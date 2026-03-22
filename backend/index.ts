@@ -3,6 +3,7 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import AuthRouter from './src/routes/authRoutes';
 import ProfileRouter from './src/routes/profileRoutes';
+import Responses from './src/utils/responses';
 
 const app = express();
 
@@ -25,5 +26,7 @@ app.listen(PORT, () => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to the Smart English AI backend!' });
+  res.json(
+    Responses.successResponse('Welcome to the Smart English AI backend!', null)
+  );
 });

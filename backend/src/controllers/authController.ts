@@ -1,23 +1,28 @@
 import AuthService from '../services/authServices';
 import { Request, Response } from 'express';
+import Responses from '../utils/responses';
 
 class AuthController {
   static register = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !role) {
       return res
         .status(400)
-        .json({ message: 'Email and password are required' });
+        .json(
+          Responses.errorResponse(
+            new Error('Email, password, and role are required')
+          )
+        );
     }
 
     try {
-      const user = await AuthService.registerUser(email, password);
+      const user = await AuthService.registerUser(email, password, role);
       return res
         .status(201)
-        .json({ message: 'User registered successfully', user });
+        .json(Responses.successResponse('User registered successfully', user));
     } catch (error) {
-      res.status(400).json({ message: 'Registration failed', error });
+      return res.status(400).json(Responses.errorResponse(error));
     }
   };
 
@@ -25,9 +30,11 @@ class AuthController {
     const { email, password } = req.body;
     try {
       const { user, token } = await AuthService.loginUser(email, password);
-      return res.status(200).json({ message: 'Login successful', user, token });
+      return res
+        .status(200)
+        .json(Responses.successResponse('Login successful', { user, token }));
     } catch (error) {
-      res.status(400).json({ message: 'Login failed', error });
+      return res.status(400).json(Responses.errorResponse(error));
     }
   };
 }

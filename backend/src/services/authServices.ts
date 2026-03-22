@@ -1,23 +1,23 @@
 import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { signToken } from '../utils/jwt';
+import { Role } from '../generated/prisma/enums';
 
 class AuthService {
-  constructor(private readonly db = prisma) {}
-
-  registerUser = async (email: string, password: string) => {
-    const existingUser = await this.db.user.findUnique({ where: { email } });
+  static registerUser = async (email: string, password: string, role: Role) => {
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       throw new Error('User already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.db.$transaction(async tx => {
+    const user = await prisma.$transaction(async tx => {
       const createdUser = await tx.user.create({
         data: {
           email,
-          password: hashedPassword
+          password: hashedPassword,
+          role
         }
       });
 
@@ -33,19 +33,19 @@ class AuthService {
     return user;
   };
 
-  findUserById = async (id: string) => {
-    return this.db.user.findUnique({
+  static findUserById = async (id: string) => {
+    return prisma.user.findUnique({
       where: { id }
     });
   };
 
-  findUserByEmail = async (email: string) => {
-    return this.db.user.findUnique({
+  static findUserByEmail = async (email: string) => {
+    return prisma.user.findUnique({
       where: { email }
     });
   };
 
-  loginUser = async (email: string, password: string) => {
+  static loginUser = async (email: string, password: string) => {
     const user = await this.findUserByEmail(email);
     if (!user) {
       throw new Error('Invalid email or password');
@@ -59,4 +59,4 @@ class AuthService {
   };
 }
 
-export default new AuthService();
+export default AuthService;

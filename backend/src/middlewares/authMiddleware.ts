@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { verifyToken } from '../utils/jwt';
+import Responses from '../utils/responses';
 
 export type AuthenticatedRequest = Request & {
   userId?: string;
@@ -13,13 +14,17 @@ const verifyJWT = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Missing or invalid token' });
+    return res
+      .status(401)
+      .json(Responses.errorResponse(new Error('Missing or invalid token')));
   }
 
   const token = authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ message: 'Missing token' });
+    return res
+      .status(401)
+      .json(Responses.errorResponse(new Error('Missing token')));
   }
 
   try {
@@ -27,7 +32,9 @@ const verifyJWT = (
     const userId = decoded.userId;
 
     if (!userId) {
-      return res.status(401).json({ message: 'Invalid token payload' });
+      return res
+        .status(401)
+        .json(Responses.errorResponse(new Error('Invalid token payload')));
     }
 
     req.userId = userId;
@@ -37,10 +44,16 @@ const verifyJWT = (
       error instanceof Error &&
       error.message === 'JWT_SECRET is not defined'
     ) {
-      return res.status(500).json({ message: 'JWT_SECRET is not configured' });
+      return res
+        .status(500)
+        .json(
+          Responses.errorResponse(new Error('JWT_SECRET is not configured'))
+        );
     }
 
-    return res.status(401).json({ message: 'Token is invalid or expired' });
+    return res
+      .status(401)
+      .json(Responses.errorResponse(new Error('Token is invalid or expired')));
   }
 };
 

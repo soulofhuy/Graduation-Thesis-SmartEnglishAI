@@ -1,31 +1,22 @@
 import prisma from '../utils/prisma';
-
-export type UpdateProfileInput = {
-  firstName?: string | null;
-  lastName?: string | null;
-  address?: string | null;
-  phoneNumber?: string | null;
-  dateOfBirth?: Date | string | null;
-};
+import { ProfileModel } from '../generated/prisma/models/Profile';
 
 class ProfileService {
-  constructor(private readonly db = prisma) {}
-
-  getProfileByUserId = async (userId: string) => {
-    return this.db.profile.findUnique({
+  static getProfileByUserId = async (userId: string) => {
+    return prisma.profile.findUnique({
       where: { userId },
       include: {
-        user: {
-          select: {
-            email: true
-          }
-        }
+        user: true
       }
     });
   };
 
-  updateProfile = async (userId: string, payload: UpdateProfileInput) => {
-    const existingProfile = await this.db.profile.findUnique({
+  static updateProfile = async (
+    userId: string,
+    firstName?: string,
+    lastName?: string
+  ) => {
+    const existingProfile = await prisma.profile.findUnique({
       where: { userId }
     });
 
@@ -33,33 +24,14 @@ class ProfileService {
       throw new Error('Profile not found');
     }
 
-    const allowedFields: Array<keyof UpdateProfileInput> = [
-      'firstName',
-      'lastName',
-      'address',
-      'phoneNumber',
-      'dateOfBirth'
-    ];
-
-    const data = allowedFields.reduce<Record<string, unknown>>((acc, key) => {
-      const value = payload[key];
-      if (value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
-
-    if (Object.keys(data).length === 0) {
-      throw new Error('No profile fields provided to update');
-    }
-
-    return this.db.profile.update({
+    return prisma.profile.update({
       where: { userId },
-      data
+      data: {
+        ...(firstName !== undefined ? { firstName } : {}),
+        ...(lastName !== undefined ? { lastName } : {})
+      }
     });
   };
 }
 
-const profileService = new ProfileService();
-
-export default profileService;
+export default ProfileService;
