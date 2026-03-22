@@ -36,14 +36,14 @@ class AuthService {
   static loginUser = async (email: string, password: string) => {
     const user = await this.findUserByEmail(email);
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid email');
     }
     if (!user.isActive) {
       throw new Error('User account is inactive');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid password');
     }
     const token = signToken(user.id);
     return { user, token };
