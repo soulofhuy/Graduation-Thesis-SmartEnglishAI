@@ -31,6 +31,35 @@ class ProfileController {
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
+
+  static updateMyProfile = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.userId;
+      const profileData = req.body;
+
+      if (!userId) {
+        return res
+          .status(401)
+          .json(Responses.errorResponse(new Error('Unauthorized')));
+      }
+
+      const updatedProfile = await ProfileService.updateProfile(
+        userId,
+        profileData
+      );
+
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Profile updated successfully',
+            updatedProfile
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
 }
 
 export default ProfileController;

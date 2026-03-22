@@ -13,8 +13,7 @@ class ProfileService {
 
   static updateProfile = async (
     userId: string,
-    firstName?: string,
-    lastName?: string
+    profileData: Partial<ProfileModel>
   ) => {
     const existingProfile = await prisma.profile.findUnique({
       where: { userId }
@@ -27,8 +26,7 @@ class ProfileService {
     return prisma.profile.update({
       where: { userId },
       data: {
-        ...(firstName !== undefined ? { firstName } : {}),
-        ...(lastName !== undefined ? { lastName } : {})
+        ...profileData
       }
     });
   };

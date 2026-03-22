@@ -78,7 +78,7 @@ class AuthService {
   static deactivateUser = async (userId: string) => {
     await prisma.user.update({
       where: { id: userId },
-      data: { isActive: false }
+      data: { isActive: false, deactivatedAt: new Date() }
     });
   };
 
