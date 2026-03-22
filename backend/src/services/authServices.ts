@@ -33,6 +33,55 @@ class AuthService {
     return user;
   };
 
+  static loginUser = async (email: string, password: string) => {
+    const user = await this.findUserByEmail(email);
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+    if (!user.isActive) {
+      throw new Error('User account is inactive');
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid email or password');
+    }
+    const token = signToken(user.id);
+    return { user, token };
+  };
+
+  static changePassword = async (
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ) => {
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      throw new Error('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword }
+    });
+  };
+
+  static deactivateUser = async (userId: string) => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false }
+    });
+  };
+
   static findUserById = async (id: string) => {
     return prisma.user.findUnique({
       where: { id }
@@ -43,19 +92,6 @@ class AuthService {
     return prisma.user.findUnique({
       where: { email }
     });
-  };
-
-  static loginUser = async (email: string, password: string) => {
-    const user = await this.findUserByEmail(email);
-    if (!user) {
-      throw new Error('Invalid email or password');
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
-    }
-    const token = signToken(user.id);
-    return { user, token };
   };
 }
 

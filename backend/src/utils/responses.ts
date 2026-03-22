@@ -3,7 +3,7 @@
 interface SuccessResponse<T = any> {
   status: true;
   message: string;
-  data: T;
+  data: T | null;
   error: null;
 }
 
@@ -15,7 +15,7 @@ interface ErrorResponse {
 }
 
 class Responses {
-  successResponse<T = any>(message: string, data: T): SuccessResponse<T> {
+  successResponse<T = any>(message: string, data: T | null = null): SuccessResponse<T> {
     return {
       status: true,
       message,
