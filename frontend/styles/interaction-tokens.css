@@ -1,0 +1,75 @@
+/*
+  Interaction color tokens (hover / active / selected).
+  These are derived from the existing theme primitives in app/globals.css:
+  --background, --foreground, --primary, --accent, --muted, --destructive, --ring, etc.
+
+  Usage (Tailwind arbitrary values):
+  className="bg-[var(--btn-primary-bg)] text-[var(--btn-primary-fg)] hover:bg-[var(--btn-primary-bg-hover)] active:bg-[var(--btn-primary-bg-active)]"
+*/
+
+:root {
+  /* Generic interaction surfaces */
+  --surface-hover: color-mix(in oklch, var(--foreground) 6%, transparent);
+  --surface-active: color-mix(in oklch, var(--foreground) 10%, transparent);
+  --surface-selected: color-mix(in oklch, var(--primary) 14%, transparent);
+
+  /* Primary button */
+  --btn-primary-bg: var(--primary);
+  --btn-primary-fg: var(--primary-foreground);
+  --btn-primary-bg-hover: color-mix(in oklch, var(--primary) 90%, transparent);
+  --btn-primary-bg-active: color-mix(in oklch, var(--primary) 80%, transparent);
+
+  /* Secondary button */
+  --btn-secondary-bg: var(--secondary);
+  --btn-secondary-fg: var(--secondary-foreground);
+  --btn-secondary-bg-hover: color-mix(
+    in oklch,
+    var(--secondary) 90%,
+    transparent
+  );
+  --btn-secondary-bg-active: color-mix(
+    in oklch,
+    var(--secondary) 80%,
+    transparent
+  );
+
+  /* Accent (often used for subtle highlights) */
+  --btn-accent-bg: var(--accent);
+  --btn-accent-fg: var(--accent-foreground);
+  --btn-accent-bg-hover: color-mix(in oklch, var(--accent) 90%, transparent);
+  --btn-accent-bg-active: color-mix(in oklch, var(--accent) 80%, transparent);
+
+  /* Destructive button */
+  --btn-destructive-bg: var(--destructive);
+  --btn-destructive-fg: var(--destructive-foreground);
+  --btn-destructive-bg-hover: color-mix(
+    in oklch,
+    var(--destructive) 90%,
+    transparent
+  );
+  --btn-destructive-bg-active: color-mix(
+    in oklch,
+    var(--destructive) 80%,
+    transparent
+  );
+
+  /* Ghost / neutral interactions */
+  --btn-ghost-bg-hover: var(--surface-hover);
+  --btn-ghost-bg-active: var(--surface-active);
+
+  /* Outline */
+  --btn-outline-border: var(--border);
+  --btn-outline-bg: var(--background);
+  --btn-outline-fg: var(--foreground);
+  --btn-outline-bg-hover: color-mix(in oklch, var(--accent) 16%, transparent);
+  --btn-outline-bg-active: color-mix(in oklch, var(--accent) 24%, transparent);
+
+  /* Controls (tabs, sidebar items, selectable rows, etc.) */
+  --control-hover-bg: color-mix(in oklch, var(--accent) 14%, transparent);
+  --control-active-bg: color-mix(in oklch, var(--accent) 22%, transparent);
+  --control-selected-bg: color-mix(in oklch, var(--primary) 16%, transparent);
+  --control-selected-fg: var(--foreground);
+
+  /* Focus ring */
+  --focus-ring: var(--ring);
+}

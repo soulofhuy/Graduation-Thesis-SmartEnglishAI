@@ -1,0 +1,45 @@
+'use client'
+
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
+import { Moon, Sun } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-xl"
+        disabled
+      >
+        <Sun className="w-5 h-5" />
+      </Button>
+    )
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      className="rounded-xl transition-all hover:bg-primary/10 hover:text-primary"
+      title={`Chuyển sang chế độ ${theme === 'light' ? 'tối' : 'sáng'}`}
+    >
+      {theme === 'light' ? (
+        <Moon className="w-5 h-5" />
+      ) : (
+        <Sun className="w-5 h-5" />
+      )}
+      <span className="sr-only">Chuyển đổi chế độ sáng/tối</span>
+    </Button>
+  )
+}
