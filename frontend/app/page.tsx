@@ -5,6 +5,14 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import {
+  type CarouselApi,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageToggle } from '@/components/language-toggle'
 import { useLanguage } from '@/components/language-provider'
@@ -15,12 +23,45 @@ export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
 
+  const [heroCarouselApi, setHeroCarouselApi] = useState<CarouselApi | null>(null)
+  const [heroSelectedIndex, setHeroSelectedIndex] = useState(0)
+  const [heroSnapCount, setHeroSnapCount] = useState(0)
+
+  const heroSlides = [
+    { src: '/landing-page/scrolling-pictures/pic-1.png', alt: 'English fun fact 1' },
+    { src: '/landing-page/scrolling-pictures/pic-2.png', alt: 'English fun fact 2' },
+    { src: '/landing-page/scrolling-pictures/pic-3.png', alt: 'English fun fact 3' },
+    { src: '/landing-page/scrolling-pictures/pic-4.png', alt: 'English fun fact 4' },
+    { src: '/landing-page/scrolling-pictures/pic-5.png', alt: 'English fun fact 5' },
+    { src: '/landing-page/scrolling-pictures/pic-6.png', alt: 'English fun fact 6' },
+    { src: '/landing-page/scrolling-pictures/pic-7.png', alt: 'English fun fact 7' },
+  ]
+
   useEffect(() => {
     setIsLoaded(true)
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    if (!heroCarouselApi) return
+
+    const update = () => {
+      setHeroSelectedIndex(heroCarouselApi.selectedScrollSnap())
+      setHeroSnapCount(heroCarouselApi.scrollSnapList().length)
+    }
+
+    update()
+    heroCarouselApi.on('reInit', update)
+    heroCarouselApi.on('select', update)
+
+    return () => {
+      heroCarouselApi.off('reInit', update)
+      heroCarouselApi.off('select', update)
+    }
+  }, [heroCarouselApi])
+
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -89,15 +130,72 @@ export default function LandingPage() {
           </div>
 
           {/* Right side - Image */}
-          <div className={`relative h-96 md:h-full transition-all duration-1000 ${isLoaded ? 'animate-fade-in-down' : 'opacity-0'}`}>
+          <div className={`relative h-96 md:h-[28rem] lg:h-[34rem] transition-all duration-1000 ${isLoaded ? 'animate-fade-in-down' : 'opacity-0'}`}>
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-2xl" />
-            <Image
-              src="/hero-illustration.jpg"
-              alt="Hero Illustration"
-              fill
-              className="object-cover rounded-2xl shadow-2xl"
-              priority
-            />
+
+            <div className="pointer-events-none absolute top-7 -left-25 z-20 hidden md:block">
+              <Image
+                src="/landing-page/scrolling-pictures/decorative-element.png"
+                alt="Overlay hint"
+                width={200}
+                height={92}
+                style={{ rotate: '-20deg' }}
+              />
+            </div>
+
+            <Carousel
+              setApi={(api) => setHeroCarouselApi(api)}
+              opts={{
+                loop: true,
+                align: 'center',
+                duration: 800
+              }}
+              className="relative z-10"
+            >
+              <CarouselContent>
+                {heroSlides.map((slide) => (
+                  <CarouselItem key={slide.src} className="will-change-transform">
+                    <div className="relative h-96 md:h-[28rem] lg:h-[34rem] overflow-hidden ">
+                      <Image
+                        src={slide.src}
+                        alt={slide.alt}
+                        fill
+                        className="object-contain"
+                        priority
+                        quality={85}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              {/* Arrow controls */}
+              <CarouselPrevious
+                variant="outline"
+                className="left-4 -translate-y-1/2 top-1/2 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50"
+              />
+              <CarouselNext
+                variant="outline"
+                className="right-4 -translate-y-1/2 top-1/2 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50"
+              />
+
+              {/* Dots */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                {Array.from({ length: heroSnapCount }).map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`Go to slide ${index + 1}`}
+                    aria-current={index === heroSelectedIndex}
+                    onClick={() => heroCarouselApi?.scrollTo(index)}
+                    className={`h-2.5 w-2.5 rounded-full transition-all ${index === heroSelectedIndex
+                      ? 'bg-primary scale-110'
+                      : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
+                      }`}
+                  />
+                ))}
+              </div>
+            </Carousel>
           </div>
         </div>
       </section>
