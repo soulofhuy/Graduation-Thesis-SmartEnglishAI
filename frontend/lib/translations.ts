@@ -39,6 +39,42 @@ export const translations = {
         }
       },
 
+      ai: {
+        title:
+          'Manage assignments and tests more conveniently with the help of AI',
+        description:
+          'Helps teachers create tests quickly; with just a few simple prompt commands and a document file, a complete test can be created, saving a lot of time.',
+        features: [
+          'Create tests in seconds',
+          'Adjust difficulty automatically',
+          'Instant feedback by AI'
+        ]
+      },
+
+      student_benefits: {
+        title: 'Learning becomes more fun and effective with Langoer',
+        description:
+          'With a friendly and "Gen Z-oriented" interface, learning English is no longer boring. Middle school students will feel more interested and motivated to learn than before.',
+        features: [
+          'Friendly and easy-to-use interface',
+          'Effectively track learning progress and results'
+        ]
+      },
+
+      statistic: {
+        title: 'Supporting teachers in statistical analysis of results',
+        description:
+          'With the help of AI, teachers can easily analyze student test results based on dashboards and statistics from live data, making management more convenient.',
+        features: ['Detailed statistics', 'Progress charts']
+      },
+
+      outro: {
+        title: 'Ready to start learning?',
+        description:
+          'Join thousands of students improving their English skills with Langoer today.',
+        button: ['Log in now', 'Learn more']
+      },
+
       cta2: {
         title: 'Ready to improve your English?',
         subtitle:
@@ -47,7 +83,7 @@ export const translations = {
       },
 
       footer: {
-        copyright: '© 2024 Langoer. All rights reserved.',
+        copyright: '© 2026 Langoer. All rights reserved.',
         product: 'Product',
         company: 'Company',
         legal: 'Legal',
@@ -186,6 +222,42 @@ export const translations = {
         }
       },
 
+      ai: {
+        title:
+          'Quản lí bài tập và bài kiểm tra tiện lợi hơn với sự trợ giúp của AI',
+        description:
+          'Giúp giáo viên tạo đề nhanh chóng, chỉ với vài câu lệnh prompt đơn giản và một file tài liệu, có thể tạo được một đề thi đầy đủ và tiết kiệm rất nhiều thời gian.',
+        features: [
+          'Tạo đề thi trong vài giây',
+          'Có thể điều chỉnh độ khó tự động',
+          'Phản hồi ngay lập tức bởi AI'
+        ]
+      },
+
+      student_benefits: {
+        title: 'Học tập trở nên vui vẻ hơn, hiệu quả hơn với Langoer',
+        description:
+          'Với giao diện thân thiện và "đậm chất Gen Z", học tiếng Anh không còn là việc chán nữa. Các bạn học sinh THCS sẽ cảm thấy hứng thú và động lực học tập hơn so với trước.',
+        features: [
+          'Giao diện thân thiện, dễ sử dụng',
+          'Theo dõi tiến độ và kết quả học tập hiệu quả'
+        ]
+      },
+
+      statistic: {
+        title: 'Hỗ trợ giáo viên trong thống kê kết quả',
+        description:
+          'Với sự trợ giúp của AI, giáo viên có thể dễ dàng phân tích kết quả bài làm của học sinh, dựa trên các dashboard và thống kê từ dữ liệu trực tiếp, giúp công việc quản lí trở nên thuận tiện hơn.',
+        features: ['Thống kê chi tiết', 'Biểu đồ tiến bộ']
+      },
+
+      outro: {
+        title: 'Sẵn sàng bắt đầu học tập?',
+        description:
+          'Tham gia hàng nghìn học sinh đang nâng cao kỹ năng tiếng Anh của mình với Langoer ngay hôm nay.',
+        button: ['Đăng nhập ngay', 'Tìm hiểu thêm']
+      },
+
       cta2: {
         title: 'Sẵn sàng cải thiện tiếng Anh?',
         subtitle:
@@ -194,7 +266,7 @@ export const translations = {
       },
 
       footer: {
-        copyright: '© 2024 Langoer. Bảo lưu mọi quyền.',
+        copyright: '© 2026 Langoer. Bảo lưu mọi quyền.',
         product: 'Sản phẩm',
         company: 'Công ty',
         legal: 'Pháp lý',

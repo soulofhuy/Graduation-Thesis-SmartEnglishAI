@@ -62,6 +62,35 @@ export default function LandingPage() {
     }
   }, [heroCarouselApi])
 
+  useEffect(() => {
+    const elements = Array.from(
+      document.querySelectorAll(
+        '.scroll-fade-in, .scroll-fade-in-delay-1, .scroll-fade-in-delay-2, .scroll-fade-in-delay-3'
+      )
+    )
+
+    if (!elements.length) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '0px 0px -10% 0px'
+      }
+    )
+
+    elements.forEach((element) => observer.observe(element))
+
+    return () => observer.disconnect()
+  }, [])
+
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -106,7 +135,7 @@ export default function LandingPage() {
             <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
               {t.landing.hero.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            {/* <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/login" className="transition-smooth">
                 <Button size="lg" className="gap-2 w-full sm:w-auto shadow-glow hover:shadow-glow hover:scale-105 transition-all">
                   {t.landing.hero.cta}
@@ -116,8 +145,8 @@ export default function LandingPage() {
               <Button size="lg" variant="outline" className="w-full sm:w-auto transition-smooth hover:bg-primary/5">
                 {t.landing.hero.learn}
               </Button>
-            </div>
-            <div className="flex gap-6 text-sm">
+            </div> */}
+            {/* <div className="flex gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-foreground font-medium">10K+ học sinh</span>
@@ -126,19 +155,19 @@ export default function LandingPage() {
                 <Zap className="w-5 h-5 text-accent" />
                 <span className="text-foreground font-medium">AI hỗ trợ 24/7</span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Right side - Image */}
           <div className={`relative h-96 md:h-[28rem] lg:h-[34rem] transition-all duration-1000 ${isLoaded ? 'animate-fade-in-down' : 'opacity-0'}`}>
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-2xl" />
 
-            <div className="pointer-events-none absolute top-7 -left-25 z-20 hidden md:block">
+            <div className="pointer-events-none absolute top-13 -left-20 z-20 hidden md:block">
               <Image
                 src="/landing-page/scrolling-pictures/decorative-element.png"
                 alt="Overlay hint"
-                width={200}
-                height={92}
+                width={150}
+                height={100}
                 style={{ rotate: '-20deg' }}
               />
             </div>
@@ -201,11 +230,16 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="relative py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-24 overflow-hidden border-t border-border/40">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/70 via-purple-50/60 to-pink-50/70 dark:from-slate-900/80 dark:via-purple-950/60 dark:to-slate-900/80" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute -top-16 right-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-24 left-8 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              {t.landing.features.title} <span className="gradient-text">{t.landing.features.title === 'Standout Features' ? '' : 'nổi bật'}</span>
+              {t.landing.features.title}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t.landing.features.description}
@@ -262,26 +296,31 @@ export default function LandingPage() {
       </section>
 
       {/* Image Section 1 */}
-      <section className="relative py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="relative py-24 overflow-hidden border-t border-border/40">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50/70 via-orange-50/60 to-rose-50/70 dark:from-slate-900/80 dark:via-amber-950/40 dark:to-slate-900/80" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute -top-10 left-12 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-24 right-6 h-80 w-80 rounded-full bg-secondary/10 blur-3xl" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 items-center">
             <div className="relative h-96">
               <Image
-                src="/ai-feature.jpg"
+                src="/landing-page/logo-and-AI.png"
                 alt="AI Feature"
                 fill
-                className="object-cover rounded-2xl shadow-glow"
+                className="object-contain object-center"
               />
             </div>
             <div className="space-y-6 scroll-fade-in">
               <h2 className="text-4xl font-bold text-foreground">
-                AI <span className="gradient-text">thông minh</span> trong lòng bàn tay
+                <span className="gradient-text leading-tight">{t.landing.ai.title}</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Công nghệ học máy tiên tiến của chúng tôi tự động tạo ra các bài tập được điều chỉnh theo trình độ và nhu cầu của từng học sinh, giúp họ học hiệu quả hơn.
+                {t.landing.ai.description}
               </p>
-              <ul className="space-y-3">
-                {['Tạo đề thi trong vài giây', 'Điều chỉnh độ khó tự động', 'Phản hồi ngay lập tức'].map((item, i) => (
+              <ul className="space-y-3 pl-5">
+                {t.landing.ai.features.map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-foreground">
                     <div className="w-2 h-2 rounded-full bg-primary" />
                     {item}
@@ -294,18 +333,23 @@ export default function LandingPage() {
       </section>
 
       {/* Image Section 2 */}
-      <section className="relative py-24 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-24 overflow-hidden border-t border-border/40">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/70 via-cyan-50/60 to-teal-50/70 dark:from-slate-900/80 dark:via-emerald-950/40 dark:to-slate-900/80" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute -top-14 right-12 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute -bottom-24 left-6 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 scroll-fade-in order-2 md:order-1">
               <h2 className="text-4xl font-bold text-foreground">
-                <span className="gradient-text">Học tập</span> trở nên vui vẻ
+                <span className="gradient-text leading-tight">{t.landing.student_benefits.title}</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Với giao diện thân thiện và hệ thống gamification, học tiếng Anh không còn là việc chán nữa. Học sinh sẽ cảm thấy hứng thú và động lực học tập.
+                {t.landing.student_benefits.description}
               </p>
-              <ul className="space-y-3">
-                {['Giao diện dễ sử dụng', 'Hệ thống điểm và thành tích', 'Theo dõi tiến bộ rõ ràng'].map((item, i) => (
+              <ul className="space-y-3 pl-5">
+                {t.landing.student_benefits.features.map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-foreground">
                     <div className="w-2 h-2 rounded-full bg-accent" />
                     {item}
@@ -315,10 +359,10 @@ export default function LandingPage() {
             </div>
             <div className="relative h-96 order-1 md:order-2">
               <Image
-                src="/practice-feature.jpg"
+                src="/landing-page/student-benefits.png"
                 alt="Practice Feature"
                 fill
-                className="object-cover rounded-2xl shadow-glow-accent"
+                className="object-contain object-center"
               />
             </div>
           </div>
@@ -326,12 +370,17 @@ export default function LandingPage() {
       </section>
 
       {/* Image Section 3 */}
-      <section className="relative py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-24 overflow-hidden border-t border-border/40">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/70 via-sky-50/60 to-violet-50/70 dark:from-slate-900/80 dark:via-indigo-950/40 dark:to-slate-900/80" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute -top-12 left-12 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
+        <div className="absolute -bottom-24 right-8 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="relative h-96">
               <Image
-                src="/analytics-feature.jpg"
+                src="/landing-page/statistic.png"
                 alt="Analytics Feature"
                 fill
                 className="object-cover rounded-2xl shadow-glow"
@@ -339,13 +388,13 @@ export default function LandingPage() {
             </div>
             <div className="space-y-6 scroll-fade-in">
               <h2 className="text-4xl font-bold text-foreground">
-                <span className="gradient-text">Dữ liệu</span> chi tiết cho kết quả tốt
+                <span className="gradient-text leading-tight">{t.landing.statistic.title}</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Dashboard phân tích giúp học sinh và giáo viên theo dõi tiến bộ một cách chi tiết, xác định điểm yếu và có kế hoạch cải thiện cụ thể.
+                {t.landing.statistic.description}
               </p>
-              <ul className="space-y-3">
-                {['Thống kê chi tiết', 'Biểu đồ tiến bộ', 'Gợi ý cải thiện'].map((item, i) => (
+              <ul className="space-y-3 pl-5">
+                {t.landing.statistic.features.map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-foreground">
                     <div className="w-2 h-2 rounded-full bg-secondary" />
                     {item}
@@ -358,25 +407,29 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent opacity-10" />
+      <section className="relative py-24 overflow-hidden border-t border-border/40">
+        <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-50/70 via-rose-50/60 to-orange-50/70 dark:from-slate-900/80 dark:via-fuchsia-950/40 dark:to-slate-900/80" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute -top-10 right-10 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute -bottom-24 left-8 h-80 w-80 rounded-full bg-secondary/10 blur-3xl" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           <h2 className="text-5xl md:text-6xl font-bold text-foreground leading-tight">
-            Sẵn sàng <span className="gradient-text">bắt đầu</span> học tập?
+            <span className="gradient-text">{t.landing.outro.title}</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Tham gia hàng nghìn học sinh đang nâng cao kỹ năng tiếng Anh của mình với Langoer ngay hôm nay.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            {t.landing.outro.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Link href="/login">
               <Button size="lg" className="gap-2 shadow-glow hover:shadow-glow hover:scale-105 transition-all">
-                Đăng nhập ngay
+                {t.landing.outro.button[0]}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
             <Button size="lg" variant="outline" className="gap-2 transition-smooth hover:bg-primary/5">
               <Globe className="w-4 h-4" />
-              Tìm hiểu thêm
+              {t.landing.outro.button[1]}
             </Button>
           </div>
         </div>
@@ -386,45 +439,44 @@ export default function LandingPage() {
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-                  L
-                </div>
-                <span className="font-bold bg-gradient-text">Langoer</span>
+            <div className="md:col-span-1 flex items-center justify-center">
+              <div className="flex items-center justify-center gap-2">
+                <Image
+                  src="/logo/langoer-logo.png"
+                  alt="Langoer Logo"
+                  width={150}
+                  height={150}
+                />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Nền tảng học tập tiếng Anh hiện đại với AI.
-              </p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-3">Sản phẩm</h4>
+              <h4 className="font-semibold text-foreground mb-3">{t.landing.footer.product}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">Tính năng</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Giá cả</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Bảo mật</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.features}</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.pricing}</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.security}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-3">Công ty</h4>
+              <h4 className="font-semibold text-foreground mb-3">{t.landing.footer.company}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">Về chúng tôi</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Blog</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Liên hệ</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.about}</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.blog}</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.contact}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-3">Pháp lý</h4>
+              <h4 className="font-semibold text-foreground mb-3">{t.landing.footer.legal}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">Điều khoản</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Chính sách</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Cookies</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.terms}</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.policy}</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.cookies}</a></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground text-center md:text-left">
-              © 2024 Langoer. Tất cả các quyền được bảo lưu.
+              {t.landing.footer.copyright}
             </p>
             <div className="flex gap-4">
               <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Facebook</a>
