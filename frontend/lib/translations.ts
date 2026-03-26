@@ -101,18 +101,14 @@ export const translations = {
 
     // Login Page
     login: {
-      title: 'Login',
-      subtitle: 'Sign in to continue your learning journey',
+      title: 'Hey, welcome back!',
+      subTitle: 'We are very happy to see you back!',
       email: 'Email',
       password: 'Password',
-      youAre: 'You are',
-      student: 'Student',
-      teacher: 'Teacher',
-      admin: 'Admin',
-      signInBtn: 'Sign In',
-      noAccount: "Don't have an account yet?",
-      backHome: 'Back to Home',
-      demoAccounts: 'Demo Accounts:'
+      loginButton: 'Sign In',
+      or: 'Or continue with',
+      description: "Don't have an account? ",
+      signUp: 'Sign Up'
     },
 
     // Dashboard - Common
@@ -284,18 +280,14 @@ export const translations = {
 
     // Login Page
     login: {
-      title: 'Đăng nhập',
-      subtitle: 'Đăng nhập để tiếp tục học',
+      title: 'Chào mừng bạn quay lại!',
+      subTitle: 'Chúng tôi rất vui khi gặp lại bạn!',
       email: 'Email',
       password: 'Mật khẩu',
-      youAre: 'Bạn là',
-      student: 'Học sinh',
-      teacher: 'Giáo viên',
-      admin: 'Admin',
-      signInBtn: 'Đăng nhập',
-      noAccount: 'Chưa có tài khoản?',
-      backHome: 'Về trang chủ',
-      demoAccounts: 'Tài khoản demo:'
+      loginButton: 'Đăng nhập',
+      or: 'Hoặc tiếp tục với',
+      description: 'Bạn chưa có tài khoản? ',
+      signUp: 'Đăng ký'
     },
 
     // Dashboard - Common

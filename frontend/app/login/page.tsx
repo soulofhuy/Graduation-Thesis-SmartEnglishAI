@@ -70,108 +70,98 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900" />
-      
-      {/* Animated background elements */}
-      <div className="absolute top-20 right-20 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/15 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="backdrop-blur-sm border-b border-border/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+      <div className="relative min-h-screen flex flex-col">
+        <div className="backdrop-blur-sm border-b border-border/70">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center gap-2 w-fit hover:opacity-70 transition-smooth text-foreground">
               <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">{t.nav.back}</span>
             </Link>
             <div className="flex items-center gap-2">
-              <LanguageToggle />
               <ThemeToggle />
+              <LanguageToggle />
             </div>
           </div>
         </div>
 
-        {/* Login Form */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-          <div className={`w-full max-w-md transition-all duration-1000 ${isLoaded ? 'animate-scale-in' : 'opacity-0'}`}>
-            <Card className="p-8 space-y-8 border-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-2xl">
-              {/* Logo */}
-              <div className={`text-center space-y-4 transition-all duration-1000 ${isLoaded ? 'animate-fade-in-down' : 'opacity-0'}`}>
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold mx-auto shadow-glow">
-                  E
-                </div>
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold bg-gradient-text">{t.login.title}</h1>
-                  <p className="text-muted-foreground">{t.login.subtitle}</p>
-                </div>
+        <div className="mx-auto grid w-full max-w-7xl flex-1 px-4 sm:px-6 lg:grid-cols-[minmax(0,520px)_1fr] lg:px-8">
+          <div className="relative z-10 flex items-center py-12">
+            <div className={`w-full transition-all duration-700 ${isLoaded ? 'animate-scale-in' : 'opacity-0'}`}>
+              <div className="space-y-2">
+                <h1 className="text-lg font-semibold tracking-tight sm:text-4xl">{t.login.title}</h1>
               </div>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground font-medium">{t.login.email}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t.login.email.toLowerCase()}
-                            type="email"
-                            {...field}
-                            disabled={isLoading}
-                            className="bg-background/50 border-border/50 focus:border-primary transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <Card className="mt-8 border border-border/70 bg-card/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[15px]">{t.login.email}</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="user@langoer.com"
+                              type="email"
+                              {...field}
+                              disabled={isLoading}
+                              className="h-11 bg-muted/50 border-border focus-visible:ring-transparent"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground font-medium">{t.login.password}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="••••••••"
-                            type="password"
-                            {...field}
-                            disabled={isLoading}
-                            className="bg-background/50 border-border/50 focus:border-primary transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[15px]">{t.login.password}</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="••••••"
+                              type="password"
+                              {...field}
+                              disabled={isLoading}
+                              className="h-11 bg-muted/50 border-border focus-visible:ring-transparent"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <Button type="submit" size="lg" className="w-full shadow-glow hover:shadow-glow hover:scale-105 transition-all" disabled={isLoading}>
-                    {isLoading ? t.common.loading : t.login.signInBtn}
-                  </Button>
-                </form>
-              </Form>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-full bg-primary text-primary-foreground shadow-none hover:bg-primary/90"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t.common.loading : t.login.loginButton}
+                    </Button>
 
-              {/* Demo Credentials */}
-              <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl p-4 space-y-3 text-sm border border-primary/10">
-                <p className="font-semibold text-foreground">{t.login.demoAccounts}</p>
-                <ul className="space-y-2 text-xs text-muted-foreground">
-                  <li>
-                    <strong>{t.login.admin}:</strong> <span className="font-mono text-foreground">admin@example.com</span> / password
-                  </li>
-                  <li>
-                    <strong>{t.login.teacher}:</strong> <span className="font-mono text-foreground">teacher@example.com</span> / password
-                  </li>
-                  <li>
-                    <strong>{t.login.student}:</strong> <span className="font-mono text-foreground">student@example.com</span> / password
-                  </li>
-                </ul>
-              </div>
-            </Card>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="h-px flex-1 bg-border" />
+                      <span>{t.login.or}</span>
+                      <div className="h-px flex-1 bg-border" />
+                    </div>
+
+                    <p className="text-center text-xs text-muted-foreground">
+                      {t.login.description}
+                      <Link href="#" className="text-primary hover:underline"> {t.login.signUp} </Link>
+                    </p>
+                  </form>
+                </Form>
+              </Card>
+            </div>
+          </div>
+
+          <div className="relative hidden lg:block">
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background" />
+            <div className="absolute -right-32 top-1/2 h-[620px] w-[620px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_30%_30%,#ff2d55_0%,#ff7a00_32%,#c300ff_64%,#7c3aed_100%)] blur-[60px] opacity-90 dark:opacity-60 animate-bubble-drift pointer-events-none" />
           </div>
         </div>
       </div>
