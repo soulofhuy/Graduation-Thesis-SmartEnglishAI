@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { UserProfile } from './user-profile'
 import { ThemeToggle } from './theme-toggle'
+import Image from 'next/image'
 
 export interface NavItem {
   label: string
@@ -40,12 +41,14 @@ export function SidebarLayout({
     <div className="flex flex-col h-full bg-gradient-to-b from-sidebar to-sidebar/95">
       {/* Header */}
       <div className="border-b border-sidebar-border/50 p-4 md:p-6 space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-accent flex items-center justify-center text-white font-bold shadow-glow">
-            E
-          </div>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Image
+            src="/logo/langoer-logo.png"
+            alt="Langoer Logo"
+            width={120}
+            height={120}
+          />
           <div>
-            <h1 className="text-lg font-bold bg-gradient-text">Langoer</h1>
             <p className="text-xs text-muted-foreground">{title}</p>
           </div>
         </div>
@@ -81,7 +84,6 @@ export function SidebarLayout({
       <div className="border-t border-sidebar-border/50 p-4 md:p-6 space-y-4 bg-gradient-to-t from-sidebar/50 to-transparent">
         <UserProfile name={userName} role={userRole} />
         <div className="flex gap-2">
-          <ThemeToggle />
           {onLogout && (
             <Button
               variant="ghost"
@@ -103,7 +105,7 @@ export function SidebarLayout({
   return (
     <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/10">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-64 lg:w-72 bg-sidebar border-r border-sidebar-border/50 flex-shrink-0 shadow-lg">
+      <aside className="hidden md:flex bg-sidebar border-r border-sidebar-border/50 flex-shrink-0 shadow-lg">
         <SidebarContent />
       </aside>
 
