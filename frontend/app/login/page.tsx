@@ -7,6 +7,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createLoginSchema, type LoginFormValues } from '@/lib/validators/login'
 import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
+import { useAuth } from '@/components/auth-provider'
+import type { Role } from '@/lib/types'
+import { loginUser } from '@/services/auth'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,6 +27,7 @@ import Image from 'next/image'
 export default function LoginPage() {
   const { t, language } = useLanguage()
   const router = useRouter()
+  const { login } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -47,19 +51,29 @@ export default function LoginPage() {
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const { user, token, message } = await loginUser(values.email, values.password)
 
-      if (values.email.includes('admin')) {
+      login({
+        user,
+        accessToken: token,
+        refreshToken: null,
+      })
+
+      const role: Role = user.role
+      if (role === 'ADMIN') {
         router.push('/admin/overview')
-      } else if (values.email.includes('teacher')) {
+      } else if (role === 'TEACHER') {
         router.push('/teacher/overview')
       } else {
         router.push('/student/overview')
       }
 
-      toast.success('Đăng nhập thành công!')
+      if (message) {
+        toast.success(message)
+      }
     } catch (error) {
-      toast.error('Đăng nhập thất bại. Vui lòng thử lại.')
+      const message = error instanceof Error ? error.message : 'Đăng nhập thất bại. Vui lòng thử lại.'
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

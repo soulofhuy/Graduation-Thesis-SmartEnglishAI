@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createSignupSchema, type SignupFormValues } from '@/lib/validators/signup'
 import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
+import { registerUser } from '@/services/auth'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -55,12 +56,14 @@ export default function SignupPage() {
     async function onSubmit(values: SignupFormValues) {
         setIsLoading(true)
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-
-            toast.success('Đăng ký thành công!')
+            const { message } = await registerUser(values.email, values.password, values.role)
+            if (message) {
+                toast.success(message)
+            }
             router.push('/login')
         } catch (error) {
-            toast.error('Đăng ký thất bại. Vui lòng thử lại.')
+            const message = error instanceof Error ? error.message : 'Đăng ký thất bại. Vui lòng thử lại.'
+            toast.error(message)
         } finally {
             setIsLoading(false)
         }
