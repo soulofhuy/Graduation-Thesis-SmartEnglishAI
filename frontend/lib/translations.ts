@@ -101,18 +101,36 @@ export const translations = {
 
     // Login Page
     login: {
-      title: 'Login',
-      subtitle: 'Sign in to continue your learning journey',
+      title: 'Hey, welcome back!',
+      subTitle: 'We are very happy to see you back!',
       email: 'Email',
       password: 'Password',
-      youAre: 'You are',
-      student: 'Student',
-      teacher: 'Teacher',
-      admin: 'Admin',
-      signInBtn: 'Sign In',
-      noAccount: "Don't have an account yet?",
-      backHome: 'Back to Home',
-      demoAccounts: 'Demo Accounts:'
+      loginButton: 'Sign In',
+      or: 'Or continue with',
+      description: "Don't have an account? ",
+      signUp: 'Sign Up'
+    },
+
+    // Signup Page
+    signup: {
+      title: 'Create your account',
+      subTitle: 'Join Langoer and start learning today!',
+      roleLabel: 'Role',
+      rolePlaceholder: 'Choose your role',
+      roleTeacher: 'Teacher',
+      roleStudent: 'Student',
+      roleTitle: 'Who are you?',
+      roleHint: 'Choose your role to personalize your experience.',
+      roleTeacherCard: 'Teacher',
+      roleStudentCard: 'Student',
+      roleBack: 'Change role',
+      email: 'Email',
+      password: 'Password',
+      confirmPassword: 'Confirm password',
+      signUpButton: 'Sign Up',
+      or: 'Or continue with',
+      description: 'Already have an account? ',
+      signIn: 'Sign In'
     },
 
     // Dashboard - Common
@@ -284,18 +302,36 @@ export const translations = {
 
     // Login Page
     login: {
-      title: 'Đăng nhập',
-      subtitle: 'Đăng nhập để tiếp tục học',
+      title: 'Chào mừng bạn quay lại!',
+      subTitle: 'Chúng tôi rất vui khi gặp lại bạn!',
       email: 'Email',
       password: 'Mật khẩu',
-      youAre: 'Bạn là',
-      student: 'Học sinh',
-      teacher: 'Giáo viên',
-      admin: 'Admin',
-      signInBtn: 'Đăng nhập',
-      noAccount: 'Chưa có tài khoản?',
-      backHome: 'Về trang chủ',
-      demoAccounts: 'Tài khoản demo:'
+      loginButton: 'Đăng nhập',
+      or: 'Hoặc tiếp tục với',
+      description: 'Bạn chưa có tài khoản? ',
+      signUp: 'Đăng ký'
+    },
+
+    // Signup Page
+    signup: {
+      title: 'Tạo tài khoản mới',
+      subTitle: 'Tham gia Langoer và bắt đầu học ngay hôm nay!',
+      roleLabel: 'Vai trò',
+      rolePlaceholder: 'Chọn vai trò',
+      roleTeacher: 'Giáo viên',
+      roleStudent: 'Học sinh',
+      roleTitle: 'Bạn là ai?',
+      roleHint: 'Chọn vai trò để cá nhân hóa trải nghiệm.',
+      roleTeacherCard: 'Giáo viên',
+      roleStudentCard: 'Học sinh',
+      roleBack: 'Đổi vai trò',
+      email: 'Email',
+      password: 'Mật khẩu',
+      confirmPassword: 'Xác nhận mật khẩu',
+      signUpButton: 'Đăng ký',
+      or: 'Hoặc tiếp tục với',
+      description: 'Bạn đã có tài khoản? ',
+      signIn: 'Đăng nhập'
     },
 
     // Dashboard - Common
