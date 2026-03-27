@@ -1,10 +1,7 @@
 import type { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import { ThemeProvider } from 'next-themes'
-import { Toaster } from 'sonner'
-import { LanguageProvider } from '@/components/language-provider'
-import { ReactScan } from '@/components/react-scan'
+import AppProviders from '@/components/app-providers'
 import './globals.css'
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -44,14 +41,8 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning className={`${beVietnamPro.variable}`}>
       <body suppressHydrationWarning className="font-sans antialiased">
-        <ReactScan />
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <LanguageProvider>
-            {children}
-            <Toaster position="top-right" />
-            <Analytics />
-          </LanguageProvider>
-        </ThemeProvider>
+        <AppProviders>{children}</AppProviders>
+        <Analytics />
       </body>
     </html>
   )

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import { createLoginSchema, type LoginFormValues } from '@/lib/validators/login'
+import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,23 +16,13 @@ import { LanguageToggle } from '@/components/language-toggle'
 import { useLanguage } from '@/components/language-provider'
 import { ArrowLeft } from 'lucide-react'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from '@/components/ui/form'
+import Image from 'next/image'
 
-const loginSchema = z.object({
-  email: z.string().email('Vui lòng nhập địa chỉ email hợp lệ'),
-  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -39,6 +30,11 @@ export default function LoginPage() {
   useEffect(() => {
     setIsLoaded(true)
   }, [])
+
+  const loginSchema = useMemo(
+    () => createLoginSchema(getAuthValidationMessages(language)),
+    [language],
+  )
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -70,13 +66,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+    <div
+      className="min-h-screen bg-background text-foreground overflow-hidden"
+      suppressHydrationWarning
+    >
       <div className="relative min-h-screen flex flex-col">
         <div className="backdrop-blur-sm border-b border-border/70">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center gap-2 w-fit hover:opacity-70 transition-smooth text-foreground">
               <ArrowLeft className="w-5 h-5" />
             </Link>
+            <div className="flex flex-1 justify-start ml-3">
+              <Image
+                src="/logo/langoer-logo.png"
+                alt="Langoer Logo"
+                width={150}
+                height={150}
+              />
+            </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
@@ -137,7 +144,7 @@ export default function LoginPage() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full bg-primary text-primary-foreground shadow-none hover:bg-primary/90"
+                      className="w-full rounded-lg transition-all bg-gradient-to-br from-primary to-accent text-white shadow-glow hover:shadow-glow hover:brightness-110 hover:scale-[1.02]"
                       disabled={isLoading}
                     >
                       {isLoading ? t.common.loading : t.login.loginButton}
@@ -151,7 +158,7 @@ export default function LoginPage() {
 
                     <p className="text-center text-xs text-muted-foreground">
                       {t.login.description}
-                      <Link href="#" className="text-primary hover:underline"> {t.login.signUp} </Link>
+                      <Link href="/signup" className="text-primary hover:underline"> {t.login.signUp} </Link>
                     </p>
                   </form>
                 </Form>
