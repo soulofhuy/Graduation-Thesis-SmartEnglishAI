@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,12 +11,14 @@ import { ProfileTab } from './_components/ProfileTab'
 import { PasswordTab } from './_components/PasswordTab'
 import { useAuth } from '@/components/auth-provider'
 import { changePassword } from '@/services/auth'
+import { getMyProfile, updateMyProfile } from '@/services/profiles'
 import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
 import {
   createChangePasswordSchema,
   type ChangePasswordFormValues
 } from '@/lib/validators/change-password'
 import { createProfileSchema, type ProfileFormValues } from '@/lib/validators/profile'
+import { normalizeDateForApi } from '@/lib/format'
 
 const profileSchema = createProfileSchema()
 
@@ -30,15 +32,44 @@ export default function StudentSettingsPage() {
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: 'Minh',
-      lastName: 'Anh',
-      address: 'Ho Chi Minh City',
-      phoneNumber: '0900000000',
-      dateOfBirth: '2002-05-10',
-      createdAt: '2024-01-15',
-      updatedAt: '2026-03-28',
+      firstName: '',
+      lastName: '',
+      address: '',
+      phoneNumber: '',
+      dateOfBirth: '',
+      createdAt: '',
+      updatedAt: '',
     },
   })
+
+  useEffect(() => {
+    if (!accessToken) {
+      return
+    }
+
+    const loadProfile = async () => {
+      try {
+        const result = await getMyProfile(accessToken)
+        const profile = result.profile
+        console.log('Loaded profile:', profile)
+        profileForm.reset({
+          firstName: profile.firstName ?? '',
+          lastName: profile.lastName ?? '',
+          address: profile.address ?? '',
+          phoneNumber: profile.phoneNumber ?? '',
+          dateOfBirth: profile.dateOfBirth ?? '',
+          createdAt: profile.createdAt ?? '',
+          updatedAt: profile.updatedAt ?? '',
+        })
+        console.log('Profile form values after reset:', profileForm.getValues())
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Lỗi khi tải hồ sơ'
+        toast.error(message)
+      }
+    }
+
+    loadProfile()
+  }, [accessToken, profileForm])
 
   const passwordForm = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(createChangePasswordSchema(getAuthValidationMessages(language))),
@@ -50,14 +81,26 @@ export default function StudentSettingsPage() {
   })
 
   async function handleProfileSubmit(values: ProfileFormValues) {
-    setIsSavingProfile(true)
+    setIsSavingProfile(true);
+    if (!accessToken) {
+      toast.error('Vui lòng đăng nhập lại để cập nhật hồ sơ')
+      setIsSavingProfile(false);
+      return
+    }
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast.success('Lưu cài đặt thành công!')
-      if (isEditingProfile) {
-        setIsEditingProfile(false)
+      const normalizedDateOfBirth = normalizeDateForApi(values.dateOfBirth)
+      const payload = {
+        ...values,
+        dateOfBirth: normalizedDateOfBirth
       }
+      const profileData = Object.fromEntries(
+        Object.entries(payload)
+          .filter(([key]) => key !== 'createdAt' && key !== 'updatedAt')
+          .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+      ) as Omit<ProfileFormValues, 'createdAt' | 'updatedAt'>;
+      const result = await updateMyProfile(accessToken, profileData)
+      toast.success(result.message)
+      setIsEditingProfile(false)
     } catch (error) {
       toast.error('Lỗi khi lưu cài đặt')
     } finally {
@@ -74,7 +117,7 @@ export default function StudentSettingsPage() {
     setIsSavingPassword(true)
     try {
       const result = await changePassword(accessToken, values.currentPassword, values.newPassword)
-      toast.success(result.message || 'Đổi mật khẩu thành công!')
+      toast.success(result.message)
       passwordForm.reset({
         currentPassword: '',
         newPassword: '',

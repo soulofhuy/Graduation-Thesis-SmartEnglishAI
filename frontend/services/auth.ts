@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from '@/lib/api-base-url/get-api-base-url';
 import type { AuthUser, Role } from '@/lib/types';
 import {
   ApiError,
@@ -5,14 +6,6 @@ import {
   LoginResponse,
   RegisterResponse
 } from '@/lib/types/responses';
-
-const getApiBaseUrl = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    return 'http://localhost:8000/api';
-  }
-  return baseUrl.replace(/\/+$/, '');
-};
 
 export async function loginUser(email: string, password: string) {
   const response = await fetch(`${getApiBaseUrl()}/auth/login`, {

@@ -8,6 +8,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { TabsContent } from '@/components/ui/tabs'
+import { dateFormat } from '@/lib/format'
+
+const toDateInputValue = (value?: string) => {
+    if (!value) {
+        return ''
+    }
+    if (value.includes('T')) {
+        return value.split('T')[0]
+    }
+    const parts = value.split('/')
+    if (parts.length === 3) {
+        const [day, month, year] = parts
+        return `${year}-${month}-${day}`
+    }
+    return value
+}
 
 type ProfileFormValues = {
     firstName?: string
@@ -64,10 +80,10 @@ export function ProfileTab({
                             <div className="grid gap-6 md:grid-cols-2">
                                 <FormField
                                     control={form.control}
-                                    name="firstName"
+                                    name="lastName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{t.student.settings.tabs.profileTab.fields.firstName}</FormLabel>
+                                            <FormLabel>{t.student.settings.tabs.profileTab.fields.lastName}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} readOnly={!isEditingProfile} />
                                             </FormControl>
@@ -78,10 +94,10 @@ export function ProfileTab({
 
                                 <FormField
                                     control={form.control}
-                                    name="lastName"
+                                    name="firstName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{t.student.settings.tabs.profileTab.fields.lastName}</FormLabel>
+                                            <FormLabel>{t.student.settings.tabs.profileTab.fields.firstName}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} readOnly={!isEditingProfile} />
                                             </FormControl>
@@ -125,7 +141,18 @@ export function ProfileTab({
                                         <FormItem>
                                             <FormLabel>{t.student.settings.tabs.profileTab.fields.dateOfBirth}</FormLabel>
                                             <FormControl>
-                                                <Input type="date" {...field} readOnly={!isEditingProfile} />
+                                                <Input
+                                                    type={isEditingProfile ? 'date' : 'text'}
+                                                    {...field}
+                                                    readOnly={!isEditingProfile}
+                                                    value={
+                                                        isEditingProfile
+                                                            ? toDateInputValue(field.value)
+                                                            : field.value
+                                                                ? dateFormat(field.value)
+                                                                : ''
+                                                    }
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -143,7 +170,11 @@ export function ProfileTab({
                                         <FormItem>
                                             <FormLabel>{t.student.settings.tabs.profileTab.fields.createdAt}</FormLabel>
                                             <FormControl>
-                                                <Input {...field} readOnly />
+                                                <Input
+                                                    {...field}
+                                                    readOnly
+                                                    value={field.value ? dateFormat(field.value) : ''}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -157,7 +188,11 @@ export function ProfileTab({
                                         <FormItem>
                                             <FormLabel>{t.student.settings.tabs.profileTab.fields.updatedAt}</FormLabel>
                                             <FormControl>
-                                                <Input {...field} readOnly />
+                                                <Input
+                                                    {...field}
+                                                    readOnly
+                                                    value={field.value ? dateFormat(field.value) : ''}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

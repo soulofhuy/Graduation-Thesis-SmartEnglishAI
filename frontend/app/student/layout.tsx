@@ -1,8 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SidebarLayout } from '@/components/sidebar-layout'
 import { studentNavItems } from '@/lib/constants'
+import { useAuth } from '@/components/auth-provider'
+import { getMyProfile } from '@/services/profiles'
 
 export default function StudentLayout({
   children,
@@ -10,6 +13,8 @@ export default function StudentLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const { accessToken } = useAuth()
+  const [userName, setUserName] = useState('')
 
   const navItems = studentNavItems.map((item) => ({
     label: item.label,
@@ -17,12 +22,31 @@ export default function StudentLayout({
     icon: <item.icon className="w-5 h-5" />,
   }))
 
+  useEffect(() => {
+    if (!accessToken) {
+      return
+    }
+
+    const loadProfile = async () => {
+      try {
+        const result = await getMyProfile(accessToken)
+        const profile = result.profile
+        const fullName = `${profile.lastName ?? ''} ${profile.firstName ?? ''}`.trim()
+        setUserName(fullName)
+      } catch {
+        setUserName('')
+      }
+    }
+
+    loadProfile()
+  }, [accessToken])
+
   return (
     <SidebarLayout
-      title="Trang học sinh"
+      title=""
       navItems={navItems}
       userRole="student"
-      userName="Trần Minh Anh"
+      userName={userName || 'User'}
       onLogout={() => {
         router.push('/login')
       }}

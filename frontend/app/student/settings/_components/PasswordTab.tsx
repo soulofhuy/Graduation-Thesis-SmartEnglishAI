@@ -16,14 +16,34 @@ type PasswordTabProps = {
 }
 
 export function PasswordTab({ form, isSaving, onSubmit, t }: PasswordTabProps) {
+    const isDirty = form.formState.isDirty
+
     return (
         <TabsContent value="password" className="space-y-6">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>{t.student.settings.tabs.passwordTab.subTitle}</CardTitle>
-                            <CardDescription>{t.student.settings.tabs.passwordTab.description}</CardDescription>
+                            <div className="flex flex-wrap items-start justify-between gap-4">
+                                <div className="space-y-1">
+                                    <CardTitle>{t.student.settings.tabs.passwordTab.subTitle}</CardTitle>
+                                    <CardDescription>{t.student.settings.tabs.passwordTab.description}</CardDescription>
+                                </div>
+                                {isDirty && (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => form.reset()}
+                                        >
+                                            {t.common.cancel}
+                                        </Button>
+                                        <Button type="submit" disabled={isSaving}>
+                                            {isSaving ? t.common.isSaving : t.common.save}
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <FormField
@@ -68,11 +88,6 @@ export function PasswordTab({ form, isSaving, onSubmit, t }: PasswordTabProps) {
                                 )}
                             />
                         </CardContent>
-                        <CardFooter>
-                            <Button type="submit" disabled={isSaving} className="w-full">
-                                {isSaving ? t.common.isSaving : t.common.save}
-                            </Button>
-                        </CardFooter>
                     </Card>
                 </form>
             </Form>
