@@ -5,9 +5,7 @@ export const translations = {
     // Navigation
     nav: {
       login: 'Login',
-      signUp: 'Sign Up',
-      backHome: 'Back Home',
-      back: 'Back'
+      signUp: 'Sign Up'
     },
 
     // Landing Page
@@ -75,13 +73,6 @@ export const translations = {
         button: ['Log in now', 'Learn more']
       },
 
-      cta2: {
-        title: 'Ready to improve your English?',
-        subtitle:
-          'Join students who are learning smarter every day with Langoer.',
-        button: 'Log in and start'
-      },
-
       footer: {
         copyright: '© 2026 Langoer. All rights reserved.',
         product: 'Product',
@@ -133,28 +124,6 @@ export const translations = {
       signIn: 'Sign In'
     },
 
-    // Dashboard - Common
-    dashboard: {
-      overview: 'Overview',
-      logout: 'Logout',
-      settings: 'Settings',
-      classes: 'Classes',
-      profile: 'Profile'
-    },
-
-    // Teacher Dashboard
-    teacher: {
-      overview: 'Overview',
-      subtitle: 'Welcome back!',
-      quizzes: 'Manage Questions & Exercises',
-      quizzesSubtitle: 'Create, edit and organize your quizzes easily',
-      results: 'Results Analytics',
-      settings: 'Settings',
-      managementPanel: 'AI Quiz Management',
-      recentAssignments: 'Recent Assignments',
-      allQuizzes: 'All Exercises'
-    },
-
     // Student Dashboard
     student: {
       overview: 'Overview',
@@ -170,30 +139,63 @@ export const translations = {
       joinClass: 'Join Class',
       takeQuiz: 'Start Quiz',
       history: 'History',
-      progress: 'Progress'
-    },
-
-    // Admin Dashboard
-    admin: {
-      overview: 'System Overview',
-      subtitle: 'Monitor activity and system performance',
-      userGrowth: 'User Growth',
-      totalUsers: 'Total Users',
-      activeUsers: 'Active Users',
-      newUsers: 'New Users This Month',
-      users: 'User Management',
-      classes: 'Classes',
-      quizzes: 'Quizzes',
-      settings: 'Settings'
+      progress: 'Progress',
+      settings: {
+        title: 'Account Settings',
+        description: 'Manage your personal information and preferences',
+        tabs: {
+          settingsTab: {
+            mainTitle: 'System Settings',
+            subTitle: 'Interface Options',
+            description: 'Adjust language and light/dark mode',
+            option: [
+              {
+                title: 'Interface',
+                description: 'Switch light/dark'
+              },
+              {
+                title: 'Language',
+                description: 'Select display language'
+              }
+            ]
+          },
+          profileTab: {
+            mainTitle: 'Profile',
+            subTitle: 'Personal Information',
+            description: 'View and update your profile',
+            fields: {
+              firstName: 'First Name',
+              lastName: 'Last Name',
+              address: 'Address',
+              phoneNumber: 'Phone Number',
+              dateOfBirth: 'Date of Birth',
+              createdAt: 'Created At',
+              updatedAt: 'Last Updated'
+            }
+          },
+          passwordTab: {
+            mainTitle: 'Password',
+            subTitle: 'Change password',
+            description: 'Update password to protect your account',
+            fields: {
+              currentPassword: 'Current Password',
+              newPassword: 'New Password',
+              confirmPassword: 'Confirm Password'
+            }
+          }
+        }
+      }
     },
 
     // Common
     common: {
       loading: 'Loading...',
       save: 'Save',
+      isSaving: 'Saving...',
       cancel: 'Cancel',
       delete: 'Delete',
       edit: 'Edit',
+      cancelEditting: 'Cancel editing',
       add: 'Add',
       search: 'Search',
       noData: 'No data available',
@@ -206,9 +208,7 @@ export const translations = {
     // Navigation
     nav: {
       login: 'Đăng nhập',
-      signUp: 'Đăng ký',
-      backHome: 'Trang chủ',
-      back: 'Quay lại'
+      signUp: 'Đăng ký'
     },
 
     // Landing Page
@@ -276,13 +276,6 @@ export const translations = {
         button: ['Đăng nhập ngay', 'Tìm hiểu thêm']
       },
 
-      cta2: {
-        title: 'Sẵn sàng cải thiện tiếng Anh?',
-        subtitle:
-          'Tham gia cùng nhiều học sinh đang học tập hiệu quả hơn mỗi ngày với Langoer.',
-        button: 'Đăng nhập và bắt đầu'
-      },
-
       footer: {
         copyright: '© 2026 Langoer. Bảo lưu mọi quyền.',
         product: 'Sản phẩm',
@@ -334,28 +327,6 @@ export const translations = {
       signIn: 'Đăng nhập'
     },
 
-    // Dashboard - Common
-    dashboard: {
-      overview: 'Tổng quan',
-      logout: 'Đăng xuất',
-      settings: 'Cài đặt',
-      classes: 'Lớp học',
-      profile: 'Hồ sơ'
-    },
-
-    // Teacher Dashboard
-    teacher: {
-      overview: 'Tổng quan',
-      subtitle: 'Chào mừng quay lại!',
-      quizzes: 'Quản lý câu hỏi & bài tập',
-      quizzesSubtitle: 'Tạo và quản lý bài tập dễ dàng',
-      results: 'Phân tích kết quả',
-      settings: 'Cài đặt',
-      managementPanel: 'Quản lý AI tạo đề',
-      recentAssignments: 'Bài tập gần đây',
-      allQuizzes: 'Tất cả bài tập'
-    },
-
     // Student Dashboard
     student: {
       overview: 'Tổng quan',
@@ -371,30 +342,63 @@ export const translations = {
       joinClass: 'Tham gia lớp',
       takeQuiz: 'Làm bài',
       history: 'Lịch sử',
-      progress: 'Tiến độ'
-    },
-
-    // Admin Dashboard
-    admin: {
-      overview: 'Tổng quan hệ thống',
-      subtitle: 'Theo dõi hoạt động và thống kê hệ thống',
-      userGrowth: 'Tăng trưởng người dùng',
-      totalUsers: 'Tổng người dùng',
-      activeUsers: 'Đang hoạt động',
-      newUsers: 'Người dùng mới tháng này',
-      users: 'Quản lý người dùng',
-      classes: 'Lớp học',
-      quizzes: 'Bài tập',
-      settings: 'Cài đặt'
+      progress: 'Tiến độ',
+      settings: {
+        title: 'Cài đặt tài khoản',
+        description: 'Quản lý thông tin cá nhân và tuỳ chọn của bạn',
+        tabs: {
+          settingsTab: {
+            mainTitle: 'Cài đặt hệ thống',
+            subTitle: 'Tuỳ chọn giao diện',
+            description: 'Chỉnh ngôn ngữ và chế độ sáng/tối',
+            option: [
+              {
+                title: 'Giao diện',
+                description: 'Chuyển sáng/tối'
+              },
+              {
+                title: 'Ngôn ngữ',
+                description: 'Chọn ngôn ngữ hiển thị'
+              }
+            ]
+          },
+          profileTab: {
+            mainTitle: 'Hồ sơ',
+            subTitle: 'Thông tin cá nhân',
+            description: 'Xem và cập nhật hồ sơ của bạn',
+            fields: {
+              firstName: 'Tên',
+              lastName: 'Họ',
+              address: 'Địa chỉ',
+              phoneNumber: 'Số điện thoại',
+              dateOfBirth: 'Ngày sinh',
+              createdAt: 'Ngày tạo',
+              updatedAt: 'Cập nhật lần cuối'
+            }
+          },
+          passwordTab: {
+            mainTitle: 'Mật khẩu',
+            subTitle: 'Đổi mật khẩu',
+            description: 'Cập nhật mật khẩu để bảo vệ tài khoản',
+            fields: {
+              currentPassword: 'Mật khẩu hiện tại',
+              newPassword: 'Mật khẩu mới',
+              confirmPassword: 'Xác nhận mật khẩu'
+            }
+          }
+        }
+      }
     },
 
     // Common
     common: {
       loading: 'Đang tải...',
       save: 'Lưu',
+      isSaving: 'Đang lưu...',
       cancel: 'Hủy',
       delete: 'Xóa',
-      edit: 'Sửa',
+      edit: 'Chỉnh sửa',
+      cancelEditting: 'Hủy chỉnh sửa',
       add: 'Thêm',
       search: 'Tìm kiếm',
       noData: 'Không có dữ liệu',

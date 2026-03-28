@@ -22,36 +22,42 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
+import { Pencil } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
 const settingsSchema = z.object({
-  fullName: z.string().min(1, 'Tên đầy đủ là bắt buộc'),
-  email: z.string().email('Email không hợp lệ'),
-  studentId: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  address: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().optional(),
   confirmPassword: z.string().optional(),
-  emailNotifications: z.boolean(),
-  assignmentReminders: z.boolean(),
-  gradeNotifications: z.boolean(),
 })
 
 type SettingsFormValues = z.infer<typeof settingsSchema>
 
 export default function StudentSettingsPage() {
+  const { t } = useLanguage();
   const [isSaving, setIsSaving] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      fullName: 'Trần Minh Anh',
-      email: 'student@example.com',
-      studentId: '9A1-001',
+      firstName: 'Minh',
+      lastName: 'Anh',
+      address: 'Ho Chi Minh City',
+      phoneNumber: '0900000000',
+      dateOfBirth: '2002-05-10',
+      createdAt: '2024-01-15',
+      updatedAt: '2026-03-28',
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
-      emailNotifications: true,
-      assignmentReminders: true,
-      gradeNotifications: false,
     },
   })
 
@@ -61,6 +67,9 @@ export default function StudentSettingsPage() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
       toast.success('Lưu cài đặt thành công!')
+      if (isEditingProfile) {
+        setIsEditingProfile(false)
+      }
     } catch (error) {
       toast.error('Lỗi khi lưu cài đặt')
     } finally {
@@ -69,157 +78,178 @@ export default function StudentSettingsPage() {
   }
 
   return (
-    <div className=" md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
-      <div className="mx-auto w-full max-w-5xl space-y-8">
+    <div className="md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+      <div className="mx-auto w-full space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground mt-1">Quản lý tài khoản và tuỳ chọn cá nhân.</p>
+          <h1 className="text-3xl font-bold text-foreground">{t.student.settings.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.student.settings.description}</p>
         </div>
 
         <Tabs defaultValue="setting" className="space-y-6">
           <TabsList className="flex flex-wrap justify-start gap-2">
-            <TabsTrigger value="setting">Setting</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="password">Password</TabsTrigger>
+            <TabsTrigger value="setting">{t.student.settings.tabs.settingsTab.mainTitle}</TabsTrigger>
+            <TabsTrigger value="profile">{t.student.settings.tabs.profileTab.mainTitle}</TabsTrigger>
+            <TabsTrigger value="password">{t.student.settings.tabs.passwordTab.mainTitle}</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="setting" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t.student.settings.tabs.settingsTab.subTitle}</CardTitle>
+                <CardDescription>{t.student.settings.tabs.settingsTab.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{t.student.settings.tabs.settingsTab.option[0].title}</p>
+                    <p className="text-xs text-muted-foreground">{t.student.settings.tabs.settingsTab.option[0].description}</p>
+                  </div>
+                  <ThemeToggle />
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{t.student.settings.tabs.settingsTab.option[1].title}</p>
+                    <p className="text-xs text-muted-foreground">{t.student.settings.tabs.settingsTab.option[1].description}</p>
+                  </div>
+                  <LanguageToggle />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <TabsContent value="setting" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Tuỳ chọn giao diện</CardTitle>
-                    <CardDescription>Chỉnh ngôn ngữ và chế độ sáng tối.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between rounded-lg border border-border p-4">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Giao diện</p>
-                        <p className="text-xs text-muted-foreground">Chuyển sáng/tối</p>
-                      </div>
-                      <ThemeToggle />
-                    </div>
-
-                    <div className="flex items-center justify-between rounded-lg border border-border p-4">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Ngôn ngữ</p>
-                        <p className="text-xs text-muted-foreground">Chọn ngôn ngữ hiển thị</p>
-                      </div>
-                      <LanguageToggle />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Thông tin học sinh</CardTitle>
-                    <CardDescription>Mã số học sinh của bạn.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="studentId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mã số học sinh</FormLabel>
-                          <FormControl>
-                            <Input {...field} disabled />
-                          </FormControl>
-                          <FormDescription>Mã số không thể thay đổi</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
               <TabsContent value="profile" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Thông tin cá nhân</CardTitle>
-                    <CardDescription>Chỉnh sửa hồ sơ của bạn.</CardDescription>
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <CardTitle>{t.student.settings.tabs.profileTab.subTitle}</CardTitle>
+                        <CardDescription>{t.student.settings.tabs.profileTab.description}</CardDescription>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsEditingProfile((prev) => !prev)}
+                          className="gap-2"
+                        >
+                          <Pencil className="h-4 w-4" />
+                          {isEditingProfile ? t.common.cancelEditting : t.common.edit}
+                        </Button>
+                        {isEditingProfile && (
+                          <Button type="submit" disabled={isSaving} className="gap-2">
+                            {isSaving ? t.common.isSaving : t.common.save}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tên đầy đủ</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.firstName}</FormLabel>
+                            <FormControl>
+                              <Input {...field} readOnly={!isEditingProfile} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.lastName}</FormLabel>
+                            <FormControl>
+                              <Input {...field} readOnly={!isEditingProfile} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="emailNotifications"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Thông báo email</FormLabel>
-                            <FormDescription>Nhận thông báo qua email</FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.address}</FormLabel>
+                            <FormControl>
+                              <Input {...field} readOnly={!isEditingProfile} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.phoneNumber}</FormLabel>
+                            <FormControl>
+                              <Input {...field} readOnly={!isEditingProfile} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="dateOfBirth"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.dateOfBirth}</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} readOnly={!isEditingProfile} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <Separator />
 
-                    <FormField
-                      control={form.control}
-                      name="assignmentReminders"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Nhắc nhở bài tập</FormLabel>
-                            <FormDescription>Nhận nhắc nhở bài sắp đến hạn</FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="createdAt"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.createdAt}</FormLabel>
+                            <FormControl>
+                              <Input {...field} readOnly />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <Separator />
-
-                    <FormField
-                      control={form.control}
-                      name="gradeNotifications"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Thông báo về điểm</FormLabel>
-                            <FormDescription>Nhận thông báo khi giáo viên chấm bài</FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="updatedAt"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.student.settings.tabs.profileTab.fields.updatedAt}</FormLabel>
+                            <FormControl>
+                              <Input {...field} readOnly />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -227,8 +257,8 @@ export default function StudentSettingsPage() {
               <TabsContent value="password" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Đổi mật khẩu</CardTitle>
-                    <CardDescription>Cập nhật mật khẩu để bảo vệ tài khoản</CardDescription>
+                    <CardTitle>{t.student.settings.tabs.passwordTab.subTitle}</CardTitle>
+                    <CardDescription>{t.student.settings.tabs.passwordTab.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <FormField
@@ -236,7 +266,7 @@ export default function StudentSettingsPage() {
                       name="currentPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Mật khẩu hiện tại</FormLabel>
+                          <FormLabel>{t.student.settings.tabs.passwordTab.fields.currentPassword}</FormLabel>
                           <FormControl>
                             <Input type="password" {...field} />
                           </FormControl>
@@ -250,7 +280,7 @@ export default function StudentSettingsPage() {
                       name="newPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Mật khẩu mới</FormLabel>
+                          <FormLabel>{t.student.settings.tabs.passwordTab.fields.newPassword}</FormLabel>
                           <FormControl>
                             <Input type="password" {...field} />
                           </FormControl>
@@ -264,7 +294,7 @@ export default function StudentSettingsPage() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Xác nhận mật khẩu mới</FormLabel>
+                          <FormLabel>{t.student.settings.tabs.passwordTab.fields.confirmPassword}</FormLabel>
                           <FormControl>
                             <Input type="password" {...field} />
                           </FormControl>
@@ -276,9 +306,11 @@ export default function StudentSettingsPage() {
                 </Card>
               </TabsContent>
 
-              <Button type="submit" disabled={isSaving} className="w-full">
-                {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
-              </Button>
+              <TabsContent value="password">
+                <Button type="submit" disabled={isSaving} className="w-full">
+                  {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
+                </Button>
+              </TabsContent>
             </form>
           </Form>
         </Tabs>

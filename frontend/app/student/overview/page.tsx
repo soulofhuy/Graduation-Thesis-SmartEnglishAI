@@ -1,7 +1,6 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { StatsCard } from '@/components/stats-card'
 import { CheckCircle, Clock, TrendingUp, Flame } from 'lucide-react'
 import {
@@ -13,14 +12,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 
 export default function StudentOverviewPage() {
   const stats = [
