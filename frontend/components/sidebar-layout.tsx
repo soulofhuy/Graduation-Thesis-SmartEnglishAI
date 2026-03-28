@@ -105,7 +105,7 @@ export function SidebarLayout({
   return (
     <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/10">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex bg-sidebar border-r border-sidebar-border/50 flex-shrink-0 shadow-lg">
+      <aside className="hidden md:flex relative z-10 bg-sidebar border-r border-sidebar-border/50 flex-shrink-0 shadow-[0_0_30px_rgba(2,6,23,0.08)] dark:shadow-[0_0_30px_rgba(0,0,0,0.45)]">
         <SidebarContent />
       </aside>
 

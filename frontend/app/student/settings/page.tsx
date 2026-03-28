@@ -1,52 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Switch } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { LanguageToggle } from '@/components/language-toggle'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { toast } from 'sonner'
-import { Pencil } from 'lucide-react'
 import { useLanguage } from '@/components/language-provider'
+import { SettingsTab } from './_components/SettingsTab'
+import { ProfileTab } from './_components/ProfileTab'
+import { PasswordTab } from './_components/PasswordTab'
+import { useAuth } from '@/components/auth-provider'
+import { changePassword } from '@/services/auth'
+import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
+import {
+  createChangePasswordSchema,
+  type ChangePasswordFormValues
+} from '@/lib/validators/change-password'
+import { createProfileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 
-const settingsSchema = z.object({
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  address: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(),
-})
-
-type SettingsFormValues = z.infer<typeof settingsSchema>
+const profileSchema = createProfileSchema()
 
 export default function StudentSettingsPage() {
-  const { t } = useLanguage();
-  const [isSaving, setIsSaving] = useState(false)
+  const { t, language } = useLanguage();
+  const { accessToken } = useAuth()
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isSavingPassword, setIsSavingPassword] = useState(false)
   const [isEditingProfile, setIsEditingProfile] = useState(false)
 
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsSchema),
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: 'Minh',
       lastName: 'Anh',
@@ -55,14 +37,20 @@ export default function StudentSettingsPage() {
       dateOfBirth: '2002-05-10',
       createdAt: '2024-01-15',
       updatedAt: '2026-03-28',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
     },
   })
 
-  async function onSubmit(values: SettingsFormValues) {
-    setIsSaving(true)
+  const passwordForm = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(createChangePasswordSchema(getAuthValidationMessages(language))),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }
+  })
+
+  async function handleProfileSubmit(values: ProfileFormValues) {
+    setIsSavingProfile(true)
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -73,7 +61,30 @@ export default function StudentSettingsPage() {
     } catch (error) {
       toast.error('Lỗi khi lưu cài đặt')
     } finally {
-      setIsSaving(false)
+      setIsSavingProfile(false)
+    }
+  }
+
+  async function handlePasswordSubmit(values: ChangePasswordFormValues) {
+    if (!accessToken) {
+      toast.error('Vui lòng đăng nhập lại để đổi mật khẩu')
+      return
+    }
+
+    setIsSavingPassword(true)
+    try {
+      const result = await changePassword(accessToken, values.currentPassword, values.newPassword)
+      toast.success(result.message || 'Đổi mật khẩu thành công!')
+      passwordForm.reset({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Lỗi khi đổi mật khẩu'
+      toast.error(message)
+    } finally {
+      setIsSavingPassword(false)
     }
   }
 
@@ -92,227 +103,23 @@ export default function StudentSettingsPage() {
             <TabsTrigger value="password">{t.student.settings.tabs.passwordTab.mainTitle}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="setting" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.student.settings.tabs.settingsTab.subTitle}</CardTitle>
-                <CardDescription>{t.student.settings.tabs.settingsTab.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between rounded-lg border border-border p-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{t.student.settings.tabs.settingsTab.option[0].title}</p>
-                    <p className="text-xs text-muted-foreground">{t.student.settings.tabs.settingsTab.option[0].description}</p>
-                  </div>
-                  <ThemeToggle />
-                </div>
+          <SettingsTab t={t} />
 
-                <div className="flex items-center justify-between rounded-lg border border-border p-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{t.student.settings.tabs.settingsTab.option[1].title}</p>
-                    <p className="text-xs text-muted-foreground">{t.student.settings.tabs.settingsTab.option[1].description}</p>
-                  </div>
-                  <LanguageToggle />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <ProfileTab
+            form={profileForm}
+            isEditingProfile={isEditingProfile}
+            isSaving={isSavingProfile}
+            onToggleEdit={() => setIsEditingProfile((prev) => !prev)}
+            onSubmit={handleProfileSubmit}
+            t={t}
+          />
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <TabsContent value="profile" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <CardTitle>{t.student.settings.tabs.profileTab.subTitle}</CardTitle>
-                        <CardDescription>{t.student.settings.tabs.profileTab.description}</CardDescription>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setIsEditingProfile((prev) => !prev)}
-                          className="gap-2"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          {isEditingProfile ? t.common.cancelEditting : t.common.edit}
-                        </Button>
-                        {isEditingProfile && (
-                          <Button type="submit" disabled={isSaving} className="gap-2">
-                            {isSaving ? t.common.isSaving : t.common.save}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.firstName}</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly={!isEditingProfile} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.lastName}</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly={!isEditingProfile} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.address}</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly={!isEditingProfile} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="phoneNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.phoneNumber}</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly={!isEditingProfile} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="dateOfBirth"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.dateOfBirth}</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} readOnly={!isEditingProfile} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <Separator />
-
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <FormField
-                        control={form.control}
-                        name="createdAt"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.createdAt}</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="updatedAt"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t.student.settings.tabs.profileTab.fields.updatedAt}</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="password" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t.student.settings.tabs.passwordTab.subTitle}</CardTitle>
-                    <CardDescription>{t.student.settings.tabs.passwordTab.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="currentPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t.student.settings.tabs.passwordTab.fields.currentPassword}</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t.student.settings.tabs.passwordTab.fields.newPassword}</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t.student.settings.tabs.passwordTab.fields.confirmPassword}</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="password">
-                <Button type="submit" disabled={isSaving} className="w-full">
-                  {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
-                </Button>
-              </TabsContent>
-            </form>
-          </Form>
+          <PasswordTab
+            form={passwordForm}
+            isSaving={isSavingPassword}
+            onSubmit={handlePasswordSubmit}
+            t={t}
+          />
         </Tabs>
       </div>
     </div>

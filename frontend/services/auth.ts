@@ -98,3 +98,46 @@ export async function registerUser(
 
   return { user: authUser, message };
 }
+
+export async function logoutUser(token: string) {
+  const response = await fetch(`${getApiBaseUrl()}/auth/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const payload = (await response.json()) as ApiSuccess<null> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Logout failed';
+    throw new Error(message);
+  }
+
+  return { message: payload.message };
+}
+
+export async function changePassword(
+  token: string,
+  currentPassword: string,
+  newPassword: string
+) {
+  const response = await fetch(`${getApiBaseUrl()}/auth/change-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ currentPassword, newPassword })
+  });
+
+  const payload = (await response.json()) as ApiSuccess<null> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Change password failed';
+    throw new Error(message);
+  }
+
+  return { message: payload.message };
+}
