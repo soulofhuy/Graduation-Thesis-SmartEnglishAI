@@ -4,6 +4,7 @@ export const authValidationMessages = {
   en: {
     roleRequired: 'Please choose a role',
     emailInvalid: 'Please enter a valid email address',
+    currentPasswordRequired: 'Please enter your current password',
     passwordMin: 'Password must be at least 6 characters',
     confirmPasswordRequired: 'Please confirm your password',
     confirmPasswordMismatch: 'Passwords do not match'
@@ -11,6 +12,7 @@ export const authValidationMessages = {
   vi: {
     roleRequired: 'Vui lòng chọn vai trò',
     emailInvalid: 'Vui lòng nhập địa chỉ email hợp lệ',
+    currentPasswordRequired: 'Vui lòng nhập mật khẩu hiện tại',
     passwordMin: 'Mật khẩu phải có ít nhất 6 ký tự',
     confirmPasswordRequired: 'Vui lòng xác nhận mật khẩu',
     confirmPasswordMismatch: 'Mật khẩu xác nhận không khớp'

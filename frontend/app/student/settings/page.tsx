@@ -1,281 +1,170 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Switch } from '@/components/ui/switch'
+import { useEffect, useState } from 'react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { toast } from 'sonner'
+import { useLanguage } from '@/components/language-provider'
+import { SettingsTab } from './_components/SettingsTab'
+import { ProfileTab } from './_components/ProfileTab'
+import { PasswordTab } from './_components/PasswordTab'
+import { useAuth } from '@/components/auth-provider'
+import { changePassword } from '@/services/auth'
+import { getMyProfile, updateMyProfile } from '@/services/profiles'
+import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
+import {
+  createChangePasswordSchema,
+  type ChangePasswordFormValues
+} from '@/lib/validators/change-password'
+import { createProfileSchema, type ProfileFormValues } from '@/lib/validators/profile'
+import { normalizeDateForApi } from '@/lib/format'
 
-const settingsSchema = z.object({
-  fullName: z.string().min(1, 'Tên đầy đủ là bắt buộc'),
-  email: z.string().email('Email không hợp lệ'),
-  studentId: z.string().optional(),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(),
-  emailNotifications: z.boolean(),
-  assignmentReminders: z.boolean(),
-  gradeNotifications: z.boolean(),
-})
-
-type SettingsFormValues = z.infer<typeof settingsSchema>
+const profileSchema = createProfileSchema()
 
 export default function StudentSettingsPage() {
-  const [isSaving, setIsSaving] = useState(false)
+  const { t, language } = useLanguage();
+  const { accessToken } = useAuth()
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isSavingPassword, setIsSavingPassword] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
 
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsSchema),
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
-      fullName: 'Trần Minh Anh',
-      email: 'student@example.com',
-      studentId: '9A1-001',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-      emailNotifications: true,
-      assignmentReminders: true,
-      gradeNotifications: false,
+      firstName: '',
+      lastName: '',
+      address: '',
+      phoneNumber: '',
+      dateOfBirth: '',
+      createdAt: '',
+      updatedAt: '',
     },
   })
 
-  async function onSubmit(values: SettingsFormValues) {
-    setIsSaving(true)
+  useEffect(() => {
+    if (!accessToken) {
+      return
+    }
+
+    const loadProfile = async () => {
+      try {
+        const result = await getMyProfile(accessToken)
+        const profile = result.profile
+        console.log('Loaded profile:', profile)
+        profileForm.reset({
+          firstName: profile.firstName ?? '',
+          lastName: profile.lastName ?? '',
+          address: profile.address ?? '',
+          phoneNumber: profile.phoneNumber ?? '',
+          dateOfBirth: profile.dateOfBirth ?? '',
+          createdAt: profile.createdAt ?? '',
+          updatedAt: profile.updatedAt ?? '',
+        })
+        console.log('Profile form values after reset:', profileForm.getValues())
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Lỗi khi tải hồ sơ'
+        toast.error(message)
+      }
+    }
+
+    loadProfile()
+  }, [accessToken, profileForm])
+
+  const passwordForm = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(createChangePasswordSchema(getAuthValidationMessages(language))),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }
+  })
+
+  async function handleProfileSubmit(values: ProfileFormValues) {
+    setIsSavingProfile(true);
+    if (!accessToken) {
+      toast.error('Vui lòng đăng nhập lại để cập nhật hồ sơ')
+      setIsSavingProfile(false);
+      return
+    }
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast.success('Lưu cài đặt thành công!')
+      const normalizedDateOfBirth = normalizeDateForApi(values.dateOfBirth)
+      const payload = {
+        ...values,
+        dateOfBirth: normalizedDateOfBirth
+      }
+      const profileData = Object.fromEntries(
+        Object.entries(payload)
+          .filter(([key]) => key !== 'createdAt' && key !== 'updatedAt')
+          .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+      ) as Omit<ProfileFormValues, 'createdAt' | 'updatedAt'>;
+      const result = await updateMyProfile(accessToken, profileData)
+      toast.success(result.message)
+      setIsEditingProfile(false)
     } catch (error) {
       toast.error('Lỗi khi lưu cài đặt')
     } finally {
-      setIsSaving(false)
+      setIsSavingProfile(false)
+    }
+  }
+
+  async function handlePasswordSubmit(values: ChangePasswordFormValues) {
+    if (!accessToken) {
+      toast.error('Vui lòng đăng nhập lại để đổi mật khẩu')
+      return
+    }
+
+    setIsSavingPassword(true)
+    try {
+      const result = await changePassword(accessToken, values.currentPassword, values.newPassword)
+      toast.success(result.message)
+      passwordForm.reset({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Lỗi khi đổi mật khẩu'
+      toast.error(message)
+    } finally {
+      setIsSavingPassword(false)
     }
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-2xl">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
-          Cài đặt
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Quản lý thông tin và cài đặt cá nhân của bạn
-        </p>
+    <div className="md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+      <div className="mx-auto w-full space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{t.student.settings.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.student.settings.description}</p>
+        </div>
+
+        <Tabs defaultValue="setting" className="space-y-6">
+          <TabsList className="flex flex-wrap justify-start gap-2">
+            <TabsTrigger value="setting">{t.student.settings.tabs.settingsTab.mainTitle}</TabsTrigger>
+            <TabsTrigger value="profile">{t.student.settings.tabs.profileTab.mainTitle}</TabsTrigger>
+            <TabsTrigger value="password">{t.student.settings.tabs.passwordTab.mainTitle}</TabsTrigger>
+          </TabsList>
+
+          <SettingsTab t={t} />
+
+          <ProfileTab
+            form={profileForm}
+            isEditingProfile={isEditingProfile}
+            isSaving={isSavingProfile}
+            onToggleEdit={() => setIsEditingProfile((prev) => !prev)}
+            onSubmit={handleProfileSubmit}
+            t={t}
+          />
+
+          <PasswordTab
+            form={passwordForm}
+            isSaving={isSavingPassword}
+            onSubmit={handlePasswordSubmit}
+            t={t}
+          />
+        </Tabs>
       </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Account Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin tài khoản</CardTitle>
-              <CardDescription>
-                Cập nhật thông tin cơ bản của bạn
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tên đầy đủ</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="studentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mã số học sinh</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled />
-                    </FormControl>
-                    <FormDescription>
-                      Mã số không thể thay đổi
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Password */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Đổi mật khẩu</CardTitle>
-              <CardDescription>
-                Cập nhật mật khẩu của bạn để bảo vệ tài khoản
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="currentPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mật khẩu hiện tại</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="newPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mật khẩu mới</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Xác nhận mật khẩu mới</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Notification Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông báo</CardTitle>
-              <CardDescription>
-                Quản lý cài đặt thông báo của bạn
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="emailNotifications"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Thông báo email</FormLabel>
-                      <FormDescription>
-                        Nhận thông báo qua email
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Separator />
-
-              <FormField
-                control={form.control}
-                name="assignmentReminders"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Nhắc nhở bài tập
-                      </FormLabel>
-                      <FormDescription>
-                        Nhận nhắc nhở về bài tập sắp đến hạn
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Separator />
-
-              <FormField
-                control={form.control}
-                name="gradeNotifications"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Thông báo về điểm
-                      </FormLabel>
-                      <FormDescription>
-                        Nhận thông báo khi giáo viên chấm bài
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Save Button */}
-          <Button type="submit" disabled={isSaving} className="w-full">
-            {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
-          </Button>
-        </form>
-      </Form>
     </div>
   )
 }

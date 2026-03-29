@@ -23,10 +23,21 @@ class ProfileService {
       throw new Error('Profile not found');
     }
 
+    const { createdAt, updatedAt, ...rest } = profileData;
+    const dateOfBirthValue = (profileData as { dateOfBirth?: unknown })
+      .dateOfBirth;
+    const parsedDateOfBirth =
+      typeof dateOfBirthValue === 'string' && dateOfBirthValue.trim().length > 0
+        ? new Date(`${dateOfBirthValue}T00:00:00.000Z`)
+        : dateOfBirthValue instanceof Date
+          ? dateOfBirthValue
+          : undefined;
+
     return prisma.profile.update({
       where: { userId },
       data: {
-        ...profileData
+        ...rest,
+        ...(parsedDateOfBirth ? { dateOfBirth: parsedDateOfBirth } : {})
       }
     });
   };
