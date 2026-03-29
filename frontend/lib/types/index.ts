@@ -26,3 +26,17 @@ export interface Profile {
   createdAt?: string | null;
   updatedAt?: string | null;
 }
+
+export interface Class {
+  id: string;
+  name?: string | null;
+  description?: string | null;
+  teacherId: string;
+  teacher?: User | null;
+  students?: User[] | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  needsTeacherApproval: boolean;
+  isActive: boolean;
+  deactivatedAt?: string | null;
+}
