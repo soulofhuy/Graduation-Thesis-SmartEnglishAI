@@ -51,7 +51,6 @@ export default function StudentSettingsPage() {
       try {
         const result = await getMyProfile(accessToken)
         const profile = result.profile
-        console.log('Loaded profile:', profile)
         profileForm.reset({
           firstName: profile.firstName ?? '',
           lastName: profile.lastName ?? '',
@@ -61,7 +60,6 @@ export default function StudentSettingsPage() {
           createdAt: profile.createdAt ?? '',
           updatedAt: profile.updatedAt ?? '',
         })
-        console.log('Profile form values after reset:', profileForm.getValues())
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Lỗi khi tải hồ sơ'
         toast.error(message)

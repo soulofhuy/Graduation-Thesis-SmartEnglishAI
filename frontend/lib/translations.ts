@@ -124,6 +124,37 @@ export const translations = {
       signIn: 'Sign In'
     },
 
+    // Teacher Dashboard
+    teacher: {
+      classes: {
+        title: 'Manage classes',
+        description: 'Create and manage your classes',
+        tableViewport: {
+          title: 'List of classes',
+          columnName: 'Class name',
+          columnDescription: 'Description',
+          columnStudentNumber: 'Number of students',
+          columnAssignmentNumber: 'Number of assignments',
+          columnClassCode: 'Class code',
+          columnActions: 'Operations'
+        },
+        gridViewport: {
+          fieldStudentNumer: 'No. students',
+          fieldAssignmentNumer: 'No. assignments',
+          fieldClassCode: 'Class code'
+        },
+        addClass: {
+          title: 'Create a new class',
+          description: 'Enter class information to create a new class',
+          fieldName: 'Class name',
+          filedNamePlaceholder: 'e.g., Class 9CB1',
+          fieldDescription: 'Class description',
+          fieldDescriptionPlaceholder: 'e.g., A class for 9CB students',
+          fieldNeedsTeacherApproval: 'Needs your approval to join?'
+        }
+      }
+    },
+
     // Student Dashboard
     student: {
       overview: 'Overview',
@@ -200,7 +231,8 @@ export const translations = {
       search: 'Search',
       noData: 'No data available',
       error: 'Something went wrong',
-      success: 'Success'
+      success: 'Success',
+      viewPort: 'Choose your viewport'
     }
   },
 
@@ -327,6 +359,38 @@ export const translations = {
       signIn: 'Đăng nhập'
     },
 
+    // Teacher Dashboard
+    teacher: {
+      classes: {
+        title: 'Quản lí lớp học',
+        description: 'Tạo và quản lí các lớp học của bạn',
+        tableViewport: {
+          title: 'Danh sách các lớp học',
+          columnName: 'Tên lớp',
+          columnDescription: 'Mô tả',
+          columnStudentNumber: 'Số lượng học sinh',
+          columnAssignmentNumber: 'Số lượng bài tập',
+          columnClassCode: 'Mã lớp',
+          columnActions: 'Các thao tác'
+        },
+        gridViewport: {
+          fieldStudentNumer: 'Số học sinh',
+          fieldAssignmentNumer: 'Số bài tập',
+          fieldClassCode: 'Mã lớp'
+        },
+        addClass: {
+          title: 'Tạo lớp học mới',
+          description: 'Nhập thông tin lớp học để tạo lớp mới',
+          fieldName: 'Tên lớp học',
+          filedNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldDescription: 'Mô tả lớp học',
+          fieldDescriptionPlaceholder:
+            'Ví dụ: Lớp học dành cho học sinh lớp 9CB',
+          fieldNeedsTeacherApproval: 'Cần sự phê duyệt của bạn để tham gia?'
+        }
+      }
+    },
+
     // Student Dashboard
     student: {
       overview: 'Tổng quan',
@@ -403,7 +467,8 @@ export const translations = {
       search: 'Tìm kiếm',
       noData: 'Không có dữ liệu',
       error: 'Có lỗi xảy ra',
-      success: 'Thành công'
+      success: 'Thành công',
+      viewPort: 'Chọn chế độ hiển thị'
     }
   }
 };

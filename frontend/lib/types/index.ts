@@ -39,4 +39,5 @@ export interface Class {
   needsTeacherApproval: boolean;
   isActive: boolean;
   deactivatedAt?: string | null;
+  classCode?: string;
 }
