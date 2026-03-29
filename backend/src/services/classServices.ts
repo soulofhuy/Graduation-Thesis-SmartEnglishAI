@@ -1,8 +1,10 @@
 import prisma from '../utils/prisma';
 import { ClassModel } from '../generated/prisma/models/Class';
+import generateClassCode from '../utils/generate-class-code';
 
 class ClassService {
   static insertClass = async (classData: ClassModel) => {
+    classData.classCode = classData.classCode || generateClassCode();
     return prisma.class.create({
       data: classData
     });

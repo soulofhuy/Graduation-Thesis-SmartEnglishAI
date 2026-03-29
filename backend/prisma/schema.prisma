@@ -50,6 +50,7 @@ model Class {
   name                  String?
   description           String?
   teacherId             String
+  classCode             String      @unique
   teacher               User        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
   students              User[]      @relation("ClassStudents")
   createdAt             DateTime?   @default(now())
