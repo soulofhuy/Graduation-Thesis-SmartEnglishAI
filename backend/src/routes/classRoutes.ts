@@ -6,18 +6,24 @@ const router = Router();
 
 router.post('/classes', verifyJWT, ClassController.createClass);
 
-router.patch(
-  '/classes/:classId',
+router.post(
+  '/classes/generate-code',
   verifyJWT,
-  ClassController.updateClassInformation
+  ClassController.generateUniqueClassCode
+);
+
+router.get(
+  '/classes/deactivated',
+  verifyJWT,
+  ClassController.getAllDeactivatedClassesByTeacherId
 );
 
 router.get('/classes/:classId', verifyJWT, ClassController.getClassById);
 
-router.get(
-  '/classes-by-teacher/:teacherId',
+router.patch(
+  '/classes/:classId',
   verifyJWT,
-  ClassController.getClassesByTeacherId
+  ClassController.updateClassInformation
 );
 
 router.patch(
@@ -26,10 +32,10 @@ router.patch(
   ClassController.toggleClassStatus
 );
 
-router.post(
-  '/classes/generate-code',
+router.get(
+  '/classes-by-teacher/:teacherId',
   verifyJWT,
-  ClassController.generateUniqueClassCode
+  ClassController.getClassesByTeacherId
 );
 
 export default router;

@@ -6,7 +6,8 @@ import {
   Settings,
   GraduationCap,
   Inbox,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from 'lucide-react';
 
 export const teacherNavItems = [
@@ -29,6 +30,11 @@ export const teacherNavItems = [
     label: 'Kết quả học tập',
     href: '/teacher/results',
     icon: BarChart3
+  },
+  {
+    label: 'Thùng rác',
+    href: '/teacher/trash',
+    icon: Trash2
   },
   {
     label: 'Cài đặt tài khoản',

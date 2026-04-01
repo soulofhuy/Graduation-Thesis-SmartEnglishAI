@@ -129,3 +129,26 @@ export const toggleClassStatus = async (token: string, classId: string) => {
 
   return { class: payload.data, message: payload.message };
 };
+
+export async function getDeactivatedClasses(token: string) {
+  const response = await fetch(`${getApiBaseUrl()}/classes/deactivated`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const payload = (await response.json()) as ApiSuccess<Class[]> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Get deactivated classes failed';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Deactivated classes response is missing data');
+  }
+
+  return { classes: payload.data, message: payload.message };
+}

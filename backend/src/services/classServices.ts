@@ -68,6 +68,12 @@ class ClassService {
     }
     return classCode;
   };
+
+  static getAllDeactivatedClassesByTeacherId = async (teacherId: string) => {
+    return prisma.class.findMany({
+      where: { teacherId, isActive: false }
+    });
+  };
 }
 
 export default ClassService;

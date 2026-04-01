@@ -138,6 +138,35 @@ class ClassController {
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
+
+  static getAllDeactivatedClassesByTeacherId = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const teacherId = req.userId;
+
+    if (!teacherId) {
+      return res
+        .status(401)
+        .json(
+          Responses.errorResponse(
+            new Error('Unauthorized - Teacher ID not found')
+          )
+        );
+    }
+
+    try {
+      const classes =
+        await ClassService.getAllDeactivatedClassesByTeacherId(teacherId);
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse('Deactivated classes fetched', classes)
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
 }
 
 export default ClassController;
