@@ -151,6 +151,28 @@ export const translations = {
           fieldDescription: 'Class description',
           fieldDescriptionPlaceholder: 'e.g., A class for 9CB students',
           fieldNeedsTeacherApproval: 'Needs your approval to join?'
+        },
+        editClass: {
+          title: 'Edit Class',
+          description: 'Update Class Information',
+          fieldName: 'Class Name',
+          fieldNamePlaceholder: 'Example: Class 9CB1',
+          fieldDescription: 'Class Description',
+          fieldDescriptionPlaceholder: 'Example: Class for 9CB students',
+          fieldNeedsTeacherApproval: 'Needs your approval to join?',
+          fieldClassCode: 'Class Code'
+        },
+        deleteClass: {
+          title: 'Delete class',
+          description: 'Are you sure you want to delete this class?',
+          classInformation: {
+            title: 'Class Information',
+            fieldClassName: 'Class Name',
+            fieldClassDescription: 'Class Description',
+            fieldStudentNumber: 'Number of Students',
+            fieldAssignmentNumber: 'Number of Assignments',
+            fieldClassCode: 'Class Code'
+          }
         }
       }
     },
@@ -225,6 +247,7 @@ export const translations = {
       isSaving: 'Saving...',
       cancel: 'Cancel',
       delete: 'Delete',
+      isDeleting: 'Deleting...',
       edit: 'Edit',
       cancelEditting: 'Cancel editing',
       add: 'Add',
@@ -387,6 +410,29 @@ export const translations = {
           fieldDescriptionPlaceholder:
             'Ví dụ: Lớp học dành cho học sinh lớp 9CB',
           fieldNeedsTeacherApproval: 'Cần sự phê duyệt của bạn để tham gia?'
+        },
+        editClass: {
+          title: 'Chỉnh sửa lớp học',
+          description: 'Cập nhật thông tin lớp học',
+          fieldName: 'Tên lớp học',
+          fieldNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldDescription: 'Mô tả lớp học',
+          fieldDescriptionPlaceholder:
+            'Ví dụ: Lớp học dành cho học sinh lớp 9CB',
+          fieldNeedsTeacherApproval: 'Cần sự phê duyệt của bạn để tham gia?',
+          fieldClassCode: 'Mã lớp học'
+        },
+        deleteClass: {
+          title: 'Xóa lớp học',
+          description: 'Bạn có chắc muốn xóa lớp học này không?',
+          classInformation: {
+            title: 'Thông tin lớp học',
+            fieldClassName: 'Tên lớp học',
+            fieldClassDescription: 'Mô tả lớp học',
+            fieldStudentNumber: 'Số lượng học sinh',
+            fieldAssignmentNumber: 'Số lượng bài tập',
+            fieldClassCode: 'Mã lớp học'
+          }
         }
       }
     },
@@ -461,6 +507,7 @@ export const translations = {
       isSaving: 'Đang lưu...',
       cancel: 'Hủy',
       delete: 'Xóa',
+      isDeleting: 'Đang xóa...',
       edit: 'Chỉnh sửa',
       cancelEditting: 'Hủy chỉnh sửa',
       add: 'Thêm',

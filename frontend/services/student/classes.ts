@@ -2,16 +2,7 @@ import { getApiBaseUrl } from '@/lib/api-base-url/get-api-base-url';
 import type { Class } from '@/lib/types';
 import type { ApiError, ApiSuccess } from '@/lib/types/responses';
 
-export type CreateClassPayload = {
-  name?: string | null;
-  description?: string | null;
-  teacherId?: string;
-};
-
-export async function createClass(
-  token: string,
-  classData: CreateClassPayload
-) {
+export async function createClass(token: string, classData: Class) {
   const response = await fetch(`${getApiBaseUrl()}/classes`, {
     method: 'POST',
     headers: {

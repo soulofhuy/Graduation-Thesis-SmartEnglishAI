@@ -33,6 +33,8 @@ import { TOAST_COLORS } from '@/lib/constants'
 import { useLanguage } from '@/components/language-provider'
 import { Switch } from '@/components/ui/switch'
 import { createClassSchema, type ClassFormValues } from '@/lib/validators/class'
+import { EditClassModal } from './edit-class-modal'
+import { DeleteClassModal } from './delete-class-modal'
 
 const classSchema = createClassSchema()
 
@@ -45,6 +47,9 @@ export default function TeacherClassesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedClass, setSelectedClass] = useState<BackendClass | null>(null)
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
     defaultValues: {
@@ -103,6 +108,26 @@ export default function TeacherClassesPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Sao chép thành công!', { className: TOAST_COLORS.success })
+  }
+
+  const handleEditClass = (classItem: BackendClass) => {
+    setSelectedClass(classItem)
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditSuccess = (updatedClass: BackendClass) => {
+    setClasses((prev) =>
+      prev.map((c) => (c.id === updatedClass.id ? updatedClass : c))
+    )
+  }
+
+  const handleDeleteClass = (classItem: BackendClass) => {
+    setSelectedClass(classItem)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteSuccess = (classId: string) => {
+    setClasses((prev) => prev.filter((c) => c.id !== classId))
   }
 
   return (
@@ -170,10 +195,10 @@ export default function TeacherClassesPage() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteClass(classItem)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
                     </div>
@@ -275,10 +300,10 @@ export default function TeacherClassesPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteClass(classItem)}>
                               <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
                           </div>
@@ -356,6 +381,22 @@ export default function TeacherClassesPage() {
           </form>
         </Form>
       </ModalWrapper>
+
+      <EditClassModal
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        classItem={selectedClass}
+        accessToken={accessToken || ''}
+        onSuccess={handleEditSuccess}
+      />
+
+      <DeleteClassModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        classItem={selectedClass}
+        accessToken={accessToken || ''}
+        onSuccess={handleDeleteSuccess}
+      />
     </div>
   )
 }

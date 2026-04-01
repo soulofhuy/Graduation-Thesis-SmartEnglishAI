@@ -5,21 +5,31 @@ import verifyJWT from '../middlewares/authMiddleware';
 const router = Router();
 
 router.post('/classes', verifyJWT, ClassController.createClass);
+
 router.patch(
-  '/classes/:classId/toggle-approval',
+  '/classes/:classId',
   verifyJWT,
-  ClassController.toggleTeacherApproval
+  ClassController.updateClassInformation
 );
+
 router.get('/classes/:classId', verifyJWT, ClassController.getClassById);
+
 router.get(
   '/classes-by-teacher/:teacherId',
   verifyJWT,
   ClassController.getClassesByTeacherId
 );
+
 router.patch(
   '/classes/:classId/toggle-status',
   verifyJWT,
   ClassController.toggleClassStatus
+);
+
+router.post(
+  '/classes/generate-code',
+  verifyJWT,
+  ClassController.generateUniqueClassCode
 );
 
 export default router;

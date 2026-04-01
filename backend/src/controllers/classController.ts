@@ -30,8 +30,9 @@ class ClassController {
     }
   };
 
-  static toggleTeacherApproval = async (req: Request, res: Response) => {
+  static updateClassInformation = async (req: Request, res: Response) => {
     const classId = req.params.classId || req.body.classId;
+    const updateData = req.body as Partial<ClassModel>;
 
     if (!classId) {
       return res
@@ -40,15 +41,14 @@ class ClassController {
     }
 
     try {
-      const updatedClass =
-        await ClassService.updateNeedTeacherApprovalStatus(classId);
+      const updatedClass = await ClassService.updateClassInformation(
+        classId,
+        updateData
+      );
       return res
         .status(200)
         .json(
-          Responses.successResponse(
-            'Teacher approval status updated',
-            updatedClass
-          )
+          Responses.successResponse('Class information updated', updatedClass)
         );
     } catch (error) {
       return res.status(400).json(Responses.errorResponse(error));
@@ -121,6 +121,19 @@ class ClassController {
       return res
         .status(200)
         .json(Responses.successResponse('Class status updated', updatedClass));
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
+  static generateUniqueClassCode = async (req: Request, res: Response) => {
+    try {
+      const classCode = await ClassService.generateUniqueClassCode();
+      return res.status(200).json(
+        Responses.successResponse('Unique class code generated', {
+          classCode
+        })
+      );
     } catch (error) {
       return res.status(400).json(Responses.errorResponse(error));
     }

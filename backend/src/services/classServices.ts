@@ -10,7 +10,10 @@ class ClassService {
     });
   };
 
-  static updateNeedTeacherApprovalStatus = async (classId: string) => {
+  static updateClassInformation = async (
+    classId: string,
+    updateData: Partial<ClassModel>
+  ) => {
     const existingClass = await prisma.class.findUnique({
       where: { id: classId }
     });
@@ -19,7 +22,7 @@ class ClassService {
     }
     return prisma.class.update({
       where: { id: classId },
-      data: { needsTeacherApproval: !existingClass.needsTeacherApproval }
+      data: updateData
     });
   };
 
@@ -31,7 +34,7 @@ class ClassService {
 
   static getClassesByTeacherId = async (teacherId: string) => {
     return prisma.class.findMany({
-      where: { teacherId }
+      where: { teacherId, isActive: true }
     });
   };
 
@@ -44,8 +47,26 @@ class ClassService {
     }
     return prisma.class.update({
       where: { id: classId },
-      data: { isActive: !existingClass.isActive }
+      data: {
+        isActive: !existingClass.isActive,
+        updatedAt: new Date(),
+        deactivatedAt: !existingClass.isActive ? null : new Date()
+      }
     });
+  };
+
+  static generateUniqueClassCode = async () => {
+    let classCode = generateClassCode();
+    let isUnique = false;
+    while (!isUnique) {
+      const existingClass = await prisma.class.findUnique({
+        where: { classCode }
+      });
+      if (!existingClass) {
+        isUnique = true;
+      }
+    }
+    return classCode;
   };
 }
 
