@@ -19,6 +19,8 @@ import {
 } from '@/lib/validators/change-password'
 import { createProfileSchema, type ProfileFormValues } from '@/lib/validators/profile'
 import { normalizeDateForApi } from '@/lib/format'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 const profileSchema = createProfileSchema()
 
@@ -51,7 +53,6 @@ export default function StudentSettingsPage() {
       try {
         const result = await getMyProfile(accessToken)
         const profile = result.profile
-        console.log('Loaded profile:', profile)
         profileForm.reset({
           firstName: profile.firstName ?? '',
           lastName: profile.lastName ?? '',
@@ -61,10 +62,9 @@ export default function StudentSettingsPage() {
           createdAt: profile.createdAt ?? '',
           updatedAt: profile.updatedAt ?? '',
         })
-        console.log('Profile form values after reset:', profileForm.getValues())
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Lỗi khi tải hồ sơ'
-        toast.error(message)
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
       }
     }
 
@@ -83,7 +83,7 @@ export default function StudentSettingsPage() {
   async function handleProfileSubmit(values: ProfileFormValues) {
     setIsSavingProfile(true);
     if (!accessToken) {
-      toast.error('Vui lòng đăng nhập lại để cập nhật hồ sơ')
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error });
       setIsSavingProfile(false);
       return
     }
@@ -99,10 +99,10 @@ export default function StudentSettingsPage() {
           .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
       ) as Omit<ProfileFormValues, 'createdAt' | 'updatedAt'>;
       const result = await updateMyProfile(accessToken, profileData)
-      toast.success(result.message)
+      toast.success(getToastMessage('saveSuccess', language), { className: TOAST_COLORS.success })
       setIsEditingProfile(false)
     } catch (error) {
-      toast.error('Lỗi khi lưu cài đặt')
+      toast.error(getToastMessage('saveFailed', language), { className: TOAST_COLORS.error })
     } finally {
       setIsSavingProfile(false)
     }
@@ -110,22 +110,22 @@ export default function StudentSettingsPage() {
 
   async function handlePasswordSubmit(values: ChangePasswordFormValues) {
     if (!accessToken) {
-      toast.error('Vui lòng đăng nhập lại để đổi mật khẩu')
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
     setIsSavingPassword(true)
     try {
       const result = await changePassword(accessToken, values.currentPassword, values.newPassword)
-      toast.success(result.message)
+      toast.success(getToastMessage('changePasswordSuccess', language), { className: TOAST_COLORS.success })
       passwordForm.reset({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Lỗi khi đổi mật khẩu'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : getToastMessage('changePasswordFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsSavingPassword(false)
     }

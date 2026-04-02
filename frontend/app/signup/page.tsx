@@ -25,7 +25,8 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import Image from 'next/image'
-
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { getToastMessage } from '@/lib/toast/message'
 
 export default function SignupPage() {
     const { t, language } = useLanguage()
@@ -58,12 +59,12 @@ export default function SignupPage() {
         try {
             const { message } = await registerUser(values.email, values.password, values.role)
             if (message) {
-                toast.success(message)
+                toast.success(getToastMessage('signUpSuccess', language), { className: TOAST_COLORS.success })
             }
             router.push('/login')
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Đăng ký thất bại. Vui lòng thử lại.'
-            toast.error(message)
+            const message = error instanceof Error ? error.message : getToastMessage('signUpFailed', language)
+            toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setIsLoading(false)
         }

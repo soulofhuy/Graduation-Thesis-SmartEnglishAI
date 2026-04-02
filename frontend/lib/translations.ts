@@ -124,6 +124,83 @@ export const translations = {
       signIn: 'Sign In'
     },
 
+    // Teacher Dashboard
+    teacher: {
+      classes: {
+        title: 'Manage classes',
+        description: 'Create and manage your classes',
+        tableViewport: {
+          title: 'List of classes',
+          columnName: 'Class name',
+          columnDescription: 'Description',
+          columnStudentNumber: 'Number of students',
+          columnAssignmentNumber: 'Number of assignments',
+          columnClassCode: 'Class code',
+          columnActions: 'Operations'
+        },
+        gridViewport: {
+          fieldStudentNumer: 'No. students',
+          fieldAssignmentNumer: 'No. assignments',
+          fieldClassCode: 'Class code'
+        },
+        addClass: {
+          title: 'Create a new class',
+          description: 'Enter class information to create a new class',
+          fieldName: 'Class name',
+          filedNamePlaceholder: 'e.g., Class 9CB1',
+          fieldDescription: 'Class description',
+          fieldDescriptionPlaceholder: 'e.g., A class for 9CB students',
+          fieldNeedsTeacherApproval: 'Needs your approval to join?'
+        },
+        editClass: {
+          title: 'Edit Class',
+          description: 'Update Class Information',
+          fieldName: 'Class Name',
+          fieldNamePlaceholder: 'Example: Class 9CB1',
+          fieldDescription: 'Class Description',
+          fieldDescriptionPlaceholder: 'Example: Class for 9CB students',
+          fieldNeedsTeacherApproval: 'Needs your approval to join?',
+          fieldClassCode: 'Class Code'
+        },
+        deleteClass: {
+          title: 'Delete class',
+          description: 'Are you sure you want to delete this class?',
+          classInformation: {
+            title: 'Class Information',
+            fieldClassName: 'Class Name',
+            fieldClassDescription: 'Class Description',
+            fieldStudentNumber: 'Number of Students',
+            fieldAssignmentNumber: 'Number of Assignments',
+            fieldClassCode: 'Class Code'
+          }
+        }
+      },
+      trashBin: {
+        title: 'Trash Bin',
+        description:
+          'Manage deleted items. You can restore or permanently delete them',
+        filter: {
+          class: 'Class',
+          assignment: 'Assignment',
+          question: 'Question'
+        },
+        table: {
+          title: 'List of deleted items',
+          description: 'items in trash bin',
+          columnName: 'Name',
+          columnType: 'Type',
+          columnDescription: 'Description',
+          columnDeletedAt: 'Deleted Date',
+          columnActions: 'Actions'
+        },
+        note: {
+          title: 'Note',
+          description:
+            'Items in the trash bin can be permanently deleted. Once permanently deleted, they cannot be restored.'
+        }
+      }
+    },
+
     // Student Dashboard
     student: {
       overview: 'Overview',
@@ -194,13 +271,16 @@ export const translations = {
       isSaving: 'Saving...',
       cancel: 'Cancel',
       delete: 'Delete',
+      isDeleting: 'Deleting...',
+      restore: 'Restore',
       edit: 'Edit',
       cancelEditting: 'Cancel editing',
       add: 'Add',
       search: 'Search',
       noData: 'No data available',
       error: 'Something went wrong',
-      success: 'Success'
+      success: 'Success',
+      viewPort: 'Choose your viewport'
     }
   },
 
@@ -327,6 +407,85 @@ export const translations = {
       signIn: 'Đăng nhập'
     },
 
+    // Teacher Dashboard
+    teacher: {
+      classes: {
+        title: 'Quản lí lớp học',
+        description: 'Tạo và quản lí các lớp học của bạn',
+        tableViewport: {
+          title: 'Danh sách các lớp học',
+          columnName: 'Tên lớp',
+          columnDescription: 'Mô tả',
+          columnStudentNumber: 'Số lượng học sinh',
+          columnAssignmentNumber: 'Số lượng bài tập',
+          columnClassCode: 'Mã lớp',
+          columnActions: 'Các thao tác'
+        },
+        gridViewport: {
+          fieldStudentNumer: 'Số học sinh',
+          fieldAssignmentNumer: 'Số bài tập',
+          fieldClassCode: 'Mã lớp'
+        },
+        addClass: {
+          title: 'Tạo lớp học mới',
+          description: 'Nhập thông tin lớp học để tạo lớp mới',
+          fieldName: 'Tên lớp học',
+          filedNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldDescription: 'Mô tả lớp học',
+          fieldDescriptionPlaceholder:
+            'Ví dụ: Lớp học dành cho học sinh lớp 9CB',
+          fieldNeedsTeacherApproval: 'Cần sự phê duyệt của bạn để tham gia?'
+        },
+        editClass: {
+          title: 'Chỉnh sửa lớp học',
+          description: 'Cập nhật thông tin lớp học',
+          fieldName: 'Tên lớp học',
+          fieldNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldDescription: 'Mô tả lớp học',
+          fieldDescriptionPlaceholder:
+            'Ví dụ: Lớp học dành cho học sinh lớp 9CB',
+          fieldNeedsTeacherApproval: 'Cần sự phê duyệt của bạn để tham gia?',
+          fieldClassCode: 'Mã lớp học'
+        },
+        deleteClass: {
+          title: 'Xóa lớp học',
+          description: 'Bạn có chắc muốn xóa lớp học này không?',
+          classInformation: {
+            title: 'Thông tin lớp học',
+            fieldClassName: 'Tên lớp học',
+            fieldClassDescription: 'Mô tả lớp học',
+            fieldStudentNumber: 'Số lượng học sinh',
+            fieldAssignmentNumber: 'Số lượng bài tập',
+            fieldClassCode: 'Mã lớp học'
+          }
+        }
+      },
+      trashBin: {
+        title: 'Thùng rác',
+        description:
+          'Quản lí các mục đã xóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn',
+        filter: {
+          class: 'Lớp học',
+          assignment: 'Bài tập',
+          question: 'Câu hỏi'
+        },
+        table: {
+          title: 'Danh sách mục đã xóa',
+          description: ' mục trong thùng rác',
+          columnName: 'Tên',
+          columnType: 'Loại',
+          columnDescription: 'Mô tả',
+          columnDeletedAt: 'Ngày xóa',
+          columnActions: 'Các thao tác'
+        },
+        note: {
+          title: 'Lưu ý',
+          description:
+            'Các mục trong thùng rác có thể bị xóa vĩnh viễn. Một khi xóa vĩnh viễn, bạn không thể khôi phục được nữa.'
+        }
+      }
+    },
+
     // Student Dashboard
     student: {
       overview: 'Tổng quan',
@@ -397,13 +556,16 @@ export const translations = {
       isSaving: 'Đang lưu...',
       cancel: 'Hủy',
       delete: 'Xóa',
+      isDeleting: 'Đang xóa...',
+      restore: 'Khôi phục',
       edit: 'Chỉnh sửa',
       cancelEditting: 'Hủy chỉnh sửa',
       add: 'Thêm',
       search: 'Tìm kiếm',
       noData: 'Không có dữ liệu',
       error: 'Có lỗi xảy ra',
-      success: 'Thành công'
+      success: 'Thành công',
+      viewPort: 'Chọn chế độ hiển thị'
     }
   }
 };

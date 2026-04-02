@@ -17,7 +17,7 @@ export default function AppProviders({
                 <LanguageProvider>
                     <ReactScan />
                     {children}
-                    <Toaster position="top-right" />
+                    <Toaster position="top-right" richColors />
                 </LanguageProvider>
             </AuthProvider>
         </ThemeProvider>

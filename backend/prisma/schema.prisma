@@ -28,6 +28,8 @@ model User {
   updatedAt         DateTime?   @updatedAt
   isActive          Boolean     @default(true)
   deactivatedAt     DateTime?
+  taughtClasses     Class[]     @relation("ClassTeacher")
+  enrolledClasses   Class[]     @relation("ClassStudents")
 }
 
 model Profile {
@@ -41,4 +43,19 @@ model Profile {
   dateOfBirth       DateTime?
   createdAt         DateTime?   @default(now())
   updatedAt         DateTime?   @updatedAt
+}
+
+model Class {
+  id                    String      @id @default(uuid())
+  name                  String?
+  description           String?
+  teacherId             String
+  classCode             String      @unique
+  teacher               User        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  students              User[]      @relation("ClassStudents")
+  createdAt             DateTime?   @default(now())
+  updatedAt             DateTime?   @updatedAt
+  needsTeacherApproval  Boolean     @default(false)
+  isActive              Boolean     @default(true)
+  deactivatedAt         DateTime?
 }
