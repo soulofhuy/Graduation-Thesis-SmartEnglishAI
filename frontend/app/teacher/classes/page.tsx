@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/form'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { TOAST_COLORS } from '@/lib/constants'
+import { TOAST_COLORS } from '@/lib/toast/color'
 import { useLanguage } from '@/components/language-provider'
 import { Switch } from '@/components/ui/switch'
 import { createClassSchema, type ClassFormValues } from '@/lib/validators/class'

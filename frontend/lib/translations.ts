@@ -174,6 +174,30 @@ export const translations = {
             fieldClassCode: 'Class Code'
           }
         }
+      },
+      trashBin: {
+        title: 'Trash Bin',
+        description:
+          'Manage deleted items. You can restore or permanently delete them',
+        filter: {
+          class: 'Class',
+          assignment: 'Assignment',
+          question: 'Question'
+        },
+        table: {
+          title: 'List of deleted items',
+          description: 'items in trash bin',
+          columnName: 'Name',
+          columnType: 'Type',
+          columnDescription: 'Description',
+          columnDeletedAt: 'Deleted Date',
+          columnActions: 'Actions'
+        },
+        note: {
+          title: 'Note',
+          description:
+            'Items in the trash bin can be permanently deleted. Once permanently deleted, they cannot be restored.'
+        }
       }
     },
 
@@ -248,6 +272,7 @@ export const translations = {
       cancel: 'Cancel',
       delete: 'Delete',
       isDeleting: 'Deleting...',
+      restore: 'Restore',
       edit: 'Edit',
       cancelEditting: 'Cancel editing',
       add: 'Add',
@@ -434,6 +459,30 @@ export const translations = {
             fieldClassCode: 'Mã lớp học'
           }
         }
+      },
+      trashBin: {
+        title: 'Thùng rác',
+        description:
+          'Quản lí các mục đã xóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn',
+        filter: {
+          class: 'Lớp học',
+          assignment: 'Bài tập',
+          question: 'Câu hỏi'
+        },
+        table: {
+          title: 'Danh sách mục đã xóa',
+          description: ' mục trong thùng rác',
+          columnName: 'Tên',
+          columnType: 'Loại',
+          columnDescription: 'Mô tả',
+          columnDeletedAt: 'Ngày xóa',
+          columnActions: 'Các thao tác'
+        },
+        note: {
+          title: 'Lưu ý',
+          description:
+            'Các mục trong thùng rác có thể bị xóa vĩnh viễn. Một khi xóa vĩnh viễn, bạn không thể khôi phục được nữa.'
+        }
       }
     },
 
@@ -508,6 +557,7 @@ export const translations = {
       cancel: 'Hủy',
       delete: 'Xóa',
       isDeleting: 'Đang xóa...',
+      restore: 'Khôi phục',
       edit: 'Chỉnh sửa',
       cancelEditting: 'Hủy chỉnh sửa',
       add: 'Thêm',

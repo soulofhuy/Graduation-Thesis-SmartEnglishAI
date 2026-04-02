@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner'
 import { toggleClassStatus } from '@/services/teacher/classes'
 import type { Class as BackendClass } from '@/lib/types'
-import { TOAST_COLORS } from '@/lib/constants'
+import { TOAST_COLORS } from '@/lib/toast/color'
 import { useLanguage } from '@/components/language-provider'
 
 interface DeleteClassModalProps {
