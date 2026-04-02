@@ -22,6 +22,8 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from '@/components/ui/form'
 import Image from 'next/image'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 
 export default function LoginPage() {
@@ -69,11 +71,11 @@ export default function LoginPage() {
       }
 
       if (message) {
-        toast.success(message)
+        toast.success(getToastMessage('loginSuccess', language), { className: TOAST_COLORS.success })
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Đăng nhập thất bại. Vui lòng thử lại.'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : getToastMessage('loginFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsLoading(false)
     }
