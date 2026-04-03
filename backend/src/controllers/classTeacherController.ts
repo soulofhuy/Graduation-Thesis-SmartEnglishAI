@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import ClassService from '../services/classServices';
+import ClassTeacherService from '../services/classTeacherServices';
 import Responses from '../utils/responses';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
 import { ClassModel } from '../generated/prisma/models/Class';
 
-class ClassController {
+class ClassTeacherController {
   static createClass = async (req: AuthenticatedRequest, res: Response) => {
     const classData = req.body as ClassModel;
 
@@ -19,7 +19,7 @@ class ClassController {
     }
 
     try {
-      const createdClass = await ClassService.insertClass(classData);
+      const createdClass = await ClassTeacherService.insertClass(classData);
       return res
         .status(201)
         .json(
@@ -41,7 +41,7 @@ class ClassController {
     }
 
     try {
-      const updatedClass = await ClassService.updateClassInformation(
+      const updatedClass = await ClassTeacherService.updateClassInformation(
         classId,
         updateData
       );
@@ -65,7 +65,7 @@ class ClassController {
     }
 
     try {
-      const classData = await ClassService.getClassById(classId);
+      const classData = await ClassTeacherService.getClassById(classId);
 
       if (!classData) {
         return res
@@ -96,7 +96,8 @@ class ClassController {
     }
 
     try {
-      const classes = await ClassService.getClassesByTeacherId(teacherId);
+      const classes =
+        await ClassTeacherService.getClassesByTeacherId(teacherId);
       return res
         .status(200)
         .json(
@@ -117,7 +118,7 @@ class ClassController {
     }
 
     try {
-      const updatedClass = await ClassService.updateClassStatus(classId);
+      const updatedClass = await ClassTeacherService.updateClassStatus(classId);
       return res
         .status(200)
         .json(Responses.successResponse('Class status updated', updatedClass));
@@ -128,7 +129,7 @@ class ClassController {
 
   static generateUniqueClassCode = async (req: Request, res: Response) => {
     try {
-      const classCode = await ClassService.generateUniqueClassCode();
+      const classCode = await ClassTeacherService.generateUniqueClassCode();
       return res.status(200).json(
         Responses.successResponse('Unique class code generated', {
           classCode
@@ -157,7 +158,9 @@ class ClassController {
 
     try {
       const classes =
-        await ClassService.getAllDeactivatedClassesByTeacherId(teacherId);
+        await ClassTeacherService.getAllDeactivatedClassesByTeacherId(
+          teacherId
+        );
       return res
         .status(200)
         .json(
@@ -167,6 +170,49 @@ class ClassController {
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
+
+  static approveStudentJoinClass = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const { classId, studentId } = req.body;
+    const approverId = req.userId;
+
+    console.log('Approve student join class request:', {
+      classId,
+      studentId,
+      approverId
+    });
+
+    if (!classId || !studentId || !approverId) {
+      return res
+        .status(400)
+        .json(
+          Responses.errorResponse(
+            new Error('Class ID, Student ID, and Approver ID are required')
+          )
+        );
+    }
+
+    try {
+      const updatedClassMember =
+        await ClassTeacherService.approveStudentJoinClass(
+          classId,
+          studentId,
+          approverId
+        );
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Student join request approved',
+            updatedClassMember
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
 }
 
-export default ClassController;
+export default ClassTeacherController;

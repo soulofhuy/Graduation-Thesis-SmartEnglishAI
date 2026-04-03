@@ -2,7 +2,7 @@ import prisma from '../utils/prisma';
 import { ClassModel } from '../generated/prisma/models/Class';
 import generateClassCode from '../utils/generate-class-code';
 
-class ClassService {
+class ClassTeacherService {
   static insertClass = async (classData: ClassModel) => {
     classData.classCode = classData.classCode || generateClassCode();
     return prisma.class.create({
@@ -74,6 +74,38 @@ class ClassService {
       where: { teacherId, isActive: false }
     });
   };
+
+  static approveStudentJoinClass = async (
+    classId: string,
+    studentId: string,
+    approverId: string
+  ) => {
+    console.log('[Service] approveStudentJoinClass', {
+      classId,
+      studentId,
+      approverId
+    });
+    const existingClass = await prisma.class.findUnique({
+      where: { id: classId }
+    });
+    if (!existingClass) {
+      throw new Error('Class not found');
+    }
+
+    return prisma.classMember.update({
+      where: {
+        classId_studentId: {
+          classId,
+          studentId
+        }
+      },
+      data: {
+        isApproved: true,
+        approverId,
+        approvedAt: new Date()
+      }
+    });
+  };
 }
 
-export default ClassService;
+export default ClassTeacherService;
