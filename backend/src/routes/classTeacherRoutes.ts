@@ -21,6 +21,18 @@ router.get(
 router.get('/classes/:classId', verifyJWT, ClassTeacherController.getClassById);
 
 router.patch(
+  '/classes/approve-student',
+  verifyJWT,
+  ClassTeacherController.approveStudentJoinClass
+);
+
+router.patch(
+  '/classes/reject-student',
+  verifyJWT,
+  ClassTeacherController.rejectStudentJoinClass
+);
+
+router.patch(
   '/classes/:classId',
   verifyJWT,
   ClassTeacherController.updateClassInformation
@@ -36,12 +48,6 @@ router.get(
   '/classes-by-teacher/:teacherId',
   verifyJWT,
   ClassTeacherController.getClassesByTeacherId
-);
-
-router.patch(
-  '/classes/approve-student',
-  verifyJWT,
-  ClassTeacherController.approveStudentJoinClass
 );
 
 export default router;

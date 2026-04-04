@@ -213,6 +213,41 @@ class ClassTeacherController {
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
+
+  static rejectStudentJoinClass = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const { classId, studentId } = req.body;
+    const rejectorId = req.userId;
+    if (!classId || !studentId || !rejectorId) {
+      return res
+        .status(400)
+        .json(
+          Responses.errorResponse(
+            new Error('Class ID, Student ID, and Rejector ID are required')
+          )
+        );
+    }
+    try {
+      const updatedClassMember =
+        await ClassTeacherService.rejectStudentJoinClass(
+          classId,
+          studentId,
+          rejectorId
+        );
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Student join request rejected',
+            updatedClassMember
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
 }
 
 export default ClassTeacherController;

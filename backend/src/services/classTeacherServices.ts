@@ -80,11 +80,17 @@ class ClassTeacherService {
     studentId: string,
     approverId: string
   ) => {
-    console.log('[Service] approveStudentJoinClass', {
-      classId,
-      studentId,
-      approverId
+    const approver = await prisma.user.findUnique({
+      where: { id: approverId }
     });
+
+    if (!approver) {
+      throw new Error('Approver not found');
+    }
+    if (approver.role === 'STUDENT') {
+      throw new Error('Only teachers/admin can approve student join class');
+    }
+
     const existingClass = await prisma.class.findUnique({
       where: { id: classId }
     });
@@ -103,6 +109,44 @@ class ClassTeacherService {
         isApproved: true,
         approverId,
         approvedAt: new Date()
+      }
+    });
+  };
+
+  static rejectStudentJoinClass = async (
+    classId: string,
+    studentId: string,
+    rejectorId: string
+  ) => {
+    const rejortor = await prisma.user.findUnique({
+      where: { id: rejectorId }
+    });
+
+    if (!rejortor) {
+      throw new Error('Rejector not found');
+    }
+    if (rejortor.role === 'STUDENT') {
+      throw new Error('Only teachers/admin can reject student join class');
+    }
+
+    const existingClass = await prisma.class.findUnique({
+      where: { id: classId }
+    });
+    if (!existingClass) {
+      throw new Error('Class not found');
+    }
+
+    return prisma.classMember.update({
+      where: {
+        classId_studentId: {
+          classId,
+          studentId
+        }
+      },
+      data: {
+        isRejected: true,
+        rejectorId,
+        rejectedAt: new Date()
       }
     });
   };

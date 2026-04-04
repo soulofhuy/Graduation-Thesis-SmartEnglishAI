@@ -31,6 +31,7 @@ model User {
   taughtClasses         Class[]           @relation("ClassTeacher")
   studentClasses        ClassMember[]     @relation("ClassMemberStudent")
   approvedClasses       ClassMember[]     @relation("ClassMemberApprover")
+  rejectedClasses       ClassMember[]     @relation("ClassMemberRejector")
 }
 
 model Profile {
@@ -66,14 +67,18 @@ model ClassMember {
   classId               String
   studentId             String
   approverId            String?
+  rejectorId            String?
   class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
   student               User              @relation("ClassMemberStudent", fields: [studentId], references: [id], onDelete: Cascade)
   approver              User?             @relation("ClassMemberApprover", fields: [approverId], references: [id], onDelete: Cascade)
+  rejector              User?             @relation("ClassMemberRejector", fields: [rejectorId], references: [id], onDelete: Cascade)
   joinedAt              DateTime          @default(now())
   isBanned              Boolean           @default(false)
   bannedAt              DateTime?
   isApproved            Boolean           @default(false)
   approvedAt            DateTime?
+  isRejected            Boolean           @default(false)
+  rejectedAt            DateTime?
 
   @@unique([classId, studentId])
   @@index([studentId])

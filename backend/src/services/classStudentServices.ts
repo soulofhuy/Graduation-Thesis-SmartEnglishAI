@@ -8,12 +8,23 @@ class ClassStudentService {
     if (!existingClass) {
       throw new Error('Class not found');
     }
-    return prisma.classMember.create({
-      data: {
-        classId: existingClass.id,
-        studentId: student
-      }
-    });
+    if (existingClass.needsTeacherApproval) {
+      return prisma.classMember.create({
+        data: {
+          classId: existingClass.id,
+          studentId: student
+        }
+      });
+    } else {
+      return prisma.classMember.create({
+        data: {
+          classId: existingClass.id,
+          studentId: student,
+          approverId: existingClass.teacherId,
+          isApproved: true
+        }
+      });
+    }
   };
 }
 
