@@ -13,7 +13,13 @@ router.post(
 router.get(
   '/classes/pending-requests',
   verifyJWT,
-  ClassStudentController.getAllPendingRequestsToJoinClassByStudent
+  ClassStudentController.getAllRequestsToJoinClassByStudent
+);
+
+router.get(
+  '/classes/approved',
+  verifyJWT,
+  ClassStudentController.getAllApprovedClassesByStudent
 );
 
 export default router;

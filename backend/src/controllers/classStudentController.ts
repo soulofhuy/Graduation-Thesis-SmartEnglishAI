@@ -4,7 +4,32 @@ import Responses from '../utils/responses';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
 
 class ClassStudentController {
-  static getAllPendingRequestsToJoinClassByStudent = async (
+  static getAllApprovedClassesByStudent = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const studentId = req.userId;
+    if (!studentId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Student ID is required')));
+    }
+
+    try {
+      const approvedClasses =
+        await ClassStudentService.getAllApprovedClassesByStudent(studentId);
+      return res.json(
+        Responses.successResponse(
+          'Approved class list retrieved successfully',
+          approvedClasses
+        )
+      );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
+  static getAllRequestsToJoinClassByStudent = async (
     req: AuthenticatedRequest,
     res: Response
   ) => {
@@ -17,12 +42,10 @@ class ClassStudentController {
 
     try {
       const pendingRequests =
-        await ClassStudentService.getAllPendingRequestsToJoinClassByStudent(
-          studentId
-        );
+        await ClassStudentService.getAllRequestsToJoinClassByStudent(studentId);
       return res.json(
         Responses.successResponse(
-          'Pending requests retrieved successfully',
+          'Requests retrieved successfully',
           pendingRequests
         )
       );

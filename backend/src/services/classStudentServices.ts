@@ -1,14 +1,41 @@
 import prisma from '../utils/prisma';
 
 class ClassStudentService {
-  static getAllPendingRequestsToJoinClassByStudent = async (
-    studentId: string
-  ) => {
+  static getAllApprovedClassesByStudent = async (studentId: string) => {
+    return prisma.class.findMany({
+      where: {
+        isActive: true,
+        classMembers: {
+          some: {
+            studentId,
+            isApproved: true,
+            isBanned: false
+          }
+        }
+      },
+      include: {
+        teacher: {
+          include: {
+            profile: true
+          }
+        },
+        classMembers: {
+          where: {
+            isApproved: true,
+            isBanned: false
+          },
+          include: {
+            student: true
+          }
+        }
+      }
+    });
+  };
+
+  static getAllRequestsToJoinClassByStudent = async (studentId: string) => {
     return prisma.classMember.findMany({
       where: {
-        studentId,
-        isApproved: false,
-        isRejected: false
+        studentId
       },
       include: {
         class: true,

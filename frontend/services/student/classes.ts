@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/lib/api-base-url/get-api-base-url';
+import type { Class } from '@/lib/types';
 import type { ClassMember } from '@/lib/types';
 import type { ApiError, ApiSuccess } from '@/lib/types/responses';
 
@@ -26,9 +27,29 @@ export const requestToJoinClass = async (token: string, classCode: string) => {
   return { class: payload.data, message: payload.message };
 };
 
-export const getAllPendingRequestsToJoinClassByStudent = async (
-  token: string
-) => {
+export const getAllApprovedClassesByStudent = async (token: string) => {
+  const response = await fetch(`${getApiBaseUrl()}/classes/approved`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const payload = (await response.json()) as ApiSuccess<Class[]> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch approved classes';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Approved classes response is missing data');
+  }
+
+  return { approvedClasses: payload.data, message: payload.message };
+};
+
+export const getAllRequestsToJoinClassByStudent = async (token: string) => {
   const response = await fetch(`${getApiBaseUrl()}/classes/pending-requests`, {
     method: 'GET',
     headers: {

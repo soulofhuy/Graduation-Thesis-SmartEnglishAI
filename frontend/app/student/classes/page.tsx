@@ -13,62 +13,66 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, BookOpen, LayoutGrid, List } from 'lucide-react'
+import { Plus, Users, BookOpen, LayoutGrid, List, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
-  getAllPendingRequestsToJoinClassByStudent,
+  getAllApprovedClassesByStudent,
+  getAllRequestsToJoinClassByStudent,
   requestToJoinClass,
 } from '@/services/student/classes'
-
-interface ClassItem {
-  id: string
-  name: string
-  teacher: string
-  studentCount: number
-  latestAnnouncement: string
-  status?: 'active' | 'pending'
-}
-
-interface JoinRequestItem {
-  id: string
-  classCode: string
-  status: 'pending' | 'approved' | 'rejected'
-  requestedAt: string
-}
+import type { Class as BackendClass } from '@/lib/types'
+import { getToastMessage } from '@/lib/toast/message'
+import { useLanguage } from '@/components/language-provider'
+import { JoinRequestsModal, type JoinRequestItem } from './join-requests-modal'
 
 export default function StudentClassesPage() {
+  const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
-  const [classes, setClasses] = useState<ClassItem[]>([
-    {
-      id: '1',
-      name: 'Lớp 9A1',
-      teacher: 'Thầy Nguyễn Văn A',
-      studentCount: 30,
-      latestAnnouncement: 'Nhắc nhở: Bài tập Unit 3 sẽ hết hạn vào T5',
-      status: 'active',
-    },
-    {
-      id: '2',
-      name: 'Lớp 9A2',
-      teacher: 'Cô Trần Thị B',
-      studentCount: 28,
-      latestAnnouncement: 'Lập lịch kiểm tra giữa kì cho tuần tới',
-      status: 'active',
-    },
-  ])
+  const [classes, setClasses] = useState<BackendClass[]>([])
 
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
+  const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false)
   const [classCode, setClassCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
   const [isLoadingRequests, setIsLoadingRequests] = useState(false)
   const [joinRequests, setJoinRequests] = useState<JoinRequestItem[]>([])
+
+  const getTeacherLabel = (classItem: BackendClass) => {
+    const profile = classItem.teacher?.profile
+    const teacherName = [profile?.lastName, profile?.firstName]
+      .filter(Boolean)
+      .join(' ')
+
+    return teacherName || classItem.teacher?.email || 'Chưa cập nhật giáo viên'
+  }
+
+  const getStudentCount = (classItem: BackendClass) => {
+    return classItem.classMembers?.length ?? 0
+  }
+
+  const fetchApprovedClasses = async (token: string) => {
+    setIsLoadingClasses(true)
+    try {
+      const result = await getAllApprovedClassesByStudent(token)
+      setClasses(result.approvedClasses as BackendClass[])
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : getToastMessage('loadFailed', language)
+      toast.error(message)
+    } finally {
+      setIsLoadingClasses(false)
+    }
+  }
 
   const fetchPendingRequests = async (token: string) => {
     setIsLoadingRequests(true)
     try {
-      const result = await getAllPendingRequestsToJoinClassByStudent(token)
+      const result = await getAllRequestsToJoinClassByStudent(token)
       const mappedRequests: JoinRequestItem[] = result.pendingRequests.map(
         request => ({
           id: request.id,
@@ -87,7 +91,7 @@ export default function StudentClassesPage() {
       const message =
         error instanceof Error
           ? error.message
-          : 'Không thể tải danh sách yêu cầu tham gia lớp.'
+          : getToastMessage('loadFailed', language)
       toast.error(message)
     } finally {
       setIsLoadingRequests(false)
@@ -99,7 +103,10 @@ export default function StudentClassesPage() {
       return
     }
 
-    void fetchPendingRequests(accessToken)
+    void Promise.all([
+      fetchApprovedClasses(accessToken),
+      fetchPendingRequests(accessToken)
+    ])
   }, [accessToken, isHydrated])
 
   const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
@@ -156,21 +163,10 @@ export default function StudentClassesPage() {
         ...currentRequests,
       ])
 
-      await fetchPendingRequests(accessToken)
-
-      if (classMember.isApproved) {
-        setClasses(currentClasses => [
-          ...currentClasses,
-          {
-            id: classMember.classId,
-            name: `Lớp ${normalizedClassCode}`,
-            teacher: 'Đã được duyệt',
-            studentCount: 0,
-            latestAnnouncement: 'Bạn đã tham gia lớp học thành công.',
-            status: 'active',
-          },
-        ])
-      }
+      await Promise.all([
+        fetchPendingRequests(accessToken),
+        fetchApprovedClasses(accessToken)
+      ])
 
       toast.success(result.message)
     } finally {
@@ -222,63 +218,79 @@ export default function StudentClassesPage() {
             <Plus className="w-4 h-4" />
             Tham gia lớp
           </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => setIsJoinRequestsModalOpen(true)}
+          >
+            <Eye className="w-4 h-4" />
+            Yêu cầu tham gia lớp học
+          </Button>
         </div>
       </div>
 
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map((classItem) => (
-            <Card key={classItem.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-muted-foreground" />
-                      {classItem.name}
-                    </CardTitle>
-                    <CardDescription>
-                      Giáo viên: {classItem.teacher}
-                    </CardDescription>
-                  </div>
-                  {classItem.status === 'pending' ? (
-                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                      Chờ duyệt
-                    </span>
-                  ) : null}
+            <Card key={classItem.id} className="relative min-h-[210px] overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Eye className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <BookOpen className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <CardHeader className="pr-24">
+                <div className="space-y-1">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-muted-foreground" />
+                    {classItem.name ?? `Lớp ${classItem.classCode ?? ''}`}
+                  </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Stats */}
-                <div className="flex gap-4">
-                  <div className="flex-1 bg-muted/50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                      <Users className="w-4 h-4" />
-                      Học sinh
+              <CardContent>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-muted/50 p-3">
+                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                      <BookOpen className="w-4 h-4" />
+                      Tên giáo viên
                     </div>
-                    <p className="text-lg font-bold text-foreground">
-                      {classItem.studentCount}
+                    <p className="text-base font-semibold text-foreground leading-tight">
+                      {getTeacherLabel(classItem)}
                     </p>
                   </div>
-                </div>
 
-                {/* Latest Announcement */}
-                <div className="bg-accent/10 rounded-lg p-3 border border-accent/20">
-                  <p className="text-xs text-muted-foreground font-semibold mb-1">
-                    THÔNG BÁO MỚI NHẤT
-                  </p>
-                  <p className="text-sm text-foreground">
-                    {classItem.latestAnnouncement}
-                  </p>
-                </div>
+                  <div className="rounded-xl bg-muted/50 p-3">
+                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="w-4 h-4" />
+                      Số lượng học sinh
+                    </div>
+                    <p className="text-2xl font-bold text-foreground leading-none">
+                      {getStudentCount(classItem)}
+                    </p>
+                  </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" className="flex-1">
-                    Xem chi tiết
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    Bài tập
-                  </Button>
+                  <div className="rounded-xl bg-muted/50 p-3">
+                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Eye className="w-4 h-4" />
+                      Trạng thái lớp
+                    </div>
+                    <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                      Đang học
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl bg-muted/50 p-3">
+                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                      <BookOpen className="w-4 h-4" />
+                      Mã lớp
+                    </div>
+                    <p className="text-base font-semibold text-foreground leading-tight">
+                      {classItem.classCode ?? '---'}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -300,35 +312,46 @@ export default function StudentClassesPage() {
                   <TableHead>Giáo viên</TableHead>
                   <TableHead>Học sinh</TableHead>
                   <TableHead>Trạng thái</TableHead>
-                  <TableHead>Thông báo mới nhất</TableHead>
+                  <TableHead>Mã lớp</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {classes.length === 0 ? (
+                {isLoadingClasses ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      Đang tải danh sách lớp đã tham gia...
+                    </TableCell>
+                  </TableRow>
+                ) : classes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
                       Chưa có lớp học nào.
                     </TableCell>
                   </TableRow>
                 ) : (
                   classes.map(classItem => (
                     <TableRow key={classItem.id}>
-                      <TableCell className="font-medium">{classItem.name}</TableCell>
-                      <TableCell>{classItem.teacher}</TableCell>
-                      <TableCell>{classItem.studentCount}</TableCell>
+                      <TableCell className="font-medium">{classItem.name ?? `Lớp ${classItem.classCode ?? ''}`}</TableCell>
+                      <TableCell>{getTeacherLabel(classItem)}</TableCell>
+                      <TableCell>{getStudentCount(classItem)}</TableCell>
                       <TableCell>
-                        {classItem.status === 'pending' ? (
-                          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                            Chờ duyệt
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                            Đang học
-                          </span>
-                        )}
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                          Đang học
+                        </span>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {classItem.latestAnnouncement}
+                      <TableCell className="font-mono text-sm font-semibold">
+                        {classItem.classCode ?? '---'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <BookOpen className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -338,55 +361,6 @@ export default function StudentClassesPage() {
           </CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Yêu cầu tham gia lớp học</CardTitle>
-          <CardDescription>
-            Theo dõi danh sách yêu cầu đã gửi và trạng thái phê duyệt.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mã lớp</TableHead>
-                <TableHead>Thời gian gửi</TableHead>
-                <TableHead>Trạng thái</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingRequests ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
-                    Đang tải danh sách yêu cầu...
-                  </TableCell>
-                </TableRow>
-              ) : joinRequests.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
-                    Bạn chưa gửi yêu cầu tham gia lớp nào.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                joinRequests.map(request => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-semibold">{request.classCode}</TableCell>
-                    <TableCell>{new Date(request.requestedAt).toLocaleString('vi-VN')}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getRequestStatusClassName(request.status)}`}
-                      >
-                        {getRequestStatusLabel(request.status)}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       {/* Join Class Modal */}
       <ModalWrapper
@@ -425,6 +399,13 @@ export default function StudentClassesPage() {
           </div>
         </div>
       </ModalWrapper>
+
+      <JoinRequestsModal
+        isOpen={isJoinRequestsModalOpen}
+        onOpenChange={setIsJoinRequestsModalOpen}
+        requests={joinRequests}
+        isLoading={isLoadingRequests}
+      />
     </div>
   )
 }

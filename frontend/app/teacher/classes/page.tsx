@@ -212,41 +212,53 @@ export default function TeacherClassesPage() {
       {!isLoading && viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map((classItem) => {
-            const studentCount = (classItem as any).approvedStudentsCount ?? 0
+            const studentCount = classItem.approvedStudentsCount ?? 0
             const assignmentCount = 0
             const pendingCount = getPendingRequestCount(classItem)
 
             return (
-              <Card key={classItem.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl">{classItem?.name}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {classItem?.description}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="relative"
-                        onClick={() => handleViewPendingRequests(classItem)}
-                      >
-                        <Eye className="w-4 h-4" />
-                        {pendingCount > 0 ? (
-                          <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
-                            {pendingCount}
-                          </span>
-                        ) : null}
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteClass(classItem)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
+              <Card key={classItem.id} className="relative overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative h-8 w-8"
+                    onClick={() => handleViewPendingRequests(classItem)}
+                  >
+                    <Eye className="w-4 h-4" />
+                    {pendingCount > 0 ? (
+                      <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
+                        {pendingCount}
+                      </span>
+                    ) : null}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleEditClass(classItem)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleDeleteClass(classItem)}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+
+                <CardHeader className="pr-28">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-muted-foreground" />
+                      {classItem?.name}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {classItem?.description || 'Chưa có mô tả cho lớp học này'}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
