@@ -16,7 +16,8 @@ export const toastMessages = {
     saveSuccess: 'Save successful',
     saveFailed: 'Save failed',
     changePasswordSuccess: 'Change password successful',
-    changePasswordFailed: 'Change password failed'
+    changePasswordFailed: 'Change password failed',
+    copySuccess: 'Copy successful'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',
@@ -33,7 +34,8 @@ export const toastMessages = {
     saveSuccess: 'Lưu thành công',
     saveFailed: 'Lưu thất bại',
     changePasswordSuccess: 'Đổi mật khẩu thành công',
-    changePasswordFailed: 'Đổi mật khẩu thất bại'
+    changePasswordFailed: 'Đổi mật khẩu thất bại',
+    copySuccess: 'Sao chép thành công'
   }
 } as const;
 

@@ -139,15 +139,15 @@ export const translations = {
           columnActions: 'Operations'
         },
         gridViewport: {
-          fieldStudentNumer: 'No. students',
-          fieldAssignmentNumer: 'No. assignments',
+          fieldStudentNumber: 'No. students',
+          fieldAssignmentNumber: 'No. assignments',
           fieldClassCode: 'Class code'
         },
         addClass: {
           title: 'Create a new class',
           description: 'Enter class information to create a new class',
           fieldName: 'Class name',
-          filedNamePlaceholder: 'e.g., Class 9CB1',
+          fieldNamePlaceholder: 'e.g., Class 9CB1',
           fieldDescription: 'Class description',
           fieldDescriptionPlaceholder: 'e.g., A class for 9CB students',
           fieldNeedsTeacherApproval: 'Needs your approval to join?'
@@ -422,15 +422,15 @@ export const translations = {
           columnActions: 'Các thao tác'
         },
         gridViewport: {
-          fieldStudentNumer: 'Số học sinh',
-          fieldAssignmentNumer: 'Số bài tập',
+          fieldStudentNumber: 'Số học sinh',
+          fieldAssignmentNumber: 'Số bài tập',
           fieldClassCode: 'Mã lớp'
         },
         addClass: {
           title: 'Tạo lớp học mới',
           description: 'Nhập thông tin lớp học để tạo lớp mới',
           fieldName: 'Tên lớp học',
-          filedNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldNamePlaceholder: 'Ví dụ: Lớp 9CB1',
           fieldDescription: 'Mô tả lớp học',
           fieldDescriptionPlaceholder:
             'Ví dụ: Lớp học dành cho học sinh lớp 9CB',

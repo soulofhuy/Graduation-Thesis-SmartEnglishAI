@@ -20,8 +20,8 @@ app.use(
 app.use(express.json());
 app.use('/api', AuthRouter);
 app.use('/api', ProfileRouter);
-app.use('/api', ClassTeacherRouter);
 app.use('/api', ClassStudentRouter);
+app.use('/api', ClassTeacherRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 

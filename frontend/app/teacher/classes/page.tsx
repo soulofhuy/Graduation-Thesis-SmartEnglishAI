@@ -35,11 +35,12 @@ import { Switch } from '@/components/ui/switch'
 import { createClassSchema, type ClassFormValues } from '@/lib/validators/class'
 import { EditClassModal } from './edit-class-modal'
 import { DeleteClassModal } from './delete-class-modal'
+import { getToastMessage } from '@/lib/toast/message'
 
 const classSchema = createClassSchema()
 
 export default function TeacherClassesPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { accessToken, user } = useAuth()
   const [classes, setClasses] = useState<BackendClass[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -70,7 +71,7 @@ export default function TeacherClassesPage() {
         const result = await getClassesByTeacherId(accessToken, user.id)
         setClasses(result.classes)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Loi khi tai lop hoc'
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
         toast.error(message, { className: TOAST_COLORS.error })
       } finally {
         setIsLoading(false)
@@ -82,7 +83,7 @@ export default function TeacherClassesPage() {
 
   async function onSubmit(values: ClassFormValues) {
     if (!accessToken) {
-      toast.error('Vui long dang nhap lai', { className: TOAST_COLORS.error })
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
@@ -98,7 +99,7 @@ export default function TeacherClassesPage() {
       setIsModalOpen(false)
       toast.success(result.message, { className: TOAST_COLORS.success })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Loi khi tao lop hoc'
+      const message = error instanceof Error ? error.message : getToastMessage('saveFailed', language)
       toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsCreating(false)
@@ -107,7 +108,7 @@ export default function TeacherClassesPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Sao chép thành công!', { className: TOAST_COLORS.success })
+    toast.success(getToastMessage('copySuccess', language), { className: TOAST_COLORS.success })
   }
 
   const handleEditClass = (classItem: BackendClass) => {
@@ -173,7 +174,7 @@ export default function TeacherClassesPage() {
       {isLoading && (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Dang tai lop hoc...
+            ... {t.common.loading}
           </CardContent>
         </Card>
       )}
@@ -209,7 +210,7 @@ export default function TeacherClassesPage() {
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                         <Users className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldStudentNumer}
+                        {t.teacher.classes.gridViewport.fieldStudentNumber}
                       </div>
                       <p className="text-2xl font-bold text-foreground">
                         {studentCount}
@@ -218,7 +219,7 @@ export default function TeacherClassesPage() {
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                         <BookOpen className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldAssignmentNumer}
+                        {t.teacher.classes.gridViewport.fieldAssignmentNumber}
                       </div>
                       <p className="text-2xl font-bold text-foreground">
                         {assignmentCount}
@@ -343,7 +344,7 @@ export default function TeacherClassesPage() {
                 <FormItem>
                   <FormLabel>{t.teacher.classes.addClass.fieldName}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t.teacher.classes.addClass.filedNamePlaceholder} {...field} />
+                    <Input placeholder={t.teacher.classes.addClass.fieldNamePlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

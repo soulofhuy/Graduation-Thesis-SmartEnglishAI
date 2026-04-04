@@ -10,4 +10,10 @@ router.post(
   ClassStudentController.studentJoinClass
 );
 
+router.get(
+  '/classes/pending-requests',
+  verifyJWT,
+  ClassStudentController.getAllPendingRequestsToJoinClassByStudent
+);
+
 export default router;
