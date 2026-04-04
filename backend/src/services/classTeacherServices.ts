@@ -36,28 +36,35 @@ class ClassTeacherService {
     teacherId: string,
     includePending = false
   ) => {
-    return prisma.class.findMany({
+    const classes = await prisma.class.findMany({
       where: { teacherId, isActive: true },
-      ...(includePending
-        ? {
-            include: {
-              classMembers: {
-                where: {
-                  isApproved: false,
-                  isRejected: false,
-                  isBanned: false
-                },
-                include: {
-                  student: {
-                    include: {
-                      profile: true
-                    }
-                  }
-                }
+      include: {
+        classMembers: {
+          include: {
+            student: {
+              include: {
+                profile: true
               }
             }
           }
-        : {})
+        }
+      }
+    });
+
+    return classes.map(cls => {
+      const pendingMembers = cls.classMembers.filter(
+        cm => !cm.isApproved && !cm.isRejected && !cm.isBanned
+      );
+      const approvedMembers = cls.classMembers.filter(
+        cm => cm.isApproved && !cm.isBanned
+      );
+
+      return {
+        ...cls,
+        classMembers: includePending ? cls.classMembers : approvedMembers,
+        pendingStudentsList: pendingMembers,
+        approvedStudentsCount: approvedMembers.length
+      };
     });
   };
 

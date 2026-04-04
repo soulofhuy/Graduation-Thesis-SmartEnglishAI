@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge } from 'lucide-react'
+import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { createClass, getClassesByTeacherId } from '@/services/teacher/classes'
@@ -36,6 +36,8 @@ import { createClassSchema, type ClassFormValues } from '@/lib/validators/class'
 import { EditClassModal } from './edit-class-modal'
 import { DeleteClassModal } from './delete-class-modal'
 import { getToastMessage } from '@/lib/toast/message'
+import { Badge } from '@/components/ui/badge'
+import { PendingRequestsModal } from './pending-requests-modal'
 
 const classSchema = createClassSchema()
 
@@ -50,6 +52,7 @@ export default function TeacherClassesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isPendingModalOpen, setIsPendingModalOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<BackendClass | null>(null)
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
@@ -60,6 +63,20 @@ export default function TeacherClassesPage() {
     },
   })
 
+  const reloadClasses = async () => {
+    if (!accessToken || !user?.id) {
+      return
+    }
+
+    try {
+      const result = await getClassesByTeacherId(accessToken, user.id, true)
+      setClasses(result.classes)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
+    }
+  }
+
   useEffect(() => {
     if (!accessToken || !user?.id) {
       return
@@ -68,7 +85,7 @@ export default function TeacherClassesPage() {
     const loadClasses = async () => {
       setIsLoading(true)
       try {
-        const result = await getClassesByTeacherId(accessToken, user.id)
+        const result = await getClassesByTeacherId(accessToken, user.id, true)
         setClasses(result.classes)
       } catch (error) {
         const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
@@ -79,7 +96,7 @@ export default function TeacherClassesPage() {
     }
 
     loadClasses()
-  }, [accessToken, user?.id])
+  }, [accessToken, user?.id, language])
 
   async function onSubmit(values: ClassFormValues) {
     if (!accessToken) {
@@ -129,6 +146,19 @@ export default function TeacherClassesPage() {
 
   const handleDeleteSuccess = (classId: string) => {
     setClasses((prev) => prev.filter((c) => c.id !== classId))
+  }
+
+  const handleViewPendingRequests = (classItem: BackendClass) => {
+    setSelectedClass(classItem)
+    setIsPendingModalOpen(true)
+  }
+
+  const getPendingRequestCount = (classItem: BackendClass) => {
+    return (
+      classItem.classMembers?.filter(
+        (member) => !member.isApproved && !member.isRejected && !member.isBanned
+      ).length ?? 0
+    )
   }
 
   return (
@@ -182,8 +212,9 @@ export default function TeacherClassesPage() {
       {!isLoading && viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map((classItem) => {
-            const studentCount = classItem.students?.length ?? 0
+            const studentCount = (classItem as any).approvedStudentsCount ?? 0
             const assignmentCount = 0
+            const pendingCount = getPendingRequestCount(classItem)
 
             return (
               <Card key={classItem.id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -196,6 +227,19 @@ export default function TeacherClassesPage() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative"
+                        onClick={() => handleViewPendingRequests(classItem)}
+                      >
+                        <Eye className="w-4 h-4" />
+                        {pendingCount > 0 ? (
+                          <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
+                            {pendingCount}
+                          </span>
+                        ) : null}
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -227,22 +271,33 @@ export default function TeacherClassesPage() {
                     </div>
                   </div>
 
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      {t.teacher.classes.gridViewport.fieldClassCode}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="text-sm font-mono font-bold text-foreground">
-                        {classItem?.classCode}
-                      </code>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6"
-                        onClick={() => copyToClipboard(classItem?.classCode ?? '')}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </Button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                        <Users className="w-4 h-4" />
+                        {t.teacher.classes.gridViewport.fieldPendingRequestNumber}
+                      </div>
+                      <p className="text-2xl font-bold text-foreground">
+                        {pendingCount}
+                      </p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {t.teacher.classes.gridViewport.fieldClassCode}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-sm font-mono font-bold text-foreground">
+                          {classItem?.classCode}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6"
+                          onClick={() => copyToClipboard(classItem?.classCode ?? '')}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -267,14 +322,16 @@ export default function TeacherClassesPage() {
                     <TableHead>{t.teacher.classes.tableViewport.columnDescription}</TableHead>
                     <TableHead>{t.teacher.classes.tableViewport.columnStudentNumber}</TableHead>
                     <TableHead>{t.teacher.classes.tableViewport.columnAssignmentNumber}</TableHead>
+                    <TableHead>Pending</TableHead>
                     <TableHead>{t.teacher.classes.tableViewport.columnClassCode}</TableHead>
                     <TableHead className="text-right">{t.teacher.classes.tableViewport.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {classes.map((classItem) => {
-                    const studentCount = classItem.students?.length ?? 0
+                    const studentCount = classItem.approvedStudentsCount ?? 0
                     const assignmentCount = 0
+                    const pendingCount = getPendingRequestCount(classItem)
 
                     return (
                       <TableRow key={classItem.id}>
@@ -284,6 +341,11 @@ export default function TeacherClassesPage() {
                         <TableCell>{classItem?.description}</TableCell>
                         <TableCell>{studentCount}</TableCell>
                         <TableCell>{assignmentCount}</TableCell>
+                        <TableCell>
+                          <Badge variant={pendingCount > 0 ? 'secondary' : 'outline'}>
+                            {pendingCount}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <code className="text-xs font-mono font-bold">
@@ -301,6 +363,19 @@ export default function TeacherClassesPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="relative"
+                              onClick={() => handleViewPendingRequests(classItem)}
+                            >
+                              <Eye className="h-4 w-4" />
+                              {pendingCount > 0 ? (
+                                <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
+                                  {pendingCount}
+                                </span>
+                              ) : null}
+                            </Button>
                             <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -397,6 +472,14 @@ export default function TeacherClassesPage() {
         classItem={selectedClass}
         accessToken={accessToken || ''}
         onSuccess={handleDeleteSuccess}
+      />
+
+      <PendingRequestsModal
+        isOpen={isPendingModalOpen}
+        onOpenChange={setIsPendingModalOpen}
+        classItem={selectedClass}
+        accessToken={accessToken || ''}
+        onActionSuccess={reloadClasses}
       />
     </div>
   )

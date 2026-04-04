@@ -45,6 +45,8 @@ export interface Class {
   isActive: boolean;
   deactivatedAt?: string | null;
   classCode?: string;
+  approvedStudentsCount?: number;
+  pendingStudentsList?: ClassMember[];
 }
 
 export interface ClassMember {

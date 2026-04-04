@@ -1,3 +1,5 @@
+import { time } from 'console';
+
 export type Language = 'en' | 'vi';
 
 export const translations = {
@@ -141,6 +143,7 @@ export const translations = {
         gridViewport: {
           fieldStudentNumber: 'No. students',
           fieldAssignmentNumber: 'No. assignments',
+          fieldPendingRequestNumber: 'No. pending requests',
           fieldClassCode: 'Class code'
         },
         addClass: {
@@ -173,6 +176,16 @@ export const translations = {
             fieldAssignmentNumber: 'Number of Assignments',
             fieldClassCode: 'Class Code'
           }
+        },
+        viewPendingRequests: {
+          title: 'Pending participation requests',
+          class: 'Class',
+          pendingRequestsCount: 'Number of pending requests',
+          acceptButton: 'Accept',
+          rejectButton: 'Reject',
+          noPendingRequests: 'No pending requests',
+          status: 'Pending',
+          timeRequest: 'Requested at'
         }
       },
       trashBin: {
@@ -424,6 +437,7 @@ export const translations = {
         gridViewport: {
           fieldStudentNumber: 'Số học sinh',
           fieldAssignmentNumber: 'Số bài tập',
+          fieldPendingRequestNumber: 'Chờ duyệt',
           fieldClassCode: 'Mã lớp'
         },
         addClass: {
@@ -458,6 +472,16 @@ export const translations = {
             fieldAssignmentNumber: 'Số lượng bài tập',
             fieldClassCode: 'Mã lớp học'
           }
+        },
+        viewPendingRequests: {
+          title: 'Yêu cầu tham gia đang chờ duyệt',
+          class: 'Lớp',
+          pendingRequestsCount: 'Số lượng đang chờ duyệt',
+          acceptButton: 'Chấp nhận',
+          rejectButton: 'Từ chối',
+          noPendingRequests: 'Không có yêu cầu nào đang chờ duyệt',
+          status: 'Đang chờ duyệt',
+          timeRequest: 'Yêu cầu lúc '
         }
       },
       trashBin: {
