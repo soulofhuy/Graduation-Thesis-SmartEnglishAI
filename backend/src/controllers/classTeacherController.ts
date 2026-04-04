@@ -88,6 +88,8 @@ class ClassTeacherController {
     res: Response
   ) => {
     const teacherId = req.params.teacherId || req.userId || req.body.teacherId;
+    const includePendingRaw = req.query.includePending;
+    const includePending = includePendingRaw === 'true';
 
     if (!teacherId) {
       return res
@@ -96,8 +98,10 @@ class ClassTeacherController {
     }
 
     try {
-      const classes =
-        await ClassTeacherService.getClassesByTeacherId(teacherId);
+      const classes = await ClassTeacherService.getClassesByTeacherId(
+        teacherId,
+        includePending
+      );
       return res
         .status(200)
         .json(

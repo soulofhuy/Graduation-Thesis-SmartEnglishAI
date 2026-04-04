@@ -32,9 +32,32 @@ class ClassTeacherService {
     });
   };
 
-  static getClassesByTeacherId = async (teacherId: string) => {
+  static getClassesByTeacherId = async (
+    teacherId: string,
+    includePending = false
+  ) => {
     return prisma.class.findMany({
-      where: { teacherId, isActive: true }
+      where: { teacherId, isActive: true },
+      ...(includePending
+        ? {
+            include: {
+              classMembers: {
+                where: {
+                  isApproved: false,
+                  isRejected: false,
+                  isBanned: false
+                },
+                include: {
+                  student: {
+                    include: {
+                      profile: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        : {})
     });
   };
 
