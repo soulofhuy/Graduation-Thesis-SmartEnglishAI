@@ -7,19 +7,21 @@ import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, BookOpen, LayoutGrid, List, Eye, Grid, TableCellsMerge, ClockAlert } from 'lucide-react'
+import { Plus, Users, BookOpen, Eye, Grid, TableCellsMerge, ClockAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
   getAllApprovedClassesByStudent,
   getAllRequestsToJoinClassByStudent,
+  getStudentsByClassId,
   requestToJoinClass,
 } from '@/services/student/classes'
-import type { Class as BackendClass } from '@/lib/types'
+import type { Class as BackendClass, ClassMember } from '@/lib/types'
 import { getToastMessage } from '@/lib/toast/message'
 import { useLanguage } from '@/components/language-provider'
 import { JoinClassModal } from './join-class-modal'
 import { JoinRequestsModal, type JoinRequestItem } from './join-requests-modal'
+import { ClassMembersModal } from './class-members-modal'
 
 export default function StudentClassesPage() {
   const { t, language } = useLanguage()
@@ -29,11 +31,15 @@ export default function StudentClassesPage() {
 
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
   const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false)
+  const [isClassMembersModalOpen, setIsClassMembersModalOpen] = useState(false)
   const [classCode, setClassCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
   const [isLoadingClasses, setIsLoadingClasses] = useState(false)
   const [isLoadingRequests, setIsLoadingRequests] = useState(false)
+  const [isLoadingClassMembers, setIsLoadingClassMembers] = useState(false)
   const [joinRequests, setJoinRequests] = useState<JoinRequestItem[]>([])
+  const [selectedClass, setSelectedClass] = useState<BackendClass | null>(null)
+  const [selectedClassMembers, setSelectedClassMembers] = useState<ClassMember[]>([])
 
   const getTeacherLabel = (classItem: BackendClass) => {
     const profile = classItem.teacher?.profile
@@ -104,22 +110,6 @@ export default function StudentClassesPage() {
     ])
   }, [accessToken, isHydrated])
 
-  // const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
-  //   if (status === 'approved') return 'Đã duyệt'
-  //   if (status === 'rejected') return 'Từ chối'
-  //   return 'Chờ duyệt'
-  // }
-
-  // const getRequestStatusClassName = (status: JoinRequestItem['status']) => {
-  //   if (status === 'approved') {
-  //     return 'bg-emerald-100 text-emerald-800'
-  //   }
-  //   if (status === 'rejected') {
-  //     return 'bg-rose-100 text-rose-800'
-  //   }
-  //   return 'bg-amber-100 text-amber-800'
-  // }
-
   const handleJoinClass = async () => {
     if (!classCode.trim()) {
       toast.error('Vui lòng nhập mã lớp học')
@@ -168,6 +158,36 @@ export default function StudentClassesPage() {
       setIsJoining(false)
       setClassCode('')
       setIsJoinModalOpen(false)
+    }
+  }
+
+  const handleViewClassMembers = async (classItem: BackendClass) => {
+    if (!isHydrated) {
+      toast.error('Dang tai phien dang nhap, vui long thu lai')
+      return
+    }
+
+    if (!accessToken) {
+      toast.error('Ban can dang nhap de xem danh sach hoc sinh')
+      return
+    }
+
+    setSelectedClass(classItem)
+    setSelectedClassMembers([])
+    setIsClassMembersModalOpen(true)
+    setIsLoadingClassMembers(true)
+
+    try {
+      const result = await getStudentsByClassId(accessToken, classItem.id)
+      setSelectedClassMembers(result.classDetail.classMembers ?? [])
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : getToastMessage('loadFailed', language)
+      toast.error(message)
+    } finally {
+      setIsLoadingClassMembers(false)
     }
   }
 
@@ -227,11 +247,13 @@ export default function StudentClassesPage() {
           {classes.map((classItem) => (
             <Card key={classItem.id} className="relative min-h-[210px] overflow-hidden hover:shadow-lg transition-shadow">
               <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => handleViewClassMembers(classItem)}
+                >
                   <Eye className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <BookOpen className="w-4 h-4" />
                 </Button>
               </div>
 
@@ -332,11 +354,13 @@ export default function StudentClassesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleViewClassMembers(classItem)}
+                          >
                             <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <BookOpen className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -363,6 +387,15 @@ export default function StudentClassesPage() {
         onOpenChange={setIsJoinRequestsModalOpen}
         requests={joinRequests}
         isLoading={isLoadingRequests}
+      />
+
+      <ClassMembersModal
+        isOpen={isClassMembersModalOpen}
+        onOpenChange={setIsClassMembersModalOpen}
+        className={selectedClass?.name}
+        classCode={selectedClass?.classCode}
+        classMembers={selectedClassMembers}
+        isLoading={isLoadingClassMembers}
       />
     </div>
   )

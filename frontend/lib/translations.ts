@@ -252,6 +252,23 @@ export const translations = {
           columnTimeRequest: 'Request Time',
           columnStatus: 'Status'
         },
+        viewClassMembersList: {
+          title: 'Class Member List - Class: ',
+          description: 'List of members in your class',
+          fieldSearch: 'Search by full name, email, or phone number...',
+          fieldSearchPlaceholder: 'Enter search keyword',
+          fieldSortBy: 'Sort by',
+          sortNameAsc: 'Name: A to Z',
+          sortNameDesc: 'Name: Z to A',
+          sortJoinedAtAsc: 'Joined date: Oldest first',
+          sortJoinedAtDesc: 'Joined date: Newest first',
+          columnNo: 'No.',
+          columnName: 'Full Name',
+          columnEmail: 'Email',
+          columnPhoneNumber: 'Phone Number',
+          columnDateJoined: 'Date Joined',
+          noData: 'No data to display'
+        },
         gridViewport: {
           fieldTeacherName: 'Teacher Name',
           fieldStudentNumber: 'Number of students',
@@ -599,6 +616,23 @@ export const translations = {
           columnClassCode: 'Mã lớp',
           columnClassStatus: 'Trạng thái lớp',
           columnActions: 'Các thao tác'
+        },
+        viewClassMembersList: {
+          title: 'Danh sách thành viên lớp học - Lớp: ',
+          description: 'Danh sách các thành viên trong lớp học của bạn',
+          fieldSearch: 'Tìm kiếm theo họ và tên, email hoặc số điện thoại...',
+          fieldSearchPlaceholder: 'Nhập từ khóa tìm kiếm',
+          fieldSortBy: 'Sắp xếp theo',
+          sortNameAsc: 'Tên: A đến Z',
+          sortNameDesc: 'Tên: Z đến A',
+          sortJoinedAtAsc: 'Ngày tham gia: Cũ nhất trước',
+          sortJoinedAtDesc: 'Ngày tham gia: Mới nhất trước',
+          columnNo: 'STT',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnPhoneNumber: 'Số điện thoại',
+          columnDateJoined: 'Ngày tham gia',
+          noData: 'Không có dữ liệu để hiển thị'
         }
       },
       settings: {

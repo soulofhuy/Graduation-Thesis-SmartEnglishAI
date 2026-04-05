@@ -1,35 +1,34 @@
 import prisma from '../utils/prisma';
-import { ClassModel } from '../generated/prisma/models/Class';
-import generateClassCode from '../utils/generate-class-code';
 
 class ClassService {
   static getStudentsByClassId = async (classId: string) => {
-    const existingClass = await prisma.class.findUnique({
-      where: { id: classId }
-    });
-    if (!existingClass) {
-      throw new Error('Class not found');
-    }
-
-    const classMembers = await prisma.classMember.findMany({
-      where: {
-        classId,
-        isApproved: true,
-        isBanned: false
-      },
+    const classWithMembers = await prisma.class.findUnique({
+      where: { id: classId },
       include: {
-        student: {
+        classMembers: {
+          where: {
+            isApproved: true,
+            isBanned: false
+          },
           include: {
-            profile: true
+            student: {
+              include: {
+                profile: true
+              }
+            }
+          },
+          orderBy: {
+            approvedAt: 'asc'
           }
         }
-      },
-      orderBy: {
-        approvedAt: 'asc'
       }
     });
 
-    return classMembers;
+    if (!classWithMembers) {
+      throw new Error('Class not found');
+    }
+
+    return classWithMembers;
   };
 }
 

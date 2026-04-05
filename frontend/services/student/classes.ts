@@ -72,3 +72,28 @@ export const getAllRequestsToJoinClassByStudent = async (token: string) => {
 
   return { pendingRequests: payload.data, message: payload.message };
 };
+
+export const getStudentsByClassId = async (token: string, classId: string) => {
+  const response = await fetch(
+    `${getApiBaseUrl()}/get-students-by-class/${classId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<Class> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch class students';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Class students response is missing data');
+  }
+
+  return { classDetail: payload.data, message: payload.message };
+};
