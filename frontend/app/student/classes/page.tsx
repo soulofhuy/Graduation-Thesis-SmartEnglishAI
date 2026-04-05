@@ -3,17 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { ModalWrapper } from '@/components/modal-wrapper'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell,
+  TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, BookOpen, LayoutGrid, List, Eye } from 'lucide-react'
+import { Plus, Users, BookOpen, LayoutGrid, List, Eye, Grid, TableCellsMerge, ClockAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
@@ -24,6 +18,7 @@ import {
 import type { Class as BackendClass } from '@/lib/types'
 import { getToastMessage } from '@/lib/toast/message'
 import { useLanguage } from '@/components/language-provider'
+import { JoinClassModal } from './join-class-modal'
 import { JoinRequestsModal, type JoinRequestItem } from './join-requests-modal'
 
 export default function StudentClassesPage() {
@@ -109,21 +104,21 @@ export default function StudentClassesPage() {
     ])
   }, [accessToken, isHydrated])
 
-  const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
-    if (status === 'approved') return 'Đã duyệt'
-    if (status === 'rejected') return 'Từ chối'
-    return 'Chờ duyệt'
-  }
+  // const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
+  //   if (status === 'approved') return 'Đã duyệt'
+  //   if (status === 'rejected') return 'Từ chối'
+  //   return 'Chờ duyệt'
+  // }
 
-  const getRequestStatusClassName = (status: JoinRequestItem['status']) => {
-    if (status === 'approved') {
-      return 'bg-emerald-100 text-emerald-800'
-    }
-    if (status === 'rejected') {
-      return 'bg-rose-100 text-rose-800'
-    }
-    return 'bg-amber-100 text-amber-800'
-  }
+  // const getRequestStatusClassName = (status: JoinRequestItem['status']) => {
+  //   if (status === 'approved') {
+  //     return 'bg-emerald-100 text-emerald-800'
+  //   }
+  //   if (status === 'rejected') {
+  //     return 'bg-rose-100 text-rose-800'
+  //   }
+  //   return 'bg-amber-100 text-amber-800'
+  // }
 
   const handleJoinClass = async () => {
     if (!classCode.trim()) {
@@ -178,37 +173,35 @@ export default function StudentClassesPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Lớp học của tôi
+            {t.student.classes.title}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Quản lý các lớp học đã tham gia
+            {t.student.classes.description}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg border bg-background p-1">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 p-1">
+            <span className="px-2 text-xs font-medium tracking-wide text-muted-foreground">
+              {t.common.viewPort}
+            </span>
             <Button
-              type="button"
               size="sm"
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              className="gap-1"
+              className="rounded-sm"
               onClick={() => setViewMode('grid')}
             >
-              <LayoutGrid className="h-4 w-4" />
-              Grid
+              <Grid className="h-4 w-4" />
             </Button>
             <Button
-              type="button"
               size="sm"
               variant={viewMode === 'table' ? 'default' : 'ghost'}
-              className="gap-1"
+              className="rounded-sm"
               onClick={() => setViewMode('table')}
             >
-              <List className="h-4 w-4" />
-              Table
+              <TableCellsMerge className="h-4 w-4" />
             </Button>
           </div>
           <Button
@@ -216,15 +209,15 @@ export default function StudentClassesPage() {
             onClick={() => setIsJoinModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            Tham gia lớp
+            {t.student.classes.buttonJoinClass.buttonName}
           </Button>
           <Button
             variant="outline"
             className="gap-2"
             onClick={() => setIsJoinRequestsModalOpen(true)}
           >
-            <Eye className="w-4 h-4" />
-            Yêu cầu tham gia lớp học
+            <ClockAlert className="w-4 h-4" />
+            {t.student.classes.buttonViewRequests.buttonName}
           </Button>
         </div>
       </div>
@@ -255,7 +248,7 @@ export default function StudentClassesPage() {
                   <div className="rounded-xl bg-muted/50 p-3">
                     <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <BookOpen className="w-4 h-4" />
-                      Tên giáo viên
+                      {t.student.classes.gridViewport.fieldTeacherName}
                     </div>
                     <p className="text-base font-semibold text-foreground leading-tight">
                       {getTeacherLabel(classItem)}
@@ -265,7 +258,7 @@ export default function StudentClassesPage() {
                   <div className="rounded-xl bg-muted/50 p-3">
                     <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <Users className="w-4 h-4" />
-                      Số lượng học sinh
+                      {t.student.classes.gridViewport.fieldStudentNumber}
                     </div>
                     <p className="text-2xl font-bold text-foreground leading-none">
                       {getStudentCount(classItem)}
@@ -275,7 +268,7 @@ export default function StudentClassesPage() {
                   <div className="rounded-xl bg-muted/50 p-3">
                     <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <Eye className="w-4 h-4" />
-                      Trạng thái lớp
+                      {t.student.classes.gridViewport.fieldClassStatus}
                     </div>
                     <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
                       Đang học
@@ -285,7 +278,7 @@ export default function StudentClassesPage() {
                   <div className="rounded-xl bg-muted/50 p-3">
                     <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <BookOpen className="w-4 h-4" />
-                      Mã lớp
+                      {t.student.classes.gridViewport.fieldClassCode}
                     </div>
                     <p className="text-base font-semibold text-foreground leading-tight">
                       {classItem.classCode ?? '---'}
@@ -298,35 +291,29 @@ export default function StudentClassesPage() {
         </div>
       ) : (
         <Card>
-          <CardHeader>
-            <CardTitle>Danh sách lớp dạng bảng</CardTitle>
-            <CardDescription>
-              Chuyển nhanh giữa hai kiểu hiển thị Grid và Table.
-            </CardDescription>
-          </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Lớp học</TableHead>
-                  <TableHead>Giáo viên</TableHead>
-                  <TableHead>Học sinh</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Mã lớp</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t.student.classes.tableViewport.columnClassName}</TableHead>
+                  <TableHead>{t.student.classes.tableViewport.columnTeacherName}</TableHead>
+                  <TableHead>{t.student.classes.tableViewport.columnStudentNumber}</TableHead>
+                  <TableHead>{t.student.classes.tableViewport.columnClassStatus}</TableHead>
+                  <TableHead>{t.student.classes.tableViewport.columnClassCode}</TableHead>
+                  <TableHead className="text-right">{t.student.classes.tableViewport.columnActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingClasses ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      Đang tải danh sách lớp đã tham gia...
+                      {t.common.loading}...
                     </TableCell>
                   </TableRow>
                 ) : classes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      Chưa có lớp học nào.
+
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -362,43 +349,14 @@ export default function StudentClassesPage() {
         </Card>
       )}
 
-      {/* Join Class Modal */}
-      <ModalWrapper
+      <JoinClassModal
         isOpen={isJoinModalOpen}
         onOpenChange={setIsJoinModalOpen}
-        title="Tham gia lớp học"
-        description="Nhập mã lớp học do giáo viên cung cấp"
-        footer={
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setIsJoinModalOpen(false)}>
-              Hủy
-            </Button>
-            <Button
-              onClick={handleJoinClass}
-              disabled={isJoining || !classCode.trim()}
-            >
-              {isJoining ? 'Đang tham gia...' : 'Tham gia'}
-            </Button>
-          </div>
-        }
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-2">
-              Mã lớp học
-            </label>
-            <Input
-              placeholder="Ví dụ: ABC123"
-              value={classCode}
-              onChange={(e) => setClassCode(e.target.value)}
-              disabled={isJoining}
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Hãy hỏi giáo viên của bạn để lấy mã lớp học
-            </p>
-          </div>
-        </div>
-      </ModalWrapper>
+        classCode={classCode}
+        onClassCodeChange={setClassCode}
+        isJoining={isJoining}
+        onJoin={handleJoinClass}
+      />
 
       <JoinRequestsModal
         isOpen={isJoinRequestsModalOpen}

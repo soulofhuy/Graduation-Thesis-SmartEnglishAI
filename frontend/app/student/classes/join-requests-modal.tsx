@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { useLanguage } from '@/components/language-provider'
 
 export interface JoinRequestItem {
     id: string
@@ -31,6 +32,7 @@ export function JoinRequestsModal({
     requests,
     isLoading,
 }: JoinRequestsModalProps) {
+    const { t, language } = useLanguage();
     const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
         if (status === 'approved') return 'Đã duyệt'
         if (status === 'rejected') return 'Từ chối'
@@ -51,12 +53,12 @@ export function JoinRequestsModal({
         <ModalWrapper
             isOpen={isOpen}
             onOpenChange={onOpenChange}
-            title="Yêu cầu tham gia lớp học"
-            description="Theo dõi danh sách yêu cầu đã gửi và trạng thái phê duyệt."
+            title={t.student.classes.buttonViewRequests.title}
+            description={t.student.classes.buttonViewRequests.description}
             footer={
                 <div className="flex justify-end gap-3">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
-                        Đóng
+                        {t.common.close}
                     </Button>
                 </div>
             }
@@ -64,22 +66,22 @@ export function JoinRequestsModal({
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Mã lớp</TableHead>
-                        <TableHead>Thời gian gửi</TableHead>
-                        <TableHead>Trạng thái</TableHead>
+                        <TableHead>{t.student.classes.buttonViewRequests.columnClassCode}</TableHead>
+                        <TableHead>{t.student.classes.buttonViewRequests.columnTimeRequest}</TableHead>
+                        <TableHead>{t.student.classes.buttonViewRequests.columnStatus}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {isLoading ? (
                         <TableRow>
                             <TableCell colSpan={3} className="text-center text-muted-foreground">
-                                Đang tải danh sách yêu cầu...
+                                {t.common.loading}...
                             </TableCell>
                         </TableRow>
                     ) : requests.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={3} className="text-center text-muted-foreground">
-                                Bạn chưa gửi yêu cầu tham gia lớp nào.
+                                {t.student.classes.buttonViewRequests.noRequests}
                             </TableCell>
                         </TableRow>
                     ) : (

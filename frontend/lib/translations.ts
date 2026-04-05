@@ -1,4 +1,4 @@
-import { time } from 'console';
+import { table, time } from 'console';
 
 export type Language = 'en' | 'vi';
 
@@ -230,6 +230,43 @@ export const translations = {
       takeQuiz: 'Start Quiz',
       history: 'History',
       progress: 'Progress',
+      classes: {
+        title: 'My Classes',
+        description: 'List of classes you are currently attending',
+        buttonJoinClass: {
+          buttonName: 'Join Class',
+          title: 'Join New Class',
+          description:
+            'Enter the class code provided by your teacher to join the new class',
+          fieldClassCode: 'Class Code',
+          fieldClassCodePlaceholder: 'Example: ABC123',
+          note: 'You need a class code to join. Please contact your teacher to get the class code.'
+        },
+        buttonViewRequests: {
+          buttonName: 'View request history',
+          title: 'Request history for joining',
+          description:
+            'Track the list of submitted requests and approval status.',
+          noRequests: 'You have not submitted any requests to join the class.',
+          columnClassCode: 'Class Code',
+          columnTimeRequest: 'Request Time',
+          columnStatus: 'Status'
+        },
+        gridViewport: {
+          fieldTeacherName: 'Teacher Name',
+          fieldStudentNumber: 'Number of students',
+          fieldClassCode: 'Class Code',
+          fieldClassStatus: 'Class Status'
+        },
+        tableViewport: {
+          columnClassName: 'Class Name',
+          columnTeacherName: 'Teacher Name',
+          columnStudentNumber: 'Number of students',
+          columnClassCode: 'Class Code',
+          columnClassStatus: 'Class Status',
+          columnActions: 'Actions'
+        }
+      },
       settings: {
         title: 'Account Settings',
         description: 'Manage your personal information and preferences',
@@ -293,7 +330,8 @@ export const translations = {
       noData: 'No data available',
       error: 'Something went wrong',
       success: 'Success',
-      viewPort: 'Choose your viewport'
+      viewPort: 'Choose your viewport',
+      close: 'Close'
     }
   },
 
@@ -526,6 +564,43 @@ export const translations = {
       takeQuiz: 'Làm bài',
       history: 'Lịch sử',
       progress: 'Tiến độ',
+      classes: {
+        title: 'Lớp học của tôi',
+        description: 'Danh sách các lớp học bạn đang tham gia',
+        buttonJoinClass: {
+          buttonName: 'Tham gia lớp',
+          title: 'Tham gia lớp học mới',
+          description:
+            'Nhập mã lớp do giáo viên cung cấp để tham gia lớp học mới',
+          fieldClassCode: 'Mã lớp học',
+          fieldClassCodePlaceholder: 'Ví dụ: ABC123',
+          note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.'
+        },
+        buttonViewRequests: {
+          buttonName: 'Xem lịch sử yêu cầu',
+          title: 'Lịch sử yêu cầu tham gia',
+          description:
+            'Theo dõi danh sách yêu cầu đã gửi và trạng thái phê duyệt.',
+          noRequests: 'Bạn chưa gửi yêu cầu nào để tham gia lớp học.',
+          columnClassCode: 'Mã lớp',
+          columnTimeRequest: 'Thời gian yêu cầu',
+          columnStatus: 'Trạng thái'
+        },
+        gridViewport: {
+          fieldTeacherName: 'Tên giáo viên',
+          fieldStudentNumber: 'Số học sinh',
+          fieldClassCode: 'Mã lớp',
+          fieldClassStatus: 'Trạng thái lớp'
+        },
+        tableViewport: {
+          columnClassName: 'Tên lớp',
+          columnTeacherName: 'Tên giáo viên',
+          columnStudentNumber: 'Số học sinh',
+          columnClassCode: 'Mã lớp',
+          columnClassStatus: 'Trạng thái lớp',
+          columnActions: 'Các thao tác'
+        }
+      },
       settings: {
         title: 'Cài đặt tài khoản',
         description: 'Quản lý thông tin cá nhân và tuỳ chọn của bạn',
@@ -589,7 +664,8 @@ export const translations = {
       noData: 'Không có dữ liệu',
       error: 'Có lỗi xảy ra',
       success: 'Thành công',
-      viewPort: 'Chọn chế độ hiển thị'
+      viewPort: 'Chọn chế độ hiển thị',
+      close: 'Đóng'
     }
   }
 };
