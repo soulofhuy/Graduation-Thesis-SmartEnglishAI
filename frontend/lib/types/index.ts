@@ -6,6 +6,10 @@ export interface User {
   password: string;
   role: Role;
   profile?: Profile | null;
+  taughtClasses?: Class[] | null;
+  studentClasses?: ClassMember[] | null;
+  approvedClasses?: ClassMember[] | null;
+  rejectedClasses?: ClassMember[] | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   isActive: boolean;
@@ -33,6 +37,7 @@ export interface Class {
   description?: string | null;
   teacherId: string;
   teacher?: User | null;
+  classMembers?: ClassMember[] | null;
   students?: User[] | null;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -40,4 +45,25 @@ export interface Class {
   isActive: boolean;
   deactivatedAt?: string | null;
   classCode?: string;
+  approvedStudentsCount?: number;
+  pendingStudentsList?: ClassMember[];
+}
+
+export interface ClassMember {
+  id: string;
+  classId: string;
+  studentId: string;
+  approverId?: string | null;
+  rejectorId?: string | null;
+  class?: Class | null;
+  student?: User | null;
+  approver?: User | null;
+  rejector?: User | null;
+  joinedAt?: string | null;
+  isBanned: boolean;
+  bannedAt?: string | null;
+  isApproved: boolean;
+  approvedAt?: string | null;
+  isRejected: boolean;
+  rejectedAt?: string | null;
 }

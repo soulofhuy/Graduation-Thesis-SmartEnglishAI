@@ -1,3 +1,5 @@
+import { table, time } from 'console';
+
 export type Language = 'en' | 'vi';
 
 export const translations = {
@@ -139,15 +141,16 @@ export const translations = {
           columnActions: 'Operations'
         },
         gridViewport: {
-          fieldStudentNumer: 'No. students',
-          fieldAssignmentNumer: 'No. assignments',
+          fieldStudentNumber: 'No. students',
+          fieldAssignmentNumber: 'No. assignments',
+          fieldPendingRequestNumber: 'No. pending requests',
           fieldClassCode: 'Class code'
         },
         addClass: {
           title: 'Create a new class',
           description: 'Enter class information to create a new class',
           fieldName: 'Class name',
-          filedNamePlaceholder: 'e.g., Class 9CB1',
+          fieldNamePlaceholder: 'e.g., Class 9CB1',
           fieldDescription: 'Class description',
           fieldDescriptionPlaceholder: 'e.g., A class for 9CB students',
           fieldNeedsTeacherApproval: 'Needs your approval to join?'
@@ -173,6 +176,16 @@ export const translations = {
             fieldAssignmentNumber: 'Number of Assignments',
             fieldClassCode: 'Class Code'
           }
+        },
+        viewPendingRequests: {
+          title: 'Pending participation requests',
+          class: 'Class',
+          pendingRequestsCount: 'Number of pending requests',
+          acceptButton: 'Accept',
+          rejectButton: 'Reject',
+          noPendingRequests: 'No pending requests',
+          status: 'Pending',
+          timeRequest: 'Requested at'
         }
       },
       trashBin: {
@@ -217,6 +230,60 @@ export const translations = {
       takeQuiz: 'Start Quiz',
       history: 'History',
       progress: 'Progress',
+      classes: {
+        title: 'My Classes',
+        description: 'List of classes you are currently attending',
+        buttonJoinClass: {
+          buttonName: 'Join Class',
+          title: 'Join New Class',
+          description:
+            'Enter the class code provided by your teacher to join the new class',
+          fieldClassCode: 'Class Code',
+          fieldClassCodePlaceholder: 'Example: ABC123',
+          note: 'You need a class code to join. Please contact your teacher to get the class code.'
+        },
+        buttonViewRequests: {
+          buttonName: 'View request history',
+          title: 'Request history for joining',
+          description:
+            'Track the list of submitted requests and approval status.',
+          noRequests: 'You have not submitted any requests to join the class.',
+          columnClassCode: 'Class Code',
+          columnTimeRequest: 'Request Time',
+          columnStatus: 'Status'
+        },
+        viewClassMembersList: {
+          title: 'Class Member List - Class: ',
+          description: 'List of members in your class',
+          fieldSearch: 'Search by full name, email, or phone number...',
+          fieldSearchPlaceholder: 'Enter search keyword',
+          fieldSortBy: 'Sort by',
+          sortNameAsc: 'Name: A to Z',
+          sortNameDesc: 'Name: Z to A',
+          sortJoinedAtAsc: 'Joined date: Oldest first',
+          sortJoinedAtDesc: 'Joined date: Newest first',
+          columnNo: 'No.',
+          columnName: 'Full Name',
+          columnEmail: 'Email',
+          columnPhoneNumber: 'Phone Number',
+          columnDateJoined: 'Date Joined',
+          noData: 'No data to display'
+        },
+        gridViewport: {
+          fieldTeacherName: 'Teacher Name',
+          fieldStudentNumber: 'Number of students',
+          fieldClassCode: 'Class Code',
+          fieldClassStatus: 'Class Status'
+        },
+        tableViewport: {
+          columnClassName: 'Class Name',
+          columnTeacherName: 'Teacher Name',
+          columnStudentNumber: 'Number of students',
+          columnClassCode: 'Class Code',
+          columnClassStatus: 'Class Status',
+          columnActions: 'Actions'
+        }
+      },
       settings: {
         title: 'Account Settings',
         description: 'Manage your personal information and preferences',
@@ -280,7 +347,8 @@ export const translations = {
       noData: 'No data available',
       error: 'Something went wrong',
       success: 'Success',
-      viewPort: 'Choose your viewport'
+      viewPort: 'Choose your viewport',
+      close: 'Close'
     }
   },
 
@@ -422,15 +490,16 @@ export const translations = {
           columnActions: 'Các thao tác'
         },
         gridViewport: {
-          fieldStudentNumer: 'Số học sinh',
-          fieldAssignmentNumer: 'Số bài tập',
+          fieldStudentNumber: 'Số học sinh',
+          fieldAssignmentNumber: 'Số bài tập',
+          fieldPendingRequestNumber: 'Chờ duyệt',
           fieldClassCode: 'Mã lớp'
         },
         addClass: {
           title: 'Tạo lớp học mới',
           description: 'Nhập thông tin lớp học để tạo lớp mới',
           fieldName: 'Tên lớp học',
-          filedNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldNamePlaceholder: 'Ví dụ: Lớp 9CB1',
           fieldDescription: 'Mô tả lớp học',
           fieldDescriptionPlaceholder:
             'Ví dụ: Lớp học dành cho học sinh lớp 9CB',
@@ -458,6 +527,16 @@ export const translations = {
             fieldAssignmentNumber: 'Số lượng bài tập',
             fieldClassCode: 'Mã lớp học'
           }
+        },
+        viewPendingRequests: {
+          title: 'Yêu cầu tham gia đang chờ duyệt',
+          class: 'Lớp',
+          pendingRequestsCount: 'Số lượng đang chờ duyệt',
+          acceptButton: 'Chấp nhận',
+          rejectButton: 'Từ chối',
+          noPendingRequests: 'Không có yêu cầu nào đang chờ duyệt',
+          status: 'Đang chờ duyệt',
+          timeRequest: 'Yêu cầu lúc '
         }
       },
       trashBin: {
@@ -502,6 +581,60 @@ export const translations = {
       takeQuiz: 'Làm bài',
       history: 'Lịch sử',
       progress: 'Tiến độ',
+      classes: {
+        title: 'Lớp học của tôi',
+        description: 'Danh sách các lớp học bạn đang tham gia',
+        buttonJoinClass: {
+          buttonName: 'Tham gia lớp',
+          title: 'Tham gia lớp học mới',
+          description:
+            'Nhập mã lớp do giáo viên cung cấp để tham gia lớp học mới',
+          fieldClassCode: 'Mã lớp học',
+          fieldClassCodePlaceholder: 'Ví dụ: ABC123',
+          note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.'
+        },
+        buttonViewRequests: {
+          buttonName: 'Xem lịch sử yêu cầu',
+          title: 'Lịch sử yêu cầu tham gia',
+          description:
+            'Theo dõi danh sách yêu cầu đã gửi và trạng thái phê duyệt.',
+          noRequests: 'Bạn chưa gửi yêu cầu nào để tham gia lớp học.',
+          columnClassCode: 'Mã lớp',
+          columnTimeRequest: 'Thời gian yêu cầu',
+          columnStatus: 'Trạng thái'
+        },
+        gridViewport: {
+          fieldTeacherName: 'Tên giáo viên',
+          fieldStudentNumber: 'Số học sinh',
+          fieldClassCode: 'Mã lớp',
+          fieldClassStatus: 'Trạng thái lớp'
+        },
+        tableViewport: {
+          columnClassName: 'Tên lớp',
+          columnTeacherName: 'Tên giáo viên',
+          columnStudentNumber: 'Số học sinh',
+          columnClassCode: 'Mã lớp',
+          columnClassStatus: 'Trạng thái lớp',
+          columnActions: 'Các thao tác'
+        },
+        viewClassMembersList: {
+          title: 'Danh sách thành viên lớp học - Lớp: ',
+          description: 'Danh sách các thành viên trong lớp học của bạn',
+          fieldSearch: 'Tìm kiếm theo họ và tên, email hoặc số điện thoại...',
+          fieldSearchPlaceholder: 'Nhập từ khóa tìm kiếm',
+          fieldSortBy: 'Sắp xếp theo',
+          sortNameAsc: 'Tên: A đến Z',
+          sortNameDesc: 'Tên: Z đến A',
+          sortJoinedAtAsc: 'Ngày tham gia: Cũ nhất trước',
+          sortJoinedAtDesc: 'Ngày tham gia: Mới nhất trước',
+          columnNo: 'STT',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnPhoneNumber: 'Số điện thoại',
+          columnDateJoined: 'Ngày tham gia',
+          noData: 'Không có dữ liệu để hiển thị'
+        }
+      },
       settings: {
         title: 'Cài đặt tài khoản',
         description: 'Quản lý thông tin cá nhân và tuỳ chọn của bạn',
@@ -565,7 +698,8 @@ export const translations = {
       noData: 'Không có dữ liệu',
       error: 'Có lỗi xảy ra',
       success: 'Thành công',
-      viewPort: 'Chọn chế độ hiển thị'
+      viewPort: 'Chọn chế độ hiển thị',
+      close: 'Đóng'
     }
   }
 };

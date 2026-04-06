@@ -19,43 +19,68 @@ enum Role {
 }
 
 model User {
-  id                String      @id @default(uuid())
-  email             String      @unique
-  password          String
-  role              Role        @default(STUDENT)
-  profile           Profile?
-  createdAt         DateTime?   @default(now())
-  updatedAt         DateTime?   @updatedAt
-  isActive          Boolean     @default(true)
-  deactivatedAt     DateTime?
-  taughtClasses     Class[]     @relation("ClassTeacher")
-  enrolledClasses   Class[]     @relation("ClassStudents")
+  id                    String            @id @default(uuid())
+  email                 String            @unique
+  password              String
+  role                  Role              @default(STUDENT)
+  profile               Profile?
+  createdAt             DateTime?         @default(now())
+  updatedAt             DateTime?         @updatedAt
+  isActive              Boolean           @default(true)
+  deactivatedAt         DateTime?
+  taughtClasses         Class[]           @relation("ClassTeacher")
+  studentClasses        ClassMember[]     @relation("ClassMemberStudent")
+  approvedClasses       ClassMember[]     @relation("ClassMemberApprover")
+  rejectedClasses       ClassMember[]     @relation("ClassMemberRejector")
 }
 
 model Profile {
-  id                String      @id @default(uuid())
-  userId            String      @unique
-  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  firstName         String?
-  lastName          String?
-  address           String?
-  phoneNumber       String?
-  dateOfBirth       DateTime?
-  createdAt         DateTime?   @default(now())
-  updatedAt         DateTime?   @updatedAt
+  id                    String            @id @default(uuid())
+  userId                String            @unique
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName             String?
+  lastName              String?
+  address               String?
+  phoneNumber           String?
+  dateOfBirth           DateTime?
+  createdAt             DateTime?         @default(now())
+  updatedAt             DateTime?         @updatedAt
 }
 
 model Class {
-  id                    String      @id @default(uuid())
+  id                    String            @id @default(uuid())
   name                  String?
   description           String?
   teacherId             String
-  classCode             String      @unique
-  teacher               User        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  students              User[]      @relation("ClassStudents")
-  createdAt             DateTime?   @default(now())
-  updatedAt             DateTime?   @updatedAt
-  needsTeacherApproval  Boolean     @default(false)
-  isActive              Boolean     @default(true)
+  classCode             String            @unique
+  teacher               User              @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  classMembers          ClassMember[]
+  createdAt             DateTime?         @default(now())
+  updatedAt             DateTime?         @updatedAt
+  needsTeacherApproval  Boolean           @default(false)
+  isActive              Boolean           @default(true)
   deactivatedAt         DateTime?
+}
+
+model ClassMember {
+  id                    String            @id @default(uuid())
+  classId               String
+  studentId             String
+  approverId            String?
+  rejectorId            String?
+  class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student               User              @relation("ClassMemberStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  approver              User?             @relation("ClassMemberApprover", fields: [approverId], references: [id], onDelete: Cascade)
+  rejector              User?             @relation("ClassMemberRejector", fields: [rejectorId], references: [id], onDelete: Cascade)
+  joinedAt              DateTime          @default(now())
+  isBanned              Boolean           @default(false)
+  bannedAt              DateTime?
+  isApproved            Boolean           @default(false)
+  approvedAt            DateTime?
+  isRejected            Boolean           @default(false)
+  rejectedAt            DateTime?
+
+  @@unique([classId, studentId])
+  @@index([studentId])
+  @@index([approverId])
 }

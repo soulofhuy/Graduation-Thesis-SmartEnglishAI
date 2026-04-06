@@ -26,9 +26,19 @@ export async function createClass(token: string, classData: Partial<Class>) {
   return { class: payload.data, message: payload.message };
 }
 
-export async function getClassesByTeacherId(token: string, teacherId: string) {
+export async function getClassesByTeacherId(
+  token: string,
+  teacherId: string,
+  includePending = false
+) {
+  const searchParams = new URLSearchParams();
+  if (includePending) {
+    searchParams.set('includePending', 'true');
+  }
+
+  const queryString = searchParams.toString();
   const response = await fetch(
-    `${getApiBaseUrl()}/classes-by-teacher/${teacherId}`,
+    `${getApiBaseUrl()}/classes-by-teacher/${teacherId}${queryString ? `?${queryString}` : ''}`,
     {
       method: 'GET',
       headers: {
@@ -50,6 +60,54 @@ export async function getClassesByTeacherId(token: string, teacherId: string) {
   }
 
   return { classes: payload.data, message: payload.message };
+}
+
+export async function approveStudentJoinClass(
+  token: string,
+  classId: string,
+  studentId: string
+) {
+  const response = await fetch(`${getApiBaseUrl()}/classes/approve-student`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ classId, studentId })
+  });
+
+  const payload = (await response.json()) as ApiSuccess<unknown> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Approve request failed';
+    throw new Error(message);
+  }
+
+  return { message: payload.message };
+}
+
+export async function rejectStudentJoinClass(
+  token: string,
+  classId: string,
+  studentId: string
+) {
+  const response = await fetch(`${getApiBaseUrl()}/classes/reject-student`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ classId, studentId })
+  });
+
+  const payload = (await response.json()) as ApiSuccess<unknown> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Reject request failed';
+    throw new Error(message);
+  }
+
+  return { message: payload.message };
 }
 
 export async function updateClass(

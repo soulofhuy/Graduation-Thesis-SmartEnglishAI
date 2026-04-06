@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge } from 'lucide-react'
+import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { createClass, getClassesByTeacherId } from '@/services/teacher/classes'
@@ -35,11 +35,14 @@ import { Switch } from '@/components/ui/switch'
 import { createClassSchema, type ClassFormValues } from '@/lib/validators/class'
 import { EditClassModal } from './edit-class-modal'
 import { DeleteClassModal } from './delete-class-modal'
+import { getToastMessage } from '@/lib/toast/message'
+import { Badge } from '@/components/ui/badge'
+import { PendingRequestsModal } from './pending-requests-modal'
 
 const classSchema = createClassSchema()
 
 export default function TeacherClassesPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { accessToken, user } = useAuth()
   const [classes, setClasses] = useState<BackendClass[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -49,6 +52,7 @@ export default function TeacherClassesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isPendingModalOpen, setIsPendingModalOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<BackendClass | null>(null)
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
@@ -59,6 +63,20 @@ export default function TeacherClassesPage() {
     },
   })
 
+  const reloadClasses = async () => {
+    if (!accessToken || !user?.id) {
+      return
+    }
+
+    try {
+      const result = await getClassesByTeacherId(accessToken, user.id, true)
+      setClasses(result.classes)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
+    }
+  }
+
   useEffect(() => {
     if (!accessToken || !user?.id) {
       return
@@ -67,10 +85,10 @@ export default function TeacherClassesPage() {
     const loadClasses = async () => {
       setIsLoading(true)
       try {
-        const result = await getClassesByTeacherId(accessToken, user.id)
+        const result = await getClassesByTeacherId(accessToken, user.id, true)
         setClasses(result.classes)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Loi khi tai lop hoc'
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
         toast.error(message, { className: TOAST_COLORS.error })
       } finally {
         setIsLoading(false)
@@ -78,11 +96,11 @@ export default function TeacherClassesPage() {
     }
 
     loadClasses()
-  }, [accessToken, user?.id])
+  }, [accessToken, user?.id, language])
 
   async function onSubmit(values: ClassFormValues) {
     if (!accessToken) {
-      toast.error('Vui long dang nhap lai', { className: TOAST_COLORS.error })
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
@@ -98,7 +116,7 @@ export default function TeacherClassesPage() {
       setIsModalOpen(false)
       toast.success(result.message, { className: TOAST_COLORS.success })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Loi khi tao lop hoc'
+      const message = error instanceof Error ? error.message : getToastMessage('saveFailed', language)
       toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsCreating(false)
@@ -107,7 +125,7 @@ export default function TeacherClassesPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Sao chép thành công!', { className: TOAST_COLORS.success })
+    toast.success(getToastMessage('copySuccess', language), { className: TOAST_COLORS.success })
   }
 
   const handleEditClass = (classItem: BackendClass) => {
@@ -128,6 +146,19 @@ export default function TeacherClassesPage() {
 
   const handleDeleteSuccess = (classId: string) => {
     setClasses((prev) => prev.filter((c) => c.id !== classId))
+  }
+
+  const handleViewPendingRequests = (classItem: BackendClass) => {
+    setSelectedClass(classItem)
+    setIsPendingModalOpen(true)
+  }
+
+  const getPendingRequestCount = (classItem: BackendClass) => {
+    return (
+      classItem.classMembers?.filter(
+        (member) => !member.isApproved && !member.isRejected && !member.isBanned
+      ).length ?? 0
+    )
   }
 
   return (
@@ -173,7 +204,7 @@ export default function TeacherClassesPage() {
       {isLoading && (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Dang tai lop hoc...
+            ... {t.common.loading}
           </CardContent>
         </Card>
       )}
@@ -181,27 +212,53 @@ export default function TeacherClassesPage() {
       {!isLoading && viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map((classItem) => {
-            const studentCount = classItem.students?.length ?? 0
+            const studentCount = classItem.approvedStudentsCount ?? 0
             const assignmentCount = 0
+            const pendingCount = getPendingRequestCount(classItem)
 
             return (
-              <Card key={classItem.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl">{classItem?.name}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {classItem?.description}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteClass(classItem)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
+              <Card key={classItem.id} className="relative overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative h-8 w-8"
+                    onClick={() => handleViewPendingRequests(classItem)}
+                  >
+                    <Eye className="w-4 h-4" />
+                    {pendingCount > 0 ? (
+                      <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
+                        {pendingCount}
+                      </span>
+                    ) : null}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleEditClass(classItem)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleDeleteClass(classItem)}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+
+                <CardHeader className="pr-28">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-muted-foreground" />
+                      {classItem?.name}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {classItem?.description || 'Chưa có mô tả cho lớp học này'}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -209,7 +266,7 @@ export default function TeacherClassesPage() {
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                         <Users className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldStudentNumer}
+                        {t.teacher.classes.gridViewport.fieldStudentNumber}
                       </div>
                       <p className="text-2xl font-bold text-foreground">
                         {studentCount}
@@ -218,7 +275,7 @@ export default function TeacherClassesPage() {
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                         <BookOpen className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldAssignmentNumer}
+                        {t.teacher.classes.gridViewport.fieldAssignmentNumber}
                       </div>
                       <p className="text-2xl font-bold text-foreground">
                         {assignmentCount}
@@ -226,22 +283,33 @@ export default function TeacherClassesPage() {
                     </div>
                   </div>
 
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      {t.teacher.classes.gridViewport.fieldClassCode}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="text-sm font-mono font-bold text-foreground">
-                        {classItem?.classCode}
-                      </code>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6"
-                        onClick={() => copyToClipboard(classItem?.classCode ?? '')}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </Button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                        <Users className="w-4 h-4" />
+                        {t.teacher.classes.gridViewport.fieldPendingRequestNumber}
+                      </div>
+                      <p className="text-2xl font-bold text-foreground">
+                        {pendingCount}
+                      </p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {t.teacher.classes.gridViewport.fieldClassCode}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-sm font-mono font-bold text-foreground">
+                          {classItem?.classCode}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6"
+                          onClick={() => copyToClipboard(classItem?.classCode ?? '')}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -266,14 +334,16 @@ export default function TeacherClassesPage() {
                     <TableHead>{t.teacher.classes.tableViewport.columnDescription}</TableHead>
                     <TableHead>{t.teacher.classes.tableViewport.columnStudentNumber}</TableHead>
                     <TableHead>{t.teacher.classes.tableViewport.columnAssignmentNumber}</TableHead>
+                    <TableHead>Pending</TableHead>
                     <TableHead>{t.teacher.classes.tableViewport.columnClassCode}</TableHead>
                     <TableHead className="text-right">{t.teacher.classes.tableViewport.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {classes.map((classItem) => {
-                    const studentCount = classItem.students?.length ?? 0
+                    const studentCount = classItem.approvedStudentsCount ?? 0
                     const assignmentCount = 0
+                    const pendingCount = getPendingRequestCount(classItem)
 
                     return (
                       <TableRow key={classItem.id}>
@@ -283,6 +353,11 @@ export default function TeacherClassesPage() {
                         <TableCell>{classItem?.description}</TableCell>
                         <TableCell>{studentCount}</TableCell>
                         <TableCell>{assignmentCount}</TableCell>
+                        <TableCell>
+                          <Badge variant={pendingCount > 0 ? 'secondary' : 'outline'}>
+                            {pendingCount}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <code className="text-xs font-mono font-bold">
@@ -300,6 +375,19 @@ export default function TeacherClassesPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="relative"
+                              onClick={() => handleViewPendingRequests(classItem)}
+                            >
+                              <Eye className="h-4 w-4" />
+                              {pendingCount > 0 ? (
+                                <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
+                                  {pendingCount}
+                                </span>
+                              ) : null}
+                            </Button>
                             <Button variant="ghost" size="icon" onClick={() => handleEditClass(classItem)}>
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -343,7 +431,7 @@ export default function TeacherClassesPage() {
                 <FormItem>
                   <FormLabel>{t.teacher.classes.addClass.fieldName}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t.teacher.classes.addClass.filedNamePlaceholder} {...field} />
+                    <Input placeholder={t.teacher.classes.addClass.fieldNamePlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -396,6 +484,14 @@ export default function TeacherClassesPage() {
         classItem={selectedClass}
         accessToken={accessToken || ''}
         onSuccess={handleDeleteSuccess}
+      />
+
+      <PendingRequestsModal
+        isOpen={isPendingModalOpen}
+        onOpenChange={setIsPendingModalOpen}
+        classItem={selectedClass}
+        accessToken={accessToken || ''}
+        onActionSuccess={reloadClasses}
       />
     </div>
   )
