@@ -60,15 +60,6 @@ export default function TeacherStudentsPage() {
         return classes.find((classItem) => classItem.id === selectedClassId) ?? null
     }, [classes, selectedClassId])
 
-    const stats = useMemo(() => {
-        return {
-            total: totalItems,
-            approved: members.filter((member) => member.isApproved && !member.isBanned).length,
-            pending: members.filter(
-                (member) => !member.isApproved && !member.isRejected && !member.isBanned
-            ).length,
-        }
-    }, [members, totalItems])
 
     const loadStudentsByClass = async (classId: string, page: number) => {
         if (!accessToken || !user?.id) {
@@ -153,39 +144,39 @@ export default function TeacherStudentsPage() {
                 </p>
             </div>
 
-            <Card>
-                <CardContent className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                        <p className="text-sm font-medium text-foreground">Lop cua giao vien</p>
-                        <Select value={selectedClassId} onValueChange={(value) => void handleSelectClass(value)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Chon lop hoc" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {classes.map((classItem) => (
-                                    <SelectItem key={classItem.id} value={classItem.id}>
-                                        {classItem.name || 'Lop chua dat ten'}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+            <div className="flex items-end justify-between gap-6">
+                <div className="space-y-2 w-full max-w-sm">
+                    <p className="text-sm font-medium text-foreground">Tìm học sinh</p>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            className="pl-9 h-10"
+                            placeholder="Nhập tên hoặc email..."
+                            value={searchValue}
+                            onChange={(event) => setSearchValue(event.target.value)}
+                        />
                     </div>
+                </div>
 
-                    <div className="space-y-2">
-                        <p className="text-sm font-medium text-foreground">Tim hoc sinh</p>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                className="pl-9"
-                                placeholder="Nhap ten hoac email..."
-                                value={searchValue}
-                                onChange={(event) => setSearchValue(event.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                </CardContent>
-            </Card>
+                <div className="space-y-2 w-full max-w-xs">
+                    <p className="text-sm font-medium text-foreground">Lớp của giáo viên</p>
+                    <Select
+                        value={selectedClassId}
+                        onValueChange={(value) => void handleSelectClass(value)}
+                    >
+                        <SelectTrigger className="h-10">
+                            <SelectValue placeholder="Chọn lớp học" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {classes.map((classItem) => (
+                                <SelectItem key={classItem.id} value={classItem.id}>
+                                    {classItem.name || 'Lớp chưa đặt tên'}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
 
             {isClassLoading ? (
                 <Card>

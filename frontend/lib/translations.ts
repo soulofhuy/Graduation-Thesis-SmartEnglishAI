@@ -348,7 +348,13 @@ export const translations = {
       error: 'Something went wrong',
       success: 'Success',
       viewPort: 'Choose your viewport',
-      close: 'Close'
+      close: 'Close',
+      pagination: {
+        label: 'Number of results / page',
+        previous: 'Previous page',
+        next: 'Next page',
+        total: 'Total quantity:'
+      }
     }
   },
 
@@ -699,7 +705,13 @@ export const translations = {
       error: 'Có lỗi xảy ra',
       success: 'Thành công',
       viewPort: 'Chọn chế độ hiển thị',
-      close: 'Đóng'
+      close: 'Đóng',
+      pagination: {
+        label: 'Số kết quả / trang',
+        previous: 'Trang trước',
+        next: 'Trang sau',
+        total: 'Tổng số lượng:'
+      }
     }
   }
 };

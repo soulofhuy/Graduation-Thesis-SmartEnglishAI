@@ -5,6 +5,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { useLanguage } from './language-provider'
 
 type PageSizeSelectProps = {
     value: number
@@ -21,8 +22,12 @@ export function PageSizeSelect({
     options = DEFAULT_OPTIONS,
     disabled = false,
 }: PageSizeSelectProps) {
+    const { t } = useLanguage();
     return (
-        <div className="space-y-2">
+        <div className="flex items-center gap-3">
+            <div className='text-sm text-gray-500'>
+                {t.common.pagination.label}
+            </div>
             <Select
                 value={String(value)}
                 onValueChange={(nextValue) => {
@@ -33,8 +38,8 @@ export function PageSizeSelect({
                 }}
                 disabled={disabled}
             >
-                <SelectTrigger>
-                    <SelectValue placeholder="Chon so luong" />
+                <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Chọn số lượng" />
                 </SelectTrigger>
                 <SelectContent>
                     {options.map((size) => (

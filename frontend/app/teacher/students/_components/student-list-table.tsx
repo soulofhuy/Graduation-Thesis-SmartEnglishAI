@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/table'
 import { dateTimeFormat } from '@/lib/format'
 import type { ClassMember } from '@/lib/types'
+import { useLanguage } from '@/components/language-provider'
 
 type StudentListTableProps = {
     members: ClassMember[]
@@ -95,6 +96,7 @@ export function StudentListTable({
     onPrevPage,
     onNextPage,
 }: StudentListTableProps) {
+    const { t } = useLanguage();
     const [memberToRemove, setMemberToRemove] = useState<ClassMember | null>(null)
     const [removedMemberIds, setRemovedMemberIds] = useState<Record<string, boolean>>({})
 
@@ -193,7 +195,9 @@ export function StudentListTable({
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                <p className="text-sm text-muted-foreground">Tong {totalItems} hoc sinh</p>
+                <p className="text-sm text-muted-foreground">
+                    {t.common.pagination.total} {totalItems}
+                </p>
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
@@ -201,7 +205,7 @@ export function StudentListTable({
                         disabled={!hasPrevPage || isPaging}
                         onClick={onPrevPage}
                     >
-                        Trang truoc
+                        {t.common.pagination.previous}
                     </Button>
                     <Button
                         variant="outline"
@@ -209,13 +213,12 @@ export function StudentListTable({
                         disabled={!hasNextPage || isPaging}
                         onClick={onNextPage}
                     >
-                        Trang sau
+                        {t.common.pagination.next}
                     </Button>
                 </div>
 
                 <div className="flex items-center gap-4">
-
-                    <div className="w-[180px]">
+                    <div>
                         <PageSizeSelect
                             value={pageSize}
                             onChange={onPageSizeChange}
