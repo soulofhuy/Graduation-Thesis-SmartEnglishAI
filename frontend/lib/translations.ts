@@ -188,6 +188,34 @@ export const translations = {
           timeRequest: 'Requested at'
         }
       },
+      students: {
+        title: 'Manage students',
+        description: 'View and manage students in your class',
+        searchEngine: {
+          findStudent: {
+            title: 'Search for students',
+            placeholder: "Enter student's name or email"
+          }
+        },
+        filter: {
+          title: 'Select your class',
+          placeholder: 'Choose a class'
+        },
+        tableView: {
+          title: 'List of students',
+          description: 'Class:',
+          columnNo: 'No.',
+          columnName: 'Full Name',
+          columnEmail: 'Email',
+          columnStatus: 'Status',
+          columnDateJoined: 'Joining Date',
+          columnActions: 'Actions',
+          noData: 'No students to display',
+          requestToChooseClass:
+            'Please select a class to view the student list.',
+          buttonViewDeactivatedStudents: 'View inactive students'
+        }
+      },
       trashBin: {
         title: 'Trash Bin',
         description:
@@ -543,6 +571,34 @@ export const translations = {
           noPendingRequests: 'Không có yêu cầu nào đang chờ duyệt',
           status: 'Đang chờ duyệt',
           timeRequest: 'Yêu cầu lúc '
+        }
+      },
+      students: {
+        title: 'Quản lí học sinh',
+        description: 'Xem và quản lí học sinh trong lớp học của bạn',
+        searchEngine: {
+          findStudent: {
+            title: 'Tìm kiếm học sinh',
+            placeholder: 'Nhập tên hoặc email của học sinh'
+          }
+        },
+        filter: {
+          title: 'Chọn lớp của bạn',
+          placeholder: 'Chọn một lớp học'
+        },
+        tableView: {
+          title: 'Danh sách học sinh',
+          description: 'Lớp:',
+          columnNo: 'STT',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnStatus: 'Trạng thái',
+          columnDateJoined: 'Ngày tham gia',
+          columnActions: 'Các thao tác',
+          noData: 'Không có học sinh nào để hiển thị',
+          requestToChooseClass:
+            'Hãy chọn một lớp để có thể xem danh sách học sinh.',
+          buttonViewDeactivatedStudents: 'Xem HS bị khóa'
         }
       },
       trashBin: {

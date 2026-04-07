@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Trash2, UserX, CheckCircle2, XCircle, Clock3 } from 'lucide-react'
+import { UserX, CheckCircle2, XCircle, Clock3, UserX2 } from 'lucide-react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -25,6 +25,8 @@ import {
 import { dateTimeFormat } from '@/lib/format'
 import type { ClassMember } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 type StudentListTableProps = {
     members: ClassMember[]
@@ -37,6 +39,8 @@ type StudentListTableProps = {
     totalItems: number
     hasPrevPage: boolean
     hasNextPage: boolean
+    removedMemberIds: Record<string, boolean>
+    onDeactivateMember: (memberId: string) => void
     onPageSizeChange: (nextPageSize: number) => void
     onPrevPage: () => void
     onNextPage: () => void
@@ -46,7 +50,7 @@ function getStudentName(member: ClassMember) {
     const firstName = member.student?.profile?.firstName ?? ''
     const lastName = member.student?.profile?.lastName ?? ''
     const fullName = `${lastName} ${firstName}`.trim()
-    return fullName || member.student?.email || 'Chua cap nhat ten'
+    return fullName || member.student?.email || ''
 }
 
 function getMemberStatus(member: ClassMember) {
@@ -92,13 +96,14 @@ export function StudentListTable({
     totalItems,
     hasPrevPage,
     hasNextPage,
+    removedMemberIds,
+    onDeactivateMember,
     onPageSizeChange,
     onPrevPage,
     onNextPage,
 }: StudentListTableProps) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [memberToRemove, setMemberToRemove] = useState<ClassMember | null>(null)
-    const [removedMemberIds, setRemovedMemberIds] = useState<Record<string, boolean>>({})
 
     const normalizedSearch = searchValue.trim().toLowerCase()
 
@@ -121,28 +126,27 @@ export function StudentListTable({
             return
         }
 
-        setRemovedMemberIds((prev) => ({
-            ...prev,
-            [memberToRemove.id]: true,
-        }))
+        onDeactivateMember(memberToRemove.id)
 
-        toast.success('Da xoa hoc sinh khoi danh sach hien thi')
+        toast.success(getToastMessage('deleteSuccess', language), { className: TOAST_COLORS.success })
         setMemberToRemove(null)
     }
 
     if (isLoading) {
-        return <div className="py-10 text-center text-muted-foreground">Dang tai danh sach hoc sinh...</div>
+        return <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
     }
 
     if (!hasSelectedClass) {
-        return <div className="py-10 text-center text-muted-foreground">Hay chon lop de tai danh sach hoc sinh.</div>
+        return <div className="py-10 text-center text-muted-foreground">{t.teacher.students.tableView.requestToChooseClass}</div>
     }
 
     if (filteredMembers.length === 0) {
         return (
-            <div className="py-10 text-center text-muted-foreground">
-                Khong co hoc sinh phu hop voi bo loc hien tai trong lop {selectedClassName}.
-            </div>
+            <>
+                <div className="py-10 text-center text-muted-foreground">
+                    {t.teacher.students.tableView.noData}.
+                </div>
+            </>
         )
     }
 
@@ -152,12 +156,12 @@ export function StudentListTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-16">STT</TableHead>
-                            <TableHead>Hoc sinh</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Trang thai</TableHead>
-                            <TableHead>Ngay tham gia</TableHead>
-                            <TableHead className="text-right">Thao tac</TableHead>
+                            <TableHead className="w-16">{t.teacher.students.tableView.columnNo}</TableHead>
+                            <TableHead>{t.teacher.students.tableView.columnName}</TableHead>
+                            <TableHead>{t.teacher.students.tableView.columnEmail}</TableHead>
+                            <TableHead>{t.teacher.students.tableView.columnStatus}</TableHead>
+                            <TableHead>{t.teacher.students.tableView.columnDateJoined}</TableHead>
+                            <TableHead className="text-right">{t.teacher.students.tableView.columnActions}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -180,10 +184,10 @@ export function StudentListTable({
                                         <div className="flex justify-end gap-2">
                                             <Button
                                                 size="icon"
-                                                variant="destructive"
+                                                variant="ghost"
                                                 onClick={() => setMemberToRemove(member)}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <UserX2 className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -243,6 +247,7 @@ export function StudentListTable({
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
         </>
     )
 }
