@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Responses from '../utils/responses';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
-import ClassService from '../services/class';
+import ClassService from '../services/classServices';
 import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
 
 const DEFAULT_ITEMS_PER_PAGE = MINIMUM_ITEMS_PER_PAGE;
