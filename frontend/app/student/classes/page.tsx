@@ -19,9 +19,9 @@ import {
 import type { Class as BackendClass, ClassMember } from '@/lib/types'
 import { getToastMessage } from '@/lib/toast/message'
 import { useLanguage } from '@/components/language-provider'
-import { JoinClassModal } from './join-class-modal'
-import { JoinRequestsModal, type JoinRequestItem } from './join-requests-modal'
-import { ClassMembersModal } from './class-members-modal'
+import { JoinClassModal } from './_components/join-class-modal'
+import { JoinRequestsModal, type JoinRequestItem } from './_components/join-requests-modal'
+import { ClassMembersModal } from './_components/class-members-modal'
 
 export default function StudentClassesPage() {
   const { t, language } = useLanguage()

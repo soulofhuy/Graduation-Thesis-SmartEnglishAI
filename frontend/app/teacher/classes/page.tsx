@@ -33,11 +33,11 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 import { useLanguage } from '@/components/language-provider'
 import { Switch } from '@/components/ui/switch'
 import { createClassSchema, type ClassFormValues } from '@/lib/validators/class'
-import { EditClassModal } from './edit-class-modal'
-import { DeleteClassModal } from './delete-class-modal'
+import { EditClassModal } from './_components/edit-class-modal'
+import { DeleteClassModal } from './_components/delete-class-modal'
 import { getToastMessage } from '@/lib/toast/message'
 import { Badge } from '@/components/ui/badge'
-import { PendingRequestsModal } from './pending-requests-modal'
+import { PendingRequestsModal } from './_components/pending-requests-modal'
 
 const classSchema = createClassSchema()
 
