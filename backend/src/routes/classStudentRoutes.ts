@@ -17,6 +17,12 @@ router.get(
 );
 
 router.get(
+  '/classes/banned',
+  verifyJWT,
+  ClassStudentController.getAllBannedClassesByStudent
+);
+
+router.get(
   '/classes/approved',
   verifyJWT,
   ClassStudentController.getAllApprovedClassesByStudent

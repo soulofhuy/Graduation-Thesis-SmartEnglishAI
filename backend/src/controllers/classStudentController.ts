@@ -29,6 +29,31 @@ class ClassStudentController {
     }
   };
 
+  static getAllBannedClassesByStudent = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const studentId = req.userId;
+    if (!studentId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Student ID is required')));
+    }
+
+    try {
+      const bannedClasses =
+        await ClassStudentService.getAllBannedClassesByStudent(studentId);
+      return res.json(
+        Responses.successResponse(
+          'Banned class list retrieved successfully',
+          bannedClasses
+        )
+      );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
   static getAllRequestsToJoinClassByStudent = async (
     req: AuthenticatedRequest,
     res: Response
