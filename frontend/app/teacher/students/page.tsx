@@ -17,6 +17,7 @@ import {
 import type { Class, ClassMember } from '@/lib/types'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
 import { getAllStudentsByClassId } from '@/services/classes'
+import { getAllBannedStudentsByClassId, toggleBanStudentInClass } from '@/services/teacher/students'
 import { StudentListTable } from './_components/student-list-table'
 import { DeactivatedStudentsModal } from './_components/deactivated-students-modal'
 import { useLanguage } from '@/components/language-provider'
@@ -40,7 +41,14 @@ export default function TeacherStudentsPage() {
     const [totalItems, setTotalItems] = useState(0)
     const [hasNextPage, setHasNextPage] = useState(false)
     const [hasPrevPage, setHasPrevPage] = useState(false)
-    const [removedMemberIds, setRemovedMemberIds] = useState<Record<string, boolean>>({})
+    const [bannedMembers, setBannedMembers] = useState<ClassMember[]>([])
+    const [isBannedStudentsLoading, setIsBannedStudentsLoading] = useState(false)
+    const [bannedCurrentPage, setBannedCurrentPage] = useState(1)
+    const [bannedPageSize, setBannedPageSize] = useState(10)
+    const [bannedTotalItems, setBannedTotalItems] = useState(0)
+    const [bannedHasNextPage, setBannedHasNextPage] = useState(false)
+    const [bannedHasPrevPage, setBannedHasPrevPage] = useState(false)
+    const [isBanMutating, setIsBanMutating] = useState(false)
     const [isDeactivatedModalOpen, setIsDeactivatedModalOpen] = useState(false)
 
     useEffect(() => {
@@ -68,11 +76,6 @@ export default function TeacherStudentsPage() {
         return classes.find((classItem) => classItem.id === selectedClassId) ?? null
     }, [classes, selectedClassId])
 
-    const deactivatedMembers = useMemo(() => {
-        return members.filter((member) => removedMemberIds[member.id])
-    }, [members, removedMemberIds])
-
-
     const loadStudentsByClass = async (classId: string, page: number) => {
         if (!accessToken || !user?.id) {
             return
@@ -93,6 +96,38 @@ export default function TeacherStudentsPage() {
             toast.error(message)
         } finally {
             setIsStudentLoading(false)
+        }
+    }
+
+    const loadBannedStudentsByClass = async (classId: string, page = 1, limit = bannedPageSize) => {
+        if (!accessToken) {
+            return
+        }
+
+        setIsBannedStudentsLoading(true)
+        try {
+            const classDetail = await getAllBannedStudentsByClassId(
+                accessToken,
+                classId,
+                page,
+                limit,
+            )
+            const pagination = classDetail?.pagination
+
+            setBannedMembers(classDetail?.classMembers ?? [])
+            setBannedCurrentPage(pagination?.page ?? page)
+            setBannedTotalItems(pagination?.totalItems ?? 0)
+            setBannedHasNextPage(Boolean(pagination?.hasNextPage))
+            setBannedHasPrevPage(Boolean(pagination?.hasPrevPage))
+        } catch (error) {
+            const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+            toast.error(message)
+            setBannedMembers([])
+            setBannedTotalItems(0)
+            setBannedHasNextPage(false)
+            setBannedHasPrevPage(false)
+        } finally {
+            setIsBannedStudentsLoading(false)
         }
     }
 
@@ -127,29 +162,96 @@ export default function TeacherStudentsPage() {
 
         setSelectedClassId(classId)
         setMembers([])
-        setRemovedMemberIds({})
+        setBannedMembers([])
+        setBannedCurrentPage(1)
+        setBannedPageSize(10)
+        setBannedTotalItems(0)
+        setBannedHasNextPage(false)
+        setBannedHasPrevPage(false)
         setCurrentPage(1)
         await loadStudentsByClass(classId, 1)
     }
 
-    const handleDeactivateMember = (memberId: string) => {
-        setRemovedMemberIds((prev) => ({
-            ...prev,
-            [memberId]: true,
-        }))
+    const handleDeactivateMember = async (member: ClassMember) => {
+        if (!accessToken || !selectedClassId) {
+            return
+        }
+
+        setIsBanMutating(true)
+        try {
+            await toggleBanStudentInClass(accessToken, selectedClassId, member.studentId)
+            toast.success(getToastMessage('deleteSuccess', language), { className: TOAST_COLORS.success })
+
+            await Promise.all([
+                loadStudentsByClass(selectedClassId, currentPage),
+                loadBannedStudentsByClass(selectedClassId, bannedCurrentPage, bannedPageSize),
+            ])
+        } catch (error) {
+            const message = error instanceof Error ? error.message : getToastMessage('deleteFailed', language)
+            toast.error(message)
+            throw error
+        } finally {
+            setIsBanMutating(false)
+        }
     }
 
-    const handleReactivateMember = (memberId: string) => {
-        setRemovedMemberIds((prev) => {
-            if (!prev[memberId]) {
-                return prev
-            }
+    const handleReactivateMember = async (member: ClassMember) => {
+        if (!accessToken || !selectedClassId) {
+            return
+        }
 
-            const next = { ...prev }
-            delete next[memberId]
-            return next
-        })
-        toast.success(getToastMessage('restoreSuccess', language), { className: TOAST_COLORS.success })
+        setIsBanMutating(true)
+        try {
+            await toggleBanStudentInClass(accessToken, selectedClassId, member.studentId)
+            toast.success(getToastMessage('restoreSuccess', language), { className: TOAST_COLORS.success })
+
+            await Promise.all([
+                loadStudentsByClass(selectedClassId, currentPage),
+                loadBannedStudentsByClass(selectedClassId, bannedCurrentPage, bannedPageSize),
+            ])
+        } catch (error) {
+            const message = error instanceof Error ? error.message : getToastMessage('restoreFailed', language)
+            toast.error(message)
+            throw error
+        } finally {
+            setIsBanMutating(false)
+        }
+    }
+
+    const handleOpenBannedStudentsModal = async () => {
+        if (!selectedClassId) {
+            return
+        }
+
+        setBannedCurrentPage(1)
+        setIsDeactivatedModalOpen(true)
+        await loadBannedStudentsByClass(selectedClassId, 1, bannedPageSize)
+    }
+
+    const handleBannedPageSizeChange = async (nextPageSize: number) => {
+        if (!selectedClassId) {
+            return
+        }
+
+        setBannedPageSize(nextPageSize)
+        setBannedCurrentPage(1)
+        await loadBannedStudentsByClass(selectedClassId, 1, nextPageSize)
+    }
+
+    const handlePrevBannedPage = async () => {
+        if (!selectedClassId || !bannedHasPrevPage || isBannedStudentsLoading) {
+            return
+        }
+
+        await loadBannedStudentsByClass(selectedClassId, bannedCurrentPage - 1, bannedPageSize)
+    }
+
+    const handleNextBannedPage = async () => {
+        if (!selectedClassId || !bannedHasNextPage || isBannedStudentsLoading) {
+            return
+        }
+
+        await loadBannedStudentsByClass(selectedClassId, bannedCurrentPage + 1, bannedPageSize)
     }
 
     const handlePrevPage = async () => {
@@ -234,12 +336,12 @@ export default function TeacherStudentsPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setIsDeactivatedModalOpen(true)}
-                                disabled={deactivatedMembers.length === 0}
+                                onClick={() => void handleOpenBannedStudentsModal()}
+                                disabled={!selectedClassId || isBannedStudentsLoading}
                                 className="shrink-0"
                             >
                                 <Eye className="h-4 w-4 mr-1" />
-                                {t.teacher.students.tableView.buttonViewDeactivatedStudents} ({deactivatedMembers.length})
+                                {t.teacher.students.tableView.buttonViewDeactivatedStudents} ({bannedTotalItems})
                             </Button>
                         </div>
 
@@ -250,6 +352,7 @@ export default function TeacherStudentsPage() {
                         members={members}
                         isLoading={isStudentLoading}
                         isPaging={isStudentLoading}
+                        isMutating={isBanMutating}
                         hasSelectedClass={Boolean(selectedClassId)}
                         selectedClassName={selectedClass?.name || ''}
                         searchValue={searchValue}
@@ -257,7 +360,6 @@ export default function TeacherStudentsPage() {
                         totalItems={totalItems}
                         hasPrevPage={hasPrevPage}
                         hasNextPage={hasNextPage}
-                        removedMemberIds={removedMemberIds}
                         onDeactivateMember={handleDeactivateMember}
                         onPageSizeChange={(nextPageSize) => void handlePageSizeChange(nextPageSize)}
                         onPrevPage={() => void handlePrevPage()}
@@ -269,7 +371,18 @@ export default function TeacherStudentsPage() {
             <DeactivatedStudentsModal
                 open={isDeactivatedModalOpen}
                 onOpenChange={setIsDeactivatedModalOpen}
-                members={deactivatedMembers}
+                members={bannedMembers}
+                isLoading={isBannedStudentsLoading}
+                isMutating={isBanMutating}
+                totalItems={bannedTotalItems}
+                currentPage={bannedCurrentPage}
+                pageSize={bannedPageSize}
+                hasPrevPage={bannedHasPrevPage}
+                hasNextPage={bannedHasNextPage}
+                isPaging={isBannedStudentsLoading}
+                onPageSizeChange={(nextPageSize) => void handleBannedPageSizeChange(nextPageSize)}
+                onPrevPage={handlePrevBannedPage}
+                onNextPage={handleNextBannedPage}
                 onReactivateMember={handleReactivateMember}
             />
         </div>

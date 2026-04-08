@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
 import { UserX, CheckCircle2, XCircle, Clock3, UserX2 } from 'lucide-react'
 import {
     AlertDialog,
@@ -25,13 +24,12 @@ import {
 import { dateTimeFormat } from '@/lib/format'
 import type { ClassMember } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
-import { getToastMessage } from '@/lib/toast/message'
-import { TOAST_COLORS } from '@/lib/toast/color'
 
 type StudentListTableProps = {
     members: ClassMember[]
     isLoading: boolean
     isPaging: boolean
+    isMutating: boolean
     hasSelectedClass: boolean
     selectedClassName: string
     searchValue: string
@@ -39,8 +37,7 @@ type StudentListTableProps = {
     totalItems: number
     hasPrevPage: boolean
     hasNextPage: boolean
-    removedMemberIds: Record<string, boolean>
-    onDeactivateMember: (memberId: string) => void
+    onDeactivateMember: (member: ClassMember) => Promise<void>
     onPageSizeChange: (nextPageSize: number) => void
     onPrevPage: () => void
     onNextPage: () => void
@@ -89,6 +86,7 @@ export function StudentListTable({
     members,
     isLoading,
     isPaging,
+    isMutating,
     hasSelectedClass,
     selectedClassName,
     searchValue,
@@ -96,20 +94,18 @@ export function StudentListTable({
     totalItems,
     hasPrevPage,
     hasNextPage,
-    removedMemberIds,
     onDeactivateMember,
     onPageSizeChange,
     onPrevPage,
     onNextPage,
 }: StudentListTableProps) {
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
     const [memberToRemove, setMemberToRemove] = useState<ClassMember | null>(null)
 
     const normalizedSearch = searchValue.trim().toLowerCase()
 
     const filteredMembers = useMemo(() => {
         return members
-            .filter((member) => !removedMemberIds[member.id])
             .filter((member) => {
                 if (!normalizedSearch) {
                     return true
@@ -119,17 +115,19 @@ export function StudentListTable({
                 const studentEmail = member.student?.email?.toLowerCase() ?? ''
                 return studentName.includes(normalizedSearch) || studentEmail.includes(normalizedSearch)
             })
-    }, [members, normalizedSearch, removedMemberIds])
+    }, [members, normalizedSearch])
 
-    const handleConfirmRemove = () => {
+    const handleConfirmRemove = async () => {
         if (!memberToRemove) {
             return
         }
 
-        onDeactivateMember(memberToRemove.id)
-
-        toast.success(getToastMessage('deleteSuccess', language), { className: TOAST_COLORS.success })
-        setMemberToRemove(null)
+        try {
+            await onDeactivateMember(memberToRemove)
+            setMemberToRemove(null)
+        } catch {
+            // Error toast is handled by page container.
+        }
     }
 
     if (isLoading) {
@@ -156,12 +154,12 @@ export function StudentListTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-16">{t.teacher.students.tableView.columnNo}</TableHead>
-                            <TableHead>{t.teacher.students.tableView.columnName}</TableHead>
-                            <TableHead>{t.teacher.students.tableView.columnEmail}</TableHead>
-                            <TableHead>{t.teacher.students.tableView.columnStatus}</TableHead>
-                            <TableHead>{t.teacher.students.tableView.columnDateJoined}</TableHead>
-                            <TableHead className="text-right">{t.teacher.students.tableView.columnActions}</TableHead>
+                            <TableHead className="w-16 text-center">{t.teacher.students.tableView.columnNo}</TableHead>
+                            <TableHead className="text-center">{t.teacher.students.tableView.columnName}</TableHead>
+                            <TableHead className="text-center">{t.teacher.students.tableView.columnEmail}</TableHead>
+                            <TableHead className="text-center">{t.teacher.students.tableView.columnStatus}</TableHead>
+                            <TableHead className="text-center">{t.teacher.students.tableView.columnDateJoined}</TableHead>
+                            <TableHead className="text-center">{t.teacher.students.tableView.columnActions}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -170,21 +168,22 @@ export function StudentListTable({
 
                             return (
                                 <TableRow key={member.id}>
-                                    <TableCell>{index + 1}</TableCell>
-                                    <TableCell className="font-medium">{getStudentName(member)}</TableCell>
-                                    <TableCell>{member.student?.email || '-'}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="text-center">{index + 1}</TableCell>
+                                    <TableCell className="text-center font-medium">{getStudentName(member)}</TableCell>
+                                    <TableCell className="text-center">{member.student?.email || '-'}</TableCell>
+                                    <TableCell className="text-center">
                                         <Badge variant="outline" className={`gap-1.5 ${status.className}`}>
                                             {status.icon}
                                             {status.label}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{member.joinedAt ? dateTimeFormat(member.joinedAt) : '-'}</TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
+                                    <TableCell className="text-center">{member.joinedAt ? dateTimeFormat(member.joinedAt) : '-'}</TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex justify-center gap-2">
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
+                                                disabled={isMutating}
                                                 onClick={() => setMemberToRemove(member)}
                                             >
                                                 <UserX2 className="h-4 w-4" />
@@ -236,14 +235,16 @@ export function StudentListTable({
             <AlertDialog open={Boolean(memberToRemove)} onOpenChange={(open) => !open && setMemberToRemove(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xoa hoc sinh khoi danh sach hien thi?</AlertDialogTitle>
+                        <AlertDialogTitle>{t.teacher.students.banStudent.title}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Hanh dong nay chi ap dung o frontend. Ban co the tai lai trang de lay du lieu goc.
+                            {t.teacher.students.banStudent.description}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Huy</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleConfirmRemove}>Xoa</AlertDialogAction>
+                        <AlertDialogCancel>{t.common.no}</AlertDialogCancel>
+                        <AlertDialogAction disabled={isMutating} onClick={() => void handleConfirmRemove()}>
+                            {t.common.yes}
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

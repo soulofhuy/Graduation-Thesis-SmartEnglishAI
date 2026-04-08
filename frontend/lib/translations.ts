@@ -214,6 +214,22 @@ export const translations = {
           requestToChooseClass:
             'Please select a class to view the student list.',
           buttonViewDeactivatedStudents: 'View inactive students'
+        },
+        banStudent: {
+          title: 'Ban this student',
+          description:
+            'Are you sure you want to ban this student from this class?'
+        },
+        viewBannedStudents: {
+          title: 'List of locked students',
+          description: 'Teachers can unlock students',
+          columnNo: 'No.',
+          columnName: 'Full Name',
+          columnEmail: 'Email',
+          columnDateJoined: 'Joining Date',
+          columnActions: 'Actions',
+          noData: 'No students are locked',
+          unbanButton: 'Unlock'
         }
       },
       trashBin: {
@@ -382,7 +398,11 @@ export const translations = {
         previous: 'Previous page',
         next: 'Next page',
         total: 'Total quantity:'
-      }
+      },
+      yes: 'Yes',
+      no: 'No',
+      confirm: 'Confirm',
+      back: 'Back'
     }
   },
 
@@ -599,6 +619,22 @@ export const translations = {
           requestToChooseClass:
             'Hãy chọn một lớp để có thể xem danh sách học sinh.',
           buttonViewDeactivatedStudents: 'Xem HS bị khóa'
+        },
+        banStudent: {
+          title: 'Khóa học sinh',
+          description:
+            'Bạn có chắc muốn khóa học sinh này khỏi lớp học này không?'
+        },
+        viewBannedStudents: {
+          title: 'Danh sách các học sinh bị khóa',
+          description: 'Giáo viên có thể mở khóa cho học sinh',
+          columnNo: 'STT',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnDateJoined: 'Ngày tham gia',
+          columnActions: 'Các thao tác',
+          noData: 'Không có học sinh nào bị khóa',
+          unbanButton: 'Mở khóa'
         }
       },
       trashBin: {
@@ -767,7 +803,11 @@ export const translations = {
         previous: 'Trang trước',
         next: 'Trang sau',
         total: 'Tổng số lượng:'
-      }
+      },
+      yes: 'Có',
+      no: 'Không',
+      confirm: 'Xác nhận',
+      back: 'Quay lại'
     }
   }
 };
