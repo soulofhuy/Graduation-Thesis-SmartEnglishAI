@@ -67,7 +67,7 @@ export function DeactivatedStudentsModal({
     const { t } = useLanguage()
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[70vw] max-w-[95vw] sm:max-w-[1400px]">
+            <DialogContent className="w-[50vw] max-w-[95vw] sm:max-w-[1400px]">
                 <DialogHeader>
                     <DialogTitle>{t.teacher.students.viewBannedStudents.title}</DialogTitle>
                     <DialogDescription>

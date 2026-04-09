@@ -97,3 +97,25 @@ export const getStudentsByClassId = async (token: string, classId: string) => {
 
   return { classDetail: payload.data, message: payload.message };
 };
+
+export const getBannedClassByStudent = async (token: string) => {
+  const response = await fetch(`${getApiBaseUrl()}/classes/banned`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const payload = (await response.json()) as ApiSuccess<Class[]> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch banned classes';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Banned classes response is missing data');
+  }
+
+  return { bannedClasses: payload.data, message: payload.message };
+};

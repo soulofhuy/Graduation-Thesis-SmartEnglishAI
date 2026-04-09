@@ -47,6 +47,11 @@ class ClassStudentService {
           include: {
             profile: true
           }
+        },
+        classMembers: {
+          where: {
+            isBanned: true
+          }
         }
       }
     });

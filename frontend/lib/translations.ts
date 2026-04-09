@@ -287,7 +287,7 @@ export const translations = {
           note: 'You need a class code to join. Please contact your teacher to get the class code.'
         },
         buttonViewRequests: {
-          buttonName: 'View request history',
+          buttonName: 'Request history',
           title: 'Request history for joining',
           description:
             'Track the list of submitted requests and approval status.',
@@ -312,6 +312,16 @@ export const translations = {
           columnPhoneNumber: 'Phone Number',
           columnDateJoined: 'Date Joined',
           noData: 'No data to display'
+        },
+        viewBannedClasses: {
+          title: 'List of locked classes',
+          description:
+            'Classes you no longer have access to because you have been banned',
+          columnClassName: 'Class Name',
+          columnTeacherName: 'Teacher Name',
+          columnClassCode: 'Class Code',
+          columnBannedDate: 'Banned Date',
+          noData: 'You are not banned from any classes'
         },
         gridViewport: {
           fieldTeacherName: 'Teacher Name',
@@ -692,7 +702,7 @@ export const translations = {
           note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.'
         },
         buttonViewRequests: {
-          buttonName: 'Xem lịch sử yêu cầu',
+          buttonName: 'Lịch sử yêu cầu',
           title: 'Lịch sử yêu cầu tham gia',
           description:
             'Theo dõi danh sách yêu cầu đã gửi và trạng thái phê duyệt.',
@@ -731,6 +741,16 @@ export const translations = {
           columnPhoneNumber: 'Số điện thoại',
           columnDateJoined: 'Ngày tham gia',
           noData: 'Không có dữ liệu để hiển thị'
+        },
+        viewBannedClasses: {
+          title: 'Danh sách các lớp học bị khóa',
+          description:
+            'Các lớp bạn không còn quyền truy cập do đã bị cấm tham gia',
+          columnClassName: 'Tên lớp',
+          columnTeacherName: 'Tên giáo viên',
+          columnClassCode: 'Mã lớp',
+          columnBannedDate: 'Ngày bị cấm',
+          noData: 'Bạn không bị cấm tham gia lớp học nào'
         }
       },
       settings: {
