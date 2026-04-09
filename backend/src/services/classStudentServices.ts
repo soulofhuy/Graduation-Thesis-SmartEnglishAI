@@ -32,6 +32,31 @@ class ClassStudentService {
     });
   };
 
+  static getAllBannedClassesByStudent = async (studentId: string) => {
+    return prisma.class.findMany({
+      where: {
+        classMembers: {
+          some: {
+            studentId,
+            isBanned: true
+          }
+        }
+      },
+      include: {
+        teacher: {
+          include: {
+            profile: true
+          }
+        },
+        classMembers: {
+          where: {
+            isBanned: true
+          }
+        }
+      }
+    });
+  };
+
   static getAllRequestsToJoinClassByStudent = async (studentId: string) => {
     return prisma.classMember.findMany({
       where: {

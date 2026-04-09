@@ -188,6 +188,50 @@ export const translations = {
           timeRequest: 'Requested at'
         }
       },
+      students: {
+        title: 'Manage students',
+        description: 'View and manage students in your class',
+        searchEngine: {
+          findStudent: {
+            title: 'Search for students',
+            placeholder: "Enter student's name or email"
+          }
+        },
+        filter: {
+          title: 'Select your class',
+          placeholder: 'Choose a class'
+        },
+        tableView: {
+          title: 'List of students',
+          description: 'Class:',
+          columnNo: 'No.',
+          columnName: 'Full Name',
+          columnEmail: 'Email',
+          columnStatus: 'Status',
+          columnDateJoined: 'Joining Date',
+          columnActions: 'Actions',
+          noData: 'No students to display',
+          requestToChooseClass:
+            'Please select a class to view the student list.',
+          buttonViewDeactivatedStudents: 'View inactive students'
+        },
+        banStudent: {
+          title: 'Ban this student',
+          description:
+            'Are you sure you want to ban this student from this class?'
+        },
+        viewBannedStudents: {
+          title: 'List of locked students',
+          description: 'Teachers can unlock students',
+          columnNo: 'No.',
+          columnName: 'Full Name',
+          columnEmail: 'Email',
+          columnDateJoined: 'Joining Date',
+          columnActions: 'Actions',
+          noData: 'No students are locked',
+          unbanButton: 'Unlock'
+        }
+      },
       trashBin: {
         title: 'Trash Bin',
         description:
@@ -243,7 +287,7 @@ export const translations = {
           note: 'You need a class code to join. Please contact your teacher to get the class code.'
         },
         buttonViewRequests: {
-          buttonName: 'View request history',
+          buttonName: 'Request history',
           title: 'Request history for joining',
           description:
             'Track the list of submitted requests and approval status.',
@@ -268,6 +312,16 @@ export const translations = {
           columnPhoneNumber: 'Phone Number',
           columnDateJoined: 'Date Joined',
           noData: 'No data to display'
+        },
+        viewBannedClasses: {
+          title: 'List of locked classes',
+          description:
+            'Classes you no longer have access to because you have been banned',
+          columnClassName: 'Class Name',
+          columnTeacherName: 'Teacher Name',
+          columnClassCode: 'Class Code',
+          columnBannedDate: 'Banned Date',
+          noData: 'You are not banned from any classes'
         },
         gridViewport: {
           fieldTeacherName: 'Teacher Name',
@@ -348,7 +402,17 @@ export const translations = {
       error: 'Something went wrong',
       success: 'Success',
       viewPort: 'Choose your viewport',
-      close: 'Close'
+      close: 'Close',
+      pagination: {
+        label: 'Number of results / page',
+        previous: 'Previous page',
+        next: 'Next page',
+        total: 'Total quantity:'
+      },
+      yes: 'Yes',
+      no: 'No',
+      confirm: 'Confirm',
+      back: 'Back'
     }
   },
 
@@ -539,6 +603,50 @@ export const translations = {
           timeRequest: 'Yêu cầu lúc '
         }
       },
+      students: {
+        title: 'Quản lí học sinh',
+        description: 'Xem và quản lí học sinh trong lớp học của bạn',
+        searchEngine: {
+          findStudent: {
+            title: 'Tìm kiếm học sinh',
+            placeholder: 'Nhập tên hoặc email của học sinh'
+          }
+        },
+        filter: {
+          title: 'Chọn lớp của bạn',
+          placeholder: 'Chọn một lớp học'
+        },
+        tableView: {
+          title: 'Danh sách học sinh',
+          description: 'Lớp:',
+          columnNo: 'STT',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnStatus: 'Trạng thái',
+          columnDateJoined: 'Ngày tham gia',
+          columnActions: 'Các thao tác',
+          noData: 'Không có học sinh nào để hiển thị',
+          requestToChooseClass:
+            'Hãy chọn một lớp để có thể xem danh sách học sinh.',
+          buttonViewDeactivatedStudents: 'Xem HS bị khóa'
+        },
+        banStudent: {
+          title: 'Khóa học sinh',
+          description:
+            'Bạn có chắc muốn khóa học sinh này khỏi lớp học này không?'
+        },
+        viewBannedStudents: {
+          title: 'Danh sách các học sinh bị khóa',
+          description: 'Giáo viên có thể mở khóa cho học sinh',
+          columnNo: 'STT',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnDateJoined: 'Ngày tham gia',
+          columnActions: 'Các thao tác',
+          noData: 'Không có học sinh nào bị khóa',
+          unbanButton: 'Mở khóa'
+        }
+      },
       trashBin: {
         title: 'Thùng rác',
         description:
@@ -594,7 +702,7 @@ export const translations = {
           note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.'
         },
         buttonViewRequests: {
-          buttonName: 'Xem lịch sử yêu cầu',
+          buttonName: 'Lịch sử yêu cầu',
           title: 'Lịch sử yêu cầu tham gia',
           description:
             'Theo dõi danh sách yêu cầu đã gửi và trạng thái phê duyệt.',
@@ -633,6 +741,16 @@ export const translations = {
           columnPhoneNumber: 'Số điện thoại',
           columnDateJoined: 'Ngày tham gia',
           noData: 'Không có dữ liệu để hiển thị'
+        },
+        viewBannedClasses: {
+          title: 'Danh sách các lớp học bị khóa',
+          description:
+            'Các lớp bạn không còn quyền truy cập do đã bị cấm tham gia',
+          columnClassName: 'Tên lớp',
+          columnTeacherName: 'Tên giáo viên',
+          columnClassCode: 'Mã lớp',
+          columnBannedDate: 'Ngày bị cấm',
+          noData: 'Bạn không bị cấm tham gia lớp học nào'
         }
       },
       settings: {
@@ -699,7 +817,17 @@ export const translations = {
       error: 'Có lỗi xảy ra',
       success: 'Thành công',
       viewPort: 'Chọn chế độ hiển thị',
-      close: 'Đóng'
+      close: 'Đóng',
+      pagination: {
+        label: 'Số kết quả / trang',
+        previous: 'Trang trước',
+        next: 'Trang sau',
+        total: 'Tổng số lượng:'
+      },
+      yes: 'Có',
+      no: 'Không',
+      confirm: 'Xác nhận',
+      back: 'Quay lại'
     }
   }
 };

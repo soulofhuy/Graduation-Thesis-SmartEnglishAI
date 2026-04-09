@@ -6,6 +6,7 @@ import ProfileRouter from './src/routes/profileRoutes';
 import ClassTeacherRouter from './src/routes/classTeacherRoutes';
 import ClassStudentRouter from './src/routes/classStudentRoutes';
 import ClassRouter from './src/routes/classRoutes';
+import StudentRouter from './src/routes/studentRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api', ProfileRouter);
 app.use('/api', ClassStudentRouter);
 app.use('/api', ClassTeacherRouter);
 app.use('/api', ClassRouter);
+app.use('/api', StudentRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 

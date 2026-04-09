@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  UserRound,
   BookOpen,
   BarChart3,
   Settings,
@@ -20,6 +21,11 @@ export const teacherNavItems = [
     label: 'Quản lí lớp học',
     href: '/teacher/classes',
     icon: Users
+  },
+  {
+    label: 'Quản lí học sinh',
+    href: '/teacher/students',
+    icon: UserRound
   },
   {
     label: 'Quản lí câu hỏi',

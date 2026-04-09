@@ -148,14 +148,14 @@ class ClassTeacherService {
     studentId: string,
     rejectorId: string
   ) => {
-    const rejortor = await prisma.user.findUnique({
+    const rejector = await prisma.user.findUnique({
       where: { id: rejectorId }
     });
 
-    if (!rejortor) {
+    if (!rejector) {
       throw new Error('Rejector not found');
     }
-    if (rejortor.role === 'STUDENT') {
+    if (rejector.role === 'STUDENT') {
       throw new Error('Only teachers/admin can reject student join class');
     }
 

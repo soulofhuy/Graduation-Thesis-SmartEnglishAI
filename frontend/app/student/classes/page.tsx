@@ -7,11 +7,12 @@ import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, BookOpen, Eye, Grid, TableCellsMerge, ClockAlert } from 'lucide-react'
+import { Plus, Users, BookOpen, Eye, Grid, TableCellsMerge, ClockAlert, UserX } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
   getAllApprovedClassesByStudent,
+  getBannedClassByStudent,
   getAllRequestsToJoinClassByStudent,
   getStudentsByClassId,
   requestToJoinClass,
@@ -19,9 +20,10 @@ import {
 import type { Class as BackendClass, ClassMember } from '@/lib/types'
 import { getToastMessage } from '@/lib/toast/message'
 import { useLanguage } from '@/components/language-provider'
-import { JoinClassModal } from './join-class-modal'
-import { JoinRequestsModal, type JoinRequestItem } from './join-requests-modal'
-import { ClassMembersModal } from './class-members-modal'
+import { JoinClassModal } from './_components/join-class-modal'
+import { JoinRequestsModal, type JoinRequestItem } from './_components/join-requests-modal'
+import { ClassMembersModal } from './_components/class-members-modal'
+import { BannedClassesModal } from './_components/banned-classes-modal'
 
 export default function StudentClassesPage() {
   const { t, language } = useLanguage()
@@ -31,13 +33,16 @@ export default function StudentClassesPage() {
 
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
   const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false)
+  const [isBannedClassesModalOpen, setIsBannedClassesModalOpen] = useState(false)
   const [isClassMembersModalOpen, setIsClassMembersModalOpen] = useState(false)
   const [classCode, setClassCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
   const [isLoadingClasses, setIsLoadingClasses] = useState(false)
   const [isLoadingRequests, setIsLoadingRequests] = useState(false)
   const [isLoadingClassMembers, setIsLoadingClassMembers] = useState(false)
+  const [isLoadingBannedClasses, setIsLoadingBannedClasses] = useState(false)
   const [joinRequests, setJoinRequests] = useState<JoinRequestItem[]>([])
+  const [bannedClasses, setBannedClasses] = useState<BackendClass[]>([])
   const [selectedClass, setSelectedClass] = useState<BackendClass | null>(null)
   const [selectedClassMembers, setSelectedClassMembers] = useState<ClassMember[]>([])
 
@@ -99,6 +104,22 @@ export default function StudentClassesPage() {
     }
   }
 
+  const fetchBannedClasses = async (token: string) => {
+    setIsLoadingBannedClasses(true)
+    try {
+      const result = await getBannedClassByStudent(token)
+      setBannedClasses(result.bannedClasses as BackendClass[])
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : getToastMessage('loadFailed', language)
+      toast.error(message)
+    } finally {
+      setIsLoadingBannedClasses(false)
+    }
+  }
+
   useEffect(() => {
     if (!isHydrated || !accessToken) {
       return
@@ -106,7 +127,8 @@ export default function StudentClassesPage() {
 
     void Promise.all([
       fetchApprovedClasses(accessToken),
-      fetchPendingRequests(accessToken)
+      fetchPendingRequests(accessToken),
+      fetchBannedClasses(accessToken)
     ])
   }, [accessToken, isHydrated])
 
@@ -238,6 +260,14 @@ export default function StudentClassesPage() {
           >
             <ClockAlert className="w-4 h-4" />
             {t.student.classes.buttonViewRequests.buttonName}
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => setIsBannedClassesModalOpen(true)}
+          >
+            <UserX className="w-4 h-4" />
+            Banned Class
           </Button>
         </div>
       </div>
@@ -396,6 +426,13 @@ export default function StudentClassesPage() {
         classCode={selectedClass?.classCode}
         classMembers={selectedClassMembers}
         isLoading={isLoadingClassMembers}
+      />
+
+      <BannedClassesModal
+        isOpen={isBannedClassesModalOpen}
+        onOpenChange={setIsBannedClassesModalOpen}
+        classes={bannedClasses}
+        isLoading={isLoadingBannedClasses}
       />
     </div>
   )
