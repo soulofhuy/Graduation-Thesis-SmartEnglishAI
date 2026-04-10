@@ -34,7 +34,7 @@ model User {
   rejectedClasses       ClassMember[]     @relation("ClassMemberRejector")
   createdAssignments    Assignment[]      @relation("AssignmentCreator")
   createdQuestions      Question[]        @relation("QuestionCreator")
-  // createdPassages       Passage[]         @relation("PassageCreator")
+  createdPassages       Passage[]         @relation("PassageCreator")
 }
 
 model Profile {
@@ -121,7 +121,8 @@ model Task {
 
   assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   questions             Question[]
-  // passages              Passage[]
+  passages              Passage[]
+  choices               Choice[]          @relation("TaskChoices")
 
   @@index([assignmentId])
 }
@@ -131,43 +132,54 @@ model Question {
   questionContent       String
   createdBy             String?
   taskId                String
+  passageId             String?
   correctChoiceId       String?           @unique
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
   task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
   creator               User?             @relation("QuestionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  passage               Passage?          @relation(fields: [passageId], references: [id], onDelete: SetNull)
   choices               Choice[]          @relation("QuestionChoices")
   correctChoice         Choice?           @relation("QuestionCorrectChoice", fields: [correctChoiceId], references: [id], onDelete: SetNull)
 
   @@index([taskId])
+  @@index([passageId])
   @@index([createdBy])
 }
 
 model Choice {
   id                    String            @id @default(uuid())
-  questionId            String
+  questionId            String?
+  taskId                String?
+  passageId             String?
   choiceContent         String
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
-  question              Question          @relation("QuestionChoices", fields: [questionId], references: [id], onDelete: Cascade)
+  question              Question?         @relation("QuestionChoices", fields: [questionId], references: [id], onDelete: Cascade)
+  task                  Task?             @relation("TaskChoices", fields: [taskId], references: [id], onDelete: Cascade)
+  passage               Passage?          @relation("PassageChoices", fields: [passageId], references: [id], onDelete: Cascade)
   correctFor            Question?         @relation("QuestionCorrectChoice")
 
   @@index([questionId])
+  @@index([taskId])
+  @@index([passageId])
 }
 
-// model Passage {
-//   id                    String            @id @default(uuid())
-//   passageContent        String
-//   createdBy             String?
-//   taskId                String
-//   createdAt             DateTime          @default(now())
-//   updatedAt             DateTime          @updatedAt
+model Passage {
+  id                    String            @id @default(uuid())
+  passageContent        String
+  createdBy             String?
+  taskId                String
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
 
-//   task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
-//   creator               User?             @relation("PassageCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  creator               User?             @relation("PassageCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  questions             Question[]
+  choices               Choice[]          @relation("PassageChoices")
 
-//   @@index([taskId])
-//   @@index([createdBy])
-// }
+  @@index([taskId])
+  @@index([createdBy])
+}
