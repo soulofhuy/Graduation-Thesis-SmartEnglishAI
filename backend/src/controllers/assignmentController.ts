@@ -1,0 +1,102 @@
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middlewares/authMiddleware';
+import AssignmentService from '../services/assignmentServices';
+import Responses from '../utils/responses';
+
+class AssignmentController {
+  static createAssignment = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const creatorId = req.userId;
+
+    if (!creatorId) {
+      return res
+        .status(401)
+        .json(
+          Responses.errorResponse(new Error('Unauthorized - User ID not found'))
+        );
+    }
+
+    try {
+      const createdAssignment =
+        await AssignmentService.createAssignmentWithTasks(creatorId, req.body);
+
+      return res
+        .status(201)
+        .json(
+          Responses.successResponse(
+            'Assignment created successfully',
+            createdAssignment
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
+  static getAssignmentById = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const assignmentId = req.params.assignmentId || req.body.assignmentId;
+
+    if (!assignmentId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Assignment ID is required')));
+    }
+
+    try {
+      const assignment =
+        await AssignmentService.getAssignmentById(assignmentId);
+
+      if (!assignment) {
+        return res
+          .status(404)
+          .json(Responses.errorResponse(new Error('Assignment not found')));
+      }
+
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Assignment fetched successfully',
+            assignment
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
+  static getAssignmentsByClassId = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const classId = req.params.classId || req.body.classId;
+
+    if (!classId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Class ID is required')));
+    }
+
+    try {
+      const assignments =
+        await AssignmentService.getAssignmentsByClassId(classId);
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Assignments fetched successfully',
+            assignments
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+}
+
+export default AssignmentController;
