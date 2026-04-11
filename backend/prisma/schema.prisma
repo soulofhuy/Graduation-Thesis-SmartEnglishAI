@@ -18,6 +18,15 @@ enum Role {
   STUDENT
 }
 
+enum TaskType {
+  PRONUNCIATION
+  WORD_STRESS
+  SITUATIONAL_DIALOG
+  MULTIPLE_CHOICE
+  CLOZE_PASSAGE
+  READING_COMPREHENSION
+}
+
 model User {
   id                    String            @id @default(uuid())
   email                 String            @unique
@@ -116,6 +125,7 @@ model Task {
   id                    String            @id @default(uuid())
   assignmentId          String
   taskContent           String
+  taskType              TaskType          @default(MULTIPLE_CHOICE)
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 

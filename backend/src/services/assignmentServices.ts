@@ -1,4 +1,6 @@
 import { Role } from '../generated/prisma/enums';
+import { AssignmentModel } from '../generated/prisma/models';
+import { TaskType } from '../generated/prisma/enums';
 import prisma from '../utils/prisma';
 
 type CreateChoiceInput = {
@@ -30,6 +32,7 @@ type CreateAssignmentInput = {
   dueDate?: string;
   isSingleAttempt?: boolean;
   canViewResult?: boolean;
+  taskType?: TaskType;
   tasks: CreateTaskInput[];
 };
 
@@ -183,6 +186,7 @@ class AssignmentService {
         isSingleAttempt: boolean;
         canViewResult: boolean;
         description?: string | null;
+        taskType?: TaskType;
         dueDate?: Date;
       } = {
         title: payload.title.trim(),
@@ -190,7 +194,8 @@ class AssignmentService {
         createdBy: creatorId,
         isPublic: payload.isPublic ?? false,
         isSingleAttempt: payload.isSingleAttempt ?? false,
-        canViewResult: payload.canViewResult ?? true
+        canViewResult: payload.canViewResult ?? true,
+        taskType: payload.taskType || TaskType.MULTIPLE_CHOICE
       };
 
       if (payload.description !== undefined) {
@@ -209,7 +214,8 @@ class AssignmentService {
         const createdTask = await tx.task.create({
           data: {
             assignmentId: createdAssignment.id,
-            taskContent: task.taskContent.trim()
+            taskContent: task.taskContent.trim(),
+            taskType: payload.taskType || TaskType.MULTIPLE_CHOICE
           }
         });
 

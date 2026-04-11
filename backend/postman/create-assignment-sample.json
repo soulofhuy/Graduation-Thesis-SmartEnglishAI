@@ -9,6 +9,7 @@
   "tasks": [
     {
       "taskContent": "Part 1: Reading comprehension",
+      "taskType": "READING_COMPREHENSION",
       "passages": [
         {
           "passageContent": "In many cities, people are choosing bicycles over cars for short trips. Riding a bike can reduce traffic congestion and improve public health. However, safe bike lanes are still limited in several areas."
@@ -63,6 +64,7 @@
     },
     {
       "taskContent": "Part 2: Grammar and vocabulary",
+      "taskType": "MULTIPLE_CHOICE",
       "questions": [
         {
           "questionContent": "Choose the correct sentence in present perfect tense.",
