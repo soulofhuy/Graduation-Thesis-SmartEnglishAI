@@ -1,11 +1,11 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
@@ -15,6 +15,7 @@ import {
     type TaskDraft,
     type TaskType,
 } from '../_components'
+import { useLanguage } from '@/components/language-provider'
 
 const createId = () => Math.random().toString(36).slice(2, 10)
 
@@ -43,6 +44,7 @@ const createTask = (index: number): TaskDraft => ({
 })
 
 export default function CreateQuizPage() {
+    const { t } = useLanguage()
     const router = useRouter()
     const initialTask = createTask(0)
     const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'advanced' | 'history' | 'stats'>('basic')
@@ -255,9 +257,18 @@ export default function CreateQuizPage() {
     }
 
     const topTabs = [
-        { key: 'basic', label: 'Thong tin co ban' },
-        { key: 'questions', label: 'Soan cau hoi' },
+        { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
+        { key: 'questions', label: t.teacher.assignments.createAssignment.title },
     ] as const
+
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+            return
+        }
+
+        router.push('/teacher/quizzes')
+    }
 
     const handleAddTask = () => {
         const newTask = createTask(tasks.length)
@@ -371,7 +382,17 @@ export default function CreateQuizPage() {
     return (
         <div className="p-4 md:p-8 space-y-4 bg-muted/20 min-h-screen">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">Chinh sua de thi</h1>
+                <div className="flex items-center gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={handleGoBack}
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-3xl font-semibold">{t.teacher.assignments.createAssignment.title}</h1>
+                </div>
             </div>
 
             <Card className="overflow-hidden py-0">
@@ -447,14 +468,6 @@ export default function CreateQuizPage() {
                             onChangeChoiceContent={handleChangeChoiceContent}
                         />
                     )}
-
-                    {/* {activeTab !== 'basic' && activeTab !== 'questions' && (
-                        <Card>
-                            <CardContent className="py-16 text-center text-muted-foreground">
-                                Tab nay dang duoc cap nhat.
-                            </CardContent>
-                        </Card>
-                    )} */}
                 </div>
             </Card >
         </div >

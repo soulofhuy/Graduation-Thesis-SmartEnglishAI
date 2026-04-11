@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { QuestionDraft, TaskDraft, TaskType } from './quiz-builder-types'
+import { useLanguage } from '@/components/language-provider'
 
 type QuizQuestionsSectionProps = {
     tasks: TaskDraft[]
@@ -55,14 +56,16 @@ export function QuizQuestionsSection({
     onDeleteChoice,
     onChangeChoiceContent,
 }: QuizQuestionsSectionProps) {
+    const { t } = useLanguage();
+
     return (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
             <Card className="xl:col-span-4">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl">Danh sach phan thi</CardTitle>
+                        <CardTitle className="text-xl">{t.teacher.assignments.createQuestionsAndTasks.createTask.title}</CardTitle>
                         <Button variant="ghost" size="sm" className="text-primary" onClick={onAddTask}>
-                            Them moi
+                            {t.teacher.assignments.createQuestionsAndTasks.createTask.addTaskButton}
                         </Button>
                     </div>
                 </CardHeader>
@@ -104,13 +107,13 @@ export function QuizQuestionsSection({
 
                     <div className="space-y-3 border-t pt-4">
                         <div className="grid gap-2">
-                            <Label>Task type</Label>
+                            <Label>{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdown}</Label>
                             <Select
                                 value={selectedTask.taskType}
                                 onValueChange={(value) => onChangeTaskType(selectedTask.id, value as TaskType)}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Chon task type" />
+                                    <SelectValue placeholder="-----" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="pronounciation">Pronounciation</SelectItem>
@@ -124,10 +127,10 @@ export function QuizQuestionsSection({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>Mo ta task</Label>
+                            <Label>{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskDescription}</Label>
                             <RichTextEditor
                                 minHeightClass="min-h-20"
-                                placeholder="Nhap mo ta cho task nay"
+                                placeholder={t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskDescriptionPlaceholder}
                                 value={selectedTask.taskDescription}
                                 onChange={(value) => onChangeTaskDescription(selectedTask.id, value)}
                             />
@@ -136,9 +139,9 @@ export function QuizQuestionsSection({
 
                     <div className="border-t pt-4 space-y-3">
                         <div className="flex items-center justify-between gap-2">
-                            <p className="font-semibold">Danh muc cau hoi</p>
+                            <p className="font-semibold">{t.teacher.assignments.createQuestionsAndTasks.createQuestion.questionList.title}</p>
                             <Button type="button" variant="outline" size="sm" onClick={() => onAddQuestion(selectedTask.id)}>
-                                <Plus className="w-4 h-4 mr-1" /> Them cau hoi
+                                <Plus className="w-4 h-4 mr-1" /> {t.teacher.assignments.createQuestionsAndTasks.createQuestion.questionList.addQuestionButton}
                             </Button>
                         </div>
 
@@ -163,15 +166,15 @@ export function QuizQuestionsSection({
 
             <Card className="xl:col-span-8">
                 <CardHeader>
-                    <CardTitle className="text-xl">Them cau hoi moi</CardTitle>
+                    <CardTitle className="text-xl">{t.teacher.assignments.createQuestionsAndTasks.createQuestion.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-5">
                     {usesSharedPassage && (
                         <div className="grid gap-2">
-                            <Label>Doan van dung chung cho task</Label>
+                            <Label>{t.teacher.assignments.createQuestionsAndTasks.createQuestion.clozeTest.title}</Label>
                             <RichTextEditor
                                 minHeightClass="min-h-32"
-                                placeholder="Nhap doan van dung chung"
+                                placeholder={t.teacher.assignments.createQuestionsAndTasks.createQuestion.clozeTest.passagePlaceholder}
                                 value={getSharedPassageContent(selectedTask)}
                                 onChange={(value) => onChangeSharedPassage(selectedTask.id, value)}
                             />
@@ -180,33 +183,21 @@ export function QuizQuestionsSection({
 
                     {showQuestionComposer && (
                         <div className="grid gap-2">
-                            <Label>Soan cau hoi</Label>
+                            <Label>{t.teacher.assignments.createQuestionsAndTasks.createQuestion.questionContent}</Label>
                             <RichTextEditor
                                 minHeightClass="min-h-24"
-                                placeholder="Nhap noi dung cau hoi"
+                                placeholder={t.teacher.assignments.createQuestionsAndTasks.createQuestion.questionContentPlaceholder}
                                 value={selectedQuestion.questionContent}
                                 onChange={onChangeQuestionContent}
                             />
                         </div>
                     )}
 
-                    {!showQuestionComposer && (
-                        <p className="text-sm text-muted-foreground">
-                            Loai task nay khong can nhap noi dung cau hoi. Chi can tao danh sach cau hoi va dap an.
-                        </p>
-                    )}
-
-                    {isReadingComprehension && (
-                        <p className="text-sm text-muted-foreground">
-                            Reading comprehension: moi cau hoi van can noi dung cau hoi va dap an, va tat ca dung chung doan van tren.
-                        </p>
-                    )}
-
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <Label>Cau tra loi</Label>
+                            <Label>{t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.title}</Label>
                             <Button type="button" variant="outline" size="sm" onClick={onAddChoice}>
-                                <Plus className="w-4 h-4 mr-1" /> Them dap an
+                                <Plus className="w-4 h-4 mr-1" /> {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.addChoiceButton}
                             </Button>
                         </div>
 
@@ -222,7 +213,7 @@ export function QuizQuestionsSection({
                                             className={`w-4 h-4 mr-2 ${choice.isCorrect ? 'text-green-600' : 'text-muted-foreground'
                                                 }`}
                                         />
-                                        Dap an {index + 1}
+                                        {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.choiceNo}{index + 1}
                                     </button>
 
                                     <Button
@@ -233,13 +224,13 @@ export function QuizQuestionsSection({
                                         disabled={selectedQuestion.choices.length <= 2}
                                         onClick={() => onDeleteChoice(choice.id)}
                                     >
-                                        Xoa dap an
+                                        {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.deleteChoiceButton}
                                     </Button>
                                 </div>
 
                                 <RichTextEditor
                                     minHeightClass="min-h-20"
-                                    placeholder="Nhap noi dung dap an"
+                                    placeholder={t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.choicePlaceholder}
                                     value={choice.choiceContent}
                                     onChange={(value) => onChangeChoiceContent(choice.id, value)}
                                 />

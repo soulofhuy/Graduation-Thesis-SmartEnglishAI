@@ -232,6 +232,69 @@ export const translations = {
           unbanButton: 'Unlock'
         }
       },
+      assignments: {
+        createAssignment: {
+          title: 'Create new assignment',
+          description: 'Free to create your own assignment as you want',
+          tabAssignmentInfo: {
+            title: 'Assignment information',
+            fieldAssignmentName: 'Assignment name',
+            fieldAssignmentNamePlaceholder:
+              'e.g., Present Simple Tense Exercise',
+            fieldClass: 'Is assigned for class',
+            fieldDeadline: 'Deadline',
+            fieldDescription: 'Description',
+            fieldDescriptionPlaceholder: 'Enter assignment description here'
+          },
+          tabAssignmentConfig: {
+            title: 'Assignment configuration',
+            fieldIsPublic: 'Make assignment public',
+            fieldIsPublicDescription:
+              'If enabled, students that are not in your assigned class can also access',
+            fieldOneAttempt: 'Only allow one attempt',
+            fieldOneAttemptDescription:
+              'If enabled, students can only attempt the assignment once',
+            fieldCanViewResult: 'Allow students to view results',
+            fieldCanViewResultDescription:
+              'If enabled, students can view their results after submission'
+          }
+        },
+        createQuestionsAndTasks: {
+          createTask: {
+            title: 'Tasks list',
+            addTaskButton: 'Add new task',
+            fieldTaskTypeDropdown: 'Select task type',
+            fieldTaskDescription: 'Task description',
+            fieldTaskDescriptionPlaceholder: 'Enter description for this task'
+          },
+          createQuestion: {
+            questionList: {
+              title: 'Questions list',
+              addQuestionButton: 'Add new question'
+            },
+            title: 'Create a new question',
+            questionContent: 'Question content',
+            questionContentPlaceholder: 'Enter question content here',
+            choice: {
+              title: 'Choices for this question',
+              addChoiceButton: 'Add new choice',
+              deleteChoiceButton: 'Delete this choice',
+              choiceNo: 'Choice number ',
+              choicePlaceholder: 'Enter choice content here'
+            },
+            clozeTest: {
+              title: 'Type the passage for this task',
+              passagePlaceholder:
+                'Enter passage content here. Use {{blank}} to indicate blank space for cloze test.'
+            },
+            readingComprehensionTest: {
+              title: 'Type the passage for this task',
+              passagePlaceholder:
+                'Enter passage content here. The question will be based on this passage.'
+            }
+          }
+        }
+      },
       trashBin: {
         title: 'Trash Bin',
         description:
@@ -645,6 +708,78 @@ export const translations = {
           columnActions: 'Các thao tác',
           noData: 'Không có học sinh nào bị khóa',
           unbanButton: 'Mở khóa'
+        }
+      },
+      assignments: {
+        createAssignment: {
+          title: 'Tạo bài tập mới',
+          description:
+            'Tự do tạo bài tập theo nhu cầu của bạn và năng lực của học sinh',
+
+          tabAssignmentInfo: {
+            title: 'Thông tin bài tập',
+            fieldAssignmentName: 'Tên bài tập',
+            fieldAssignmentNamePlaceholder:
+              'Ví dụ: Bài tập về thì hiện tại đơn',
+            fieldClass: 'Giao cho lớp',
+            fieldDeadline: 'Hạn nộp',
+            fieldDescription: 'Mô tả',
+            fieldDescriptionPlaceholder: 'Nhập mô tả bài tập tại đây'
+          },
+
+          tabAssignmentConfig: {
+            title: 'Cấu hình bài tập',
+            fieldIsPublic: 'Công khai bài tập',
+            fieldIsPublicDescription:
+              'Nếu bật, học sinh ngoài lớp vẫn có thể truy cập bài tập',
+            fieldOneAttempt: 'Chỉ cho phép làm một lần',
+            fieldOneAttemptDescription:
+              'Nếu bật, học sinh chỉ được làm bài một lần duy nhất',
+            fieldCanViewResult: 'Cho phép xem kết quả',
+            fieldCanViewResultDescription:
+              'Nếu bật, học sinh có thể xem kết quả sau khi nộp bài'
+          }
+        },
+
+        createQuestionsAndTasks: {
+          createTask: {
+            title: 'Danh sách phần lớn',
+            addTaskButton: 'Thêm phần mới',
+            fieldTaskTypeDropdown: 'Chọn loại bài tập',
+            fieldTaskDescription: 'Đề bài cho phần này',
+            fieldTaskDescriptionPlaceholder: 'Nhập đề bài cho phần này'
+          },
+
+          createQuestion: {
+            questionList: {
+              title: 'Danh sách câu hỏi',
+              addQuestionButton: 'Thêm câu hỏi'
+            },
+
+            title: 'Tạo câu hỏi mới',
+            questionContent: 'Nội dung câu hỏi',
+            questionContentPlaceholder: 'Nhập nội dung câu hỏi tại đây',
+
+            choice: {
+              title: 'Các lựa chọn',
+              addChoiceButton: 'Thêm lựa chọn',
+              deleteChoiceButton: 'Xóa lựa chọn',
+              choiceNo: 'Đáp án ',
+              choicePlaceholder: 'Nhập nội dung của phương án'
+            },
+
+            clozeTest: {
+              title: 'Nhập đoạn văn cho bài đục lỗ',
+              passagePlaceholder:
+                'Nhập nội dung đoạn văn. Dùng {{blank}} để đánh dấu chỗ trống cần điền.'
+            },
+
+            readingComprehensionTest: {
+              title: 'Nhập đoạn văn đọc hiểu',
+              passagePlaceholder:
+                'Nhập nội dung đoạn văn. Các câu hỏi sẽ dựa trên đoạn này.'
+            }
+          }
         }
       },
       trashBin: {
