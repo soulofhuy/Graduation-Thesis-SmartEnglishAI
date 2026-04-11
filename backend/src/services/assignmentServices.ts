@@ -8,11 +8,17 @@ type CreateChoiceInput = {
 
 type CreateQuestionInput = {
   questionContent: string;
+  passageIndex?: number;
   choices: CreateChoiceInput[];
+};
+
+type CreatePassageInput = {
+  passageContent: string;
 };
 
 type CreateTaskInput = {
   taskContent: string;
+  passages?: CreatePassageInput[];
   questions: CreateQuestionInput[];
 };
 
@@ -59,6 +65,25 @@ class AssignmentService {
           );
         }
 
+        if (
+          question.passageIndex !== undefined &&
+          (!Number.isInteger(question.passageIndex) ||
+            question.passageIndex < 0)
+        ) {
+          throw new Error(
+            `passageIndex must be a non-negative integer at task ${taskIndex}, question ${questionIndex}`
+          );
+        }
+
+        if (
+          question.passageIndex !== undefined &&
+          (!task.passages || question.passageIndex >= task.passages.length)
+        ) {
+          throw new Error(
+            `Invalid passageIndex at task ${taskIndex}, question ${questionIndex}`
+          );
+        }
+
         if (!Array.isArray(question.choices) || question.choices.length < 2) {
           throw new Error(
             `Question at task ${taskIndex}, question ${questionIndex} must have at least two choices`
@@ -83,6 +108,16 @@ class AssignmentService {
           }
         });
       });
+
+      if (task.passages) {
+        task.passages.forEach((passage, passageIndex) => {
+          if (!passage.passageContent?.trim()) {
+            throw new Error(
+              `Passage content is required at task ${taskIndex}, passage ${passageIndex}`
+            );
+          }
+        });
+      }
     });
   }
 
@@ -178,12 +213,33 @@ class AssignmentService {
           }
         });
 
+        const createdPassages: string[] = [];
+
+        if (task.passages?.length) {
+          for (const passage of task.passages) {
+            const createdPassage = await tx.passage.create({
+              data: {
+                taskId: createdTask.id,
+                passageContent: passage.passageContent.trim(),
+                createdBy: creatorId
+              }
+            });
+            createdPassages.push(createdPassage.id);
+          }
+        }
+
         for (const question of task.questions) {
+          const mappedPassageId =
+            question.passageIndex !== undefined
+              ? (createdPassages[question.passageIndex] ?? null)
+              : null;
+
           const createdQuestion = await tx.question.create({
             data: {
               taskId: createdTask.id,
               questionContent: question.questionContent.trim(),
-              createdBy: creatorId
+              createdBy: creatorId,
+              passageId: mappedPassageId
             }
           });
 
@@ -216,6 +272,17 @@ class AssignmentService {
         include: {
           tasks: {
             include: {
+              passages: {
+                include: {
+                  questions: {
+                    include: {
+                      choices: true,
+                      correctChoice: true
+                    }
+                  },
+                  choices: true
+                }
+              },
               questions: {
                 include: {
                   choices: true,
@@ -251,6 +318,19 @@ class AssignmentService {
             createdAt: 'asc'
           },
           include: {
+            passages: {
+              orderBy: {
+                createdAt: 'asc'
+              },
+              include: {
+                questions: {
+                  include: {
+                    choices: true,
+                    correctChoice: true
+                  }
+                }
+              }
+            },
             questions: {
               orderBy: {
                 createdAt: 'asc'
@@ -282,6 +362,16 @@ class AssignmentService {
       include: {
         tasks: {
           include: {
+            passages: {
+              include: {
+                questions: {
+                  include: {
+                    choices: true,
+                    correctChoice: true
+                  }
+                }
+              }
+            },
             questions: {
               include: {
                 choices: true,
