@@ -1,30 +1,33 @@
-import type { TaskType } from '@/lib/types';
+import type {
+  CreateChoiceInput,
+  CreatePassageInput,
+  CreateTaskInput
+} from '@/lib/types/create-test-input';
 
 export interface ChoiceDraft {
   id: string;
-  choiceContent: string;
-  isCorrect: boolean;
+  choiceContent: CreateChoiceInput['choiceContent'];
+  isCorrect: CreateChoiceInput['isCorrect'];
 }
 
 export interface QuestionDraft {
   id: string;
   questionContent: string;
   topicTag: string;
-  questionType: 'single-choice';
   passageIndex: string;
   choices: ChoiceDraft[];
 }
 
 export interface PassageDraft {
   id: string;
-  passageContent: string;
+  passageContent: CreatePassageInput['passageContent'];
 }
 
 export interface TaskDraft {
   id: string;
   taskTitle: string;
   taskDescription: string;
-  taskType: TaskType;
+  taskType: CreateTaskInput['taskType'];
   passages: PassageDraft[];
   questions: QuestionDraft[];
 }

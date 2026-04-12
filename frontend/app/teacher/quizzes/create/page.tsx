@@ -9,41 +9,18 @@ import { Card } from '@/components/ui/card'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
+    buildCreateAssignmentPayload,
+    createChoice,
+    createId,
+    createQuestion,
+    createTask,
+    safeTrim,
     type AssignmentFormData,
-    type ChoiceDraft,
     type QuestionDraft,
     type TaskDraft
 } from '../_components'
 import type { TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
-
-const createId = () => Math.random().toString(36).slice(2, 10)
-
-const createChoice = (): ChoiceDraft => ({
-    id: createId(),
-    choiceContent: '',
-    isCorrect: false,
-})
-
-const createQuestion = (): QuestionDraft => ({
-    id: createId(),
-    questionContent: '',
-    topicTag: '',
-    questionType: 'single-choice',
-    passageIndex: 'none',
-    choices: [createChoice(), createChoice()],
-})
-
-const safeTrim = (value?: string | null) => (typeof value === 'string' ? value.trim() : '')
-
-const createTask = (taskType: TaskType = 'MULTIPLE_CHOICE', taskTitle = ''): TaskDraft => ({
-    id: createId(),
-    taskTitle,
-    taskDescription: '',
-    taskType,
-    passages: [],
-    questions: [createQuestion()],
-})
 
 export default function CreateQuizPage() {
     const { t } = useLanguage()
@@ -166,41 +143,7 @@ export default function CreateQuizPage() {
     }
 
     const payloadPreview = useMemo(() => {
-        return {
-            title: safeTrim(formData.title),
-            description: safeTrim(formData.description) || undefined,
-            classId: safeTrim(formData.classId),
-            isPublic: formData.isPublic,
-            dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
-            isSingleAttempt: formData.isSingleAttempt,
-            canViewResult: formData.canViewResult,
-            tasks: tasks.map((task) => ({
-                taskContent: safeTrim(task.taskDescription) || safeTrim(task.taskTitle),
-                taskType: task.taskType,
-                passages: task.passages.length
-                    ? (task.taskType === 'CLOZE_PASSAGE' || task.taskType === 'READING_COMPREHENSION'
-                        ? [
-                            {
-                                passageContent: safeTrim(task.passages[0]?.passageContent),
-                            },
-                        ]
-                        : task.passages.map((passage) => ({ passageContent: safeTrim(passage.passageContent) })))
-                    : undefined,
-                questions: task.questions.map((question) => ({
-                    questionContent: safeTrim(question.questionContent),
-                    passageIndex:
-                        task.taskType === 'CLOZE_PASSAGE' || task.taskType === 'READING_COMPREHENSION'
-                            ? 0
-                            : question.passageIndex === 'none'
-                                ? undefined
-                                : Number(question.passageIndex),
-                    choices: question.choices.map((choice) => ({
-                        choiceContent: safeTrim(choice.choiceContent),
-                        isCorrect: choice.isCorrect,
-                    })),
-                })),
-            })),
-        }
+        return buildCreateAssignmentPayload(formData, tasks)
     }, [formData, tasks])
 
     const goToQuestionTab = () => {
