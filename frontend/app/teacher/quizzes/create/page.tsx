@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/card'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
+    QuizPreviewModal,
+    QuizPreviewContent,
     buildCreateAssignmentPayload,
     createChoice,
     createId,
@@ -48,8 +50,9 @@ export default function CreateQuizPage() {
     }
 
     const initialTask = createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))
-    const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'advanced' | 'history' | 'stats'>('basic')
+    const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview'>('basic')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [formData, setFormData] = useState<AssignmentFormData>({
         title: '',
         description: '',
@@ -226,6 +229,7 @@ export default function CreateQuizPage() {
     const topTabs = [
         { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
         { key: 'questions', label: t.teacher.assignments.createAssignment.title },
+        { key: 'preview', label: 'View preview' },
     ] as const
 
     const handleGoBack = () => {
@@ -400,6 +404,11 @@ export default function CreateQuizPage() {
                                                     return
                                                 }
 
+                                                if (tab.key === 'preview' && (!formData.title.trim() || !tasks.length)) {
+                                                    toast.error('Vui lòng nhập tiêu đề và tạo task trước')
+                                                    return
+                                                }
+
                                                 setActiveTab(tab.key)
                                             }}
                                         >
@@ -411,9 +420,19 @@ export default function CreateQuizPage() {
                         </div>
 
                         <div>
-                            <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
-                                {isSubmitting ? t.common.isSaving : t.common.save}
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsPreviewOpen(true)}
+                                    disabled={!formData.title.trim() || !tasks.length}
+                                >
+                                    Xem trước
+                                </Button>
+                                <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
+                                    {isSubmitting ? t.common.isSaving : t.common.save}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -453,8 +472,18 @@ export default function CreateQuizPage() {
                             onChangeChoiceContent={handleChangeChoiceContent}
                         />
                     )}
+
+                    {activeTab === 'preview' && (
+                        <QuizPreviewContent payload={payloadPreview} />
+                    )}
                 </div>
             </Card >
+
+            <QuizPreviewModal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                payload={payloadPreview}
+            />
         </div >
     )
 }
