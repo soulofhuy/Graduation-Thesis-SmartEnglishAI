@@ -264,10 +264,19 @@ export const translations = {
             title: 'Tasks list',
             addTaskButton: 'Add new task',
             fieldTaskTypeDropdown: 'Select task type',
+            fieldTaskTypeDropdownValue: {
+              PRONUNCIATION: 'Pronunciation',
+              WORD_STRESS: 'Word stress',
+              SITUATIONAL_DIALOG: 'Situational dialog',
+              MULTIPLE_CHOICE: 'Multiple choice',
+              CLOZE_PASSAGE: 'Cloze passage',
+              READING_COMPREHENSION: 'Reading comprehension'
+            },
             fieldTaskDescription: 'Task description',
             fieldTaskDescriptionPlaceholder: 'Enter description for this task'
           },
           createQuestion: {
+            deleteButton: 'Delete this question',
             questionList: {
               title: 'Questions list',
               addQuestionButton: 'Add new question'
@@ -746,34 +755,39 @@ export const translations = {
             title: 'Danh sách phần lớn',
             addTaskButton: 'Thêm phần mới',
             fieldTaskTypeDropdown: 'Chọn loại bài tập',
+            fieldTaskTypeDropdownValue: {
+              PRONUNCIATION: 'Phát âm',
+              WORD_STRESS: 'Nhấn âm',
+              SITUATIONAL_DIALOG: 'Đoạn hội thoại tình huống',
+              MULTIPLE_CHOICE: 'Trắc nghiệm ngữ pháp/từ vựng/viết lại câu',
+              CLOZE_PASSAGE: 'Đoạn văn đục lỗ',
+              READING_COMPREHENSION: 'Đọc hiểu đoạn văn'
+            },
             fieldTaskDescription: 'Đề bài cho phần này',
             fieldTaskDescriptionPlaceholder: 'Nhập đề bài cho phần này'
           },
 
           createQuestion: {
+            deleteButton: 'Xóa câu hỏi này',
             questionList: {
               title: 'Danh sách câu hỏi',
               addQuestionButton: 'Thêm câu hỏi'
             },
-
             title: 'Tạo câu hỏi mới',
             questionContent: 'Nội dung câu hỏi',
             questionContentPlaceholder: 'Nhập nội dung câu hỏi tại đây',
-
             choice: {
-              title: 'Các lựa chọn',
-              addChoiceButton: 'Thêm lựa chọn',
-              deleteChoiceButton: 'Xóa lựa chọn',
+              title: 'Các đáp án',
+              addChoiceButton: 'Thêm đáp án',
+              deleteChoiceButton: 'Xóa đáp án',
               choiceNo: 'Đáp án ',
               choicePlaceholder: 'Nhập nội dung của phương án'
             },
-
             clozeTest: {
               title: 'Nhập đoạn văn cho bài đục lỗ',
               passagePlaceholder:
                 'Nhập nội dung đoạn văn. Dùng {{blank}} để đánh dấu chỗ trống cần điền.'
             },
-
             readingComprehensionTest: {
               title: 'Nhập đoạn văn đọc hiểu',
               passagePlaceholder:

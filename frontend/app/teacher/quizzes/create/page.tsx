@@ -12,9 +12,9 @@ import {
     type AssignmentFormData,
     type ChoiceDraft,
     type QuestionDraft,
-    type TaskDraft,
-    type TaskType,
+    type TaskDraft
 } from '../_components'
+import type { TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 
 const createId = () => Math.random().toString(36).slice(2, 10)
@@ -34,11 +34,13 @@ const createQuestion = (): QuestionDraft => ({
     choices: [createChoice(), createChoice()],
 })
 
-const createTask = (index: number): TaskDraft => ({
+const safeTrim = (value?: string | null) => (typeof value === 'string' ? value.trim() : '')
+
+const createTask = (taskType: TaskType = 'MULTIPLE_CHOICE', taskTitle = ''): TaskDraft => ({
     id: createId(),
-    taskTitle: `Phan ${index + 1}`,
+    taskTitle,
     taskDescription: '',
-    taskType: 'multiple_choice',
+    taskType,
     passages: [],
     questions: [createQuestion()],
 })
@@ -46,7 +48,29 @@ const createTask = (index: number): TaskDraft => ({
 export default function CreateQuizPage() {
     const { t } = useLanguage()
     const router = useRouter()
-    const initialTask = createTask(0)
+
+    const getTaskTitleFromType = (taskType: TaskType) => {
+        const labels = t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue
+
+        switch (taskType) {
+            case 'PRONUNCIATION':
+                return labels.PRONUNCIATION
+            case 'WORD_STRESS':
+                return labels.WORD_STRESS
+            case 'SITUATIONAL_DIALOG':
+                return labels.SITUATIONAL_DIALOG
+            case 'MULTIPLE_CHOICE':
+                return labels.MULTIPLE_CHOICE
+            case 'CLOZE_PASSAGE':
+                return labels.CLOZE_PASSAGE
+            case 'READING_COMPREHENSION':
+                return labels.READING_COMPREHENSION
+            default:
+                return labels.MULTIPLE_CHOICE
+        }
+    }
+
+    const initialTask = createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))
     const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'advanced' | 'history' | 'stats'>('basic')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [formData, setFormData] = useState<AssignmentFormData>({
@@ -68,10 +92,10 @@ export default function CreateQuizPage() {
         selectedTask?.questions[0]
 
     const isPronunciationOrStress =
-        selectedTask?.taskType === 'pronounciation' ||
-        selectedTask?.taskType === 'word_stress'
-    const isClozePassage = selectedTask?.taskType === 'cloze_passage'
-    const isReadingComprehension = selectedTask?.taskType === 'reading_comprehension'
+        selectedTask?.taskType === 'PRONUNCIATION' ||
+        selectedTask?.taskType === 'WORD_STRESS'
+    const isClozePassage = selectedTask?.taskType === 'CLOZE_PASSAGE'
+    const isReadingComprehension = selectedTask?.taskType === 'READING_COMPREHENSION'
     const usesSharedPassage = isClozePassage || isReadingComprehension
     const showQuestionComposer = !isPronunciationOrStress && !isClozePassage
 
@@ -143,35 +167,35 @@ export default function CreateQuizPage() {
 
     const payloadPreview = useMemo(() => {
         return {
-            title: formData.title.trim(),
-            description: formData.description.trim() || undefined,
-            classId: formData.classId.trim(),
+            title: safeTrim(formData.title),
+            description: safeTrim(formData.description) || undefined,
+            classId: safeTrim(formData.classId),
             isPublic: formData.isPublic,
             dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
             isSingleAttempt: formData.isSingleAttempt,
             canViewResult: formData.canViewResult,
             tasks: tasks.map((task) => ({
-                taskContent: task.taskDescription.trim() || task.taskTitle.trim(),
+                taskContent: safeTrim(task.taskDescription) || safeTrim(task.taskTitle),
                 taskType: task.taskType,
                 passages: task.passages.length
-                    ? (task.taskType === 'cloze_passage' || task.taskType === 'reading_comprehension'
+                    ? (task.taskType === 'CLOZE_PASSAGE' || task.taskType === 'READING_COMPREHENSION'
                         ? [
                             {
-                                passageContent: task.passages[0]?.passageContent.trim() ?? '',
+                                passageContent: safeTrim(task.passages[0]?.passageContent),
                             },
                         ]
-                        : task.passages.map((passage) => ({ passageContent: passage.passageContent.trim() })))
+                        : task.passages.map((passage) => ({ passageContent: safeTrim(passage.passageContent) })))
                     : undefined,
                 questions: task.questions.map((question) => ({
-                    questionContent: question.questionContent.trim(),
+                    questionContent: safeTrim(question.questionContent),
                     passageIndex:
-                        task.taskType === 'cloze_passage' || task.taskType === 'reading_comprehension'
+                        task.taskType === 'CLOZE_PASSAGE' || task.taskType === 'READING_COMPREHENSION'
                             ? 0
                             : question.passageIndex === 'none'
                                 ? undefined
                                 : Number(question.passageIndex),
                     choices: question.choices.map((choice) => ({
-                        choiceContent: choice.choiceContent.trim(),
+                        choiceContent: safeTrim(choice.choiceContent),
                         isCorrect: choice.isCorrect,
                     })),
                 })),
@@ -206,8 +230,8 @@ export default function CreateQuizPage() {
             }
 
             const requiresPassage =
-                task.taskType === 'cloze_passage' ||
-                task.taskType === 'reading_comprehension'
+                task.taskType === 'CLOZE_PASSAGE' ||
+                task.taskType === 'READING_COMPREHENSION'
 
             if (requiresPassage && !task.passages?.[0]?.passageContent?.trim()) {
                 toast.error('Task dang chon can nhap doan van dung chung')
@@ -221,9 +245,9 @@ export default function CreateQuizPage() {
 
             for (const question of task.questions) {
                 const requiresQuestionContent =
-                    task.taskType !== 'pronounciation' &&
-                    task.taskType !== 'word_stress' &&
-                    task.taskType !== 'cloze_passage'
+                    task.taskType !== 'PRONUNCIATION' &&
+                    task.taskType !== 'WORD_STRESS' &&
+                    task.taskType !== 'CLOZE_PASSAGE'
 
                 if (requiresQuestionContent && !question.questionContent) {
                     toast.error('Question content khong duoc de trong')
@@ -271,7 +295,7 @@ export default function CreateQuizPage() {
     }
 
     const handleAddTask = () => {
-        const newTask = createTask(tasks.length)
+        const newTask = createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))
         setTasks((prev) => [...prev, newTask])
         setSelectedTaskId(newTask.id)
         setSelectedQuestionId(newTask.questions[0].id)
@@ -314,6 +338,7 @@ export default function CreateQuizPage() {
         updateTask(taskId, (oldTask) => ({
             ...oldTask,
             taskType,
+            taskTitle: getTaskTitleFromType(taskType),
         }))
     }
 
@@ -335,6 +360,22 @@ export default function CreateQuizPage() {
 
     const handleSelectQuestion = (questionId: string) => {
         setSelectedQuestionId(questionId)
+    }
+
+    const handleDeleteSelectedQuestion = () => {
+        if (!selectedTask || !selectedQuestion) {
+            return
+        }
+
+        if (selectedTask.questions.length <= 1) {
+            toast.error('Can it nhat 1 cau hoi trong moi task')
+            return
+        }
+
+        updateTask(selectedTask.id, (oldTask) => ({
+            ...oldTask,
+            questions: oldTask.questions.filter((question) => question.id !== selectedQuestion.id),
+        }))
     }
 
     const handleChangeQuestionContent = (value: string) => {
@@ -428,7 +469,7 @@ export default function CreateQuizPage() {
 
                         <div>
                             <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
-                                {isSubmitting ? 'Dang luu...' : 'Luu de thi'}
+                                {isSubmitting ? t.common.isSaving : t.common.save}
                             </Button>
                         </div>
                     </div>
@@ -459,6 +500,7 @@ export default function CreateQuizPage() {
                             onChangeTaskType={handleChangeTaskType}
                             onChangeTaskDescription={handleChangeTaskDescription}
                             onAddQuestion={handleAddQuestion}
+                            onDeleteQuestion={handleDeleteSelectedQuestion}
                             onSelectQuestion={handleSelectQuestion}
                             onChangeSharedPassage={updateSharedPassageContent}
                             onChangeQuestionContent={handleChangeQuestionContent}

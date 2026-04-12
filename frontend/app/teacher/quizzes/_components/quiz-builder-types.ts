@@ -1,3 +1,5 @@
+import type { TaskType } from '@/lib/types';
+
 export interface ChoiceDraft {
   id: string;
   choiceContent: string;
@@ -12,14 +14,6 @@ export interface QuestionDraft {
   passageIndex: string;
   choices: ChoiceDraft[];
 }
-
-export type TaskType =
-  | 'pronounciation'
-  | 'word_stress'
-  | 'situational_dialog'
-  | 'multiple_choice'
-  | 'cloze_passage'
-  | 'reading_comprehension';
 
 export interface PassageDraft {
   id: string;

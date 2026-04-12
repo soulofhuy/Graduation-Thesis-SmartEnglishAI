@@ -1,4 +1,11 @@
 export type Role = 'ADMIN' | 'TEACHER' | 'STUDENT';
+export type TaskType =
+  | 'PRONUNCIATION'
+  | 'WORD_STRESS'
+  | 'SITUATIONAL_DIALOG'
+  | 'MULTIPLE_CHOICE'
+  | 'CLOZE_PASSAGE'
+  | 'READING_COMPREHENSION';
 
 export interface User {
   id: string;

@@ -4,9 +4,11 @@ import { CheckCircle2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { QuestionDraft, TaskDraft, TaskType } from './quiz-builder-types'
+import type { QuestionDraft, TaskDraft } from './quiz-builder-types'
+import type { TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 
 type QuizQuestionsSectionProps = {
@@ -24,6 +26,7 @@ type QuizQuestionsSectionProps = {
     onChangeTaskType: (taskId: string, taskType: TaskType) => void
     onChangeTaskDescription: (taskId: string, value: string) => void
     onAddQuestion: (taskId: string) => void
+    onDeleteQuestion: () => void
     onSelectQuestion: (questionId: string) => void
     onChangeSharedPassage: (taskId: string, value: string) => void
     onChangeQuestionContent: (value: string) => void
@@ -48,6 +51,7 @@ export function QuizQuestionsSection({
     onChangeTaskType,
     onChangeTaskDescription,
     onAddQuestion,
+    onDeleteQuestion,
     onSelectQuestion,
     onChangeSharedPassage,
     onChangeQuestionContent,
@@ -64,7 +68,7 @@ export function QuizQuestionsSection({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl">{t.teacher.assignments.createQuestionsAndTasks.createTask.title}</CardTitle>
-                        <Button variant="ghost" size="sm" className="text-primary" onClick={onAddTask}>
+                        <Button variant="secondary" size="sm" className="text-primary text-white" onClick={onAddTask}>
                             {t.teacher.assignments.createQuestionsAndTasks.createTask.addTaskButton}
                         </Button>
                     </div>
@@ -116,12 +120,12 @@ export function QuizQuestionsSection({
                                     <SelectValue placeholder="-----" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="pronounciation">Pronounciation</SelectItem>
-                                    <SelectItem value="word_stress">Word stress</SelectItem>
-                                    <SelectItem value="situational_dialog">Situational dialog</SelectItem>
-                                    <SelectItem value="multiple_choice">Multiple choice</SelectItem>
-                                    <SelectItem value="cloze_passage">Cloze passage</SelectItem>
-                                    <SelectItem value="reading_comprehension">Reading comprehension</SelectItem>
+                                    <SelectItem value="PRONUNCIATION">{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue.PRONUNCIATION}</SelectItem>
+                                    <SelectItem value="WORD_STRESS">{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue.WORD_STRESS}</SelectItem>
+                                    <SelectItem value="SITUATIONAL_DIALOG">{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue.SITUATIONAL_DIALOG}</SelectItem>
+                                    <SelectItem value="MULTIPLE_CHOICE">{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue.MULTIPLE_CHOICE}</SelectItem>
+                                    <SelectItem value="CLOZE_PASSAGE">{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue.CLOZE_PASSAGE}</SelectItem>
+                                    <SelectItem value="READING_COMPREHENSION">{t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue.READING_COMPREHENSION}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -140,7 +144,7 @@ export function QuizQuestionsSection({
                     <div className="border-t pt-4 space-y-3">
                         <div className="flex items-center justify-between gap-2">
                             <p className="font-semibold">{t.teacher.assignments.createQuestionsAndTasks.createQuestion.questionList.title}</p>
-                            <Button type="button" variant="outline" size="sm" onClick={() => onAddQuestion(selectedTask.id)}>
+                            <Button type="button" variant="secondary" size="sm" onClick={() => onAddQuestion(selectedTask.id)}>
                                 <Plus className="w-4 h-4 mr-1" /> {t.teacher.assignments.createQuestionsAndTasks.createQuestion.questionList.addQuestionButton}
                             </Button>
                         </div>
@@ -166,7 +170,20 @@ export function QuizQuestionsSection({
 
             <Card className="xl:col-span-8">
                 <CardHeader>
-                    <CardTitle className="text-xl">{t.teacher.assignments.createQuestionsAndTasks.createQuestion.title}</CardTitle>
+                    <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="text-xl">{t.teacher.assignments.createQuestionsAndTasks.createQuestion.title}</CardTitle>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive"
+                            disabled={selectedTask.questions.length <= 1}
+                            onClick={onDeleteQuestion}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            {t.teacher.assignments.createQuestionsAndTasks.createQuestion.deleteButton}
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-5">
                     {usesSharedPassage && (
@@ -193,9 +210,11 @@ export function QuizQuestionsSection({
                         </div>
                     )}
 
+                    <Separator className="my-4 h-[2px]" />
+
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <Label>{t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.title}</Label>
+                            <Label className="text-xl">{t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.title}</Label>
                             <Button type="button" variant="outline" size="sm" onClick={onAddChoice}>
                                 <Plus className="w-4 h-4 mr-1" /> {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.addChoiceButton}
                             </Button>
@@ -210,7 +229,7 @@ export function QuizQuestionsSection({
                                         onClick={() => onToggleCorrectChoice(choice.id)}
                                     >
                                         <CheckCircle2
-                                            className={`w-4 h-4 mr-2 ${choice.isCorrect ? 'text-green-600' : 'text-muted-foreground'
+                                            className={`w-5 h-5 mr-2 stroke-[2.5] ${choice.isCorrect ? 'text-green-600' : 'text-muted-foreground'
                                                 }`}
                                         />
                                         {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.choiceNo}{index + 1}
@@ -219,11 +238,12 @@ export function QuizQuestionsSection({
                                     <Button
                                         type="button"
                                         size="sm"
-                                        variant="ghost"
+                                        variant="outline"
                                         className="text-destructive"
-                                        disabled={selectedQuestion.choices.length <= 2}
+                                        disabled={selectedQuestion.choices.length < 2}
                                         onClick={() => onDeleteChoice(choice.id)}
                                     >
+                                        <Trash2 className="w-4 h-4" />
                                         {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.deleteChoiceButton}
                                     </Button>
                                 </div>
@@ -236,12 +256,6 @@ export function QuizQuestionsSection({
                                 />
                             </div>
                         ))}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 justify-end">
-                        <Button type="button" variant="secondary">Luu cau hoi</Button>
-                        <Button type="button" variant="outline">Luu nhap</Button>
-                        <Button type="button">Luu nhap va tiep tuc tao moi</Button>
                     </div>
                 </CardContent>
             </Card>
