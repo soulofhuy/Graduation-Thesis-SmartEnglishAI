@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, Trash2, Eye, CheckCheckIcon, CheckSquare2Icon, XSquareIcon } from 'lucide-react'
+import { Plus, Sparkles, Edit, Trash2, CheckSquare2Icon, XSquareIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -227,8 +227,10 @@ export default function TeacherQuizzesPage() {
                                             <TableCell className="flex justify-center items-center">{assignment.isPublic ? <CheckSquare2Icon className="text-green-500" /> : <XSquareIcon className="text-red-500" />}</TableCell>
                                             <TableCell className="text-center">{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
                                             <TableCell className="text-center space-x-2">
-                                                <Button variant="ghost" size="sm">
-                                                    <Edit className="w-4 h-4" />
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <Link href={`/teacher/quizzes/edit/${assignment.id}`}>
+                                                        <Edit className="w-4 h-4" />
+                                                    </Link>
                                                 </Button>
                                                 <Button variant="ghost" size="sm">
                                                     <Trash2 className="w-4 h-4 text-destructive" />
