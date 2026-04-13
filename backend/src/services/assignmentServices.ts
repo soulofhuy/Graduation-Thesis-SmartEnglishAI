@@ -20,6 +20,7 @@ type CreatePassageInput = {
 
 type CreateTaskInput = {
   taskContent: string;
+  taskType?: TaskType;
   passages?: CreatePassageInput[];
   questions: CreateQuestionInput[];
 };
@@ -32,7 +33,6 @@ type CreateAssignmentInput = {
   dueDate?: string;
   isSingleAttempt?: boolean;
   canViewResult?: boolean;
-  taskType?: TaskType;
   tasks: CreateTaskInput[];
 };
 
@@ -51,6 +51,8 @@ class AssignmentService {
     }
 
     payload.tasks.forEach((task, taskIndex) => {
+      const taskType = task.taskType ?? TaskType.MULTIPLE_CHOICE;
+
       if (!task.taskContent?.trim()) {
         throw new Error(`Task content is required at index ${taskIndex}`);
       }
@@ -62,7 +64,12 @@ class AssignmentService {
       }
 
       task.questions.forEach((question, questionIndex) => {
-        if (!question.questionContent?.trim()) {
+        const requiresQuestionContent =
+          taskType !== TaskType.PRONUNCIATION &&
+          taskType !== TaskType.WORD_STRESS &&
+          taskType !== TaskType.CLOZE_PASSAGE;
+
+        if (requiresQuestionContent && !question.questionContent?.trim()) {
           throw new Error(
             `Question content is required at task ${taskIndex}, question ${questionIndex}`
           );
@@ -120,6 +127,16 @@ class AssignmentService {
             );
           }
         });
+      }
+
+      if (
+        (taskType === TaskType.CLOZE_PASSAGE ||
+          taskType === TaskType.READING_COMPREHENSION) &&
+        (!task.passages || task.passages.length === 0)
+      ) {
+        throw new Error(
+          `Task at index ${taskIndex} requires at least one passage`
+        );
       }
     });
   }
@@ -186,7 +203,6 @@ class AssignmentService {
         isSingleAttempt: boolean;
         canViewResult: boolean;
         description?: string | null;
-        taskType?: TaskType;
         dueDate?: Date;
       } = {
         title: payload.title.trim(),
@@ -194,8 +210,7 @@ class AssignmentService {
         createdBy: creatorId,
         isPublic: payload.isPublic ?? false,
         isSingleAttempt: payload.isSingleAttempt ?? false,
-        canViewResult: payload.canViewResult ?? true,
-        taskType: payload.taskType || TaskType.MULTIPLE_CHOICE
+        canViewResult: payload.canViewResult ?? true
       };
 
       if (payload.description !== undefined) {
@@ -215,7 +230,7 @@ class AssignmentService {
           data: {
             assignmentId: createdAssignment.id,
             taskContent: task.taskContent.trim(),
-            taskType: payload.taskType || TaskType.MULTIPLE_CHOICE
+            taskType: task.taskType ?? TaskType.MULTIPLE_CHOICE
           }
         });
 

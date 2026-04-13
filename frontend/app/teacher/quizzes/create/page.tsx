@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { createAssignment } from '@/services/teacher/assignments'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
@@ -26,6 +28,7 @@ import { useLanguage } from '@/components/language-provider'
 
 export default function CreateQuizPage() {
     const { t } = useLanguage()
+    const { accessToken } = useAuth()
     const router = useRouter()
 
     const getTaskTitleFromType = (taskType: TaskType) => {
@@ -164,6 +167,11 @@ export default function CreateQuizPage() {
     }
 
     const submitCreateAssignment = async () => {
+        if (!accessToken) {
+            toast.error('Vui long dang nhap lai')
+            return
+        }
+
         if (!payloadPreview.tasks.length) {
             toast.error('Can it nhat 1 task')
             return
@@ -215,12 +223,13 @@ export default function CreateQuizPage() {
 
         setIsSubmitting(true)
         try {
-            // TODO: call API create assignment here with payloadPreview.
-            await new Promise((resolve) => setTimeout(resolve, 800))
-            toast.success('Tao de thi thanh cong')
+            console.log('Payload for preview:', payloadPreview)
+            const result = await createAssignment(accessToken, payloadPreview)
+            toast.success(result.message || 'Tao de thi thanh cong')
             router.push('/teacher/quizzes')
-        } catch (_error) {
-            toast.error('Tao de thi that bai')
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Tao de thi that bai'
+            toast.error(message)
         } finally {
             setIsSubmitting(false)
         }
