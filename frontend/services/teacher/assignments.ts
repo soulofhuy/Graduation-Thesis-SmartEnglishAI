@@ -2,6 +2,20 @@ import { getApiBaseUrl } from '@/lib/api-base-url/get-api-base-url';
 import type { Assignment, CreateAssignmentInput } from '@/lib/types';
 import type { ApiError, ApiSuccess } from '@/lib/types/responses';
 
+export type AssignmentsPagination = {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};
+
+export type TeacherAssignmentsResponse = {
+  data: Assignment[];
+  pagination: AssignmentsPagination;
+};
+
 export async function createAssignment(
   token: string,
   assignmentData: CreateAssignmentInput
@@ -27,4 +41,39 @@ export async function createAssignment(
   }
 
   return { assignment: payload.data, message: payload.message };
+}
+
+export async function getAssignmentsCreatedByMe(
+  token: string,
+  page = 1,
+  limit = 10
+) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    limit: String(limit)
+  });
+
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments/created-by-me?${searchParams.toString()}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  if (!response.ok) {
+    const errorData: ApiError = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch assignments');
+  }
+
+  const payload: ApiSuccess<TeacherAssignmentsResponse> = await response.json();
+
+  if (!payload.status || !payload.data) {
+    throw new Error(payload.message || 'Failed to fetch assignments');
+  }
+
+  return payload.data;
 }

@@ -1,7 +1,9 @@
 import { Role } from '../generated/prisma/enums';
-import { AssignmentModel } from '../generated/prisma/models';
 import { TaskType } from '../generated/prisma/enums';
+import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
 import prisma from '../utils/prisma';
+
+const DEFAULT_ITEMS_PER_PAGE = MINIMUM_ITEMS_PER_PAGE;
 
 type CreateChoiceInput = {
   choiceContent: string;
@@ -403,6 +405,103 @@ class AssignmentService {
         }
       }
     });
+  };
+
+  static getAssignmentsCreatedByTeacher = async (
+    teacherId: string,
+    page = 1,
+    limit = DEFAULT_ITEMS_PER_PAGE
+  ) => {
+    if (!teacherId?.trim()) {
+      throw new Error('Teacher ID is required');
+    }
+
+    if (!Number.isInteger(page) || page < 1) {
+      throw new Error('Page must be a positive integer');
+    }
+
+    if (!Number.isInteger(limit) || limit < 1) {
+      throw new Error('Limit must be a positive integer');
+    }
+
+    const teacher = await prisma.user.findUnique({
+      where: { id: teacherId },
+      select: {
+        id: true,
+        role: true,
+        isActive: true
+      }
+    });
+
+    if (!teacher) {
+      throw new Error('Teacher not found');
+    }
+
+    if (!teacher.isActive) {
+      throw new Error('Teacher account is inactive');
+    }
+
+    if (teacher.role === Role.STUDENT) {
+      throw new Error('Only teacher/admin can have created assignments');
+    }
+
+    const where = {
+      createdBy: teacherId,
+      isActive: true
+    };
+
+    const [totalItems, assignments] = await Promise.all([
+      prisma.assignment.count({ where }),
+      prisma.assignment.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          class: {
+            select: {
+              id: true,
+              name: true,
+              teacherId: true
+            }
+          },
+          tasks: {
+            include: {
+              passages: {
+                include: {
+                  questions: {
+                    include: {
+                      choices: true,
+                      correctChoice: true
+                    }
+                  }
+                }
+              },
+              questions: {
+                include: {
+                  choices: true,
+                  correctChoice: true
+                }
+              }
+            }
+          }
+        }
+      })
+    ]);
+
+    return {
+      data: assignments,
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages: Math.max(1, Math.ceil(totalItems / limit)),
+        hasNextPage: page * limit < totalItems,
+        hasPrevPage: page > 1
+      }
+    };
   };
 }
 
