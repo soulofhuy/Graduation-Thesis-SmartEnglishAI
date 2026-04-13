@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Sparkles, Edit, Trash2, Eye, CheckCheckIcon, CheckSquare2Icon, XSquareIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -20,6 +20,8 @@ import { dateFormat } from '@/lib/format'
 import type { Assignment } from '@/lib/types'
 import { getAssignmentsCreatedByMe } from '@/services/teacher/assignments'
 import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 interface TableAssignment {
     id: string
@@ -55,7 +57,7 @@ const mapAssignmentToTableAssignment = (assignment: Assignment): TableAssignment
 }
 
 export default function TeacherQuizzesPage() {
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
     const { accessToken, isHydrated } = useAuth()
 
     const [assignments, setAssignments] = useState<TableAssignment[]>([])
@@ -94,8 +96,8 @@ export default function TeacherQuizzesPage() {
                 setHasPrevPage(Boolean(response.pagination.hasPrevPage))
             } catch (error) {
                 const message =
-                    error instanceof Error ? error.message : 'Khong the tai danh sach bai tap'
-                toast.error(message)
+                    error instanceof Error ? error.message : getToastMessage('loginFailed', language)
+                toast.error(message, { className: TOAST_COLORS.error })
             } finally {
                 setIsLoading(false)
                 setIsPaging(false)
@@ -204,27 +206,27 @@ export default function TeacherQuizzesPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnTitle}</TableHead>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnDescription}</TableHead>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnNumberOfQuestions}</TableHead>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnCreatedDate}</TableHead>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnDueDate}</TableHead>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnIsPublic}</TableHead>
-                                        <TableHead>{t.teacher.assignments.overview.tableView.columnIsActive}</TableHead>
-                                        <TableHead className="text-right">{t.teacher.assignments.overview.tableView.columnActions}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnTitle}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnDescription}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnNumberOfQuestions}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnCreatedDate}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnDueDate}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnIsPublic}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnIsActive}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.assignments.overview.tableView.columnActions}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {assignments.map((assignment) => (
                                         <TableRow key={assignment.id}>
-                                            <TableCell className="font-medium">{assignment.title}</TableCell>
-                                            <TableCell>{assignment.description || '-'}</TableCell>
-                                            <TableCell>{assignment.questionCount}</TableCell>
-                                            <TableCell>{assignment.createdDate}</TableCell>
-                                            <TableCell>{assignment.dueDate}</TableCell>
-                                            <TableCell>{assignment.isPublic ? t.common.yes : t.common.no}</TableCell>
-                                            <TableCell>{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
-                                            <TableCell className="text-right space-x-2">
+                                            <TableCell className="font-medium text-center">{assignment.title}</TableCell>
+                                            <TableCell className="text-center">{assignment.description || '-'}</TableCell>
+                                            <TableCell className="text-center">{assignment.questionCount}</TableCell>
+                                            <TableCell className="text-center">{assignment.createdDate}</TableCell>
+                                            <TableCell className="text-center">{assignment.dueDate}</TableCell>
+                                            <TableCell className="flex justify-center items-center">{assignment.isPublic ? <CheckSquare2Icon className="text-green-500" /> : <XSquareIcon className="text-red-500" />}</TableCell>
+                                            <TableCell className="text-center">{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
+                                            <TableCell className="text-center space-x-2">
                                                 <Button variant="ghost" size="sm">
                                                     <Edit className="w-4 h-4" />
                                                 </Button>
