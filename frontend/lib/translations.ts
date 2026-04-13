@@ -233,6 +233,26 @@ export const translations = {
         }
       },
       assignments: {
+        overview: {
+          title: 'Manage your assignment',
+          description:
+            'Create and manage your assignments, and view assignment results',
+          createAssignmentByAIButton: 'Create assignment with AI',
+          createAssignmentManuallyButton: 'Create assignment manually',
+          tableView: {
+            title: 'List of assignments',
+            description: 'All assignments you have created',
+            columnTitle: 'Title',
+            columnDescription: 'Description',
+            columnClass: 'Assigned class',
+            columnNumberOfQuestions: 'No. questions',
+            columnCreatedDate: 'Created date',
+            columnDueDate: 'Due date',
+            columnIsPublic: 'Public',
+            columnIsActive: 'Status',
+            columnActions: 'Actions'
+          }
+        },
         createAssignment: {
           title: 'Create new assignment',
           description: 'Free to create your own assignment as you want',
@@ -459,6 +479,8 @@ export const translations = {
 
     // Common
     common: {
+      active: 'Active',
+      inactive: 'Inactive',
       loading: 'Loading...',
       save: 'Save',
       isSaving: 'Saving...',
@@ -720,6 +742,26 @@ export const translations = {
         }
       },
       assignments: {
+        overview: {
+          title: 'Quản lí bài tập của bạn',
+          description:
+            'Tạo và quản lí các bài tập của bạn, và xem kết quả làm bài',
+          createAssignmentByAIButton: 'Tạo bài tập bằng AI',
+          createAssignmentManuallyButton: 'Tạo bài tập thủ công',
+          tableView: {
+            title: 'Danh sách bài tập',
+            description: 'Tất cả các bài tập bạn đã tạo',
+            columnTitle: 'Tiêu đề',
+            columnDescription: 'Mô tả',
+            columnClass: 'Lớp được giao',
+            columnNumberOfQuestions: 'Số lượng câu hỏi',
+            columnCreatedDate: 'Ngày tạo',
+            columnDueDate: 'Hạn nộp',
+            columnIsPublic: 'Công khai',
+            columnIsActive: 'Trạng thái',
+            columnActions: 'Hành động'
+          }
+        },
         createAssignment: {
           title: 'Tạo bài tập mới',
           description:
@@ -951,6 +993,8 @@ export const translations = {
 
     // Common
     common: {
+      active: 'Hoạt động',
+      inactive: 'Không hoạt động',
       loading: 'Đang tải...',
       save: 'Lưu',
       isSaving: 'Đang lưu...',

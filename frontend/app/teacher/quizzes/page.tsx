@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Sparkles, Edit, Trash2, Eye } from 'lucide-react'
+import { toast } from 'sonner'
 import {
     Table,
     TableBody,
@@ -14,178 +14,234 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { PageSizeSelect } from '@/components/page-size-select'
+import { useAuth } from '@/components/auth-provider'
+import { dateFormat } from '@/lib/format'
+import type { Assignment } from '@/lib/types'
+import { getAssignmentsCreatedByMe } from '@/services/teacher/assignments'
+import { useLanguage } from '@/components/language-provider'
 
-interface Quiz {
+interface TableAssignment {
     id: string
     title: string
-    category: string
+    description?: string
     questionCount: number
     createdDate: string
-    status: 'draft' | 'published'
+    dueDate: string
+    isPublic?: boolean
+    isSingleAttempt?: boolean
+    canViewResult?: boolean
+    isActive?: boolean
+}
+
+const mapAssignmentToTableAssignment = (assignment: Assignment): TableAssignment => {
+    const tasks = assignment.tasks ?? []
+    const questionCount = tasks.reduce((total, task) => {
+        return total + (task.questions?.length ?? 0)
+    }, 0)
+
+    return {
+        id: assignment.id,
+        title: assignment.title,
+        description: assignment.description ?? '',
+        questionCount,
+        createdDate: assignment.createdAt ? dateFormat(assignment.createdAt) : '-',
+        dueDate: assignment.dueDate ? dateFormat(assignment.dueDate) : '-',
+        isPublic: assignment.isPublic,
+        isSingleAttempt: assignment.isSingleAttempt,
+        canViewResult: assignment.canViewResult,
+        isActive: assignment.isActive,
+    }
 }
 
 export default function TeacherQuizzesPage() {
-    const [quizzes] = useState<Quiz[]>([
-        {
-            id: '1',
-            title: 'Bai tap ngu phap Unit 1',
-            category: 'Grammar',
-            questionCount: 20,
-            createdDate: '2024-03-10',
-            status: 'published',
-        },
-        {
-            id: '2',
-            title: 'Bai tap reading Unit 2',
-            category: 'Reading',
-            questionCount: 15,
-            createdDate: '2024-03-12',
-            status: 'published',
-        },
-        {
-            id: '3',
-            title: 'Kiem tra giua ki',
-            category: 'General',
-            questionCount: 50,
-            createdDate: '2024-03-15',
-            status: 'draft',
-        },
-    ])
+    const { t } = useLanguage()
+    const { accessToken, isHydrated } = useAuth()
 
-    const allQuizzes = quizzes
-    const publishedQuizzes = quizzes.filter((q) => q.status === 'published')
+    const [assignments, setAssignments] = useState<TableAssignment[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [isPaging, setIsPaging] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const [totalItems, setTotalItems] = useState(0)
+    const [hasNextPage, setHasNextPage] = useState(false)
+    const [hasPrevPage, setHasPrevPage] = useState(false)
+
+    const fetchQuizzes = useCallback(
+        async (page: number, limit: number, showSkeleton = false) => {
+            if (!accessToken) {
+                setAssignments([])
+                setTotalItems(0)
+                setHasNextPage(false)
+                setHasPrevPage(false)
+                setIsLoading(false)
+                setIsPaging(false)
+                return
+            }
+
+            if (showSkeleton) {
+                setIsLoading(true)
+            } else {
+                setIsPaging(true)
+            }
+
+            try {
+                const response = await getAssignmentsCreatedByMe(accessToken, page, limit)
+                setAssignments((response.data ?? []).map(mapAssignmentToTableAssignment))
+                setCurrentPage(response.pagination.page)
+                setTotalItems(response.pagination.totalItems)
+                setHasNextPage(Boolean(response.pagination.hasNextPage))
+                setHasPrevPage(Boolean(response.pagination.hasPrevPage))
+            } catch (error) {
+                const message =
+                    error instanceof Error ? error.message : 'Khong the tai danh sach bai tap'
+                toast.error(message)
+            } finally {
+                setIsLoading(false)
+                setIsPaging(false)
+            }
+        },
+        [accessToken]
+    )
+
+    useEffect(() => {
+        if (!isHydrated) {
+            return
+        }
+
+        void fetchQuizzes(currentPage, pageSize, true)
+    }, [currentPage, fetchQuizzes, isHydrated, pageSize])
+
+    const handleNextPage = () => {
+        if (!hasNextPage || isPaging) {
+            return
+        }
+        setCurrentPage((prev) => prev + 1)
+    }
+
+    const handlePrevPage = () => {
+        if (!hasPrevPage || isPaging) {
+            return
+        }
+        setCurrentPage((prev) => Math.max(1, prev - 1))
+    }
+
+    const handlePageSizeChange = (nextValue: number) => {
+        if (nextValue === pageSize) {
+            return
+        }
+        setCurrentPage(1)
+        setPageSize(nextValue)
+    }
+
+    const renderPagination = () => (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+            <p className="text-sm text-muted-foreground">
+                {t.common.pagination.total} {totalItems}
+            </p>
+            <div className="flex items-center gap-2">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!hasPrevPage || isPaging}
+                    onClick={handlePrevPage}
+                >
+                    {t.common.pagination.previous}
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!hasNextPage || isPaging}
+                    onClick={handleNextPage}
+                >
+                    {t.common.pagination.next}
+                </Button>
+            </div>
+            <PageSizeSelect
+                value={pageSize}
+                onChange={handlePageSizeChange}
+                options={[10, 20, 25, 50]}
+                disabled={isPaging}
+            />
+        </div>
+    )
 
     return (
         <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                <div className="space-y-2">
-                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-text">
-                        Quan li cau hoi va bai tap
-                    </h1>
-                    <p className="text-lg text-muted-foreground">
-                        Quan ly cac de thi va cau hoi cua ban
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-bold text-foreground">{t.teacher.assignments.overview.title}</h1>
+                    <p className="text-muted-foreground">
+                        {t.teacher.assignments.overview.description}
                     </p>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="outline" className="gap-2">
                         <Sparkles className="w-4 h-4" />
-                        Tao bang AI
+                        {t.teacher.assignments.overview.createAssignmentByAIButton}
                     </Button>
                     <Button asChild className="gap-2">
                         <Link href="/teacher/quizzes/create">
                             <Plus className="w-4 h-4" />
-                            Tao bai tap
+                            {t.teacher.assignments.overview.createAssignmentManuallyButton}
                         </Link>
                     </Button>
                 </div>
             </div>
 
-            <Tabs defaultValue="all" className="w-full">
-                <TabsList>
-                    <TabsTrigger value="all">Tat ca ({allQuizzes.length})</TabsTrigger>
-                    <TabsTrigger value="published">
-                        Da cong khai ({publishedQuizzes.length})
-                    </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="all">
-                    <Card className="border-0 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-800/70 dark:to-slate-800/50 backdrop-blur-sm shadow-glow">
-                        <CardHeader>
-                            <CardTitle className="bg-gradient-text">Bai tap va cau hoi</CardTitle>
-                            <CardDescription>Danh sach tat ca cac bai tap cua ban</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Tieu de</TableHead>
-                                            <TableHead>Chu de</TableHead>
-                                            <TableHead>Cau hoi</TableHead>
-                                            <TableHead>Ngay tao</TableHead>
-                                            <TableHead>Trang thai</TableHead>
-                                            <TableHead className="text-right">Thao tac</TableHead>
+            <Card className="border-0 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-800/70 dark:to-slate-800/50 backdrop-blur-sm shadow-glow">
+                <CardHeader>
+                    <CardTitle className="bg-gradient-text">{t.teacher.assignments.overview.tableView.title}</CardTitle>
+                    <CardDescription>{t.teacher.assignments.overview.tableView.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? (
+                        <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
+                    ) : assignments.length === 0 ? (
+                        <div className="py-10 text-center text-muted-foreground">{t.common.noData}</div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnTitle}</TableHead>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnDescription}</TableHead>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnNumberOfQuestions}</TableHead>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnCreatedDate}</TableHead>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnDueDate}</TableHead>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnIsPublic}</TableHead>
+                                        <TableHead>{t.teacher.assignments.overview.tableView.columnIsActive}</TableHead>
+                                        <TableHead className="text-right">{t.teacher.assignments.overview.tableView.columnActions}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {assignments.map((assignment) => (
+                                        <TableRow key={assignment.id}>
+                                            <TableCell className="font-medium">{assignment.title}</TableCell>
+                                            <TableCell>{assignment.description || '-'}</TableCell>
+                                            <TableCell>{assignment.questionCount}</TableCell>
+                                            <TableCell>{assignment.createdDate}</TableCell>
+                                            <TableCell>{assignment.dueDate}</TableCell>
+                                            <TableCell>{assignment.isPublic ? t.common.yes : t.common.no}</TableCell>
+                                            <TableCell>{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
+                                            <TableCell className="text-right space-x-2">
+                                                <Button variant="ghost" size="sm">
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="sm">
+                                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                                </Button>
+                                            </TableCell>
                                         </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {allQuizzes.map((quiz) => (
-                                            <TableRow key={quiz.id}>
-                                                <TableCell className="font-medium">{quiz.title}</TableCell>
-                                                <TableCell>{quiz.category}</TableCell>
-                                                <TableCell>{quiz.questionCount}</TableCell>
-                                                <TableCell>{quiz.createdDate}</TableCell>
-                                                <TableCell>
-                                                    <span
-                                                        className={`px-2 py-1 rounded text-xs font-medium ${quiz.status === 'published'
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : 'bg-yellow-100 text-yellow-800'
-                                                            }`}
-                                                    >
-                                                        {quiz.status === 'published' ? 'Da cong khai' : 'Nhap'}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="text-right space-x-2">
-                                                    <Button variant="ghost" size="sm">
-                                                        <Eye className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Edit className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Trash2 className="w-4 h-4 text-destructive" />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )}
 
-                <TabsContent value="published">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Bai tap da cong khai</CardTitle>
-                            <CardDescription>Danh sach cac bai tap da cong khai</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Tieu de</TableHead>
-                                            <TableHead>Chu de</TableHead>
-                                            <TableHead>Cau hoi</TableHead>
-                                            <TableHead>Ngay tao</TableHead>
-                                            <TableHead className="text-right">Thao tac</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {publishedQuizzes.map((quiz) => (
-                                            <TableRow key={quiz.id}>
-                                                <TableCell className="font-medium">{quiz.title}</TableCell>
-                                                <TableCell>{quiz.category}</TableCell>
-                                                <TableCell>{quiz.questionCount}</TableCell>
-                                                <TableCell>{quiz.createdDate}</TableCell>
-                                                <TableCell className="text-right space-x-2">
-                                                    <Button variant="ghost" size="sm">
-                                                        <Eye className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Edit className="w-4 h-4" />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                    {renderPagination()}
+                </CardContent>
+            </Card>
         </div>
     )
 }
