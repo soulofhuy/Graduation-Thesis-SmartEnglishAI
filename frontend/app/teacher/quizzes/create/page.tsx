@@ -7,6 +7,10 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import {
+    createAssignmentBasicInfoSchema,
+    createAssignmentPayloadSchema,
+} from '@/lib/validators/assignment'
 import { createAssignment } from '@/services/teacher/assignments'
 import {
     QuizBasicInfoSection,
@@ -27,7 +31,7 @@ import type { TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 
 export default function CreateQuizPage() {
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
     const { accessToken } = useAuth()
     const router = useRouter()
 
@@ -153,13 +157,9 @@ export default function CreateQuizPage() {
     }, [formData, tasks])
 
     const goToQuestionTab = () => {
-        if (!formData.title.trim()) {
-            toast.error('Vui long nhap tieu de de thi')
-            return
-        }
-
-        if (!formData.classId.trim()) {
-            toast.error('Vui long nhap class ID')
+        const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
+        if (!basicValidation.success) {
+            toast.error(basicValidation.error.issues[0]?.message)
             return
         }
 
@@ -172,53 +172,10 @@ export default function CreateQuizPage() {
             return
         }
 
-        if (!payloadPreview.tasks.length) {
-            toast.error('Can it nhat 1 task')
+        const payloadValidation = createAssignmentPayloadSchema(language).safeParse(payloadPreview)
+        if (!payloadValidation.success) {
+            toast.error(payloadValidation.error.issues[0]?.message)
             return
-        }
-
-        for (const task of payloadPreview.tasks) {
-            if (!task.taskContent) {
-                toast.error('Task content khong duoc de trong')
-                return
-            }
-
-            const requiresPassage =
-                task.taskType === 'CLOZE_PASSAGE' ||
-                task.taskType === 'READING_COMPREHENSION'
-
-            if (requiresPassage && !task.passages?.[0]?.passageContent?.trim()) {
-                toast.error('Task dang chon can nhap doan van dung chung')
-                return
-            }
-
-            if (!task.questions.length) {
-                toast.error('Moi task phai co it nhat 1 cau hoi')
-                return
-            }
-
-            for (const question of task.questions) {
-                const requiresQuestionContent =
-                    task.taskType !== 'PRONUNCIATION' &&
-                    task.taskType !== 'WORD_STRESS' &&
-                    task.taskType !== 'CLOZE_PASSAGE'
-
-                if (requiresQuestionContent && !question.questionContent) {
-                    toast.error('Question content khong duoc de trong')
-                    return
-                }
-
-                if (question.choices.length < 2) {
-                    toast.error('Moi cau hoi phai co it nhat 2 dap an')
-                    return
-                }
-
-                const correctCount = question.choices.filter((choice) => choice.isCorrect).length
-                if (correctCount !== 1) {
-                    toast.error('Moi cau hoi phai co dung 1 dap an dung')
-                    return
-                }
-            }
         }
 
         setIsSubmitting(true)

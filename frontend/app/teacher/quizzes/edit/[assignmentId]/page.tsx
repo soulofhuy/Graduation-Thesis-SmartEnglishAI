@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { createAssignmentBasicInfoSchema } from '@/lib/validators/assignment'
 import {
     Table,
     TableBody,
@@ -104,7 +105,7 @@ function mapAssignmentToFormData(assignment: Assignment): AssignmentFormData {
 }
 
 export default function EditQuizPage() {
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
     const { accessToken } = useAuth()
     const router = useRouter()
     const params = useParams<{ assignmentId: string }>()
@@ -263,13 +264,9 @@ export default function EditQuizPage() {
     }, [formData, tasks])
 
     const goToQuestionTab = () => {
-        if (!formData.title.trim()) {
-            toast.error('Vui long nhap tieu de de thi')
-            return
-        }
-
-        if (!formData.classId.trim()) {
-            toast.error('Vui long nhap class ID')
+        const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
+        if (!basicValidation.success) {
+            toast.error(basicValidation.error.issues[0]?.message)
             return
         }
 
@@ -287,8 +284,9 @@ export default function EditQuizPage() {
             return
         }
 
-        if (!formData.title.trim()) {
-            toast.error('Vui long nhap tieu de de thi')
+        const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
+        if (!basicValidation.success) {
+            toast.error(basicValidation.error.issues[0]?.message)
             return
         }
 
