@@ -21,7 +21,7 @@ type QuizQuestionsSectionProps = {
     getSharedPassageContent: (task: TaskDraft) => string
     onAddTask: () => void
     onSelectTask: (taskId: string) => void
-    onEditTaskTitle: (taskId: string) => void
+    // onEditTaskTitle: (taskId: string) => void
     onDeleteTask: (taskId: string) => void
     onChangeTaskType: (taskId: string, taskType: TaskType) => void
     onChangeTaskDescription: (taskId: string, value: string) => void
@@ -46,7 +46,7 @@ export function QuizQuestionsSection({
     getSharedPassageContent,
     onAddTask,
     onSelectTask,
-    onEditTaskTitle,
+    // onEditTaskTitle,
     onDeleteTask,
     onChangeTaskType,
     onChangeTaskDescription,
@@ -91,14 +91,14 @@ export function QuizQuestionsSection({
                     </div>
 
                     <div className="flex gap-2">
-                        <Button
+                        {/* <Button
                             type="button"
                             variant="outline"
                             size="icon"
                             onClick={() => onEditTaskTitle(selectedTask.id)}
                         >
                             <Pencil className="w-4 h-4" />
-                        </Button>
+                        </Button> */}
                         <Button
                             type="button"
                             variant="outline"

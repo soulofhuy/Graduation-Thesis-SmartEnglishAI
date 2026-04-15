@@ -7,7 +7,12 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { createAssignmentBasicInfoSchema } from '@/lib/validators/assignment'
+import {
+    createAssignmentBasicInfoSchema,
+    createAssignmentPreviewSchema,
+    createAssignmentQuestionListSchema,
+    createAssignmentTaskListSchema,
+} from '@/lib/validators/assignment'
 import {
     Table,
     TableBody,
@@ -263,6 +268,13 @@ export default function EditQuizPage() {
         return buildCreateAssignmentPayload(formData, tasks)
     }, [formData, tasks])
 
+    const canOpenPreview = useMemo(() => {
+        return createAssignmentPreviewSchema(language).safeParse({
+            title: formData.title,
+            tasks: payloadPreview.tasks,
+        }).success
+    }, [formData.title, payloadPreview.tasks, language])
+
     const goToQuestionTab = () => {
         const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
         if (!basicValidation.success) {
@@ -358,12 +370,15 @@ export default function EditQuizPage() {
     }
 
     const handleDeleteTask = (taskId: string) => {
-        if (tasks.length === 1) {
-            toast.error('Can it nhat mot task')
+        const nextTasks = tasks.filter((task) => task.id !== taskId)
+
+        const taskListValidation = createAssignmentTaskListSchema(language).safeParse(nextTasks)
+        if (!taskListValidation.success) {
+            toast.error(taskListValidation.error.issues[0]?.message)
             return
         }
 
-        setTasks((prev) => prev.filter((task) => task.id !== taskId))
+        setTasks(nextTasks)
     }
 
     const handleChangeTaskType = (taskId: string, taskType: TaskType) => {
@@ -399,14 +414,19 @@ export default function EditQuizPage() {
             return
         }
 
-        if (selectedTask.questions.length <= 1) {
-            toast.error('Can it nhat 1 cau hoi trong moi task')
+        const nextQuestions = selectedTask.questions.filter(
+            (question) => question.id !== selectedQuestion.id
+        )
+
+        const questionListValidation = createAssignmentQuestionListSchema(language).safeParse(nextQuestions)
+        if (!questionListValidation.success) {
+            toast.error(questionListValidation.error.issues[0]?.message)
             return
         }
 
         updateTask(selectedTask.id, (oldTask) => ({
             ...oldTask,
-            questions: oldTask.questions.filter((question) => question.id !== selectedQuestion.id)
+            questions: nextQuestions
         }))
     }
 
@@ -486,8 +506,18 @@ export default function EditQuizPage() {
                                                     return
                                                 }
 
-                                                if (tab.key === 'preview' && (!formData.title.trim() || !tasks.length)) {
-                                                    toast.error('Vui long nhap tieu de va tao task truoc')
+                                                if (tab.key === 'preview') {
+                                                    const previewValidation = createAssignmentPreviewSchema(language).safeParse({
+                                                        title: formData.title,
+                                                        tasks: payloadPreview.tasks,
+                                                    })
+
+                                                    if (!previewValidation.success) {
+                                                        toast.error(previewValidation.error.issues[0]?.message)
+                                                        return
+                                                    }
+
+                                                    setActiveTab(tab.key)
                                                     return
                                                 }
 

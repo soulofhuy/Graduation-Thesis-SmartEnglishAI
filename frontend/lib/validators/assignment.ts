@@ -172,6 +172,27 @@ export const createAssignmentPayloadSchema = (language?: Language) => {
   });
 };
 
+export const createAssignmentPreviewSchema = (language?: Language) => {
+  const messages = getAssignmentValidationMessages(language);
+
+  return z.object({
+    title: z.string().trim().min(1, messages.titleRequired),
+    tasks: z.array(z.unknown()).min(1, messages.atLeastOneTaskRequired)
+  });
+};
+
+export const createAssignmentTaskListSchema = (language?: Language) => {
+  const messages = getAssignmentValidationMessages(language);
+
+  return z.array(z.unknown()).min(1, messages.atLeastOneTaskRequired);
+};
+
+export const createAssignmentQuestionListSchema = (language?: Language) => {
+  const messages = getAssignmentValidationMessages(language);
+
+  return z.array(z.unknown()).min(1, messages.atLeastOneQuestionRequired);
+};
+
 export type AssignmentBasicInfoFormValues = z.infer<
   ReturnType<typeof createAssignmentBasicInfoSchema>
 >;

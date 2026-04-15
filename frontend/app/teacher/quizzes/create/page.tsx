@@ -9,7 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
     createAssignmentBasicInfoSchema,
+    createAssignmentPreviewSchema,
+    createAssignmentQuestionListSchema,
     createAssignmentPayloadSchema,
+    createAssignmentTaskListSchema,
 } from '@/lib/validators/assignment'
 import { createAssignment } from '@/services/teacher/assignments'
 import {
@@ -22,7 +25,6 @@ import {
     createId,
     createQuestion,
     createTask,
-    safeTrim,
     type AssignmentFormData,
     type QuestionDraft,
     type TaskDraft
@@ -156,6 +158,13 @@ export default function CreateQuizPage() {
         return buildCreateAssignmentPayload(formData, tasks)
     }, [formData, tasks])
 
+    const canOpenPreview = useMemo(() => {
+        return createAssignmentPreviewSchema(language).safeParse({
+            title: formData.title,
+            tasks: payloadPreview.tasks,
+        }).success
+    }, [formData.title, payloadPreview.tasks, language])
+
     const goToQuestionTab = () => {
         const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
         if (!basicValidation.success) {
@@ -221,30 +230,33 @@ export default function CreateQuizPage() {
         setSelectedQuestionId(selected?.questions[0]?.id ?? '')
     }
 
-    const handleEditTaskTitle = (taskId: string) => {
-        const task = tasks.find((item) => item.id === taskId)
-        if (!task) {
-            return
-        }
+    // const handleEditTaskTitle = (taskId: string) => {
+    //     const task = tasks.find((item) => item.id === taskId)
+    //     if (!task) {
+    //         return
+    //     }
 
-        const newTitle = window.prompt('Nhap ten task moi', task.taskTitle)
-        if (!newTitle?.trim()) {
-            return
-        }
+    //     const newTitle = window.prompt('Nhap ten task moi', task.taskTitle)
+    //     if (!newTitle?.trim()) {
+    //         return
+    //     }
 
-        updateTask(taskId, (oldTask) => ({
-            ...oldTask,
-            taskTitle: newTitle.trim(),
-        }))
-    }
+    //     updateTask(taskId, (oldTask) => ({
+    //         ...oldTask,
+    //         taskTitle: newTitle.trim(),
+    //     }))
+    // }
 
     const handleDeleteTask = (taskId: string) => {
-        if (tasks.length === 1) {
-            toast.error('Can it nhat mot task')
+        const nextTasks = tasks.filter((task) => task.id !== taskId)
+
+        const taskListValidation = createAssignmentTaskListSchema(language).safeParse(nextTasks)
+        if (!taskListValidation.success) {
+            toast.error(taskListValidation.error.issues[0]?.message)
             return
         }
 
-        setTasks((prev) => prev.filter((task) => task.id !== taskId))
+        setTasks(nextTasks)
     }
 
     const handleChangeTaskType = (taskId: string, taskType: TaskType) => {
@@ -280,14 +292,19 @@ export default function CreateQuizPage() {
             return
         }
 
-        if (selectedTask.questions.length <= 1) {
-            toast.error('Can it nhat 1 cau hoi trong moi task')
+        const nextQuestions = selectedTask.questions.filter(
+            (question) => question.id !== selectedQuestion.id
+        )
+
+        const questionListValidation = createAssignmentQuestionListSchema(language).safeParse(nextQuestions)
+        if (!questionListValidation.success) {
+            toast.error(questionListValidation.error.issues[0]?.message)
             return
         }
 
         updateTask(selectedTask.id, (oldTask) => ({
             ...oldTask,
-            questions: oldTask.questions.filter((question) => question.id !== selectedQuestion.id),
+            questions: nextQuestions,
         }))
     }
 
@@ -370,8 +387,18 @@ export default function CreateQuizPage() {
                                                     return
                                                 }
 
-                                                if (tab.key === 'preview' && (!formData.title.trim() || !tasks.length)) {
-                                                    toast.error('Vui lòng nhập tiêu đề và tạo task trước')
+                                                if (tab.key === 'preview') {
+                                                    const previewValidation = createAssignmentPreviewSchema(language).safeParse({
+                                                        title: formData.title,
+                                                        tasks: payloadPreview.tasks,
+                                                    })
+
+                                                    if (!previewValidation.success) {
+                                                        toast.error(previewValidation.error.issues[0]?.message)
+                                                        return
+                                                    }
+
+                                                    setActiveTab(tab.key)
                                                     return
                                                 }
 
@@ -391,7 +418,7 @@ export default function CreateQuizPage() {
                                     type="button"
                                     variant="outline"
                                     onClick={() => setIsPreviewOpen(true)}
-                                    disabled={!formData.title.trim() || !tasks.length}
+                                    disabled={!canOpenPreview}
                                 >
                                     Xem trước
                                 </Button>
@@ -423,7 +450,7 @@ export default function CreateQuizPage() {
                             getSharedPassageContent={getSharedPassageContent}
                             onAddTask={handleAddTask}
                             onSelectTask={handleSelectTask}
-                            onEditTaskTitle={handleEditTaskTitle}
+                            // onEditTaskTitle={handleEditTaskTitle}
                             onDeleteTask={handleDeleteTask}
                             onChangeTaskType={handleChangeTaskType}
                             onChangeTaskDescription={handleChangeTaskDescription}
