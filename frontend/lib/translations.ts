@@ -279,6 +279,19 @@ export const translations = {
               'If enabled, students can view their results after submission'
           }
         },
+        editAssignment: {
+          title: 'Edit assignment',
+          description: 'Update assignment information and configuration',
+          tabEdit: {
+            title: 'Edit assignment'
+          },
+          tableViewPreview: {
+            title: 'Preview assignment'
+          },
+          tabStudentResults: {
+            title: 'Student results'
+          }
+        },
         createQuestionsAndTasks: {
           createTask: {
             title: 'Tasks list',
@@ -760,6 +773,19 @@ export const translations = {
             columnIsPublic: 'Công khai',
             columnIsActive: 'Trạng thái',
             columnActions: 'Hành động'
+          }
+        },
+        editAssignment: {
+          title: 'Chỉnh sửa bài tập',
+          description: 'Cập nhật thông tin và cấu hình bài tập',
+          tabEdit: {
+            title: 'Chỉnh sửa bài tập'
+          },
+          tableViewPreview: {
+            title: 'Xem trước bài tập chỉnh sửa'
+          },
+          tabStudentResults: {
+            title: 'Kết quả học sinh'
           }
         },
         createAssignment: {

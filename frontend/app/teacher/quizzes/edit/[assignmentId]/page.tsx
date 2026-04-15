@@ -15,7 +15,7 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table'
-import { getAssignmentById } from '@/services/teacher/assignments'
+import { getAssignmentById, updateAssignmentById } from '@/services/teacher/assignments'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
@@ -29,7 +29,7 @@ import {
     type AssignmentFormData,
     type QuestionDraft,
     type TaskDraft
-} from '../../_components'
+} from '../../_components/edit'
 import type { Assignment, Choice, Question, Task, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 
@@ -282,10 +282,31 @@ export default function EditQuizPage() {
             return
         }
 
+        if (!assignmentId) {
+            toast.error('Khong tim thay assignment ID')
+            return
+        }
+
+        if (!formData.title.trim()) {
+            toast.error('Vui long nhap tieu de de thi')
+            return
+        }
+
         setIsSubmitting(true)
         try {
-            console.log('Update payload preview:', payloadPreview)
-            toast.info('Da tao man hinh edit. API cap nhat assignment se duoc noi tiep theo.')
+            const updatePayload = {
+                title: formData.title,
+                description: formData.description,
+                dueDate: formData.dueDate || null,
+                isPublic: formData.isPublic,
+                isSingleAttempt: formData.isSingleAttempt,
+                canViewResult: formData.canViewResult
+            }
+
+            const result = await updateAssignmentById(accessToken, assignmentId, updatePayload)
+
+            setFormData(mapAssignmentToFormData(result.assignment))
+            toast.success(result.message || 'Cap nhat bai tap thanh cong')
         } finally {
             setIsSubmitting(false)
         }
@@ -293,9 +314,9 @@ export default function EditQuizPage() {
 
     const topTabs = [
         { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
-        { key: 'questions', label: t.teacher.assignments.createAssignment.title },
-        { key: 'preview', label: 'View preview' },
-        { key: 'results', label: 'Student results' }
+        { key: 'questions', label: t.teacher.assignments.editAssignment.tabEdit.title },
+        { key: 'preview', label: t.teacher.assignments.editAssignment.tableViewPreview.title },
+        { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title }
     ] as const
 
     const handleGoBack = () => {
@@ -442,7 +463,7 @@ export default function EditQuizPage() {
                     <Button type="button" variant="outline" size="icon" onClick={handleGoBack}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <h1 className="text-3xl font-semibold">Chinh sua bai tap</h1>
+                    <h1 className="text-3xl font-semibold">{t.teacher.assignments.editAssignment.title}</h1>
                 </div>
             </div>
 
@@ -458,8 +479,8 @@ export default function EditQuizPage() {
                                             key={tab.key}
                                             type="button"
                                             className={`border-b-2 pb-2 text-sm font-medium whitespace-nowrap ${isActive
-                                                    ? 'border-primary text-primary'
-                                                    : 'border-transparent text-muted-foreground'
+                                                ? 'border-primary text-primary'
+                                                : 'border-transparent text-muted-foreground'
                                                 }`}
                                             onClick={() => {
                                                 if (tab.key === 'questions') {
@@ -482,21 +503,6 @@ export default function EditQuizPage() {
                             </div>
                         </div>
 
-                        <div>
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsPreviewOpen(true)}
-                                    disabled={!formData.title.trim() || !tasks.length}
-                                >
-                                    Xem truoc
-                                </Button>
-                                <Button onClick={submitUpdateAssignment} disabled={isSubmitting}>
-                                    {isSubmitting ? t.common.isSaving : 'Luu thay doi'}
-                                </Button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -505,6 +511,8 @@ export default function EditQuizPage() {
                         <QuizBasicInfoSection
                             formData={formData}
                             setFormData={setFormData}
+                            onSave={submitUpdateAssignment}
+                            isSaving={isSubmitting}
                             onContinue={goToQuestionTab}
                         />
                     )}

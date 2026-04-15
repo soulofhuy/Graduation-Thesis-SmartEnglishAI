@@ -6,6 +6,12 @@ const router = Router();
 
 router.post('/assignments', verifyJWT, AssignmentController.createAssignment);
 
+router.put(
+  '/assignments/:assignmentId',
+  verifyJWT,
+  AssignmentController.updateAssignment
+);
+
 router.get(
   '/assignments/created-by-me',
   verifyJWT,

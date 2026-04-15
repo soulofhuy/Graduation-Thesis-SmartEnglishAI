@@ -103,3 +103,43 @@ export async function getAssignmentById(token: string, assignmentId: string) {
 
   return payload.data;
 }
+
+// type UpdateAssignmentInput = {
+//   title?: string;
+//   description?: string;
+//   dueDate?: string | null;
+//   isPublic?: boolean;
+//   isSingleAttempt?: boolean;
+//   canViewResult?: boolean;
+// };
+
+export async function updateAssignmentById(
+  token: string,
+  assignmentId: string,
+  assignmentData: Partial<Assignment>
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments/${assignmentId}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(assignmentData)
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<Assignment> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Update assignment failed';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Update assignment response is missing data');
+  }
+
+  return { assignment: payload.data, message: payload.message };
+}

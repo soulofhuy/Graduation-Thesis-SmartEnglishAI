@@ -77,14 +77,14 @@ export interface ClassMember {
 
 export interface Assignment {
   id: string;
-  title: string;
+  title?: string;
   description?: string | null;
-  createdBy: string;
-  classId: string;
-  isPublic: boolean;
+  createdBy?: string;
+  classId?: string;
+  isPublic?: boolean;
   dueDate?: string | null;
-  isSingleAttempt: boolean;
-  canViewResult: boolean;
+  isSingleAttempt?: boolean;
+  canViewResult?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
   isActive: boolean;

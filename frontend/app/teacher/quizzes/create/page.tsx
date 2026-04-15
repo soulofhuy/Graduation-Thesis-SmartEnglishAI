@@ -22,7 +22,7 @@ import {
     type AssignmentFormData,
     type QuestionDraft,
     type TaskDraft
-} from '../_components'
+} from '../_components/create'
 import type { TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 

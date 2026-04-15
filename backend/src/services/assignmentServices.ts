@@ -38,6 +38,15 @@ type CreateAssignmentInput = {
   tasks: CreateTaskInput[];
 };
 
+type UpdateAssignmentInput = {
+  title?: string;
+  description?: string;
+  dueDate?: string | null;
+  isPublic?: boolean;
+  isSingleAttempt?: boolean;
+  canViewResult?: boolean;
+};
+
 class AssignmentService {
   private static validateCreatePayload(payload: CreateAssignmentInput) {
     if (!payload.title?.trim()) {
@@ -502,6 +511,138 @@ class AssignmentService {
         hasPrevPage: page > 1
       }
     };
+  };
+
+  static updateAssignment = async (
+    updaterId: string,
+    assignmentId: string,
+    payload: UpdateAssignmentInput
+  ) => {
+    if (!updaterId?.trim()) {
+      throw new Error('Updater ID is required');
+    }
+
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    const [updater, existingAssignment] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: updaterId },
+        select: {
+          id: true,
+          role: true,
+          isActive: true
+        }
+      }),
+      prisma.assignment.findUnique({
+        where: { id: assignmentId },
+        select: {
+          id: true,
+          createdBy: true,
+          class: {
+            select: {
+              teacherId: true,
+              isActive: true
+            }
+          }
+        }
+      })
+    ]);
+
+    if (!updater) {
+      throw new Error('Updater not found');
+    }
+
+    if (!updater.isActive) {
+      throw new Error('Updater account is inactive');
+    }
+
+    if (!existingAssignment) {
+      throw new Error('Assignment not found');
+    }
+
+    if (!existingAssignment.class.isActive) {
+      throw new Error('Cannot update assignment in an inactive class');
+    }
+
+    if (updater.role === Role.STUDENT) {
+      throw new Error('Students are not allowed to update assignments');
+    }
+
+    const isAdmin = updater.role === Role.ADMIN;
+    const isClassTeacher = existingAssignment.class.teacherId === updaterId;
+    const isCreator = existingAssignment.createdBy === updaterId;
+
+    if (!isAdmin && !isClassTeacher && !isCreator) {
+      throw new Error(
+        'Only assignment creator, class owner or admin can update assignment'
+      );
+    }
+
+    const normalizedTitle =
+      payload.title !== undefined ? payload.title.trim() : undefined;
+
+    if (payload.title !== undefined && !normalizedTitle) {
+      throw new Error('Assignment title cannot be empty');
+    }
+
+    let parsedDueDate: Date | null | undefined;
+    if (payload.dueDate !== undefined) {
+      if (payload.dueDate === null || payload.dueDate.trim() === '') {
+        parsedDueDate = null;
+      } else {
+        const dueDate = new Date(payload.dueDate);
+        if (Number.isNaN(dueDate.getTime())) {
+          throw new Error('Invalid dueDate format');
+        }
+        parsedDueDate = dueDate;
+      }
+    }
+
+    const data: {
+      title?: string;
+      description?: string | null;
+      dueDate?: Date | null;
+      isPublic?: boolean;
+      isSingleAttempt?: boolean;
+      canViewResult?: boolean;
+    } = {};
+
+    if (normalizedTitle !== undefined) {
+      data.title = normalizedTitle;
+    }
+
+    if (payload.description !== undefined) {
+      data.description = payload.description.trim() || null;
+    }
+
+    if (parsedDueDate !== undefined) {
+      data.dueDate = parsedDueDate;
+    }
+
+    if (payload.isPublic !== undefined) {
+      data.isPublic = payload.isPublic;
+    }
+
+    if (payload.isSingleAttempt !== undefined) {
+      data.isSingleAttempt = payload.isSingleAttempt;
+    }
+
+    if (payload.canViewResult !== undefined) {
+      data.canViewResult = payload.canViewResult;
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new Error('No valid fields provided to update');
+    }
+
+    await prisma.assignment.update({
+      where: { id: assignmentId },
+      data
+    });
+
+    return this.getAssignmentById(assignmentId);
   };
 }
 
