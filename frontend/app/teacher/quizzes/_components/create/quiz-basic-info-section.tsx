@@ -6,19 +6,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import type { AssignmentFormData } from './quiz-builder-types'
 import { useLanguage } from '@/components/language-provider'
 
+type TeacherClassOption = {
+    id: string
+    name: string
+}
+
 type QuizBasicInfoSectionProps = {
     formData: AssignmentFormData
     setFormData: Dispatch<SetStateAction<AssignmentFormData>>
+    classes: TeacherClassOption[]
+    isClassesLoading: boolean
     onContinue: () => void
 }
 
 export function QuizBasicInfoSection({
     formData,
     setFormData,
+    classes,
+    isClassesLoading,
     onContinue,
 }: QuizBasicInfoSectionProps) {
     const { t } = useLanguage();
@@ -46,17 +56,33 @@ export function QuizBasicInfoSection({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="classId">{t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClass}</Label>
-                            <Input
-                                id="classId"
-                                className="h-11"
+                            <Select
                                 value={formData.classId}
-                                onChange={(e) =>
+                                onValueChange={(value) =>
                                     setFormData((prev) => ({
                                         ...prev,
-                                        classId: e.target.value,
+                                        classId: value,
                                     }))
                                 }
-                            />
+                                disabled={isClassesLoading || classes.length === 0}
+                            >
+                                <SelectTrigger id="classId" className="h-11 w-full">
+                                    <SelectValue
+                                        placeholder={
+                                            isClassesLoading
+                                                ? 'Dang tai danh sach lop...'
+                                                : 'Chon lop hoc'
+                                        }
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {classes.map((classItem) => (
+                                        <SelectItem key={classItem.id} value={classItem.id}>
+                                            {classItem.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div className="grid gap-2">

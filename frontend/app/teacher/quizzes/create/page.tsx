@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { getClassesByTeacherId } from '@/services/teacher/classes'
 import {
     createAssignmentBasicInfoSchema,
     createAssignmentPreviewSchema,
@@ -29,12 +30,12 @@ import {
     type QuestionDraft,
     type TaskDraft
 } from '../_components/create'
-import type { TaskType } from '@/lib/types'
+import type { Class, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 
 export default function CreateQuizPage() {
     const { t, language } = useLanguage()
-    const { accessToken } = useAuth()
+    const { accessToken, user } = useAuth()
     const router = useRouter()
 
     const getTaskTitleFromType = (taskType: TaskType) => {
@@ -62,6 +63,8 @@ export default function CreateQuizPage() {
     const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview'>('basic')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+    const [isClassesLoading, setIsClassesLoading] = useState(true)
+    const [teacherClasses, setTeacherClasses] = useState<Array<{ id: string; name: string }>>([])
     const [formData, setFormData] = useState<AssignmentFormData>({
         title: '',
         description: '',
@@ -87,6 +90,44 @@ export default function CreateQuizPage() {
     const isReadingComprehension = selectedTask?.taskType === 'READING_COMPREHENSION'
     const usesSharedPassage = isClozePassage || isReadingComprehension
     const showQuestionComposer = !isPronunciationOrStress && !isClozePassage
+
+    useEffect(() => {
+        const fetchTeacherClasses = async () => {
+            if (!accessToken || !user?.id) {
+                setIsClassesLoading(false)
+                return
+            }
+
+            setIsClassesLoading(true)
+            try {
+                const response = await getClassesByTeacherId(accessToken, user.id)
+                const classOptions = (response.classes ?? [])
+                    .filter((classItem: Class) => Boolean(classItem.id) && Boolean(classItem.name?.trim()))
+                    .map((classItem: Class) => ({
+                        id: classItem.id,
+                        name: classItem.name?.trim() ?? '',
+                    }))
+
+                setTeacherClasses(classOptions)
+
+                if (!formData.classId && classOptions[0]) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        classId: classOptions[0].id,
+                    }))
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Khong the tai danh sach lop hoc'
+                toast.error(message)
+            } finally {
+                setIsClassesLoading(false)
+            }
+        }
+
+        void fetchTeacherClasses()
+        // This fetch should only run when auth identity changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [accessToken, user?.id])
 
     useEffect(() => {
         if (!tasks.find((task) => task.id === selectedTaskId) && tasks[0]) {
@@ -435,6 +476,8 @@ export default function CreateQuizPage() {
                         <QuizBasicInfoSection
                             formData={formData}
                             setFormData={setFormData}
+                            classes={teacherClasses}
+                            isClassesLoading={isClassesLoading}
                             onContinue={goToQuestionTab}
                         />
                     )}
