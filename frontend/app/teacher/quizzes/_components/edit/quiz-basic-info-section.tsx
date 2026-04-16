@@ -178,25 +178,6 @@ export function QuizBasicInfoSection({
                             />
                         </div>
                     </div>
-
-                    <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="h-11 text-base font-medium"
-                            onClick={onSave}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? t.common.isSaving : t.common.save}
-                        </Button>
-                        <Button
-                            type="button"
-                            className="h-11 text-base font-medium"
-                            onClick={onContinue}
-                        >
-                            Sang tab soạn câu hỏi →
-                        </Button>
-                    </div>
                 </CardContent>
             </Card>
         </div>

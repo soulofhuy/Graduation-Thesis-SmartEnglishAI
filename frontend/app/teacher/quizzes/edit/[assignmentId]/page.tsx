@@ -52,7 +52,10 @@ type StudentResult = {
 
 const emptyResults: StudentResult[] = []
 
-function mapTaskToDraft(task: Task): TaskDraft {
+function mapTaskToDraft(
+    task: Task,
+    getTaskTitleFromType: (taskType: TaskType) => string
+): TaskDraft {
     const questions = (task.questions ?? []).map((question) => {
         const choices = (question.choices ?? []).map((choice: Choice) => ({
             id: choice.id ?? createId(),
@@ -87,7 +90,7 @@ function mapTaskToDraft(task: Task): TaskDraft {
 
     return {
         id: task.id ?? createId(),
-        taskTitle: task.taskContent || 'Task',
+        taskTitle: getTaskTitleFromType(task.taskType),
         taskDescription: task.taskContent || '',
         taskType: task.taskType,
         passages: (task.passages ?? []).map((passage) => ({
@@ -211,7 +214,7 @@ export default function EditQuizPage() {
                 const assignment = await getAssignmentById(accessToken, assignmentId)
                 const mappedTasks =
                     (assignment.tasks ?? []).length > 0
-                        ? (assignment.tasks ?? []).map((task) => mapTaskToDraft(task))
+                        ? (assignment.tasks ?? []).map((task) => mapTaskToDraft(task, getTaskTitleFromType))
                         : [createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))]
 
                 setFormData(mapAssignmentToFormData(assignment))
@@ -360,7 +363,7 @@ export default function EditQuizPage() {
 
             setFormData(mapAssignmentToFormData(result.assignment))
             if ((result.assignment.tasks ?? []).length > 0) {
-                const nextTasks = (result.assignment.tasks ?? []).map((task) => mapTaskToDraft(task))
+                const nextTasks = (result.assignment.tasks ?? []).map((task) => mapTaskToDraft(task, getTaskTitleFromType))
                 setTasks(nextTasks)
                 setSelectedTaskId(nextTasks[0].id)
                 setSelectedQuestionId(nextTasks[0].questions[0].id)

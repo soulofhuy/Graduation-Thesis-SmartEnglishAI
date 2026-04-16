@@ -6,9 +6,32 @@ import { Separator } from '@/components/ui/separator'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { useLanguage } from '@/components/language-provider'
 import type { CreateAssignmentInput, TaskType } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 interface QuizPreviewContentProps {
     payload: CreateAssignmentInput | null
+}
+
+function FormattedHtml({
+    html,
+    className
+}: {
+    html?: string
+    className?: string
+}) {
+    if (!html?.trim()) {
+        return null
+    }
+
+    return (
+        <div
+            className={cn(
+                '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
+                className
+            )}
+            dangerouslySetInnerHTML={{ __html: html }}
+        />
+    )
 }
 
 export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
@@ -24,7 +47,7 @@ export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
     }
 
     const hasNoData =
-        !payload.assignmentTitle?.trim() &&
+        !payload.title?.trim() &&
         !payload.tasks?.length
 
     if (hasNoData) {
@@ -40,11 +63,12 @@ export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
             {/* Header Info */}
             <div className="space-y-3">
                 <div>
-                    <h2 className="text-2xl font-bold">{payload.assignmentTitle}</h2>
-                    {payload.assignmentDescription && (
-                        <p className="text-muted-foreground mt-2">
-                            {payload.assignmentDescription}
-                        </p>
+                    <h2 className="text-2xl font-bold">{payload.title}</h2>
+                    {payload.description && (
+                        <FormattedHtml
+                            html={payload.description}
+                            className="text-muted-foreground mt-2"
+                        />
                     )}
                 </div>
 
@@ -72,11 +96,13 @@ export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
                         {/* Task Header */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-semibold">
-                                    Task {taskIndex + 1}: {task.taskContent}
-                                </h3>
+                                <h3 className="text-xl font-semibold">Task {taskIndex + 1}</h3>
                                 <Badge>{getTaskTypeLabel(task.taskType as TaskType)}</Badge>
                             </div>
+                            <FormattedHtml
+                                html={task.taskContent}
+                                className="text-base"
+                            />
                         </div>
 
                         {/* Shared Passage */}
@@ -85,9 +111,10 @@ export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
                                 <p className="text-sm font-semibold text-muted-foreground">
                                     Đoạn văn:
                                 </p>
-                                <p className="text-base leading-relaxed">
-                                    {task.passages[0].passageContent}
-                                </p>
+                                <FormattedHtml
+                                    html={task.passages[0].passageContent}
+                                    className="text-base leading-relaxed"
+                                />
                             </div>
                         )}
 
@@ -104,9 +131,10 @@ export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
                                             <p className="font-medium text-sm text-muted-foreground">
                                                 Câu {qIndex + 1}:
                                             </p>
-                                            <p className="text-base">
-                                                {question.questionContent}
-                                            </p>
+                                            <FormattedHtml
+                                                html={question.questionContent}
+                                                className="text-base"
+                                            />
                                         </div>
                                     )}
 
@@ -127,14 +155,18 @@ export function QuizPreviewContent({ payload }: QuizPreviewContentProps) {
                                                         <XCircle className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                                     )}
                                                     <div className="flex-1">
-                                                        <p
-                                                            className={`text-sm ${choice.isCorrect
+                                                        <div
+                                                            className={`text-sm flex items-start gap-1 ${choice.isCorrect
                                                                 ? 'font-semibold text-green-700 dark:text-green-300'
                                                                 : 'text-gray-600 dark:text-gray-400'
                                                                 }`}
                                                         >
-                                                            {String.fromCharCode(65 + cIndex)}) {choice.choiceContent}
-                                                        </p>
+                                                            <span>{String.fromCharCode(65 + cIndex)})</span>
+                                                            <FormattedHtml
+                                                                html={choice.choiceContent}
+                                                                className="[&_p]:inline"
+                                                            />
+                                                        </div>
                                                         {choice.isCorrect && (
                                                             <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                                                                 ✓ Câu trả lời đúng

@@ -62,6 +62,27 @@ export function QuizQuestionsSection({
 }: QuizQuestionsSectionProps) {
     const { t } = useLanguage();
 
+    const getTaskTypeLabel = (taskType: TaskType) => {
+        const labels = t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue
+
+        switch (taskType) {
+            case 'PRONUNCIATION':
+                return labels.PRONUNCIATION
+            case 'WORD_STRESS':
+                return labels.WORD_STRESS
+            case 'SITUATIONAL_DIALOG':
+                return labels.SITUATIONAL_DIALOG
+            case 'MULTIPLE_CHOICE':
+                return labels.MULTIPLE_CHOICE
+            case 'CLOZE_PASSAGE':
+                return labels.CLOZE_PASSAGE
+            case 'READING_COMPREHENSION':
+                return labels.READING_COMPREHENSION
+            default:
+                return labels.MULTIPLE_CHOICE
+        }
+    }
+
     return (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
             <Card className="xl:col-span-4">
@@ -85,7 +106,7 @@ export function QuizQuestionsSection({
                                     }`}
                                 onClick={() => onSelectTask(task.id)}
                             >
-                                {task.taskTitle}
+                                {getTaskTypeLabel(task.taskType)}
                             </button>
                         ))}
                     </div>
