@@ -46,7 +46,6 @@ export function QuizQuestionsSection({
     getSharedPassageContent,
     onAddTask,
     onSelectTask,
-    // onEditTaskTitle,
     onDeleteTask,
     onChangeTaskType,
     onChangeTaskDescription,
@@ -91,14 +90,6 @@ export function QuizQuestionsSection({
                     </div>
 
                     <div className="flex gap-2">
-                        {/* <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => onEditTaskTitle(selectedTask.id)}
-                        >
-                            <Pencil className="w-4 h-4" />
-                        </Button> */}
                         <Button
                             type="button"
                             variant="outline"

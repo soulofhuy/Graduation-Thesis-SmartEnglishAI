@@ -45,6 +45,11 @@ type UpdateAssignmentInput = {
   isPublic?: boolean;
   isSingleAttempt?: boolean;
   canViewResult?: boolean;
+  tasks?: CreateTaskInput[];
+};
+
+type UpdateFullAssignmentInput = UpdateAssignmentInput & {
+  tasks?: CreateTaskInput[];
 };
 
 class AssignmentService {
@@ -518,12 +523,31 @@ class AssignmentService {
     assignmentId: string,
     payload: UpdateAssignmentInput
   ) => {
+    return this.updateAssignmentWithTasks(updaterId, assignmentId, payload);
+  };
+
+  static updateAssignmentWithTasks = async (
+    updaterId: string,
+    assignmentId: string,
+    payload: UpdateFullAssignmentInput
+  ) => {
     if (!updaterId?.trim()) {
       throw new Error('Updater ID is required');
     }
 
     if (!assignmentId?.trim()) {
       throw new Error('Assignment ID is required');
+    }
+
+    // If tasks are provided, validate the full payload
+    if (payload.tasks !== undefined && Array.isArray(payload.tasks)) {
+      // Validate tasks structure
+      const tempPayload: CreateAssignmentInput = {
+        title: payload.title?.trim() || 'Untitled',
+        classId: 'temp-class-id',
+        tasks: payload.tasks
+      };
+      this.validateCreatePayload(tempPayload);
     }
 
     const [updater, existingAssignment] = await Promise.all([
@@ -540,6 +564,7 @@ class AssignmentService {
         select: {
           id: true,
           createdBy: true,
+          classId: true,
           class: {
             select: {
               teacherId: true,
@@ -580,6 +605,7 @@ class AssignmentService {
       );
     }
 
+    // Prepare update data
     const normalizedTitle =
       payload.title !== undefined ? payload.title.trim() : undefined;
 
@@ -633,6 +659,121 @@ class AssignmentService {
       data.canViewResult = payload.canViewResult;
     }
 
+    // If tasks are provided, update the entire assignment structure
+    if (
+      payload.tasks !== undefined &&
+      Array.isArray(payload.tasks) &&
+      payload.tasks.length > 0
+    ) {
+      const updatedAssignment = await prisma.$transaction(async tx => {
+        // Update basic assignment fields
+        await tx.assignment.update({
+          where: { id: assignmentId },
+          data
+        });
+
+        // Delete all existing tasks (cascade delete will handle questions, choices, passages)
+        await tx.task.deleteMany({
+          where: { assignmentId }
+        });
+
+        // Create new tasks with questions, choices, and passages
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        for (const task of payload.tasks!) {
+          const createdTask = await tx.task.create({
+            data: {
+              assignmentId,
+              taskContent: task.taskContent.trim(),
+              taskType: task.taskType ?? TaskType.MULTIPLE_CHOICE
+            }
+          });
+
+          const createdPassages: string[] = [];
+
+          if (task.passages?.length) {
+            for (const passage of task.passages) {
+              const createdPassage = await tx.passage.create({
+                data: {
+                  taskId: createdTask.id,
+                  passageContent: passage.passageContent.trim(),
+                  createdBy: updaterId
+                }
+              });
+              createdPassages.push(createdPassage.id);
+            }
+          }
+
+          for (const question of task.questions) {
+            const mappedPassageId =
+              question.passageIndex !== undefined
+                ? (createdPassages[question.passageIndex] ?? null)
+                : null;
+
+            const createdQuestion = await tx.question.create({
+              data: {
+                taskId: createdTask.id,
+                questionContent: question.questionContent.trim(),
+                createdBy: updaterId,
+                passageId: mappedPassageId
+              }
+            });
+
+            let correctChoiceId = '';
+
+            for (const choice of question.choices) {
+              const createdChoice = await tx.choice.create({
+                data: {
+                  questionId: createdQuestion.id,
+                  choiceContent: choice.choiceContent.trim()
+                }
+              });
+
+              if (choice.isCorrect) {
+                correctChoiceId = createdChoice.id;
+              }
+            }
+
+            await tx.question.update({
+              where: { id: createdQuestion.id },
+              data: {
+                correctChoiceId
+              }
+            });
+          }
+        }
+
+        return tx.assignment.findUnique({
+          where: { id: assignmentId },
+          include: {
+            tasks: {
+              include: {
+                passages: {
+                  include: {
+                    questions: {
+                      include: {
+                        choices: true,
+                        correctChoice: true
+                      }
+                    },
+                    choices: true
+                  }
+                },
+                questions: {
+                  include: {
+                    choices: true,
+                    correctChoice: true
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+
+      return updatedAssignment;
+    }
+
+    // If no tasks provided, just update basic fields
     if (Object.keys(data).length === 0) {
       throw new Error('No valid fields provided to update');
     }

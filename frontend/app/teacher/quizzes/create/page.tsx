@@ -271,23 +271,6 @@ export default function CreateQuizPage() {
         setSelectedQuestionId(selected?.questions[0]?.id ?? '')
     }
 
-    // const handleEditTaskTitle = (taskId: string) => {
-    //     const task = tasks.find((item) => item.id === taskId)
-    //     if (!task) {
-    //         return
-    //     }
-
-    //     const newTitle = window.prompt('Nhap ten task moi', task.taskTitle)
-    //     if (!newTitle?.trim()) {
-    //         return
-    //     }
-
-    //     updateTask(taskId, (oldTask) => ({
-    //         ...oldTask,
-    //         taskTitle: newTitle.trim(),
-    //     }))
-    // }
-
     const handleDeleteTask = (taskId: string) => {
         const nextTasks = tasks.filter((task) => task.id !== taskId)
 
@@ -493,7 +476,6 @@ export default function CreateQuizPage() {
                             getSharedPassageContent={getSharedPassageContent}
                             onAddTask={handleAddTask}
                             onSelectTask={handleSelectTask}
-                            // onEditTaskTitle={handleEditTaskTitle}
                             onDeleteTask={handleDeleteTask}
                             onChangeTaskType={handleChangeTaskType}
                             onChangeTaskDescription={handleChangeTaskDescription}

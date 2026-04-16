@@ -22,7 +22,7 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table'
-import { getAssignmentById, updateAssignmentById } from '@/services/teacher/assignments'
+import { getAssignmentById, updateAssignmentFullById } from '@/services/teacher/assignments'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
@@ -334,21 +334,41 @@ export default function EditQuizPage() {
             return
         }
 
+        const previewValidation = createAssignmentPreviewSchema(language).safeParse({
+            title: formData.title,
+            tasks: payloadPreview.tasks,
+        })
+
+        if (!previewValidation.success) {
+            toast.error(previewValidation.error.issues[0]?.message)
+            return
+        }
+
         setIsSubmitting(true)
         try {
             const updatePayload = {
-                title: formData.title,
+                title: formData.title.trim(),
                 description: formData.description,
                 dueDate: formData.dueDate || null,
                 isPublic: formData.isPublic,
                 isSingleAttempt: formData.isSingleAttempt,
-                canViewResult: formData.canViewResult
+                canViewResult: formData.canViewResult,
+                tasks: payloadPreview.tasks
             }
 
-            const result = await updateAssignmentById(accessToken, assignmentId, updatePayload)
+            const result = await updateAssignmentFullById(accessToken, assignmentId, updatePayload)
 
             setFormData(mapAssignmentToFormData(result.assignment))
+            if ((result.assignment.tasks ?? []).length > 0) {
+                const nextTasks = (result.assignment.tasks ?? []).map((task) => mapTaskToDraft(task))
+                setTasks(nextTasks)
+                setSelectedTaskId(nextTasks[0].id)
+                setSelectedQuestionId(nextTasks[0].questions[0].id)
+            }
             toast.success(result.message || 'Cap nhat bai tap thanh cong')
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Cap nhat bai tap that bai'
+            toast.error(message)
         } finally {
             setIsSubmitting(false)
         }
@@ -515,6 +535,9 @@ export default function EditQuizPage() {
                     </Button>
                     <h1 className="text-3xl font-semibold">{t.teacher.assignments.editAssignment.title}</h1>
                 </div>
+                <Button type="button" onClick={submitUpdateAssignment} disabled={isSubmitting}>
+                    {isSubmitting ? t.common.isSaving : t.common.save}
+                </Button>
             </div>
 
             <Card className="overflow-hidden py-0">

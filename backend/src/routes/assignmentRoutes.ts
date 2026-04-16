@@ -12,6 +12,13 @@ router.put(
   AssignmentController.updateAssignment
 );
 
+// Separate route for updating the entire assignment with tasks
+router.put(
+  '/assignments/:assignmentId/full',
+  verifyJWT,
+  AssignmentController.updateAssignmentFull
+);
+
 router.get(
   '/assignments/created-by-me',
   verifyJWT,

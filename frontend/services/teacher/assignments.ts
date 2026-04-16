@@ -1,5 +1,6 @@
 import { getApiBaseUrl } from '@/lib/api-base-url/get-api-base-url';
 import type { Assignment, CreateAssignmentInput } from '@/lib/types';
+import type { CreateTaskInput } from '@/lib/types/create-test-input';
 import type { ApiError, ApiSuccess } from '@/lib/types/responses';
 
 export type AssignmentsPagination = {
@@ -117,6 +118,47 @@ export async function updateAssignmentById(
   token: string,
   assignmentId: string,
   assignmentData: Partial<Assignment>
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments/${assignmentId}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(assignmentData)
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<Assignment> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Update assignment failed';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Update assignment response is missing data');
+  }
+
+  return { assignment: payload.data, message: payload.message };
+}
+
+export type UpdateAssignmentFullInput = {
+  title: string;
+  description?: string;
+  dueDate?: string | null;
+  isPublic: boolean;
+  isSingleAttempt: boolean;
+  canViewResult: boolean;
+  tasks: CreateTaskInput[];
+};
+
+export async function updateAssignmentFullById(
+  token: string,
+  assignmentId: string,
+  assignmentData: UpdateAssignmentFullInput
 ) {
   const response = await fetch(
     `${getApiBaseUrl()}/assignments/${assignmentId}`,
