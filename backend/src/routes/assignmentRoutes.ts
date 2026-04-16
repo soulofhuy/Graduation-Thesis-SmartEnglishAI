@@ -19,6 +19,12 @@ router.put(
   AssignmentController.updateAssignmentFull
 );
 
+router.put(
+  '/assignments/toggle-active-status/:assignmentId',
+  verifyJWT,
+  AssignmentController.toggleAssignmentActiveStatus
+);
+
 router.get(
   '/assignments/created-by-me',
   verifyJWT,

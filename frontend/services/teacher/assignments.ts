@@ -185,3 +185,32 @@ export async function updateAssignmentFullById(
 
   return { assignment: payload.data, message: payload.message };
 }
+
+export async function toggleAssignmentActiveStatus(
+  token: string,
+  assignmentId: string
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments/toggle-active-status/${assignmentId}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<Assignment> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Toggle assignment active status failed';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Toggle assignment response is missing data');
+  }
+
+  return { assignment: payload.data, message: payload.message };
+}

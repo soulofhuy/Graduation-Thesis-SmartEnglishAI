@@ -460,8 +460,7 @@ class AssignmentService {
     }
 
     const where = {
-      createdBy: teacherId,
-      isActive: true
+      createdBy: teacherId
     };
 
     const [totalItems, assignments] = await Promise.all([
@@ -537,17 +536,6 @@ class AssignmentService {
 
     if (!assignmentId?.trim()) {
       throw new Error('Assignment ID is required');
-    }
-
-    // If tasks are provided, validate the full payload
-    if (payload.tasks !== undefined && Array.isArray(payload.tasks)) {
-      // Validate tasks structure
-      const tempPayload: CreateAssignmentInput = {
-        title: payload.title?.trim() || 'Untitled',
-        classId: 'temp-class-id',
-        tasks: payload.tasks
-      };
-      this.validateCreatePayload(tempPayload);
     }
 
     const [updater, existingAssignment] = await Promise.all([
@@ -784,6 +772,32 @@ class AssignmentService {
     });
 
     return this.getAssignmentById(assignmentId);
+  };
+
+  static toggleAssignmentActiveStatus = async (assignmentId: string) => {
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    const existingAssignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      select: {
+        id: true,
+        isActive: true
+      }
+    });
+
+    if (!existingAssignment) {
+      throw new Error('Assignment not found');
+    }
+
+    const updatedAssignment = await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        isActive: !existingAssignment.isActive
+      }
+    });
+    return updatedAssignment;
   };
 }
 

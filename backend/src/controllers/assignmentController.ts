@@ -220,6 +220,43 @@ class AssignmentController {
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
+
+  static toggleAssignmentActiveStatus = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const teacherId = req.userId;
+    const assignmentId = req.params.assignmentId || req.body.assignmentId;
+
+    if (!teacherId) {
+      return res
+        .status(401)
+        .json(
+          Responses.errorResponse(new Error('Unauthorized - User ID not found'))
+        );
+    }
+
+    if (!assignmentId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Assignment ID is required')));
+    }
+
+    try {
+      const updatedAssignment =
+        await AssignmentService.toggleAssignmentActiveStatus(assignmentId);
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Assignment active status toggled successfully',
+            updatedAssignment
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
 }
 
 export default AssignmentController;

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, Trash2, CheckSquare2Icon, XSquareIcon } from 'lucide-react'
+import { Plus, Sparkles, Edit, CheckSquare2Icon, XSquareIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -18,7 +18,10 @@ import { PageSizeSelect } from '@/components/page-size-select'
 import { useAuth } from '@/components/auth-provider'
 import { dateFormat } from '@/lib/format'
 import type { Assignment } from '@/lib/types'
-import { getAssignmentsCreatedByMe } from '@/services/teacher/assignments'
+import {
+    getAssignmentsCreatedByMe,
+    toggleAssignmentActiveStatus
+} from '@/services/teacher/assignments'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
@@ -68,6 +71,7 @@ export default function TeacherQuizzesPage() {
     const [totalItems, setTotalItems] = useState(0)
     const [hasNextPage, setHasNextPage] = useState(false)
     const [hasPrevPage, setHasPrevPage] = useState(false)
+    const [togglingAssignmentId, setTogglingAssignmentId] = useState<string | null>(null)
 
     const fetchQuizzes = useCallback(
         async (page: number, limit: number, showSkeleton = false) => {
@@ -134,6 +138,31 @@ export default function TeacherQuizzesPage() {
         }
         setCurrentPage(1)
         setPageSize(nextValue)
+    }
+
+    const handleToggleAssignmentStatus = async (assignmentId: string) => {
+        if (!accessToken || togglingAssignmentId) {
+            return
+        }
+
+        setTogglingAssignmentId(assignmentId)
+        try {
+            const response = await toggleAssignmentActiveStatus(accessToken, assignmentId)
+            setAssignments((prev) =>
+                prev.map((assignment) =>
+                    assignment.id === assignmentId
+                        ? { ...assignment, isActive: response.assignment.isActive }
+                        : assignment
+                )
+            )
+            toast.success(response.message || 'Cap nhat trang thai bai tap thanh cong')
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : 'Khong the cap nhat trang thai bai tap'
+            toast.error(message, { className: TOAST_COLORS.error })
+        } finally {
+            setTogglingAssignmentId(null)
+        }
     }
 
     const renderPagination = () => (
@@ -226,15 +255,27 @@ export default function TeacherQuizzesPage() {
                                             <TableCell className="text-center">{assignment.dueDate}</TableCell>
                                             <TableCell className="flex justify-center items-center">{assignment.isPublic ? <CheckSquare2Icon className="text-green-500" /> : <XSquareIcon className="text-red-500" />}</TableCell>
                                             <TableCell className="text-center">{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
-                                            <TableCell className="text-center space-x-2">
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-2">
                                                 <Button variant="ghost" size="sm" asChild>
                                                     <Link href={`/teacher/quizzes/edit/${assignment.id}`}>
                                                         <Edit className="w-4 h-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button variant="ghost" size="sm">
-                                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleToggleAssignmentStatus(assignment.id)}
+                                                    disabled={Boolean(togglingAssignmentId)}
+                                                    title={assignment.isActive ? 'Vo hieu hoa bai tap' : 'Kich hoat bai tap'}
+                                                >
+                                                    {assignment.isActive ? (
+                                                        <XSquareIcon className="w-4 h-4 text-destructive" />
+                                                    ) : (
+                                                        <CheckSquare2Icon className="w-4 h-4 text-green-600" />
+                                                    )}
                                                 </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}
