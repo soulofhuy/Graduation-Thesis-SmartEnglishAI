@@ -18,6 +18,15 @@ enum Role {
   STUDENT
 }
 
+enum TaskType {
+  PRONUNCIATION
+  WORD_STRESS
+  SITUATIONAL_DIALOG
+  MULTIPLE_CHOICE
+  CLOZE_PASSAGE
+  READING_COMPREHENSION
+}
+
 model User {
   id                    String            @id @default(uuid())
   email                 String            @unique
@@ -32,6 +41,9 @@ model User {
   studentClasses        ClassMember[]     @relation("ClassMemberStudent")
   approvedClasses       ClassMember[]     @relation("ClassMemberApprover")
   rejectedClasses       ClassMember[]     @relation("ClassMemberRejector")
+  createdAssignments    Assignment[]      @relation("AssignmentCreator")
+  createdQuestions      Question[]        @relation("QuestionCreator")
+  createdPassages       Passage[]         @relation("PassageCreator")
 }
 
 model Profile {
@@ -60,6 +72,7 @@ model Class {
   needsTeacherApproval  Boolean           @default(false)
   isActive              Boolean           @default(true)
   deactivatedAt         DateTime?
+  assignments           Assignment[]
 }
 
 model ClassMember {
@@ -83,4 +96,100 @@ model ClassMember {
   @@unique([classId, studentId])
   @@index([studentId])
   @@index([approverId])
+}
+
+model Assignment {
+  id                    String            @id @default(uuid())
+  title                 String
+  description           String?
+  createdBy             String
+  classId               String
+  isPublic              Boolean           @default(false)
+  dueDate               DateTime?
+  isSingleAttempt       Boolean           @default(false)
+  canViewResult         Boolean           @default(true)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  isActive              Boolean           @default(true)
+  deactivatedAt         DateTime?
+
+  creator               User              @relation("AssignmentCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  tasks                 Task[]
+
+  @@index([classId])
+  @@index([createdBy])
+}
+
+model Task {
+  id                    String            @id @default(uuid())
+  assignmentId          String
+  taskContent           String
+  taskType              TaskType          @default(MULTIPLE_CHOICE)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  questions             Question[]
+  passages              Passage[]
+  choices               Choice[]          @relation("TaskChoices")
+
+  @@index([assignmentId])
+}
+
+model Question {
+  id                    String            @id @default(uuid())
+  questionContent       String            @db.Text
+  createdBy             String?
+  taskId                String
+  passageId             String?
+  correctChoiceId       String?           @unique
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  creator               User?             @relation("QuestionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  passage               Passage?          @relation(fields: [passageId], references: [id], onDelete: SetNull)
+  choices               Choice[]          @relation("QuestionChoices")
+  correctChoice         Choice?           @relation("QuestionCorrectChoice", fields: [correctChoiceId], references: [id], onDelete: SetNull)
+
+  @@index([taskId])
+  @@index([passageId])
+  @@index([createdBy])
+}
+
+model Choice {
+  id                    String            @id @default(uuid())
+  questionId            String?
+  taskId                String?
+  passageId             String?
+  choiceContent         String            @db.Text
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  question              Question?         @relation("QuestionChoices", fields: [questionId], references: [id], onDelete: Cascade)
+  task                  Task?             @relation("TaskChoices", fields: [taskId], references: [id], onDelete: Cascade)
+  passage               Passage?          @relation("PassageChoices", fields: [passageId], references: [id], onDelete: Cascade)
+  correctFor            Question?         @relation("QuestionCorrectChoice")
+
+  @@index([questionId])
+  @@index([taskId])
+  @@index([passageId])
+}
+
+model Passage {
+  id                    String            @id @default(uuid())
+  passageContent        String            @db.Text
+  createdBy             String?
+  taskId                String
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  creator               User?             @relation("PassageCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  questions             Question[]
+  choices               Choice[]          @relation("PassageChoices")
+
+  @@index([taskId])
+  @@index([createdBy])
 }

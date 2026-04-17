@@ -4,8 +4,6 @@ import { AuthenticatedRequest } from '../middlewares/authMiddleware';
 import StudentService from '../services/studentServices';
 import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
 
-const DEFAULT_ITEMS_PER_PAGE = MINIMUM_ITEMS_PER_PAGE;
-
 class StudentController {
   static getBannedStudentsByClassId = async (
     req: AuthenticatedRequest,
@@ -14,7 +12,7 @@ class StudentController {
     const classId = req.params.classId || req.body.classId;
     const page = Number.parseInt(String(req.query.page ?? '1'), 10);
     const limit = Number.parseInt(
-      String(req.query.limit ?? DEFAULT_ITEMS_PER_PAGE),
+      String(req.query.limit ?? MINIMUM_ITEMS_PER_PAGE),
       10
     );
 
@@ -28,7 +26,7 @@ class StudentController {
       const students = await StudentService.getBannedStudentsByClassId(
         classId,
         Number.isNaN(page) ? 1 : page,
-        Number.isNaN(limit) ? DEFAULT_ITEMS_PER_PAGE : limit
+        Number.isNaN(limit) ? MINIMUM_ITEMS_PER_PAGE : limit
       );
       return res
         .status(200)
