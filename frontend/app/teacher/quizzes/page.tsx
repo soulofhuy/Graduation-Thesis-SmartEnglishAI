@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, CheckSquare2Icon, XSquareIcon } from 'lucide-react'
+import { Plus, Sparkles, Edit, CheckSquare2Icon, XSquareIcon, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -253,7 +253,7 @@ export default function TeacherQuizzesPage() {
                                             <TableCell className="text-center">{assignment.questionCount}</TableCell>
                                             <TableCell className="text-center">{assignment.createdDate}</TableCell>
                                             <TableCell className="text-center">{assignment.dueDate}</TableCell>
-                                            <TableCell className="flex justify-center items-center">{assignment.isPublic ? <CheckSquare2Icon className="text-green-500" /> : <XSquareIcon className="text-red-500" />}</TableCell>
+                                            <TableCell className="flex justify-center items-center">{assignment.isPublic ? <Check className="h-8 w-8 text-green-500" /> : <X className="h-8 w-8 text-red-500" />}</TableCell>
                                             <TableCell className="text-center">{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
                                             <TableCell className="text-center">
                                                 <div className="flex items-center justify-center gap-2">
@@ -270,9 +270,9 @@ export default function TeacherQuizzesPage() {
                                                         title={assignment.isActive ? 'Vo hieu hoa bai tap' : 'Kich hoat bai tap'}
                                                     >
                                                         {assignment.isActive ? (
-                                                            <XSquareIcon className="w-4 h-4 text-destructive" />
+                                                            <X className="w-8 h-8 text-destructive" />
                                                         ) : (
-                                                            <CheckSquare2Icon className="w-4 h-4 text-green-600" />
+                                                            <Check className="w-8 h-8 text-green-600" />
                                                         )}
                                                     </Button>
                                                 </div>

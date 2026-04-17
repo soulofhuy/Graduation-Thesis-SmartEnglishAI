@@ -1,129 +1,82 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { BookOpen, Clock, FileText, Search } from 'lucide-react'
-
-interface QuizItem {
-  id: string
-  title: string
-  questionsCount: number
-  duration: number
-  category: string
-  dueDate?: string
-  isAssigned: boolean
-}
+import {
+  BookOpen,
+  CalendarDays,
+  Check,
+  Search,
+  X,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuth } from '@/components/auth-provider'
+import { getAssignmentsAssignedToMyClasses } from '@/services/student/assignments'
+import { PageSizeSelect } from '@/components/page-size-select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import type { StudentAssignedAssignment } from '@/services/student/assignments'
+import { dateTimeFormat } from '@/lib/format'
 
 export default function StudentQuizPage() {
+  const { accessToken, isHydrated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false)
+  const [assignments, setAssignments] = useState<StudentAssignedAssignment[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
-  const quizzes: QuizItem[] = [
-    {
-      id: '1',
-      title: 'Bài tập ngữ pháp Unit 1',
-      questionsCount: 20,
-      duration: 30,
-      category: 'Grammar',
-      dueDate: '2024-03-25',
-      isAssigned: true,
-    },
-    {
-      id: '2',
-      title: 'Bài tập reading Unit 2',
-      questionsCount: 15,
-      duration: 25,
-      category: 'Reading',
-      dueDate: '2024-03-26',
-      isAssigned: true,
-    },
-    {
-      id: '3',
-      title: 'Kiểm tra giữa kì',
-      questionsCount: 50,
-      duration: 90,
-      category: 'General',
-      dueDate: '2024-03-27',
-      isAssigned: true,
-    },
-    {
-      id: '4',
-      title: 'Bài tập listening Unit 3',
-      questionsCount: 12,
-      duration: 20,
-      category: 'Listening',
-      isAssigned: false,
-    },
-    {
-      id: '5',
-      title: 'Bài tập writing Unit 4',
-      questionsCount: 8,
-      duration: 40,
-      category: 'Writing',
-      isAssigned: false,
-    },
-  ]
+  useEffect(() => {
+    if (!isHydrated || !accessToken) {
+      return
+    }
 
-  const assignedQuizzes = quizzes.filter((q) => q.isAssigned)
-  const publicQuizzes = quizzes.filter((q) => !q.isAssigned)
+    const fetchAssignments = async () => {
+      setIsLoadingAssignments(true)
+      try {
+        const response = await getAssignmentsAssignedToMyClasses(accessToken, currentPage, pageSize)
+        setAssignments(response.data)
+        setTotalItems(response.pagination.totalItems)
+        setTotalPages(response.pagination.totalPages)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Khong the tai danh sach bai tap'
+        toast.error(message)
+      } finally {
+        setIsLoadingAssignments(false)
+      }
+    }
 
-  const filteredAssigned = assignedQuizzes.filter((q) =>
-    q.title.toLowerCase().includes(searchQuery.toLowerCase())
+    void fetchAssignments()
+  }, [accessToken, isHydrated, currentPage, pageSize])
+
+  const filteredAssignments = assignments.filter((assignment) =>
+    (assignment.title ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const filteredPublic = publicQuizzes.filter((q) =>
-    q.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => Math.max(1, prevPage - 1))
+  }
 
-  const QuizCard = ({ quiz }: { quiz: QuizItem }) => (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg line-clamp-2">
-              {quiz.title}
-            </CardTitle>
-            <CardDescription className="mt-1">
-              {quiz.category}
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Quiz Info */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2 text-sm">
-            <FileText className="w-4 h-4 text-muted-foreground" />
-            <span>{quiz.questionsCount} câu hỏi</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="w-4 h-4 text-muted-foreground" />
-            <span>{quiz.duration} phút</span>
-          </div>
-        </div>
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(totalPages, prevPage + 1))
+  }
 
-        {/* Due Date */}
-        {quiz.dueDate && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-xs text-amber-700">
-              Hạn nộp: <strong>{quiz.dueDate}</strong>
-            </p>
-          </div>
-        )}
-
-        {/* Action Button */}
-        <Link href={`/student/quiz/${quiz.id}/take`} className="block">
-          <Button className="w-full gap-2">
-            <BookOpen className="w-4 h-4" />
-            Bắt đầu làm bài
-          </Button>
-        </Link>
-      </CardContent>
-    </Card>
-  )
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize)
+    setCurrentPage(1)
+  }
 
   return (
     <div className="p-4 md:p-8 space-y-8">
@@ -148,53 +101,114 @@ export default function StudentQuizPage() {
         />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="assigned" className="w-full">
-        <TabsList>
-          <TabsTrigger value="assigned">
-            Bài tập được giao ({assignedQuizzes.length})
-          </TabsTrigger>
-          <TabsTrigger value="public">
-            Bài tập công khai ({publicQuizzes.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Assigned Quizzes */}
-        <TabsContent value="assigned">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {filteredAssigned.length > 0 ? (
-              filteredAssigned.map((quiz) => (
-                <QuizCard key={quiz.id} quiz={quiz} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Không tìm thấy bài tập nào
-                </p>
-              </div>
-            )}
+      <Card className="mt-6">
+        <CardHeader className="space-y-3">
+          <div className="flex items-start justify-between gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Danh sách các bài tập
+            </CardTitle>
           </div>
-        </TabsContent>
+        </CardHeader>
+        <CardContent>
+          {isLoadingAssignments ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Dang tai bai tap...</p>
+            </div>
+          ) : filteredAssignments.length > 0 ? (
+            <div className="space-y-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[320px] text-center">Tên bài tập</TableHead>
+                    <TableHead className="text-center">Lớp</TableHead>
+                    <TableHead className="text-center">Số câu</TableHead>
+                    <TableHead className="text-center">Được làm nhiều lần</TableHead>
+                    <TableHead className="text-center">Hạn nộp</TableHead>
+                    <TableHead className="text-center">Trạng thái</TableHead>
+                    <TableHead className="text-center">Thao tác</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAssignments.map((assignment) => (
+                    <TableRow key={assignment.id} className="text-center">
+                      <TableCell className="font-medium whitespace-normal">
+                        {assignment.title ?? 'Bai tap chua co tieu de'}
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        {assignment.class?.name ?? assignment.class?.classCode ?? 'Lop hoc'}
+                      </TableCell>
+                      <TableCell>{assignment._count?.tasks ?? 0} câu</TableCell>
+                      <TableCell className="flex items-center justify-center">
+                        {!assignment.isSingleAttempt ? (
+                          <Check className="h-8 w-8 text-green-500" />
+                        ) : (
+                          <X className="h-8 w-8 text-red-500" />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {dateTimeFormat(assignment.dueDate ?? '')}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">Được giao</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/student/quiz/${assignment.id}/take`}>
+                          <Button size="sm" className="gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            Làm bài
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-        {/* Public Quizzes */}
-        <TabsContent value="public">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {filteredPublic.length > 0 ? (
-              filteredPublic.map((quiz) => (
-                <QuizCard key={quiz.id} quiz={quiz} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Không tìm thấy bài tập công khai nào
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+                <p className="text-sm text-muted-foreground">
+                  Total quantity: {totalItems}
                 </p>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1 || isLoadingAssignments}
+                    onClick={handlePrevPage}
+                  >
+                    Previous page
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages || isLoadingAssignments}
+                    onClick={handleNextPage}
+                  >
+                    Next page
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <PageSizeSelect
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                    options={[10, 20, 25, 50]}
+                    disabled={isLoadingAssignments}
+                  />
+                </div>
               </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                Không tìm thấy bài tập nào
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
