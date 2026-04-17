@@ -5,13 +5,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  BookOpen,
-  CalendarDays,
-  Check,
-  Search,
-  X,
-} from 'lucide-react'
+import { BookOpen, Check, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { getAssignmentsAssignedToMyClasses } from '@/services/student/assignments'
@@ -27,8 +21,10 @@ import {
 import { Badge } from '@/components/ui/badge'
 import type { StudentAssignedAssignment } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
+import { useLanguage } from '@/components/language-provider'
 
 export default function StudentQuizPage() {
+  const { t } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(false)
@@ -80,17 +76,15 @@ export default function StudentQuizPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">
-          Làm bài tập
+          {t.student.assignments.overview.title}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Làm bài tập được giao và luyện tập các chủ đề
+          {t.student.assignments.overview.description}
         </p>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
         <Input
@@ -106,37 +100,37 @@ export default function StudentQuizPage() {
           <div className="flex items-start justify-between gap-4">
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
-              Danh sách các bài tập
+              {t.student.assignments.overview.tableView.title}
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           {isLoadingAssignments ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Dang tai bai tap...</p>
+              <p className="text-muted-foreground">{t.common.loading}</p>
             </div>
           ) : filteredAssignments.length > 0 ? (
             <div className="space-y-6">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[320px] text-center">Tên bài tập</TableHead>
-                    <TableHead className="text-center">Lớp</TableHead>
-                    <TableHead className="text-center">Số câu</TableHead>
-                    <TableHead className="text-center">Được làm nhiều lần</TableHead>
-                    <TableHead className="text-center">Hạn nộp</TableHead>
-                    <TableHead className="text-center">Trạng thái</TableHead>
-                    <TableHead className="text-center">Thao tác</TableHead>
+                    <TableHead className="w-[320px] text-center">{t.student.assignments.overview.tableView.columnAssignmentTitle}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnClass}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnNumberOfQuestions}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnIsSingleAttempt}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnDueDate}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnStatus}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAssignments.map((assignment) => (
                     <TableRow key={assignment.id} className="text-center">
                       <TableCell className="font-medium whitespace-normal">
-                        {assignment.title ?? 'Bai tap chua co tieu de'}
+                        {assignment.title}
                       </TableCell>
                       <TableCell className="whitespace-normal">
-                        {assignment.class?.name ?? assignment.class?.classCode ?? 'Lop hoc'}
+                        {assignment.class?.name}
                       </TableCell>
                       <TableCell>{assignment._count?.tasks ?? 0} câu</TableCell>
                       <TableCell className="flex items-center justify-center">
@@ -156,7 +150,7 @@ export default function StudentQuizPage() {
                         <Link href={`/student/quiz/${assignment.id}/take`}>
                           <Button size="sm" className="gap-2">
                             <BookOpen className="h-4 w-4" />
-                            Làm bài
+                            {t.student.assignments.overview.tableView.columnDoAssignmentButton}
                           </Button>
                         </Link>
                       </TableCell>
@@ -167,7 +161,7 @@ export default function StudentQuizPage() {
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
                 <p className="text-sm text-muted-foreground">
-                  Total quantity: {totalItems}
+                  {t.common.pagination.total} {totalItems}
                 </p>
 
                 <div className="flex items-center gap-2">
@@ -177,7 +171,7 @@ export default function StudentQuizPage() {
                     disabled={currentPage === 1 || isLoadingAssignments}
                     onClick={handlePrevPage}
                   >
-                    Previous page
+                    {t.common.pagination.previous}
                   </Button>
                   <Button
                     variant="outline"
@@ -185,7 +179,7 @@ export default function StudentQuizPage() {
                     disabled={currentPage === totalPages || isLoadingAssignments}
                     onClick={handleNextPage}
                   >
-                    Next page
+                    {t.common.pagination.next}
                   </Button>
                 </div>
 

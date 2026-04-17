@@ -443,6 +443,24 @@ export const translations = {
           columnActions: 'Actions'
         }
       },
+      assignments: {
+        overview: {
+          title: 'My assignments',
+          description:
+            'Do my assignments and practice English to improve my skills',
+          tableView: {
+            title: 'List of assignments',
+            columnAssignmentTitle: 'Title',
+            columnClass: 'Class',
+            columnNumberOfQuestions: 'No. questions',
+            columnIsSingleAttempt: 'Can do multiple attempts',
+            columnDueDate: 'Due date',
+            columnStatus: 'Status',
+            columnActions: 'Actions',
+            columnDoAssignmentButton: 'Do it now'
+          }
+        }
+      },
       settings: {
         title: 'Account Settings',
         description: 'Manage your personal information and preferences',
@@ -968,6 +986,24 @@ export const translations = {
           columnClassCode: 'Mã lớp',
           columnBannedDate: 'Ngày bị cấm',
           noData: 'Bạn không bị cấm tham gia lớp học nào'
+        }
+      },
+      assignments: {
+        overview: {
+          title: 'Bài tập của tôi',
+          description:
+            'Làm bài tập và luyện tập tiếng Anh để cải thiện kỹ năng của mình',
+          tableView: {
+            title: 'Danh sách bài tập',
+            columnAssignmentTitle: 'Tiêu đề',
+            columnClass: 'Lớp',
+            columnNumberOfQuestions: 'Số câu hỏi',
+            columnIsSingleAttempt: 'Có thể làm nhiều lần',
+            columnDueDate: 'Hạn nộp',
+            columnStatus: 'Trạng thái',
+            columnActions: 'Các thao tác',
+            columnDoAssignmentButton: 'Làm ngay'
+          }
         }
       },
       settings: {
