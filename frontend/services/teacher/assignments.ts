@@ -204,7 +204,8 @@ export async function toggleAssignmentActiveStatus(
   const payload = (await response.json()) as ApiSuccess<Assignment> | ApiError;
 
   if (!response.ok || !payload.status) {
-    const message = payload?.message || 'Toggle assignment active status failed';
+    const message =
+      payload?.message || 'Toggle assignment active status failed';
     throw new Error(message);
   }
 

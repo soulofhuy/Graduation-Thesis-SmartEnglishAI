@@ -28,7 +28,7 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 
 interface TableAssignment {
     id: string
-    title: string
+    title?: string
     description?: string
     questionCount: number
     createdDate: string
@@ -257,24 +257,24 @@ export default function TeacherQuizzesPage() {
                                             <TableCell className="text-center">{assignment.isActive ? t.common.active : t.common.inactive}</TableCell>
                                             <TableCell className="text-center">
                                                 <div className="flex items-center justify-center gap-2">
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <Link href={`/teacher/quizzes/edit/${assignment.id}`}>
-                                                        <Edit className="w-4 h-4" />
-                                                    </Link>
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleToggleAssignmentStatus(assignment.id)}
-                                                    disabled={Boolean(togglingAssignmentId)}
-                                                    title={assignment.isActive ? 'Vo hieu hoa bai tap' : 'Kich hoat bai tap'}
-                                                >
-                                                    {assignment.isActive ? (
-                                                        <XSquareIcon className="w-4 h-4 text-destructive" />
-                                                    ) : (
-                                                        <CheckSquare2Icon className="w-4 h-4 text-green-600" />
-                                                    )}
-                                                </Button>
+                                                    <Button variant="ghost" size="sm" asChild>
+                                                        <Link href={`/teacher/quizzes/edit/${assignment.id}`}>
+                                                            <Edit className="w-4 h-4" />
+                                                        </Link>
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleToggleAssignmentStatus(assignment.id)}
+                                                        disabled={Boolean(togglingAssignmentId)}
+                                                        title={assignment.isActive ? 'Vo hieu hoa bai tap' : 'Kich hoat bai tap'}
+                                                    >
+                                                        {assignment.isActive ? (
+                                                            <XSquareIcon className="w-4 h-4 text-destructive" />
+                                                        ) : (
+                                                            <CheckSquare2Icon className="w-4 h-4 text-green-600" />
+                                                        )}
+                                                    </Button>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
