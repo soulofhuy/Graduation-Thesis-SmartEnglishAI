@@ -32,7 +32,7 @@ router.get(
 );
 
 router.get(
-  '/assignments/:assignmentId',
+  '/assignments-for-teacher/:assignmentId',
   verifyJWT,
   AssignmentController.getAssignmentById
 );
