@@ -147,8 +147,15 @@ export default function StudentQuizPage() {
                         <Badge variant="secondary">Được giao</Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/student/quiz/${assignment.id}/take`}>
-                          <Button size="sm" className="gap-2">
+                        <Link
+                          href={`/student/quiz/${encodeURIComponent(assignment.id)}/take`}
+                          aria-disabled={!assignment.id}
+                        >
+                          <Button
+                            size="sm"
+                            className="gap-2"
+                            disabled={!assignment.id}
+                          >
                             <BookOpen className="h-4 w-4" />
                             {t.student.assignments.overview.tableView.columnDoAssignmentButton}
                           </Button>

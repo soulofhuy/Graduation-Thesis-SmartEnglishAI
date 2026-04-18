@@ -1,5 +1,13 @@
 import { getApiBaseUrl } from '@/lib/api-base-url/get-api-base-url';
-import type { Assignment, Class, User } from '@/lib/types';
+import type {
+  Assignment,
+  Choice,
+  Class,
+  Passage,
+  Question,
+  Task,
+  User
+} from '@/lib/types';
 import type { ApiError, ApiSuccess } from '@/lib/types/responses';
 
 export type AssignmentsPagination = {
@@ -22,6 +30,29 @@ export type StudentAssignedAssignment = Assignment & {
 export type StudentAssignedAssignmentsResponse = {
   data: StudentAssignedAssignment[];
   pagination: AssignmentsPagination;
+};
+
+export type StudentTaskQuestionChoice = Pick<Choice, 'id' | 'choiceContent'>;
+
+export type StudentTaskQuestion = Pick<Question, 'id' | 'questionContent'> & {
+  choices?: StudentTaskQuestionChoice[] | null;
+};
+
+export type StudentTaskPassage = Pick<Passage, 'id' | 'passageContent'> & {
+  questions?: StudentTaskQuestion[] | null;
+};
+
+export type StudentAssignmentTask = Pick<
+  Task,
+  'id' | 'taskType' | 'taskContent'
+> & {
+  questions?: StudentTaskQuestion[] | null;
+  passages?: StudentTaskPassage[] | null;
+};
+
+export type StudentAssignmentDetailResponse = Assignment & {
+  class?: Pick<Class, 'id' | 'name' | 'teacherId'> | null;
+  tasks?: StudentAssignmentTask[] | null;
 };
 
 export async function getAssignmentsAssignedToMyClasses(
@@ -56,6 +87,37 @@ export async function getAssignmentsAssignedToMyClasses(
 
   if (!payload.data) {
     throw new Error('Assigned assignments response is missing data');
+  }
+
+  return payload.data;
+}
+
+export async function getAssignmentByIdForStudentToDoTest(
+  token: string,
+  assignmentId: string
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments-for-student/${assignmentId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  const payload = (await response.json()) as
+    | ApiSuccess<StudentAssignmentDetailResponse>
+    | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch assignment detail';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Assignment detail response is missing data');
   }
 
   return payload.data;

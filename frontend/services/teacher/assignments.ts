@@ -120,7 +120,7 @@ export async function updateAssignmentById(
   assignmentData: Partial<Assignment>
 ) {
   const response = await fetch(
-    `${getApiBaseUrl()}/assignments-for-teacher/${assignmentId}`,
+    `${getApiBaseUrl()}/assignments/${encodeURIComponent(assignmentId)}`,
     {
       method: 'PUT',
       headers: {
@@ -161,7 +161,7 @@ export async function updateAssignmentFullById(
   assignmentData: UpdateAssignmentFullInput
 ) {
   const response = await fetch(
-    `${getApiBaseUrl()}/assignments-for-teacher/${assignmentId}`,
+    `${getApiBaseUrl()}/assignments/${encodeURIComponent(assignmentId)}/full`,
     {
       method: 'PUT',
       headers: {
