@@ -10,4 +10,10 @@ router.get(
   AssignmentStudentController.getAssignmentsAssignedToStudentClasses
 );
 
+router.get(
+  '/assignments-for-student/:assignmentId',
+  verifyJWT,
+  AssignmentStudentController.getAssignmentByIdForStudentToDoTest
+);
+
 export default router;

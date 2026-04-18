@@ -104,6 +104,52 @@ class AssignmentStudentService {
       }
     };
   };
+
+  static getAssignmentByIdForStudentToDoTest = async (assignmentId: string) => {
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    return prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: {
+        class: {
+          select: {
+            id: true,
+            name: true,
+            teacherId: true
+          }
+        },
+        tasks: {
+          orderBy: {
+            createdAt: 'asc'
+          },
+          include: {
+            passages: {
+              orderBy: {
+                createdAt: 'asc'
+              },
+              include: {
+                questions: {
+                  include: {
+                    choices: true
+                  }
+                }
+              }
+            },
+            questions: {
+              orderBy: {
+                createdAt: 'asc'
+              },
+              include: {
+                choices: true
+              }
+            }
+          }
+        }
+      }
+    });
+  };
 }
 
 export default AssignmentStudentService;
