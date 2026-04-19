@@ -4,8 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Clock, Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
@@ -21,8 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/components/language-provider'
 
 interface Question {
   id: string
@@ -91,6 +90,7 @@ export default function QuizTakePage() {
   const params = useParams<{ id: string }>()
   const assignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id
   const { accessToken, isHydrated } = useAuth()
+  const { t, language } = useLanguage()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
@@ -295,19 +295,26 @@ export default function QuizTakePage() {
       <header className="border-b border-border bg-card sticky top-0 z-10">
         <div className="px-4 md:px-8 py-4">
           <div className="grid items-center gap-3 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-4">
-            <h1 className="text-center text-xl font-bold text-foreground truncate">
-              {assignment.title ?? 'Bai tap'}
-            </h1>
+            <div className="text-center">
+              <h1 className="text-xl font-bold text-foreground truncate">
+                {assignment.title}
+              </h1>
+              <h2 className="text-sm text-muted-foreground truncate">
+                {assignment.description}
+              </h2>
+            </div>
 
+            {/* Button */}
             <div className="flex justify-end lg:justify-center">
               <Button
                 onClick={() => setShowSubmitDialog(true)}
                 className="gap-2"
               >
                 <Send className="w-4 h-4" />
-                Nộp bài
+                {t.student.assignments.takeAssignment.submitButton}
               </Button>
             </div>
+
           </div>
         </div>
       </header>
@@ -413,14 +420,14 @@ export default function QuizTakePage() {
                 className="gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Câu trước
+                {t.student.assignments.takeAssignment.answerList.previousButton}
               </Button>
               <Button
                 onClick={handleNextQuestion}
                 disabled={currentQuestionIndex === totalQuestions - 1}
                 className="gap-2 ml-auto"
               >
-                Câu tiếp theo
+                {t.student.assignments.takeAssignment.answerList.nextButton}
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -449,7 +456,6 @@ export default function QuizTakePage() {
               <div className="mt-2 max-h-[calc(100vh-330px)] overflow-y-auto pr-1">
                 <div className="space-y-1">
                   {questions.map((q, index) => {
-                    const isAnswered = selectedAnswers[q.id]
                     const isFlagged = flaggedQuestions.has(q.id)
                     const isCurrent = currentQuestionIndex === index
                     const visibleOptions = q.options.slice(0, answerColumns.length)
@@ -469,9 +475,8 @@ export default function QuizTakePage() {
                           onClick={() => handleJumpToQuestion(index)}
                           className={`text-left text-xs font-semibold ${isCurrent ? 'text-primary' : 'text-foreground'
                             }`}
-                          title={isFlagged ? 'Cau da danh dau' : undefined}
                         >
-                          {index + 1}{isFlagged ? ' *' : ''}
+                          {index + 1}
                         </button>
 
                         {answerColumns.map((_, optionIndex) => {
@@ -497,7 +502,6 @@ export default function QuizTakePage() {
                                   ? 'border-primary bg-primary/20'
                                   : 'border-border bg-background hover:border-primary/60'
                                 }`}
-                              aria-label={`Cau ${index + 1} lua chon ${answerColumns[optionIndex]}`}
                             >
                               {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-primary" /> : null}
                             </button>
@@ -514,11 +518,11 @@ export default function QuizTakePage() {
           <div className="mt-8 pt-6 border-t border-border space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-primary" />
-              <span className="text-foreground">Câu hiện tại</span>
+              <span className="text-foreground">{t.student.assignments.takeAssignment.answerList.currentQuestion}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-yellow-200" />
-              <span className="text-foreground">Đánh dấu</span>
+              <span className="text-foreground">{t.student.assignments.takeAssignment.answerList.markedQuestion}</span>
             </div>
           </div>
         </div>

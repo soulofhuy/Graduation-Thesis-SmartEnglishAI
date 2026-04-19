@@ -459,6 +459,16 @@ export const translations = {
             columnActions: 'Actions',
             columnDoAssignmentButton: 'Do it now'
           }
+        },
+        takeAssignment: {
+          submitButton: 'Submit',
+          answerList: {
+            title: 'Your answer list',
+            currentQuestion: 'Current question',
+            markedQuestion: 'Marked question',
+            previousButton: 'Previous',
+            nextButton: 'Next'
+          }
         }
       },
       settings: {
@@ -1003,6 +1013,16 @@ export const translations = {
             columnStatus: 'Trạng thái',
             columnActions: 'Các thao tác',
             columnDoAssignmentButton: 'Làm ngay'
+          }
+        },
+        takeAssignment: {
+          submitButton: 'Nộp bài',
+          answerList: {
+            title: 'Danh sách câu trả lời',
+            currentQuestion: 'Câu hỏi hiện tại',
+            markedQuestion: 'Câu hỏi đã đánh dấu',
+            previousButton: 'Câu hỏi trước',
+            nextButton: 'Câu hỏi tiếp theo'
           }
         }
       },
