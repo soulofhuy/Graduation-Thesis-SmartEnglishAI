@@ -34,7 +34,10 @@ export type StudentAssignedAssignmentsResponse = {
 
 export type StudentTaskQuestionChoice = Pick<Choice, 'id' | 'choiceContent'>;
 
-export type StudentTaskQuestion = Pick<Question, 'id' | 'questionContent'> & {
+export type StudentTaskQuestion = Pick<
+  Question,
+  'id' | 'questionContent' | 'passageId'
+> & {
   choices?: StudentTaskQuestionChoice[] | null;
 };
 

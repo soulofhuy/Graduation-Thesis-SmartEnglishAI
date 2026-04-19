@@ -22,13 +22,17 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 interface Question {
   id: string
   taskContent?: string
+  taskContentHtml?: string
   text: string
+  textHtml?: string
   passageText?: string
-  options: { id: string; text: string }[]
+  passageHtml?: string
+  options: { id: string; text: string; html?: string }[]
 }
 
 const normalizeHtmlToText = (value?: string | null) => {
@@ -54,6 +58,34 @@ const normalizeHtmlToText = (value?: string | null) => {
     .trim()
 }
 
+function FormattedContent({
+  html,
+  text,
+  className,
+}: {
+  html?: string
+  text?: string
+  className?: string
+}) {
+  if (html?.trim()) {
+    return (
+      <div
+        className={cn(
+          '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
+          className,
+        )}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    )
+  }
+
+  if (!text?.trim()) {
+    return null
+  }
+
+  return <p className={cn('whitespace-pre-line', className)}>{text}</p>
+}
+
 export default function QuizTakePage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
@@ -74,34 +106,81 @@ export default function QuizTakePage() {
     const normalizedQuestions: Question[] = []
 
     assignment.tasks.forEach((task) => {
+      const normalizedTaskContent = normalizeHtmlToText(task.taskContent)
+      const rawTaskContent = task.taskContent?.trim()
+      const shouldShowPassageFallback =
+        task.taskType === 'CLOZE_PASSAGE' || task.taskType === 'READING_COMPREHENSION'
+
+      const passageById = new Map<string, { text: string; html?: string }>()
+      const passageByQuestionId = new Map<string, { text: string; html?: string }>()
+
+      task.passages?.forEach((passage) => {
+        const normalizedPassage = normalizeHtmlToText(passage.passageContent)
+        const rawPassage = passage.passageContent?.trim()
+
+        const passageValue = {
+          text: normalizedPassage,
+          html: rawPassage,
+        }
+
+        passageById.set(passage.id, passageValue)
+
+        passage.questions?.forEach((question) => {
+          passageByQuestionId.set(question.id, passageValue)
+        })
+      })
+
+      const questionById = new Map<string, Question>()
+
       task.questions?.forEach((question) => {
-        normalizedQuestions.push({
+        const mappedPassage =
+          passageByQuestionId.get(question.id) ||
+          (question.passageId ? passageById.get(question.passageId) : undefined)
+
+        questionById.set(question.id, {
           id: question.id,
-          taskContent: normalizeHtmlToText(task.taskContent),
+          taskContent: normalizedTaskContent,
+          taskContentHtml: rawTaskContent,
           text: normalizeHtmlToText(question.questionContent),
+          textHtml: question.questionContent?.trim(),
+          passageText: mappedPassage?.text ?? (shouldShowPassageFallback ? normalizedTaskContent : undefined),
+          passageHtml: mappedPassage?.html ?? (shouldShowPassageFallback ? rawTaskContent : undefined),
           options:
             question.choices?.map((choice) => ({
               id: choice.id,
               text: normalizeHtmlToText(choice.choiceContent),
+              html: choice.choiceContent?.trim(),
             })) ?? [],
         })
       })
 
       task.passages?.forEach((passage) => {
+        const normalizedPassage = normalizeHtmlToText(passage.passageContent)
+
         passage.questions?.forEach((question) => {
-          normalizedQuestions.push({
+          if (questionById.has(question.id)) {
+            return
+          }
+
+          questionById.set(question.id, {
             id: question.id,
-            taskContent: normalizeHtmlToText(task.taskContent),
+            taskContent: normalizedTaskContent,
+            taskContentHtml: rawTaskContent,
             text: normalizeHtmlToText(question.questionContent),
-            passageText: normalizeHtmlToText(passage.passageContent),
+            textHtml: question.questionContent?.trim(),
+            passageText: normalizedPassage,
+            passageHtml: passage.passageContent?.trim(),
             options:
               question.choices?.map((choice) => ({
                 id: choice.id,
                 text: normalizeHtmlToText(choice.choiceContent),
+                html: choice.choiceContent?.trim(),
               })) ?? [],
           })
         })
       })
+
+      normalizedQuestions.push(...questionById.values())
     })
 
     return normalizedQuestions
@@ -243,27 +322,30 @@ export default function QuizTakePage() {
               <CardContent>
                 {currentQuestion.taskContent ? (
                   <div className="mb-6">
-                    <p className="whitespace-pre-line text-base font-semibold text-foreground">
-                      {currentQuestion.taskContent}
-                    </p>
+                    <FormattedContent
+                      html={currentQuestion.taskContentHtml}
+                      text={currentQuestion.taskContent}
+                      className="text-base font-semibold text-foreground"
+                    />
                     <div className="mt-3 border-t border-dashed border-border" />
                   </div>
                 ) : null}
 
                 {currentQuestion.passageText ? (
                   <div className="mb-6 rounded-lg border border-border bg-muted/30 p-4">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Doan van
-                    </p>
-                    <p className="whitespace-pre-line text-sm leading-6 text-foreground">
-                      {currentQuestion.passageText}
-                    </p>
+                    <FormattedContent
+                      html={currentQuestion.passageHtml}
+                      text={currentQuestion.passageText}
+                      className="text-sm leading-6 text-foreground"
+                    />
                   </div>
                 ) : null}
 
-                <h2 className="text-base text-foreground mb-6">
-                  {currentQuestion.text}
-                </h2>
+                <FormattedContent
+                  html={currentQuestion.textHtml}
+                  text={currentQuestion.text}
+                  className="mb-6 text-base text-foreground"
+                />
 
                 {/* Options */}
                 <div className="space-y-3 mb-8">
@@ -283,9 +365,14 @@ export default function QuizTakePage() {
                         onChange={() => handleSelectAnswer(option.id)}
                         className="w-4 h-4"
                       />
-                      <span className="ml-4 font-medium text-foreground">
-                        {String.fromCharCode(65 + index)}. {option.text}
-                      </span>
+                      <div className="ml-4 flex-1 text-foreground">
+                        <span className="mr-1 font-bold">{String.fromCharCode(65 + index)}.</span>
+                        <FormattedContent
+                          html={option.html}
+                          text={option.text}
+                          className="inline text-base [&_p]:inline"
+                        />
+                      </div>
                     </label>
                   ))}
 
