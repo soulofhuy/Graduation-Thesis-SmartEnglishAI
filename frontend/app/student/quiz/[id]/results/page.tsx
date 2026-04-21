@@ -30,6 +30,7 @@ import {
     type StudentAttempt,
     type StudentAttemptResultQuestionAnswer,
 } from '@/services/student/attempts'
+import { cn } from '@/lib/utils'
 
 const toNumber = (value: string | null, fallback: number) => {
     const parsedValue = Number(value)
@@ -63,6 +64,109 @@ const buildSummaryFallback = (answered: number, total: number) => {
     }
 }
 
+const normalizeHtmlToText = (value?: string | null) => {
+    if (!value) {
+        return ''
+    }
+
+    return value
+        .replace(/<br\s*\/?>(\s*)/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<\/div>/gi, '\n')
+        .replace(/<[^>]*>/g, '')
+        .replace(/\u00a0/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+}
+
+const hasRenderableContent = (value?: string | null) =>
+    normalizeHtmlToText(value).length > 0
+
+function FormattedContent({
+    html,
+    className,
+}: {
+    html?: string | null
+    className?: string
+}) {
+    if (!hasRenderableContent(html)) {
+        return null
+    }
+
+    return (
+        <div
+            className={cn(
+                '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
+                className,
+            )}
+            dangerouslySetInnerHTML={{ __html: html as string }}
+        />
+    )
+}
+
+const getAnswerDisplayContent = (answer: StudentAttemptResultQuestionAnswer) => {
+    const questionContent = hasRenderableContent(answer.questionContent)
+        ? answer.questionContent
+        : null
+    const taskContent = hasRenderableContent(answer.taskContent)
+        ? answer.taskContent
+        : null
+    const passageContent = hasRenderableContent(answer.passageContent)
+        ? answer.passageContent
+        : null
+
+    return {
+        questionContent: questionContent ?? taskContent,
+        passageContent,
+    }
+}
+
+const answerColumns = ['A', 'B', 'C', 'D'] as const
+
+function ChoiceOptionsReview({
+    answer,
+}: {
+    answer: StudentAttemptResultQuestionAnswer
+}) {
+    if (!answer.choiceOptions?.length) {
+        return null
+    }
+
+    return (
+        <div className="ml-8 mt-3 grid gap-2">
+            {answer.choiceOptions.map((choice, index) => {
+                const marker = answerColumns[index] ?? String(index + 1)
+
+                return (
+                    <div
+                        key={choice.choiceId}
+                        className={cn(
+                            'rounded border p-3 text-sm',
+                            choice.isSelected && choice.isCorrect && 'border-green-300 bg-green-50',
+                            choice.isSelected && !choice.isCorrect && 'border-red-300 bg-red-50',
+                            !choice.isSelected && choice.isCorrect && 'border-emerald-300 bg-emerald-50',
+                            !choice.isSelected && !choice.isCorrect && 'border-border bg-muted/30',
+                        )}
+                    >
+                        <div className="flex items-start gap-2">
+                            <span className="font-semibold text-foreground">{marker}.</span>
+                            <FormattedContent
+                                html={choice.choiceContent}
+                                className="text-foreground [&_p]:my-0"
+                            />
+                        </div>
+
+                        <div className="mt-1 text-xs text-muted-foreground">
+                            {choice.isSelected ? 'Bạn đã chọn' : 'Không chọn'}
+                            {choice.isCorrect ? ' • Đáp án đúng' : ''}
+                        </div>
+                    </div>
+                )
+            })}
+        </div>
+    )
+}
+
 export default function QuizResultsPage() {
     const params = useParams<{ id: string }>()
     const assignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id
@@ -70,7 +174,7 @@ export default function QuizResultsPage() {
     const fallbackAnswered = toNumber(searchParams.get('answered'), 0)
     const fallbackTotal = toNumber(searchParams.get('total'), 0)
     const { accessToken, isHydrated } = useAuth()
-    const { t } = useLanguage()
+    useLanguage()
 
     const [assignment, setAssignment] = useState<StudentAssignmentDetailResponse | null>(null)
     const [attempt, setAttempt] = useState<StudentAttempt | null>(null)
@@ -272,9 +376,23 @@ export default function QuizResultsPage() {
                                                         <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                                                     )}
                                                     <div className="flex-1">
-                                                        <p className="font-medium text-foreground">
-                                                            {answer.questionContent || 'Câu hỏi'}
-                                                        </p>
+                                                        {getAnswerDisplayContent(answer).passageContent ? (
+                                                            <div className="mb-3 rounded-lg border border-border bg-muted/30 p-3">
+                                                                <FormattedContent
+                                                                    html={getAnswerDisplayContent(answer).passageContent}
+                                                                    className="text-sm leading-6 text-foreground"
+                                                                />
+                                                            </div>
+                                                        ) : null}
+
+                                                        {getAnswerDisplayContent(answer).questionContent ? (
+                                                            <FormattedContent
+                                                                html={getAnswerDisplayContent(answer).questionContent}
+                                                                className="font-medium text-foreground"
+                                                            />
+                                                        ) : (
+                                                            <p className="font-medium text-foreground">Câu hỏi</p>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -283,13 +401,23 @@ export default function QuizResultsPage() {
                                                         <div className="bg-red-50 rounded p-3">
                                                             <p className="text-sm text-red-700">
                                                                 <strong>Câu trả lời của bạn:</strong>{' '}
-                                                                {answer.selectedChoiceContent}
+                                                                <FormattedContent
+                                                                    html={answer.selectedChoiceContent}
+                                                                    className="inline [&_p]:inline"
+                                                                />
                                                             </p>
                                                         </div>
                                                         <div className="bg-green-50 rounded p-3">
                                                             <p className="text-sm text-green-700">
                                                                 <strong>Đáp án đúng:</strong>{' '}
-                                                                {answer.correctChoiceContent || 'Chưa có đáp án đúng'}
+                                                                {answer.correctChoiceContent ? (
+                                                                    <FormattedContent
+                                                                        html={answer.correctChoiceContent}
+                                                                        className="inline [&_p]:inline"
+                                                                    />
+                                                                ) : (
+                                                                    'Chưa có đáp án đúng'
+                                                                )}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -299,10 +427,15 @@ export default function QuizResultsPage() {
                                                     <div className="ml-8 bg-green-50 rounded p-3">
                                                         <p className="text-sm text-green-700">
                                                             <strong>Câu trả lời của bạn:</strong>{' '}
-                                                            {answer.selectedChoiceContent}
+                                                            <FormattedContent
+                                                                html={answer.selectedChoiceContent}
+                                                                className="inline [&_p]:inline"
+                                                            />
                                                         </p>
                                                     </div>
                                                 )}
+
+                                                <ChoiceOptionsReview answer={answer} />
                                             </div>
                                         ))}
                                     </TabsContent>
@@ -315,10 +448,28 @@ export default function QuizResultsPage() {
                                             >
                                                 <div className="flex items-start gap-3">
                                                     <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                                    <p className="font-medium text-foreground">
-                                                        {answer.questionContent || 'Câu hỏi'}
-                                                    </p>
+                                                    <div className="flex-1">
+                                                        {getAnswerDisplayContent(answer).passageContent ? (
+                                                            <div className="mb-3 rounded-lg border border-green-200 bg-white/70 p-3">
+                                                                <FormattedContent
+                                                                    html={getAnswerDisplayContent(answer).passageContent}
+                                                                    className="text-sm leading-6 text-foreground"
+                                                                />
+                                                            </div>
+                                                        ) : null}
+
+                                                        {getAnswerDisplayContent(answer).questionContent ? (
+                                                            <FormattedContent
+                                                                html={getAnswerDisplayContent(answer).questionContent}
+                                                                className="font-medium text-foreground"
+                                                            />
+                                                        ) : (
+                                                            <p className="font-medium text-foreground">Câu hỏi</p>
+                                                        )}
+                                                    </div>
                                                 </div>
+
+                                                <ChoiceOptionsReview answer={answer} />
                                             </div>
                                         ))}
                                     </TabsContent>
@@ -331,24 +482,52 @@ export default function QuizResultsPage() {
                                             >
                                                 <div className="flex items-start gap-3 mb-3">
                                                     <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                                    <p className="font-medium text-foreground">
-                                                        {answer.questionContent || 'Câu hỏi'}
-                                                    </p>
+                                                    <div className="flex-1">
+                                                        {getAnswerDisplayContent(answer).passageContent ? (
+                                                            <div className="mb-3 rounded-lg border border-red-200 bg-white/80 p-3">
+                                                                <FormattedContent
+                                                                    html={getAnswerDisplayContent(answer).passageContent}
+                                                                    className="text-sm leading-6 text-foreground"
+                                                                />
+                                                            </div>
+                                                        ) : null}
+
+                                                        {getAnswerDisplayContent(answer).questionContent ? (
+                                                            <FormattedContent
+                                                                html={getAnswerDisplayContent(answer).questionContent}
+                                                                className="font-medium text-foreground"
+                                                            />
+                                                        ) : (
+                                                            <p className="font-medium text-foreground">Câu hỏi</p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="space-y-2 ml-8">
                                                     <div className="bg-white rounded p-3 border border-red-200">
                                                         <p className="text-sm text-red-700">
                                                             <strong>Câu trả lời của bạn:</strong>{' '}
-                                                            {answer.selectedChoiceContent}
+                                                            <FormattedContent
+                                                                html={answer.selectedChoiceContent}
+                                                                className="inline [&_p]:inline"
+                                                            />
                                                         </p>
                                                     </div>
                                                     <div className="bg-white rounded p-3 border border-green-200">
                                                         <p className="text-sm text-green-700">
                                                             <strong>Đáp án đúng:</strong>{' '}
-                                                            {answer.correctChoiceContent || 'Chưa có đáp án đúng'}
+                                                            {answer.correctChoiceContent ? (
+                                                                <FormattedContent
+                                                                    html={answer.correctChoiceContent}
+                                                                    className="inline [&_p]:inline"
+                                                                />
+                                                            ) : (
+                                                                'Chưa có đáp án đúng'
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
+
+                                                <ChoiceOptionsReview answer={answer} />
                                             </div>
                                         ))}
                                     </TabsContent>

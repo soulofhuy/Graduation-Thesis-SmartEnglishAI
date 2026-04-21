@@ -16,6 +16,15 @@ type SubmitAttemptPayload = {
 type ResultQuestionAnswerSnapshot = {
   questionId: string;
   questionContent: string;
+  taskType: string | null;
+  taskContent: string | null;
+  passageContent: string | null;
+  choiceOptions: {
+    choiceId: string;
+    choiceContent: string;
+    isSelected: boolean;
+    isCorrect: boolean;
+  }[];
   selectedChoiceId: string;
   selectedChoiceContent: string;
   correctChoiceId: string | null;
@@ -192,6 +201,23 @@ class AttemptService {
             id: true,
             questionContent: true,
             correctChoiceId: true,
+            task: {
+              select: {
+                taskType: true,
+                taskContent: true
+              }
+            },
+            passage: {
+              select: {
+                passageContent: true
+              }
+            },
+            choices: {
+              select: {
+                id: true,
+                choiceContent: true
+              }
+            },
             correctChoice: {
               select: {
                 id: true,
@@ -212,6 +238,17 @@ class AttemptService {
     return submittedAnswers.map<ResultQuestionAnswerSnapshot>(answer => ({
       questionId: answer.questionId,
       questionContent: answer.question.questionContent,
+      taskType: answer.question.task.taskType,
+      taskContent: answer.question.task.taskContent,
+      passageContent: answer.question.passage?.passageContent ?? null,
+      choiceOptions: answer.question.choices.map(choice => ({
+        choiceId: choice.id,
+        choiceContent: choice.choiceContent,
+        isSelected: choice.id === answer.selectedChoiceId,
+        isCorrect:
+          answer.question.correctChoiceId !== null &&
+          choice.id === answer.question.correctChoiceId
+      })),
       selectedChoiceId: answer.selectedChoiceId,
       selectedChoiceContent: answer.selectedChoice.choiceContent,
       correctChoiceId: answer.question.correctChoiceId,

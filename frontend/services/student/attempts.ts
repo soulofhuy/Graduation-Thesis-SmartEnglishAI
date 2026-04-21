@@ -24,6 +24,15 @@ export type StudentAttemptAnswer = {
 export type StudentAttemptResultQuestionAnswer = {
   questionId: string;
   questionContent: string;
+  taskType: string | null;
+  taskContent: string | null;
+  passageContent: string | null;
+  choiceOptions?: {
+    choiceId: string;
+    choiceContent: string;
+    isSelected: boolean;
+    isCorrect: boolean;
+  }[];
   selectedChoiceId: string;
   selectedChoiceContent: string;
   correctChoiceId: string | null;
