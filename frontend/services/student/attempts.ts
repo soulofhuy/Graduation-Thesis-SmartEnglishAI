@@ -21,6 +21,27 @@ export type StudentAttemptAnswer = {
   selectedChoice?: unknown;
 };
 
+export type StudentAttemptResultQuestionAnswer = {
+  questionId: string;
+  questionContent: string;
+  selectedChoiceId: string;
+  selectedChoiceContent: string;
+  correctChoiceId: string | null;
+  correctChoiceContent: string | null;
+  isCorrect: boolean;
+};
+
+export type StudentAttemptResult = {
+  id: string;
+  attemptId: string;
+  studentId: string;
+  score: number;
+  correctCount: number;
+  totalCount: number;
+  questionAnswers: StudentAttemptResultQuestionAnswer[];
+  createdAt?: string | null;
+};
+
 export type StudentAttempt = {
   id: string;
   studentId: string;
@@ -30,6 +51,7 @@ export type StudentAttempt = {
   startedAt?: string | null;
   submittedAt?: string | null;
   answers?: StudentAttemptAnswer[] | null;
+  result?: StudentAttemptResult | null;
 };
 
 const buildAuthHeaders = (token: string) => ({
@@ -84,6 +106,34 @@ export const submitAttempt = async (
 
   if (!payload.data) {
     throw new Error('Submit attempt response is missing data');
+  }
+
+  return payload.data;
+};
+
+export const getLatestAttemptForStudent = async (
+  token: string,
+  assignmentId: string
+) => {
+  const response = await fetch(
+    `${getApiBaseUrl()}/attempts/latest/${assignmentId}`,
+    {
+      method: 'GET',
+      headers: buildAuthHeaders(token)
+    }
+  );
+
+  const payload = (await response.json()) as
+    | ApiSuccess<StudentAttempt>
+    | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch latest attempt';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    return null;
   }
 
   return payload.data;

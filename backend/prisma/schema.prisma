@@ -52,6 +52,7 @@ model User {
   createdQuestions      Question[]        @relation("QuestionCreator")
   createdPassages       Passage[]         @relation("PassageCreator")
   attempts              Attempt[]         @relation("AttemptStudent")
+  results               Result[]          @relation("ResultStudent")
 }
 
 model Profile {
@@ -152,12 +153,15 @@ model Attempt {
 model Result {
   id                    String            @id @default(uuid())
   attemptId             String            @unique @map("attempt_id")
+  studentId             String            @map("student_id")
   score                 Float
   correctCount          Int               @map("correct_count")
   totalCount            Int               @map("total_count")
+  questionAnswers        Json              @map("question_answers")
   createdAt             DateTime          @default(now()) @map("created_at")
 
   attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  student               User              @relation("ResultStudent", fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("Result")
 }

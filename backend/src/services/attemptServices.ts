@@ -13,6 +13,16 @@ type SubmitAttemptPayload = {
   answers?: SubmitAnswerInput[];
 };
 
+type ResultQuestionAnswerSnapshot = {
+  questionId: string;
+  questionContent: string;
+  selectedChoiceId: string;
+  selectedChoiceContent: string;
+  correctChoiceId: string | null;
+  correctChoiceContent: string | null;
+  isCorrect: boolean;
+};
+
 class AttemptService {
   private static toDraftAnswerValue(value: Prisma.InputJsonValue | null) {
     return value === null ? Prisma.JsonNull : value;
@@ -168,6 +178,51 @@ class AttemptService {
     });
   }
 
+  private static async buildResultQuestionAnswers(
+    tx: Prisma.TransactionClient,
+    attemptId: string
+  ) {
+    const submittedAnswers = await tx.answer.findMany({
+      where: {
+        attemptId
+      },
+      include: {
+        question: {
+          select: {
+            id: true,
+            questionContent: true,
+            correctChoiceId: true,
+            correctChoice: {
+              select: {
+                id: true,
+                choiceContent: true
+              }
+            }
+          }
+        },
+        selectedChoice: {
+          select: {
+            id: true,
+            choiceContent: true
+          }
+        }
+      }
+    });
+
+    return submittedAnswers.map<ResultQuestionAnswerSnapshot>(answer => ({
+      questionId: answer.questionId,
+      questionContent: answer.question.questionContent,
+      selectedChoiceId: answer.selectedChoiceId,
+      selectedChoiceContent: answer.selectedChoice.choiceContent,
+      correctChoiceId: answer.question.correctChoiceId,
+      correctChoiceContent:
+        answer.question.correctChoice?.choiceContent ?? null,
+      isCorrect:
+        answer.question.correctChoiceId !== null &&
+        answer.selectedChoiceId === answer.question.correctChoiceId
+    }));
+  }
+
   private static async ensureSingleAttemptPolicy(
     tx: Prisma.TransactionClient,
     studentId: string,
@@ -220,7 +275,8 @@ class AttemptService {
             question: true,
             selectedChoice: true
           }
-        }
+        },
+        result: true
       }
     });
   };
@@ -369,6 +425,26 @@ class AttemptService {
         throw new Error('Cannot submit attempt without answers');
       }
 
+      const totalCount = await tx.question.count({
+        where: {
+          task: {
+            assignmentId: normalizedAssignmentId
+          }
+        }
+      });
+
+      const questionAnswers = await this.buildResultQuestionAnswers(
+        tx,
+        attempt.id
+      );
+      const correctCount = questionAnswers.filter(
+        item => item.isCorrect
+      ).length;
+      const score =
+        totalCount > 0
+          ? Number(((correctCount / totalCount) * 100).toFixed(2))
+          : 0;
+
       const updateData: Prisma.AttemptUpdateInput = {
         status: AttemptStatus.SUBMITTED,
         submittedAt: new Date()
@@ -378,7 +454,7 @@ class AttemptService {
         updateData.draftAnswer = this.toDraftAnswerValue(payload.draftAnswer);
       }
 
-      return tx.attempt.update({
+      await tx.attempt.update({
         where: {
           id: attempt.id
         },
@@ -390,6 +466,42 @@ class AttemptService {
               selectedChoice: true
             }
           }
+        }
+      });
+
+      await tx.result.upsert({
+        where: {
+          attemptId: attempt.id
+        },
+        create: {
+          attemptId: attempt.id,
+          studentId: normalizedStudentId,
+          score,
+          correctCount,
+          totalCount,
+          questionAnswers
+        },
+        update: {
+          studentId: normalizedStudentId,
+          score,
+          correctCount,
+          totalCount,
+          questionAnswers
+        }
+      });
+
+      return tx.attempt.findUnique({
+        where: {
+          id: attempt.id
+        },
+        include: {
+          answers: {
+            include: {
+              question: true,
+              selectedChoice: true
+            }
+          },
+          result: true
         }
       });
     });
