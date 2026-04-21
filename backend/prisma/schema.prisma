@@ -142,10 +142,24 @@ model Attempt {
   student               User              @relation("AttemptStudent", fields: [studentId], references: [id], onDelete: Cascade)
   assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   answers               Answer[]
+  result                Result?
 
   @@index([studentId])
   @@index([assignmentId])
   @@map("Attempt")
+}
+
+model Result {
+  id                    String            @id @default(uuid())
+  attemptId             String            @unique @map("attempt_id")
+  score                 Float
+  correctCount          Int               @map("correct_count")
+  totalCount            Int               @map("total_count")
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@map("Result")
 }
 
 model Task {
