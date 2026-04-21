@@ -8,6 +8,11 @@ import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
+  startOrGetInProgressAttempt,
+  submitAttempt,
+  type StudentAttempt
+} from '@/services/student/attempts'
+import {
   getAssignmentByIdForStudentToDoTest,
   type StudentAssignmentDetailResponse
 } from '@/services/student/assignments'
@@ -90,13 +95,24 @@ export default function QuizTakePage() {
   const params = useParams<{ id: string }>()
   const assignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id
   const { accessToken, isHydrated } = useAuth()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [assignment, setAssignment] = useState<StudentAssignmentDetailResponse | null>(null)
   const [isLoadingAssignment, setIsLoadingAssignment] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const mapAttemptAnswersToSelectedAnswers = (attempt: StudentAttempt) => {
+    const nextSelectedAnswers: Record<string, string> = {}
+
+    attempt.answers?.forEach((answer) => {
+      nextSelectedAnswers[answer.questionId] = answer.selectedChoiceId
+    })
+
+    return nextSelectedAnswers
+  }
 
   const questions = useMemo<Question[]>(() => {
     if (!assignment?.tasks?.length) {
@@ -196,11 +212,16 @@ export default function QuizTakePage() {
       return
     }
 
-    const fetchAssignmentDetail = async () => {
+    const fetchQuizData = async () => {
       setIsLoadingAssignment(true)
       try {
-        const result = await getAssignmentByIdForStudentToDoTest(accessToken, assignmentId)
-        setAssignment(result)
+        const [assignmentResult, attemptResult] = await Promise.all([
+          getAssignmentByIdForStudentToDoTest(accessToken, assignmentId),
+          startOrGetInProgressAttempt(accessToken, assignmentId)
+        ])
+
+        setAssignment(assignmentResult)
+        setSelectedAnswers(mapAttemptAnswersToSelectedAnswers(attemptResult))
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Khong the tai chi tiet bai tap'
@@ -210,7 +231,7 @@ export default function QuizTakePage() {
       }
     }
 
-    void fetchAssignmentDetail()
+    void fetchQuizData()
   }, [accessToken, isHydrated, assignmentId])
 
   const handleSelectAnswerByQuestion = (questionId: string, optionId: string) => {
@@ -260,10 +281,35 @@ export default function QuizTakePage() {
       return
     }
 
-    const currentAnsweredCount = Object.keys(selectedAnswers).length
-    router.push(`/student/quiz/${assignmentId}/results?answered=${currentAnsweredCount}&total=${totalQuestions}`)
-    toast.success('Nộp bài tập thành công!')
-  }, [assignmentId, router, selectedAnswers, totalQuestions])
+    if (!accessToken) {
+      toast.error('Vui long dang nhap de nop bai tap')
+      return
+    }
+
+    const answers = Object.entries(selectedAnswers).map(([questionId, selectedChoiceId]) => ({
+      questionId,
+      selectedChoiceId
+    }))
+
+    setIsSubmitting(true)
+
+    try {
+      const submittedAttempt = await submitAttempt(accessToken, {
+        assignmentId,
+        answers
+      })
+
+      const answeredCount = submittedAttempt.answers?.length ?? answers.length
+      router.push(`/student/quiz/${assignmentId}/results?answered=${answeredCount}&total=${totalQuestions}`)
+      toast.success('Nộp bài tập thành công!')
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Khong the nop bai tap'
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [accessToken, assignmentId, router, selectedAnswers, totalQuestions])
 
   if (!isHydrated || isLoadingAssignment) {
     return (
@@ -539,7 +585,7 @@ export default function QuizTakePage() {
               Bạn chắc chắn muốn nộp bài tập này không?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogAction onClick={handleSubmitQuiz}>
+          <AlertDialogAction onClick={handleSubmitQuiz} disabled={isSubmitting}>
             Nộp bài
           </AlertDialogAction>
           <AlertDialogCancel>Tiếp tục làm bài</AlertDialogCancel>
