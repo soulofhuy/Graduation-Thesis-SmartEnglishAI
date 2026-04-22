@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
-import AssignmentService from '../services/assignmentServices';
+import AssignmentService from '../services/assignmentTeacherServices';
 import Responses from '../utils/responses';
 import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
 

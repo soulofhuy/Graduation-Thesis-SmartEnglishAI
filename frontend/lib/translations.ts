@@ -443,6 +443,43 @@ export const translations = {
           columnActions: 'Actions'
         }
       },
+      assignments: {
+        overview: {
+          title: 'My assignments',
+          description:
+            'Do my assignments and practice English to improve my skills',
+          tableView: {
+            title: 'List of assignments',
+            columnAssignmentTitle: 'Title',
+            columnClass: 'Class',
+            columnNumberOfQuestions: 'No. questions',
+            columnIsSingleAttempt: 'Can do multiple attempts',
+            columnDueDate: 'Due date',
+            columnStatus: 'Status',
+            columnResult: 'Result',
+            columnActions: 'Actions',
+            columnDoAssignmentButton: 'Do it now',
+            columnContinueAssignmentButton: 'Continue',
+            columnSubmittedAssignmentButton: 'Submitted',
+            statusAssigned: 'Assigned',
+            statusInProgress: 'In progress',
+            statusSubmitted: 'Done',
+            scoreFormat: '{{correctCount}}/{{totalCount}} correct',
+            singleAttemptWarning:
+              'This assignment allows only one submitted attempt'
+          }
+        },
+        takeAssignment: {
+          submitButton: 'Submit',
+          answerList: {
+            title: 'Your answer list',
+            currentQuestion: 'Current question',
+            markedQuestion: 'Marked question',
+            previousButton: 'Previous',
+            nextButton: 'Next'
+          }
+        }
+      },
       settings: {
         title: 'Account Settings',
         description: 'Manage your personal information and preferences',
@@ -968,6 +1005,42 @@ export const translations = {
           columnClassCode: 'Mã lớp',
           columnBannedDate: 'Ngày bị cấm',
           noData: 'Bạn không bị cấm tham gia lớp học nào'
+        }
+      },
+      assignments: {
+        overview: {
+          title: 'Bài tập của tôi',
+          description:
+            'Làm bài tập và luyện tập tiếng Anh để cải thiện kỹ năng của mình',
+          tableView: {
+            title: 'Danh sách bài tập',
+            columnAssignmentTitle: 'Tiêu đề',
+            columnClass: 'Lớp',
+            columnNumberOfQuestions: 'Số câu hỏi',
+            columnIsSingleAttempt: 'Có thể làm nhiều lần',
+            columnDueDate: 'Hạn nộp',
+            columnStatus: 'Trạng thái',
+            columnResult: 'Kết quả',
+            columnActions: 'Các thao tác',
+            columnDoAssignmentButton: 'Làm ngay',
+            columnContinueAssignmentButton: 'Tiếp tục',
+            columnSubmittedAssignmentButton: 'Đã nộp',
+            statusAssigned: 'Được giao',
+            statusInProgress: 'Đang làm',
+            statusSubmitted: 'Đã làm',
+            scoreFormat: '{{correctCount}}/{{totalCount}} đúng',
+            singleAttemptWarning: 'Bài tập này chỉ cho phép nộp một lần'
+          }
+        },
+        takeAssignment: {
+          submitButton: 'Nộp bài',
+          answerList: {
+            title: 'Danh sách câu trả lời',
+            currentQuestion: 'Câu hỏi hiện tại',
+            markedQuestion: 'Câu hỏi đã đánh dấu',
+            previousButton: 'Câu hỏi trước',
+            nextButton: 'Câu hỏi tiếp theo'
+          }
         }
       },
       settings: {

@@ -81,7 +81,7 @@ export async function getAssignmentsCreatedByMe(
 
 export async function getAssignmentById(token: string, assignmentId: string) {
   const response = await fetch(
-    `${getApiBaseUrl()}/assignments/${assignmentId}`,
+    `${getApiBaseUrl()}/assignments-for-teacher/${assignmentId}`,
     {
       method: 'GET',
       headers: {
@@ -120,7 +120,7 @@ export async function updateAssignmentById(
   assignmentData: Partial<Assignment>
 ) {
   const response = await fetch(
-    `${getApiBaseUrl()}/assignments/${assignmentId}`,
+    `${getApiBaseUrl()}/assignments/${encodeURIComponent(assignmentId)}`,
     {
       method: 'PUT',
       headers: {
@@ -161,7 +161,7 @@ export async function updateAssignmentFullById(
   assignmentData: UpdateAssignmentFullInput
 ) {
   const response = await fetch(
-    `${getApiBaseUrl()}/assignments/${assignmentId}`,
+    `${getApiBaseUrl()}/assignments/${encodeURIComponent(assignmentId)}/full`,
     {
       method: 'PUT',
       headers: {

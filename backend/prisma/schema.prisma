@@ -27,6 +27,13 @@ enum TaskType {
   READING_COMPREHENSION
 }
 
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  CANCELLED
+  EXPIRED
+}
+
 model User {
   id                    String            @id @default(uuid())
   email                 String            @unique
@@ -44,6 +51,8 @@ model User {
   createdAssignments    Assignment[]      @relation("AssignmentCreator")
   createdQuestions      Question[]        @relation("QuestionCreator")
   createdPassages       Passage[]         @relation("PassageCreator")
+  attempts              Attempt[]         @relation("AttemptStudent")
+  results               Result[]          @relation("ResultStudent")
 }
 
 model Profile {
@@ -116,9 +125,45 @@ model Assignment {
   creator               User              @relation("AssignmentCreator", fields: [createdBy], references: [id], onDelete: Cascade)
   class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
   tasks                 Task[]
+  attempts              Attempt[]
 
   @@index([classId])
   @@index([createdBy])
+}
+
+model Attempt {
+  id                    String            @id @default(uuid())
+  studentId             String            @map("student_id")
+  assignmentId          String            @map("assignment_id")
+  status                AttemptStatus     @default(IN_PROGRESS)
+  submittedAt           DateTime?         @map("submitted_at")
+  startedAt             DateTime          @default(now()) @map("started_at")
+  draftAnswer           Json?             @map("draft_answer")
+
+  student               User              @relation("AttemptStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  answers               Answer[]
+  result                Result?
+
+  @@index([studentId])
+  @@index([assignmentId])
+  @@map("Attempt")
+}
+
+model Result {
+  id                    String            @id @default(uuid())
+  attemptId             String            @unique @map("attempt_id")
+  studentId             String            @map("student_id")
+  score                 Float
+  correctCount          Int               @map("correct_count")
+  totalCount            Int               @map("total_count")
+  questionAnswers        Json              @map("question_answers")
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  student               User              @relation("ResultStudent", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("Result")
 }
 
 model Task {
@@ -152,6 +197,7 @@ model Question {
   passage               Passage?          @relation(fields: [passageId], references: [id], onDelete: SetNull)
   choices               Choice[]          @relation("QuestionChoices")
   correctChoice         Choice?           @relation("QuestionCorrectChoice", fields: [correctChoiceId], references: [id], onDelete: SetNull)
+  answers               Answer[]
 
   @@index([taskId])
   @@index([passageId])
@@ -171,10 +217,27 @@ model Choice {
   task                  Task?             @relation("TaskChoices", fields: [taskId], references: [id], onDelete: Cascade)
   passage               Passage?          @relation("PassageChoices", fields: [passageId], references: [id], onDelete: Cascade)
   correctFor            Question?         @relation("QuestionCorrectChoice")
+  selectedInAnswers     Answer[]          @relation("AnswerSelectedChoice")
 
   @@index([questionId])
   @@index([taskId])
   @@index([passageId])
+}
+
+model Answer {
+  id                    String            @id @default(uuid())
+  attemptId             String            @map("attempt_id")
+  questionId            String            @map("question_id")
+  selectedChoiceId      String            @map("selected_choice_id")
+
+  attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question              Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedChoice        Choice            @relation("AnswerSelectedChoice", fields: [selectedChoiceId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([selectedChoiceId])
+  @@map("Answer")
 }
 
 model Passage {

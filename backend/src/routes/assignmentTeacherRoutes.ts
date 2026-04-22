@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import AssignmentController from '../controllers/assignmentController';
+import AssignmentController from '../controllers/assignmentTeacherController';
 import verifyJWT from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -32,7 +32,7 @@ router.get(
 );
 
 router.get(
-  '/assignments/:assignmentId',
+  '/assignments-for-teacher/:assignmentId',
   verifyJWT,
   AssignmentController.getAssignmentById
 );

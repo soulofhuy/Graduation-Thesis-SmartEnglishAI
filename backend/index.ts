@@ -7,7 +7,9 @@ import ClassTeacherRouter from './src/routes/classTeacherRoutes';
 import ClassStudentRouter from './src/routes/classStudentRoutes';
 import ClassRouter from './src/routes/classRoutes';
 import StudentRouter from './src/routes/studentRoutes';
-import AssignmentRouter from './src/routes/assignmentRoutes';
+import AssignmentRouter from './src/routes/assignmentTeacherRoutes';
+import AssignmentStudentRouter from './src/routes/assignmentStudentRoutes';
+import AttemptRouter from './src/routes/attemptRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -28,6 +30,8 @@ app.use('/api', ClassTeacherRouter);
 app.use('/api', ClassRouter);
 app.use('/api', StudentRouter);
 app.use('/api', AssignmentRouter);
+app.use('/api', AssignmentStudentRouter);
+app.use('/api', AttemptRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 
