@@ -1,10 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
+import { useAuth } from '@/components/auth-provider'
+import { PageSizeSelect } from '@/components/page-size-select'
+import { dateTimeFormat } from '@/lib/format'
+import {
+  getAssignmentsHistoryOfStudent,
+  type StudentAssignedAssignment,
+} from '@/services/student/assignments'
 import {
   Table,
   TableBody,
@@ -14,64 +23,98 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-interface HistoryItem {
-  id: string
-  quizName: string
-  score: number
-  date: string
-  duration: number
-  status: 'passed' | 'failed'
-}
-
 export default function StudentHistoryPage() {
+  const { accessToken, isHydrated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [history, setHistory] = useState<StudentAssignedAssignment[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
-  const history: HistoryItem[] = [
-    {
-      id: '1',
-      quizName: 'Bài tập ngữ pháp Unit 1',
-      score: 8.5,
-      date: '2024-03-15',
-      duration: 28,
-      status: 'passed',
-    },
-    {
-      id: '2',
-      quizName: 'Bài tập reading Unit 2',
-      score: 7.2,
-      date: '2024-03-14',
-      duration: 22,
-      status: 'passed',
-    },
-    {
-      id: '3',
-      quizName: 'Kiểm tra giữa kì',
-      score: 6.8,
-      date: '2024-03-13',
-      duration: 85,
-      status: 'passed',
-    },
-    {
-      id: '4',
-      quizName: 'Bài tập listening Unit 1',
-      score: 5.5,
-      date: '2024-03-12',
-      duration: 18,
-      status: 'failed',
-    },
-    {
-      id: '5',
-      quizName: 'Bài tập vocabulary Unit 3',
-      score: 9.0,
-      date: '2024-03-10',
-      duration: 15,
-      status: 'passed',
-    },
-  ]
+  useEffect(() => {
+    if (!isHydrated || !accessToken) {
+      return
+    }
+
+    const fetchHistory = async () => {
+      setIsLoadingHistory(true)
+      try {
+        const response = await getAssignmentsHistoryOfStudent(
+          accessToken,
+          currentPage,
+          pageSize
+        )
+
+        setHistory(response.data)
+        setTotalItems(response.pagination.totalItems)
+        setTotalPages(response.pagination.totalPages)
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Khong the tai lich su bai tap'
+        toast.error(message)
+      } finally {
+        setIsLoadingHistory(false)
+      }
+    }
+
+    void fetchHistory()
+  }, [accessToken, isHydrated, currentPage, pageSize])
 
   const filteredHistory = history.filter((item) =>
-    item.quizName.toLowerCase().includes(searchQuery.toLowerCase())
+    (item.title ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  const getScoreDisplay = (item: StudentAssignedAssignment) => {
+    const attempt = item.attemptSummary
+
+    if (
+      attempt?.status === 'SUBMITTED' &&
+      attempt.correctCount !== undefined &&
+      attempt.totalCount !== undefined
+    ) {
+      return `${attempt.correctCount}/${attempt.totalCount}`
+    }
+
+    if (attempt?.score !== undefined) {
+      return `${attempt.score}`
+    }
+
+    return '-'
+  }
+
+  const getDurationMinutes = (item: StudentAssignedAssignment) => {
+    const startedAt = item.attemptSummary?.startedAt
+    const submittedAt = item.attemptSummary?.submittedAt
+
+    if (!startedAt || !submittedAt) {
+      return '-'
+    }
+
+    const startedAtMs = new Date(startedAt).getTime()
+    const submittedAtMs = new Date(submittedAt).getTime()
+
+    if (Number.isNaN(startedAtMs) || Number.isNaN(submittedAtMs)) {
+      return '-'
+    }
+
+    const durationMinutes = Math.max(0, Math.round((submittedAtMs - startedAtMs) / 60000))
+    return `${durationMinutes} phút`
+  }
+
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => Math.max(1, prevPage - 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(totalPages, prevPage + 1))
+  }
+
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize)
+    setCurrentPage(1)
+  }
 
   return (
     <div className="p-4 md:p-8 space-y-8">
@@ -103,63 +146,101 @@ export default function StudentHistoryPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tên bài tập</TableHead>
-                  <TableHead>Điểm</TableHead>
-                  <TableHead>Ngày làm</TableHead>
-                  <TableHead>Thời gian</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredHistory.length > 0 ? (
-                  filteredHistory.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        {item.quizName}
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-bold text-primary">
-                          {item.score}/10
-                        </span>
-                      </TableCell>
-                      <TableCell>{item.date}</TableCell>
-                      <TableCell>{item.duration} phút</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            item.status === 'passed'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {item.status === 'passed' ? 'Đạt' : 'Không đạt'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          <Eye className="w-4 h-4" />
-                          Xem chi tiết
-                        </Button>
-                      </TableCell>
+          {isLoadingHistory ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Đang tải...</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên bài tập</TableHead>
+                      <TableHead>Điểm</TableHead>
+                      <TableHead>Ngày làm</TableHead>
+                      <TableHead>Thời gian</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead className="text-right">Thao tác</TableHead>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <p className="text-muted-foreground">
-                        Không tìm thấy bài tập nào
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredHistory.length > 0 ? (
+                      filteredHistory.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">
+                            {item.title}
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-bold text-primary">
+                              {getScoreDisplay(item)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {dateTimeFormat(item.attemptSummary?.submittedAt ?? '')}
+                          </TableCell>
+                          <TableCell>{getDurationMinutes(item)}</TableCell>
+                          <TableCell>
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                              Đã nộp
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm" className="gap-2" disabled>
+                              <Eye className="w-4 h-4" />
+                              Xem chi tiết
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">
+                          <p className="text-muted-foreground">
+                            Không tìm thấy bài tập nào
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+                <p className="text-sm text-muted-foreground">
+                  Tổng: {totalItems}
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1 || isLoadingHistory}
+                    onClick={handlePrevPage}
+                  >
+                    Trước
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages || isLoadingHistory}
+                    onClick={handleNextPage}
+                  >
+                    Sau
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <PageSizeSelect
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                    options={[10, 20, 25, 50]}
+                    disabled={isLoadingHistory}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

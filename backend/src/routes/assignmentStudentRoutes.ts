@@ -16,4 +16,10 @@ router.get(
   AssignmentStudentController.getAssignmentByIdForStudentToDoTest
 );
 
+router.get(
+  '/assignments-students/history',
+  verifyJWT,
+  AssignmentStudentController.getAssignmentsHistoryOfStudent
+);
+
 export default router;
