@@ -1,4 +1,4 @@
-import { Role } from '../generated/prisma/enums';
+import { AttemptStatus, Role } from '../generated/prisma/enums';
 import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
 import prisma from '../utils/prisma';
 
@@ -87,13 +87,86 @@ class AssignmentStudentService {
             select: {
               tasks: true
             }
+          },
+          attempts: {
+            where: {
+              studentId
+            },
+            orderBy: {
+              startedAt: 'desc'
+            },
+            take: 1,
+            select: {
+              id: true,
+              status: true,
+              startedAt: true,
+              submittedAt: true,
+              result: {
+                select: {
+                  correctCount: true,
+                  totalCount: true,
+                  score: true
+                }
+              }
+            }
           }
         }
       })
     ]);
 
+    const assignmentsWithAttemptStatus = assignments.map(assignment => {
+      const latestAttempt = assignment.attempts[0];
+
+      let attemptSummary: {
+        status: AttemptStatus;
+        label: 'DONE' | 'IN_PROGRESS';
+        correctCount?: number;
+        totalCount?: number;
+        score?: number;
+        attemptId: string;
+        startedAt: Date;
+        submittedAt: Date | null;
+      } | null = null;
+
+      if (latestAttempt?.status === AttemptStatus.SUBMITTED) {
+        attemptSummary = {
+          status: AttemptStatus.SUBMITTED,
+          label: 'DONE',
+          attemptId: latestAttempt.id,
+          startedAt: latestAttempt.startedAt,
+          submittedAt: latestAttempt.submittedAt,
+          ...(latestAttempt.result?.correctCount !== undefined
+            ? { correctCount: latestAttempt.result.correctCount }
+            : {}),
+          ...(latestAttempt.result?.totalCount !== undefined
+            ? { totalCount: latestAttempt.result.totalCount }
+            : {}),
+          ...(latestAttempt.result?.score !== undefined
+            ? { score: latestAttempt.result.score }
+            : {})
+        };
+      }
+
+      if (latestAttempt?.status === AttemptStatus.IN_PROGRESS) {
+        attemptSummary = {
+          status: AttemptStatus.IN_PROGRESS,
+          label: 'IN_PROGRESS',
+          attemptId: latestAttempt.id,
+          startedAt: latestAttempt.startedAt,
+          submittedAt: latestAttempt.submittedAt
+        };
+      }
+
+      const { attempts, ...assignmentWithoutAttempts } = assignment;
+
+      return {
+        ...assignmentWithoutAttempts,
+        attemptSummary
+      };
+    });
+
     return {
-      data: assignments,
+      data: assignmentsWithAttemptStatus,
       pagination: {
         page,
         limit,

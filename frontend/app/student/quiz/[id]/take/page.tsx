@@ -226,6 +226,7 @@ export default function QuizTakePage() {
         const message =
           error instanceof Error ? error.message : 'Khong the tai chi tiet bai tap'
         toast.error(message)
+        router.push('/student/quiz')
       } finally {
         setIsLoadingAssignment(false)
       }

@@ -74,6 +74,78 @@ export default function StudentQuizPage() {
     setCurrentPage(1)
   }
 
+  const getAttemptStatusBadge = (assignment: StudentAssignedAssignment) => {
+    const attemptSummary = assignment.attemptSummary
+
+    if (!attemptSummary) {
+      return <Badge variant="secondary">{t.student.assignments.overview.tableView.statusAssigned}</Badge>
+    }
+
+    if (attemptSummary.status === 'SUBMITTED') {
+      return (
+        <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+          {t.student.assignments.overview.tableView.statusSubmitted}
+        </Badge>
+      )
+    }
+
+    if (attemptSummary.status === 'IN_PROGRESS') {
+      return (
+        <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
+          {t.student.assignments.overview.tableView.statusInProgress}
+        </Badge>
+      )
+    }
+
+    return null
+  }
+
+  const getAttemptResult = (assignment: StudentAssignedAssignment) => {
+    const attemptSummary = assignment.attemptSummary
+
+    if (
+      attemptSummary?.status === 'SUBMITTED' &&
+      attemptSummary.correctCount !== undefined &&
+      attemptSummary.totalCount !== undefined
+    ) {
+      return t.student.assignments.overview.tableView.scoreFormat
+        .replace('{{correctCount}}', String(attemptSummary.correctCount))
+        .replace('{{totalCount}}', String(attemptSummary.totalCount))
+    }
+
+    return '-'
+  }
+
+  const getActionLabel = (assignment: StudentAssignedAssignment) => {
+    if (assignment.attemptSummary?.status === 'IN_PROGRESS') {
+      return t.student.assignments.overview.tableView.columnContinueAssignmentButton
+    }
+
+    if (
+      assignment.attemptSummary?.status === 'SUBMITTED' &&
+      assignment.isSingleAttempt
+    ) {
+      return t.student.assignments.overview.tableView.columnSubmittedAssignmentButton
+    }
+
+    return t.student.assignments.overview.tableView.columnDoAssignmentButton
+  }
+
+  const handleActionClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    assignment: StudentAssignedAssignment
+  ) => {
+    const isSubmittedSingleAttempt =
+      assignment.attemptSummary?.status === 'SUBMITTED' && assignment.isSingleAttempt
+
+    if (!isSubmittedSingleAttempt) {
+      return
+    }
+
+    event.preventDefault()
+    toast.error(t.student.assignments.overview.tableView.singleAttemptWarning)
+  }
+
   return (
     <div className="p-4 md:p-8 space-y-8">
       <div>
@@ -120,49 +192,56 @@ export default function StudentQuizPage() {
                     <TableHead className="text-center">{t.student.assignments.overview.tableView.columnIsSingleAttempt}</TableHead>
                     <TableHead className="text-center">{t.student.assignments.overview.tableView.columnDueDate}</TableHead>
                     <TableHead className="text-center">{t.student.assignments.overview.tableView.columnStatus}</TableHead>
+                    <TableHead className="text-center">{t.student.assignments.overview.tableView.columnResult}</TableHead>
                     <TableHead className="text-center">{t.student.assignments.overview.tableView.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAssignments.map((assignment) => (
-                    <TableRow key={assignment.id} className="text-center">
-                      <TableCell className="font-medium whitespace-normal">
-                        {assignment.title}
-                      </TableCell>
-                      <TableCell className="whitespace-normal">
-                        {assignment.class?.name}
-                      </TableCell>
-                      <TableCell>{assignment._count?.tasks ?? 0} câu</TableCell>
-                      <TableCell className="flex items-center justify-center">
-                        {!assignment.isSingleAttempt ? (
-                          <Check className="h-8 w-8 text-green-500" />
-                        ) : (
-                          <X className="h-8 w-8 text-red-500" />
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {dateTimeFormat(assignment.dueDate ?? '')}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">Được giao</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Link
-                          href={`/student/quiz/${encodeURIComponent(assignment.id)}/take`}
-                          aria-disabled={!assignment.id}
-                        >
-                          <Button
-                            size="sm"
-                            className="gap-2"
-                            disabled={!assignment.id}
+                  {filteredAssignments.map((assignment) => {
+                    const isSubmittedSingleAttempt =
+                      assignment.attemptSummary?.status === 'SUBMITTED' && assignment.isSingleAttempt
+                    const actionLabel = getActionLabel(assignment)
+
+                    return (
+                      <TableRow key={assignment.id} className="text-center">
+                        <TableCell className="font-medium whitespace-normal">
+                          {assignment.title}
+                        </TableCell>
+                        <TableCell className="whitespace-normal">
+                          {assignment.class?.name}
+                        </TableCell>
+                        <TableCell>{assignment._count?.tasks ?? 0} câu</TableCell>
+                        <TableCell className="flex items-center justify-center">
+                          {!assignment.isSingleAttempt ? (
+                            <Check className="h-8 w-8 text-green-500" />
+                          ) : (
+                            <X className="h-8 w-8 text-red-500" />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {dateTimeFormat(assignment.dueDate ?? '')}
+                        </TableCell>
+                        <TableCell>{getAttemptStatusBadge(assignment)}</TableCell>
+                        <TableCell>{getAttemptResult(assignment)}</TableCell>
+                        <TableCell className="text-right">
+                          <Link
+                            href={`/student/quiz/${encodeURIComponent(assignment.id)}/take`}
+                            aria-disabled={!assignment.id || isSubmittedSingleAttempt}
+                            onClick={(event) => handleActionClick(event, assignment)}
                           >
-                            <BookOpen className="h-4 w-4" />
-                            {t.student.assignments.overview.tableView.columnDoAssignmentButton}
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            <Button
+                              size="sm"
+                              className="gap-2"
+                              disabled={!assignment.id}
+                            >
+                              <BookOpen className="h-4 w-4" />
+                              {actionLabel}
+                            </Button>
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
 

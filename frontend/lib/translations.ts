@@ -456,8 +456,17 @@ export const translations = {
             columnIsSingleAttempt: 'Can do multiple attempts',
             columnDueDate: 'Due date',
             columnStatus: 'Status',
+            columnResult: 'Result',
             columnActions: 'Actions',
-            columnDoAssignmentButton: 'Do it now'
+            columnDoAssignmentButton: 'Do it now',
+            columnContinueAssignmentButton: 'Continue',
+            columnSubmittedAssignmentButton: 'Submitted',
+            statusAssigned: 'Assigned',
+            statusInProgress: 'In progress',
+            statusSubmitted: 'Done',
+            scoreFormat: '{{correctCount}}/{{totalCount}} correct',
+            singleAttemptWarning:
+              'This assignment allows only one submitted attempt'
           }
         },
         takeAssignment: {
@@ -1011,8 +1020,16 @@ export const translations = {
             columnIsSingleAttempt: 'Có thể làm nhiều lần',
             columnDueDate: 'Hạn nộp',
             columnStatus: 'Trạng thái',
+            columnResult: 'Kết quả',
             columnActions: 'Các thao tác',
-            columnDoAssignmentButton: 'Làm ngay'
+            columnDoAssignmentButton: 'Làm ngay',
+            columnContinueAssignmentButton: 'Tiếp tục',
+            columnSubmittedAssignmentButton: 'Đã nộp',
+            statusAssigned: 'Được giao',
+            statusInProgress: 'Đang làm',
+            statusSubmitted: 'Đã làm',
+            scoreFormat: '{{correctCount}}/{{totalCount}} đúng',
+            singleAttemptWarning: 'Bài tập này chỉ cho phép nộp một lần'
           }
         },
         takeAssignment: {

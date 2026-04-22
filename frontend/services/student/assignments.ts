@@ -19,12 +19,24 @@ export type AssignmentsPagination = {
   hasPrevPage: boolean;
 };
 
+export type StudentAssignmentAttemptSummary = {
+  status: 'SUBMITTED' | 'IN_PROGRESS';
+  label: 'DONE' | 'IN_PROGRESS';
+  correctCount?: number;
+  totalCount?: number;
+  score?: number;
+  attemptId: string;
+  startedAt: string;
+  submittedAt: string | null;
+};
+
 export type StudentAssignedAssignment = Assignment & {
   class: Pick<Class, 'id' | 'name' | 'classCode' | 'teacherId'>;
   creator: Pick<User, 'id' | 'email' | 'role' | 'profile'>;
   _count: {
     tasks: number;
   };
+  attemptSummary: StudentAssignmentAttemptSummary | null;
 };
 
 export type StudentAssignedAssignmentsResponse = {
