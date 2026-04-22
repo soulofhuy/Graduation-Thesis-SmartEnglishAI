@@ -157,6 +157,8 @@ export default function StudentHistoryPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Tên bài tập</TableHead>
+                      <TableHead>Lớp</TableHead>
+                      <TableHead>Có thể làm nhiều lần</TableHead>
                       <TableHead>Điểm</TableHead>
                       <TableHead>Ngày làm</TableHead>
                       <TableHead>Thời gian</TableHead>
@@ -170,6 +172,10 @@ export default function StudentHistoryPage() {
                         <TableRow key={item.id}>
                           <TableCell className="font-medium">
                             {item.title}
+                          </TableCell>
+                          <TableCell>{item.class?.name ?? '-'}</TableCell>
+                          <TableCell>
+                            {item.isSingleAttempt ? 'Không' : 'Có'}
                           </TableCell>
                           <TableCell>
                             <span className="font-bold text-primary">
@@ -195,7 +201,7 @@ export default function StudentHistoryPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">
+                        <TableCell colSpan={8} className="text-center py-8">
                           <p className="text-muted-foreground">
                             Không tìm thấy bài tập nào
                           </p>
