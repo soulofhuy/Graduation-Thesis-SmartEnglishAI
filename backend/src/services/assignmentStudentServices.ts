@@ -396,6 +396,128 @@ class AssignmentStudentService {
       }
     };
   };
+
+  static getFullAttemptHistoryOfStudent = async (
+    studentId: string,
+    assignmentId: string
+  ) => {
+    if (!studentId?.trim()) {
+      throw new Error('Student ID is required');
+    }
+
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    const student = await prisma.user.findUnique({
+      where: { id: studentId },
+      select: {
+        id: true,
+        role: true,
+        isActive: true
+      }
+    });
+
+    if (!student) {
+      throw new Error('Student not found');
+    }
+
+    if (!student.isActive) {
+      throw new Error('Student account is inactive');
+    }
+
+    if (student.role !== Role.STUDENT) {
+      throw new Error('Only students can view attempt history');
+    }
+
+    const assignment = await prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        isActive: true,
+        class: {
+          isActive: true,
+          classMembers: {
+            some: {
+              studentId,
+              isApproved: true,
+              isBanned: false
+            }
+          }
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!assignment) {
+      throw new Error('Assignment not found or not accessible');
+    }
+
+    const attemptHistory = await prisma.attempt.findMany({
+      where: {
+        studentId,
+        assignmentId,
+        assignment: {
+          isActive: true,
+          class: {
+            isActive: true,
+            classMembers: {
+              some: {
+                studentId,
+                isApproved: true,
+                isBanned: false
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        startedAt: 'desc'
+      },
+      include: {
+        assignment: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            dueDate: true,
+            isSingleAttempt: true,
+            canViewResult: true,
+            createdAt: true,
+            class: {
+              select: {
+                id: true,
+                name: true,
+                classCode: true,
+                teacherId: true
+              }
+            }
+          }
+        },
+        result: {
+          select: {
+            id: true,
+            score: true,
+            correctCount: true,
+            totalCount: true,
+            questionAnswers: true,
+            createdAt: true
+          }
+        },
+        _count: {
+          select: {
+            answers: true
+          }
+        }
+      }
+    });
+
+    return {
+      totalItems: attemptHistory.length,
+      data: attemptHistory
+    };
+  };
 }
 
 export default AssignmentStudentService;

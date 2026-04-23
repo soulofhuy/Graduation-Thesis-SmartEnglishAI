@@ -98,7 +98,7 @@ class AssignmentStudentController {
 
     try {
       const assignments =
-        await AssignmentStudentService.getAssignmentsAssignedToStudentClasses(
+        await AssignmentStudentService.getAssignmentsHistoryOfStudent(
           studentId,
           page,
           limit
@@ -108,8 +108,52 @@ class AssignmentStudentController {
         .status(200)
         .json(
           Responses.successResponse(
-            'Student assignments fetched successfully',
+            'Student assignments history fetched successfully',
             assignments
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
+  static getFullAttemptHistoryOfStudent = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const studentId = req.userId;
+    const assignmentId =
+      req.params.assignmentId ||
+      req.query.assignmentId ||
+      req.body.assignmentId;
+
+    if (!studentId) {
+      return res
+        .status(401)
+        .json(
+          Responses.errorResponse(new Error('Unauthorized - User ID not found'))
+        );
+    }
+
+    if (!assignmentId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Assignment ID is required')));
+    }
+
+    try {
+      const history =
+        await AssignmentStudentService.getFullAttemptHistoryOfStudent(
+          studentId,
+          String(assignmentId)
+        );
+
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Student full attempt history fetched successfully',
+            history
           )
         );
     } catch (error) {
