@@ -44,6 +44,65 @@ export type StudentAssignedAssignmentsResponse = {
   pagination: AssignmentsPagination;
 };
 
+export type StudentAttemptHistoryItem = {
+  id: string;
+  studentId: string;
+  assignmentId: string;
+  status: 'SUBMITTED' | 'IN_PROGRESS';
+  submittedAt: string | null;
+  startedAt: string;
+  assignment: {
+    id: string;
+    title: string;
+    description: string | null;
+    dueDate: string | null;
+    isSingleAttempt: boolean;
+    canViewResult: boolean;
+    createdAt: string;
+    class: {
+      id: string;
+      name: string;
+      classCode: string;
+      teacherId: string;
+    };
+  };
+  result: {
+    id: string;
+    score: number;
+    correctCount: number;
+    totalCount: number;
+    questionAnswers: StudentAttemptHistoryQuestionAnswer[];
+    createdAt: string;
+  } | null;
+  _count: {
+    answers: number;
+  };
+};
+
+export type StudentAttemptHistoryQuestionAnswer = {
+  questionId: string;
+  questionContent: string;
+  taskType: string | null;
+  taskContent: string | null;
+  passageContent: string | null;
+  choiceOptions?: {
+    choiceId: string;
+    choiceContent: string;
+    isSelected: boolean;
+    isCorrect: boolean;
+  }[];
+  selectedChoiceId: string;
+  selectedChoiceContent: string;
+  correctChoiceId: string | null;
+  correctChoiceContent: string | null;
+  isCorrect: boolean;
+};
+
+export type StudentAttemptHistoryByAssignmentResponse = {
+  totalItems: number;
+  data: StudentAttemptHistoryItem[];
+};
+
 export type StudentTaskQuestionChoice = Pick<Choice, 'id' | 'choiceContent'>;
 
 export type StudentTaskQuestion = Pick<
@@ -170,6 +229,37 @@ export async function getAssignmentsHistoryOfStudent(
 
   if (!payload.data) {
     throw new Error('Assignment history response is missing data');
+  }
+
+  return payload.data;
+}
+
+export async function getFullAttemptHistoryOfStudentByAssignmentId(
+  token: string,
+  assignmentId: string
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments-students/history/full/${assignmentId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  const payload = (await response.json()) as
+    | ApiSuccess<StudentAttemptHistoryByAssignmentResponse>
+    | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch full attempt history';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Full attempt history response is missing data');
   }
 
   return payload.data;

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, Eye, Check, X } from 'lucide-react'
@@ -192,10 +193,12 @@ export default function StudentHistoryPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Button variant="ghost" size="sm" className="gap-2" disabled>
-                              <Eye className="w-4 h-4" />
-                              Xem chi tiết
-                            </Button>
+                            <Link href={`/student/history/${encodeURIComponent(item.id)}`}>
+                              <Button variant="ghost" size="sm" className="gap-2" disabled={!item.id}>
+                                <Eye className="w-4 h-4" />
+                                Xem chi tiết
+                              </Button>
+                            </Link>
                           </TableCell>
                         </TableRow>
                       ))
