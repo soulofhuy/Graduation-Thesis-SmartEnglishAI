@@ -478,6 +478,22 @@ export const translations = {
             previousButton: 'Previous',
             nextButton: 'Next'
           }
+        },
+        viewHistory: {
+          title: 'My assignment history',
+          description:
+            'Review your past assignments and results to track your learning progress',
+          searchPlaceholder: 'Search by assignment title...',
+          tableView: {
+            columnAssignmentTitle: 'Assignment Title',
+            columnClass: 'Class',
+            columnIsSingleAttempt: 'Single attempt',
+            columnResult: 'Result',
+            columnSubmittedAt: 'Submitted at',
+            columnTotalTime: 'Total time',
+            columnStatus: 'Status',
+            columnActions: 'Actions'
+          }
         }
       },
       settings: {
@@ -1040,6 +1056,22 @@ export const translations = {
             markedQuestion: 'Câu hỏi đã đánh dấu',
             previousButton: 'Câu hỏi trước',
             nextButton: 'Câu hỏi tiếp theo'
+          }
+        },
+        viewHistory: {
+          title: 'Lịch sử bài tập của tôi',
+          description:
+            'Xem lại các bài tập đã làm và kết quả để theo dõi tiến trình học tập của bạn',
+          searchPlaceholder: 'Tìm kiếm theo tiêu đề của bài tập...',
+          tableView: {
+            columnAssignmentTitle: 'Tiêu đề của bài tập',
+            columnClass: 'Lớp',
+            columnIsSingleAttempt: 'Chỉ được làm một lần',
+            columnResult: 'Kết quả',
+            columnSubmittedAt: 'Ngày nộp',
+            columnTotalTime: 'Thời gian tổng cộng',
+            columnStatus: 'Trạng thái',
+            columnActions: 'Các thao tác'
           }
         }
       },

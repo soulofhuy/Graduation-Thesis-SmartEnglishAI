@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, Eye } from 'lucide-react'
+import { Search, Eye, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useLanguage } from '@/components/language-provider'
 
 export default function StudentHistoryPage() {
+  const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
@@ -120,9 +122,9 @@ export default function StudentHistoryPage() {
     <div className="p-4 md:p-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Lịch sử</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t.student.assignments.viewHistory.title}</h1>
         <p className="text-muted-foreground mt-1">
-          Xem lại lịch sử các bài tập đã làm
+          {t.student.assignments.viewHistory.description}
         </p>
       </div>
 
@@ -130,7 +132,7 @@ export default function StudentHistoryPage() {
       <div className="relative">
         <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
         <Input
-          placeholder="Tìm kiếm bài tập..."
+          placeholder={t.student.assignments.viewHistory.searchPlaceholder}
           className="pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -139,12 +141,6 @@ export default function StudentHistoryPage() {
 
       {/* History Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Bài tập đã làm</CardTitle>
-          <CardDescription>
-            Danh sách tất cả các bài tập bạn đã hoàn thành
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           {isLoadingHistory ? (
             <div className="text-center py-12">
@@ -156,42 +152,46 @@ export default function StudentHistoryPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tên bài tập</TableHead>
-                      <TableHead>Lớp</TableHead>
-                      <TableHead>Có thể làm nhiều lần</TableHead>
-                      <TableHead>Điểm</TableHead>
-                      <TableHead>Ngày làm</TableHead>
-                      <TableHead>Thời gian</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnAssignmentTitle}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnClass}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnIsSingleAttempt}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnResult}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnSubmittedAt}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnTotalTime}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnStatus}</TableHead>
+                      <TableHead className="text-center">{t.student.assignments.viewHistory.tableView.columnActions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredHistory.length > 0 ? (
                       filteredHistory.map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-center">
                             {item.title}
                           </TableCell>
-                          <TableCell>{item.class?.name ?? '-'}</TableCell>
-                          <TableCell>
-                            {item.isSingleAttempt ? 'Không' : 'Có'}
+                          <TableCell className="text-center">{item.class?.name ?? '-'}</TableCell>
+                          <TableCell className="flex items-center justify-center">
+                            {!item.isSingleAttempt ? (
+                              <Check className="h-8 w-8 text-green-500" />
+                            ) : (
+                              <X className="h-8 w-8 text-red-500" />
+                            )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             <span className="font-bold text-primary">
                               {getScoreDisplay(item)}
                             </span>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             {dateTimeFormat(item.attemptSummary?.submittedAt ?? '')}
                           </TableCell>
-                          <TableCell>{getDurationMinutes(item)}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">{getDurationMinutes(item)}</TableCell>
+                          <TableCell className="text-center">
                             <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
                               Đã nộp
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-center">
                             <Button variant="ghost" size="sm" className="gap-2" disabled>
                               <Eye className="w-4 h-4" />
                               Xem chi tiết
@@ -214,7 +214,7 @@ export default function StudentHistoryPage() {
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
                 <p className="text-sm text-muted-foreground">
-                  Tổng: {totalItems}
+                  {t.common.pagination.total} {totalItems}
                 </p>
 
                 <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export default function StudentHistoryPage() {
                     disabled={currentPage === 1 || isLoadingHistory}
                     onClick={handlePrevPage}
                   >
-                    Trước
+                    {t.common.pagination.previous}
                   </Button>
                   <Button
                     variant="outline"
@@ -232,7 +232,7 @@ export default function StudentHistoryPage() {
                     disabled={currentPage === totalPages || isLoadingHistory}
                     onClick={handleNextPage}
                   >
-                    Sau
+                    {t.common.pagination.next}
                   </Button>
                 </div>
 
