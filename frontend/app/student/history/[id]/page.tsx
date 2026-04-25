@@ -9,10 +9,9 @@ import { useAuth } from '@/components/auth-provider'
 import {
     FormattedContent,
 } from '@/lib/view-details-assignment-helpers/format-content'
+import { ChoiceOptionsReview } from '@/lib/view-details-assignment-helpers/choice-options-preview'
 import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
 import { getAnswerDisplayContent } from '@/lib/view-details-assignment-helpers/get-answer-display-content'
-import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
-import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,49 +26,9 @@ import {
 import {
     getFullAttemptHistoryOfStudentByAssignmentId,
     type StudentAttemptHistoryItem,
-    type StudentAttemptHistoryQuestionAnswer,
 } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
-
-function ChoiceOptionsReview({
-    answer,
-}: {
-    answer: StudentAttemptHistoryQuestionAnswer
-}) {
-    if (!answer.choiceOptions?.length) {
-        return null
-    }
-
-    return (
-        <div className="ml-8 mt-3 grid gap-2">
-            {answer.choiceOptions.map((choice, index) => {
-                const marker = answerColumns[index] ?? String(index + 1)
-
-                return (
-                    <div
-                        key={choice.choiceId}
-                        className={cn(
-                            'rounded border p-3 text-sm',
-                            choice.isSelected && choice.isCorrect && 'border-green-300 bg-green-50',
-                            choice.isSelected && !choice.isCorrect && 'border-red-300 bg-red-50',
-                            !choice.isSelected && choice.isCorrect && 'border-emerald-300 bg-emerald-50',
-                            !choice.isSelected && !choice.isCorrect && 'border-border bg-muted/30',
-                        )}
-                    >
-                        <div className="flex items-start gap-2">
-                            <span className="font-semibold text-foreground">{marker}.</span>
-                            <FormattedContent
-                                html={choice.choiceContent}
-                                className="text-foreground [&_p]:my-0"
-                            />
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
-    )
-}
 
 export default function StudentHistoryDetailPage() {
     const { accessToken, isHydrated } = useAuth()
@@ -272,7 +231,7 @@ export default function StudentHistoryDetailPage() {
                                                         )}
                                                         <div className="flex-1 space-y-2">
                                                             <p className="text-sm text-muted-foreground">
-                                                                Câu {answerIndex + 1}
+                                                                {t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.question} {answerIndex + 1}
                                                             </p>
                                                             {getAnswerDisplayContent(answer).passageContent ? (
                                                                 <div className="rounded-lg border bg-muted/30 p-3">
