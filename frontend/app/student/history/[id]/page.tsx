@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, CheckCircle2, Clock3, Eye, XCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Clock3, Eye, Info, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
@@ -146,50 +146,43 @@ export default function StudentHistoryDetailPage() {
     return (
         <div className="p-4 md:p-8 space-y-6">
             <Link href="/student/history">
-                <Button variant="ghost" className="gap-2">
+                <Button variant="outline" className="mb-4">
                     <ArrowLeft className="w-4 h-4" />
                     Quay lại lịch sử
                 </Button>
             </Link>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>{assignmentInfo?.title ?? 'Chi tiết lịch sử bài làm'}</CardTitle>
-                    <CardDescription>
-                        {assignmentInfo
-                            ? `Lớp: ${assignmentInfo.class?.name ?? '-'} (${assignmentInfo.class?.classCode ?? '-'})`
-                            : 'Không có thông tin bài tập'}
-                    </CardDescription>
+                <CardHeader className="mb-3">
+                    <CardTitle className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Thông tin bài kiểm tra
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                         <div className="rounded-lg border p-4">
+                            <p className="text-sm text-muted-foreground">Tên bài kiểm tra</p>
+                            <p className="mt-3 text-base font-semibold">{assignmentInfo?.title}</p>
+                        </div>
+                        <div className="rounded-lg border p-4">
                             <p className="text-sm text-muted-foreground">Số lần làm</p>
-                            <p className="mt-1 text-2xl font-bold">{history.length}</p>
+                            <p className="mt-3 text-xl font-semibold">{history.length}</p>
                         </div>
                         <div className="rounded-lg border p-4">
                             <p className="text-sm text-muted-foreground">Hạn nộp</p>
-                            <p className="mt-1 text-base font-semibold">{dateTimeFormat(assignmentInfo?.dueDate ?? '')}</p>
-                        </div>
-                        <div className="rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">Loại bài</p>
-                            <p className="mt-1 text-base font-semibold">
-                                {assignmentInfo?.isSingleAttempt ? 'Một lần làm' : 'Nhiều lần làm'}
-                            </p>
+                            <p className="mt-3 text-base font-semibold">{dateTimeFormat(assignmentInfo?.dueDate ?? '')}</p>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
-                <CardHeader>
+                <CardHeader className="mb-3">
                     <CardTitle className="flex items-center gap-2">
                         <Eye className="h-5 w-5" />
                         Lịch sử các lần làm bài
                     </CardTitle>
-                    <CardDescription>
-                        Danh sách toàn bộ attempt của học sinh theo assignment này
-                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -264,22 +257,11 @@ export default function StudentHistoryDetailPage() {
 
                     return (
                         <Card key={`review-${attempt.id}`}>
-                            <CardHeader>
+                            <CardHeader className="mb-3">
                                 <CardTitle>Lần làm #{history.length - index} - Chi tiết đáp án</CardTitle>
-                                <CardDescription>
-                                    {assignmentInfo?.canViewResult
-                                        ? 'Xem từng câu hỏi, đáp án đã chọn và đáp án đúng.'
-                                        : 'Bài tập này không cho phép xem chi tiết đáp án.'}
-                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                                    <div className="rounded-lg border p-3">
-                                        <p className="text-sm text-muted-foreground">Điểm</p>
-                                        <p className="text-lg font-bold text-primary">
-                                            {attempt.result?.score ?? 0}%
-                                        </p>
-                                    </div>
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                     <div className="rounded-lg border p-3">
                                         <p className="text-sm text-muted-foreground">Số câu đúng</p>
                                         <p className="text-lg font-bold text-green-600">
