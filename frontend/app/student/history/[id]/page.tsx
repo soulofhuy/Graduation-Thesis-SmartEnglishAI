@@ -11,6 +11,7 @@ import {
     hasRenderableContent,
 } from '@/lib/view-details-assignment-helpers/format-content'
 import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
+import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -46,8 +47,6 @@ const getAnswerDisplayContent = (answer: StudentAttemptHistoryQuestionAnswer) =>
         passageContent,
     }
 }
-
-const answerColumns = ['A', 'B', 'C', 'D'] as const
 
 function ChoiceOptionsReview({
     answer,

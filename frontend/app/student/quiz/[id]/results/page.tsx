@@ -24,6 +24,7 @@ import {
     FormattedContent,
     hasRenderableContent,
 } from '@/lib/view-details-assignment-helpers/format-content'
+import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
 import { toast } from 'sonner'
 import {
     getAssignmentByIdForStudentToDoTest,
@@ -84,8 +85,6 @@ const getAnswerDisplayContent = (answer: StudentAttemptResultQuestionAnswer) => 
         passageContent,
     }
 }
-
-const answerColumns = ['A', 'B', 'C', 'D'] as const
 
 function ChoiceOptionsReview({
     answer,

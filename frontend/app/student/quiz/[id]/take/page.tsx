@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
 import { FormattedContent } from '@/lib/view-details-assignment-helpers/format-content'
+import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
 import {
   startOrGetInProgressAttempt,
   submitAttempt,
@@ -155,7 +156,6 @@ export default function QuizTakePage() {
   const totalQuestions = questions.length
   const currentQuestion = questions[currentQuestionIndex]
   const answeredCount = Object.keys(selectedAnswers).length
-  const answerColumns = ['A', 'B', 'C', 'D'] as const
 
   useEffect(() => {
     if (!isHydrated || !accessToken || !assignmentId) {
