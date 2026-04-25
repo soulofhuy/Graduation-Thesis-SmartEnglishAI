@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { ArrowLeft, CheckCircle2, Clock3, Eye, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
+import { normalizeHtmlToText } from '@/lib/show-question-helpers/normalize-html-to-text'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -35,21 +36,6 @@ const getDurationMinutes = (attempt: StudentAttemptHistoryItem) => {
 
     const minutes = Math.max(0, Math.round((submittedAtMs - startedAtMs) / 60000))
     return `${minutes} phút`
-}
-
-const normalizeHtmlToText = (value?: string | null) => {
-    if (!value) {
-        return ''
-    }
-
-    return value
-        .replace(/<br\s*\/?>\s*/gi, '\n')
-        .replace(/<\/p>/gi, '\n')
-        .replace(/<\/div>/gi, '\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/\u00a0/g, ' ')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim()
 }
 
 const hasRenderableContent = (value?: string | null) =>

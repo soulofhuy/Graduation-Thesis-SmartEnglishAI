@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
+import { normalizeHtmlToText } from '@/lib/show-question-helpers/normalize-html-to-text'
 import {
   startOrGetInProgressAttempt,
   submitAttempt,
@@ -37,29 +38,6 @@ interface Question {
   passageText?: string
   passageHtml?: string
   options: { id: string; text: string; html?: string }[]
-}
-
-const normalizeHtmlToText = (value?: string | null) => {
-  if (!value) {
-    return ''
-  }
-
-  if (typeof window === 'undefined') {
-    return value
-  }
-
-  const htmlWithBreaks = value
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<\/div>/gi, '\n')
-
-  const tempNode = document.createElement('div')
-  tempNode.innerHTML = htmlWithBreaks
-
-  return (tempNode.textContent ?? '')
-    .replace(/\u00a0/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
 }
 
 function FormattedContent({

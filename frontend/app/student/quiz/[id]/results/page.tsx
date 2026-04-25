@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/tabs'
 import { useAuth } from '@/components/auth-provider'
 import { useLanguage } from '@/components/language-provider'
+import { normalizeHtmlToText } from '@/lib/show-question-helpers/normalize-html-to-text'
 import { toast } from 'sonner'
 import {
     getAssignmentByIdForStudentToDoTest,
@@ -62,21 +63,6 @@ const buildSummaryFallback = (answered: number, total: number) => {
         correctCount,
         totalCount: safeTotal,
     }
-}
-
-const normalizeHtmlToText = (value?: string | null) => {
-    if (!value) {
-        return ''
-    }
-
-    return value
-        .replace(/<br\s*\/?>(\s*)/gi, '\n')
-        .replace(/<\/p>/gi, '\n')
-        .replace(/<\/div>/gi, '\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/\u00a0/g, ' ')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim()
 }
 
 const hasRenderableContent = (value?: string | null) =>
