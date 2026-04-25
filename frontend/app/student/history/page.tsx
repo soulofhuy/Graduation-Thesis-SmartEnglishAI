@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useLanguage } from '@/components/language-provider'
+import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
 
 export default function StudentHistoryPage() {
   const { t, language } = useLanguage()
@@ -85,25 +86,6 @@ export default function StudentHistoryPage() {
     }
 
     return '-'
-  }
-
-  const getDurationMinutes = (item: StudentAssignedAssignment) => {
-    const startedAt = item.attemptSummary?.startedAt
-    const submittedAt = item.attemptSummary?.submittedAt
-
-    if (!startedAt || !submittedAt) {
-      return '-'
-    }
-
-    const startedAtMs = new Date(startedAt).getTime()
-    const submittedAtMs = new Date(submittedAt).getTime()
-
-    if (Number.isNaN(startedAtMs) || Number.isNaN(submittedAtMs)) {
-      return '-'
-    }
-
-    const durationMinutes = Math.max(0, Math.round((submittedAtMs - startedAtMs) / 60000))
-    return `${durationMinutes} phút`
   }
 
   const handlePrevPage = () => {
@@ -186,7 +168,12 @@ export default function StudentHistoryPage() {
                           <TableCell className="text-center">
                             {dateTimeFormat(item.attemptSummary?.submittedAt ?? '')}
                           </TableCell>
-                          <TableCell className="text-center">{getDurationMinutes(item)}</TableCell>
+                          <TableCell className="text-center">
+                            {getDurationMinutes({
+                              startedAt: item.attemptSummary?.startedAt,
+                              submittedAt: item.attemptSummary?.submittedAt,
+                            })}
+                          </TableCell>
                           <TableCell className="text-center">
                             <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
                               Đã nộp

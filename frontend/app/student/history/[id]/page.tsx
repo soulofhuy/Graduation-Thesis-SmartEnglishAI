@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, Clock3, Eye, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
+import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,18 +26,6 @@ import {
     type StudentAttemptHistoryQuestionAnswer,
 } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
-
-const getDurationMinutes = (attempt: StudentAttemptHistoryItem) => {
-    const startedAtMs = new Date(attempt.startedAt).getTime()
-    const submittedAtMs = attempt.submittedAt ? new Date(attempt.submittedAt).getTime() : NaN
-
-    if (Number.isNaN(startedAtMs) || Number.isNaN(submittedAtMs)) {
-        return '-'
-    }
-
-    const minutes = Math.max(0, Math.round((submittedAtMs - startedAtMs) / 60000))
-    return `${minutes} phút`
-}
 
 const hasRenderableContent = (value?: string | null) =>
     normalizeHtmlToText(value).length > 0
@@ -264,7 +253,12 @@ export default function StudentHistoryDetailPage() {
                                         </TableCell>
                                         <TableCell className="text-center">{dateTimeFormat(attempt.startedAt ?? '')}</TableCell>
                                         <TableCell className="text-center">{dateTimeFormat(attempt.submittedAt ?? '')}</TableCell>
-                                        <TableCell className="text-center">{getDurationMinutes(attempt)}</TableCell>
+                                        <TableCell className="text-center">
+                                            {getDurationMinutes({
+                                                startedAt: attempt.startedAt,
+                                                submittedAt: attempt.submittedAt,
+                                            })}
+                                        </TableCell>
                                         <TableCell className="text-center">{attempt._count?.answers ?? 0}</TableCell>
                                         <TableCell className="text-center">
                                             {attempt.result ? (
