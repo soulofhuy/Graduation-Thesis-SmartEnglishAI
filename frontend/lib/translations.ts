@@ -494,6 +494,34 @@ export const translations = {
             columnStatus: 'Status',
             columnActions: 'Actions'
           }
+        },
+        viewHistoryDetails: {
+          assignmentInfo: {
+            title: 'Assignment information',
+            statistic: {
+              assignmentTitle: 'Assignment title',
+              assignmentTotalAttempts: 'Total attempts',
+              assignmentDeadline: 'Deadline'
+            }
+          },
+          assginmentHistory: {
+            title: 'Assignment history',
+            tableView: {
+              columnAttempt: 'Attempt',
+              columnStatus: 'Status',
+              columnStartedAt: 'Started at',
+              columnSubmittedAt: 'Submitted at',
+              columnTotalTime: 'Total time',
+              columnTotalAssignmentQuestions: 'Total questions',
+              columnResult: 'Result'
+            }
+          },
+          assignmentHistoryDetails: {
+            title: 'Assignment attempt details for attempt',
+            result: 'Number of correct questions',
+            submittedAt: 'Submitted at',
+            question: 'Question'
+          }
         }
       },
       settings: {
@@ -1072,6 +1100,34 @@ export const translations = {
             columnTotalTime: 'Thời gian tổng cộng',
             columnStatus: 'Trạng thái',
             columnActions: 'Các thao tác'
+          }
+        },
+        viewHistoryDetails: {
+          assignmentInfo: {
+            title: 'Thông tin bài tập',
+            statistic: {
+              assignmentTitle: 'Tên bài tập',
+              assignmentTotalAttempts: 'Tổng số lượt làm',
+              assignmentDeadline: 'Hạn nộp'
+            }
+          },
+          assginmentHistory: {
+            title: 'Lịch sử làm bài',
+            tableView: {
+              columnAttempt: 'Lần làm',
+              columnStatus: 'Trạng thái',
+              columnStartedAt: 'Thời gian bắt đầu',
+              columnSubmittedAt: 'Thời gian nộp bài',
+              columnTotalTime: 'Tổng thời gian',
+              columnTotalAssignmentQuestions: 'Tổng số câu hỏi',
+              columnResult: 'Kết quả'
+            }
+          },
+          assignmentHistoryDetails: {
+            title: 'Chi tiết lần làm bài',
+            result: 'Số câu trả lời đúng',
+            submittedAt: 'Thời gian nộp bài',
+            question: 'Câu hỏi'
           }
         }
       },

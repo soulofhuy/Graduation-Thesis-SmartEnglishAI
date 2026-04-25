@@ -30,6 +30,7 @@ import {
     type StudentAttemptHistoryQuestionAnswer,
 } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
+import { useLanguage } from '@/components/language-provider'
 
 function ChoiceOptionsReview({
     answer,
@@ -72,6 +73,7 @@ function ChoiceOptionsReview({
 
 export default function StudentHistoryDetailPage() {
     const { accessToken, isHydrated } = useAuth()
+    const { t } = useLanguage()
     const params = useParams<{ id: string }>()
     const assignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id
 
@@ -134,21 +136,21 @@ export default function StudentHistoryDetailPage() {
                 <CardHeader className="mb-3">
                     <CardTitle className="flex items-center gap-2">
                         <Info className="h-5 w-5" />
-                        Thông tin bài kiểm tra
+                        {t.student.assignments.viewHistoryDetails.assignmentInfo.title}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                         <div className="rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">Tên bài kiểm tra</p>
+                            <p className="text-sm text-muted-foreground">{t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentTitle}</p>
                             <p className="mt-3 text-base font-semibold">{assignmentInfo?.title}</p>
                         </div>
                         <div className="rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">Số lần làm</p>
+                            <p className="text-sm text-muted-foreground">{t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentTotalAttempts}</p>
                             <p className="mt-3 text-xl font-semibold">{history.length}</p>
                         </div>
                         <div className="rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">Hạn nộp</p>
+                            <p className="text-sm text-muted-foreground">{t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentDeadline}</p>
                             <p className="mt-3 text-base font-semibold">{dateTimeFormat(assignmentInfo?.dueDate ?? '')}</p>
                         </div>
                     </div>
@@ -159,20 +161,20 @@ export default function StudentHistoryDetailPage() {
                 <CardHeader className="mb-3">
                     <CardTitle className="flex items-center gap-2">
                         <Eye className="h-5 w-5" />
-                        Lịch sử các lần làm bài
+                        {t.student.assignments.viewHistoryDetails.assginmentHistory.title}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-center">Lần làm</TableHead>
-                                <TableHead className="text-center">Trạng thái</TableHead>
-                                <TableHead className="text-center">Bắt đầu</TableHead>
-                                <TableHead className="text-center">Nộp bài</TableHead>
-                                <TableHead className="text-center">Thời gian</TableHead>
-                                <TableHead className="text-center">Số câu đã trả lời</TableHead>
-                                <TableHead className="text-center">Kết quả</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnAttempt}</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnStatus}</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnStartedAt}</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnSubmittedAt}</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnTotalTime}</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnTotalAssignmentQuestions}</TableHead>
+                                <TableHead className="text-center">{t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnResult}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -236,18 +238,18 @@ export default function StudentHistoryDetailPage() {
                     return (
                         <Card key={`review-${attempt.id}`}>
                             <CardHeader className="mb-3">
-                                <CardTitle>Lần làm #{history.length - index} - Chi tiết đáp án</CardTitle>
+                                <CardTitle>{t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.title} #{history.length - index}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                     <div className="rounded-lg border p-3">
-                                        <p className="text-sm text-muted-foreground">Số câu đúng</p>
+                                        <p className="text-sm text-muted-foreground">{t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.result}</p>
                                         <p className="text-lg font-bold text-green-600">
                                             {attempt.result?.correctCount ?? 0}/{attempt.result?.totalCount ?? 0}
                                         </p>
                                     </div>
                                     <div className="rounded-lg border p-3">
-                                        <p className="text-sm text-muted-foreground">Nộp lúc</p>
+                                        <p className="text-sm text-muted-foreground">{t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.submittedAt}</p>
                                         <p className="text-base font-semibold">
                                             {dateTimeFormat(attempt.submittedAt ?? '')}
                                         </p>
