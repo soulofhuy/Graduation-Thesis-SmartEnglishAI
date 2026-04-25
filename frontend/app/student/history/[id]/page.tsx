@@ -6,7 +6,10 @@ import { useParams } from 'next/navigation'
 import { ArrowLeft, CheckCircle2, Clock3, Eye, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
-import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
+import {
+    FormattedContent,
+    hasRenderableContent,
+} from '@/lib/view-details-assignment-helpers/format-content'
 import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -26,31 +29,6 @@ import {
     type StudentAttemptHistoryQuestionAnswer,
 } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
-
-const hasRenderableContent = (value?: string | null) =>
-    normalizeHtmlToText(value).length > 0
-
-function FormattedContent({
-    html,
-    className,
-}: {
-    html?: string | null
-    className?: string
-}) {
-    if (!hasRenderableContent(html)) {
-        return null
-    }
-
-    return (
-        <div
-            className={cn(
-                '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
-                className,
-            )}
-            dangerouslySetInnerHTML={{ __html: html as string }}
-        />
-    )
-}
 
 const getAnswerDisplayContent = (answer: StudentAttemptHistoryQuestionAnswer) => {
     const questionContent = hasRenderableContent(answer.questionContent)

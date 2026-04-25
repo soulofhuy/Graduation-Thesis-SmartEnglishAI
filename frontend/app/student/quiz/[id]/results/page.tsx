@@ -20,7 +20,10 @@ import {
 } from '@/components/ui/tabs'
 import { useAuth } from '@/components/auth-provider'
 import { useLanguage } from '@/components/language-provider'
-import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
+import {
+    FormattedContent,
+    hasRenderableContent,
+} from '@/lib/view-details-assignment-helpers/format-content'
 import { toast } from 'sonner'
 import {
     getAssignmentByIdForStudentToDoTest,
@@ -63,31 +66,6 @@ const buildSummaryFallback = (answered: number, total: number) => {
         correctCount,
         totalCount: safeTotal,
     }
-}
-
-const hasRenderableContent = (value?: string | null) =>
-    normalizeHtmlToText(value).length > 0
-
-function FormattedContent({
-    html,
-    className,
-}: {
-    html?: string | null
-    className?: string
-}) {
-    if (!hasRenderableContent(html)) {
-        return null
-    }
-
-    return (
-        <div
-            className={cn(
-                '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
-                className,
-            )}
-            dangerouslySetInnerHTML={{ __html: html as string }}
-        />
-    )
 }
 
 const getAnswerDisplayContent = (answer: StudentAttemptResultQuestionAnswer) => {
