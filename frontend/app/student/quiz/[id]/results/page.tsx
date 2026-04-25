@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/tabs'
 import { useAuth } from '@/components/auth-provider'
 import { useLanguage } from '@/components/language-provider'
-import { normalizeHtmlToText } from '@/lib/show-question-helpers/normalize-html-to-text'
+import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
 import { toast } from 'sonner'
 import {
     getAssignmentByIdForStudentToDoTest,

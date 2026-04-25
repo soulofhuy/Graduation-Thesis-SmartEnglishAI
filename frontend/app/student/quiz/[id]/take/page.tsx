@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
-import { normalizeHtmlToText } from '@/lib/show-question-helpers/normalize-html-to-text'
+import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
 import {
   startOrGetInProgressAttempt,
   submitAttempt,
