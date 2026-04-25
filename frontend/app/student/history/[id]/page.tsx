@@ -8,9 +8,9 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
     FormattedContent,
-    hasRenderableContent,
 } from '@/lib/view-details-assignment-helpers/format-content'
 import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
+import { getAnswerDisplayContent } from '@/lib/view-details-assignment-helpers/get-answer-display-content'
 import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -30,23 +30,6 @@ import {
     type StudentAttemptHistoryQuestionAnswer,
 } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
-
-const getAnswerDisplayContent = (answer: StudentAttemptHistoryQuestionAnswer) => {
-    const questionContent = hasRenderableContent(answer.questionContent)
-        ? answer.questionContent
-        : null
-    const taskContent = hasRenderableContent(answer.taskContent)
-        ? answer.taskContent
-        : null
-    const passageContent = hasRenderableContent(answer.passageContent)
-        ? answer.passageContent
-        : null
-
-    return {
-        questionContent: questionContent ?? taskContent,
-        passageContent,
-    }
-}
 
 function ChoiceOptionsReview({
     answer,
@@ -79,11 +62,6 @@ function ChoiceOptionsReview({
                                 html={choice.choiceContent}
                                 className="text-foreground [&_p]:my-0"
                             />
-                        </div>
-
-                        <div className="mt-1 text-xs text-muted-foreground">
-                            {choice.isSelected ? 'Bạn đã chọn' : 'Không chọn'}
-                            {choice.isCorrect ? ' • Đáp án đúng' : ''}
                         </div>
                     </div>
                 )
@@ -315,32 +293,6 @@ export default function StudentHistoryDetailPage() {
                                                     </div>
 
                                                     <ChoiceOptionsReview answer={answer} />
-
-                                                    <div className="ml-8 mt-3 space-y-2">
-                                                        <div className="rounded border border-red-200 bg-red-50 p-3">
-                                                            <p className="text-sm text-red-700">
-                                                                <strong>Bạn chọn:</strong>{' '}
-                                                                <FormattedContent
-                                                                    html={answer.selectedChoiceContent}
-                                                                    className="inline [&_p]:inline"
-                                                                />
-                                                            </p>
-                                                        </div>
-
-                                                        <div className="rounded border border-green-200 bg-green-50 p-3">
-                                                            <p className="text-sm text-green-700">
-                                                                <strong>Đáp án đúng:</strong>{' '}
-                                                                {answer.correctChoiceContent ? (
-                                                                    <FormattedContent
-                                                                        html={answer.correctChoiceContent}
-                                                                        className="inline [&_p]:inline"
-                                                                    />
-                                                                ) : (
-                                                                    'Chưa có đáp án đúng'
-                                                                )}
-                                                            </p>
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

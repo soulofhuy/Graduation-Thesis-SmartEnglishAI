@@ -22,8 +22,8 @@ import { useAuth } from '@/components/auth-provider'
 import { useLanguage } from '@/components/language-provider'
 import {
     FormattedContent,
-    hasRenderableContent,
 } from '@/lib/view-details-assignment-helpers/format-content'
+import { getAnswerDisplayContent } from '@/lib/view-details-assignment-helpers/get-answer-display-content'
 import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
 import { toast } from 'sonner'
 import {
@@ -66,23 +66,6 @@ const buildSummaryFallback = (answered: number, total: number) => {
         score,
         correctCount,
         totalCount: safeTotal,
-    }
-}
-
-const getAnswerDisplayContent = (answer: StudentAttemptResultQuestionAnswer) => {
-    const questionContent = hasRenderableContent(answer.questionContent)
-        ? answer.questionContent
-        : null
-    const taskContent = hasRenderableContent(answer.taskContent)
-        ? answer.taskContent
-        : null
-    const passageContent = hasRenderableContent(answer.passageContent)
-        ? answer.passageContent
-        : null
-
-    return {
-        questionContent: questionContent ?? taskContent,
-        passageContent,
     }
 }
 
