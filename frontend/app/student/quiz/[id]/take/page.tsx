@@ -7,6 +7,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
+import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
+import { FormattedContent } from '@/lib/view-details-assignment-helpers/format-content'
+import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-constants'
 import {
   startOrGetInProgressAttempt,
   submitAttempt,
@@ -25,7 +28,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { cn } from '@/lib/utils'
 import { useLanguage } from '@/components/language-provider'
 
 interface Question {
@@ -37,57 +39,6 @@ interface Question {
   passageText?: string
   passageHtml?: string
   options: { id: string; text: string; html?: string }[]
-}
-
-const normalizeHtmlToText = (value?: string | null) => {
-  if (!value) {
-    return ''
-  }
-
-  if (typeof window === 'undefined') {
-    return value
-  }
-
-  const htmlWithBreaks = value
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<\/div>/gi, '\n')
-
-  const tempNode = document.createElement('div')
-  tempNode.innerHTML = htmlWithBreaks
-
-  return (tempNode.textContent ?? '')
-    .replace(/\u00a0/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
-}
-
-function FormattedContent({
-  html,
-  text,
-  className,
-}: {
-  html?: string
-  text?: string
-  className?: string
-}) {
-  if (html?.trim()) {
-    return (
-      <div
-        className={cn(
-          '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
-          className,
-        )}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-    )
-  }
-
-  if (!text?.trim()) {
-    return null
-  }
-
-  return <p className={cn('whitespace-pre-line', className)}>{text}</p>
 }
 
 export default function QuizTakePage() {
@@ -205,7 +156,6 @@ export default function QuizTakePage() {
   const totalQuestions = questions.length
   const currentQuestion = questions[currentQuestionIndex]
   const answeredCount = Object.keys(selectedAnswers).length
-  const answerColumns = ['A', 'B', 'C', 'D'] as const
 
   useEffect(() => {
     if (!isHydrated || !accessToken || !assignmentId) {

@@ -478,6 +478,50 @@ export const translations = {
             previousButton: 'Previous',
             nextButton: 'Next'
           }
+        },
+        viewHistory: {
+          title: 'My assignment history',
+          description:
+            'Review your past assignments and results to track your learning progress',
+          searchPlaceholder: 'Search by assignment title...',
+          tableView: {
+            columnAssignmentTitle: 'Assignment Title',
+            columnClass: 'Class',
+            columnIsSingleAttempt: 'Single attempt',
+            columnResult: 'Result',
+            columnSubmittedAt: 'Submitted at',
+            columnTotalTime: 'Total time',
+            columnStatus: 'Status',
+            columnActions: 'Actions'
+          }
+        },
+        viewHistoryDetails: {
+          assignmentInfo: {
+            title: 'Assignment information',
+            statistic: {
+              assignmentTitle: 'Assignment title',
+              assignmentTotalAttempts: 'Total attempts',
+              assignmentDeadline: 'Deadline'
+            }
+          },
+          assginmentHistory: {
+            title: 'Assignment history',
+            tableView: {
+              columnAttempt: 'Attempt',
+              columnStatus: 'Status',
+              columnStartedAt: 'Started at',
+              columnSubmittedAt: 'Submitted at',
+              columnTotalTime: 'Total time',
+              columnTotalAssignmentQuestions: 'Total questions',
+              columnResult: 'Result'
+            }
+          },
+          assignmentHistoryDetails: {
+            title: 'Assignment attempt details for attempt',
+            result: 'Number of correct questions',
+            submittedAt: 'Submitted at',
+            question: 'Question'
+          }
         }
       },
       settings: {
@@ -1040,6 +1084,50 @@ export const translations = {
             markedQuestion: 'Câu hỏi đã đánh dấu',
             previousButton: 'Câu hỏi trước',
             nextButton: 'Câu hỏi tiếp theo'
+          }
+        },
+        viewHistory: {
+          title: 'Lịch sử bài tập của tôi',
+          description:
+            'Xem lại các bài tập đã làm và kết quả để theo dõi tiến trình học tập của bạn',
+          searchPlaceholder: 'Tìm kiếm theo tiêu đề của bài tập...',
+          tableView: {
+            columnAssignmentTitle: 'Tiêu đề của bài tập',
+            columnClass: 'Lớp',
+            columnIsSingleAttempt: 'Chỉ được làm một lần',
+            columnResult: 'Kết quả',
+            columnSubmittedAt: 'Ngày nộp',
+            columnTotalTime: 'Thời gian tổng cộng',
+            columnStatus: 'Trạng thái',
+            columnActions: 'Các thao tác'
+          }
+        },
+        viewHistoryDetails: {
+          assignmentInfo: {
+            title: 'Thông tin bài tập',
+            statistic: {
+              assignmentTitle: 'Tên bài tập',
+              assignmentTotalAttempts: 'Tổng số lượt làm',
+              assignmentDeadline: 'Hạn nộp'
+            }
+          },
+          assginmentHistory: {
+            title: 'Lịch sử làm bài',
+            tableView: {
+              columnAttempt: 'Lần làm',
+              columnStatus: 'Trạng thái',
+              columnStartedAt: 'Thời gian bắt đầu',
+              columnSubmittedAt: 'Thời gian nộp bài',
+              columnTotalTime: 'Tổng thời gian',
+              columnTotalAssignmentQuestions: 'Tổng số câu hỏi',
+              columnResult: 'Kết quả'
+            }
+          },
+          assignmentHistoryDetails: {
+            title: 'Chi tiết lần làm bài',
+            result: 'Số câu trả lời đúng',
+            submittedAt: 'Thời gian nộp bài',
+            question: 'Câu hỏi'
           }
         }
       },

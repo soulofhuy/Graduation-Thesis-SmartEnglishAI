@@ -20,6 +20,11 @@ import {
 } from '@/components/ui/tabs'
 import { useAuth } from '@/components/auth-provider'
 import { useLanguage } from '@/components/language-provider'
+import {
+    FormattedContent,
+} from '@/lib/view-details-assignment-helpers/format-content'
+import { ChoiceOptionsReview } from '@/lib/view-details-assignment-helpers/choice-options-preview'
+import { getAnswerDisplayContent } from '@/lib/view-details-assignment-helpers/get-answer-display-content'
 import { toast } from 'sonner'
 import {
     getAssignmentByIdForStudentToDoTest,
@@ -28,9 +33,7 @@ import {
 import {
     getLatestAttemptForStudent,
     type StudentAttempt,
-    type StudentAttemptResultQuestionAnswer,
 } from '@/services/student/attempts'
-import { cn } from '@/lib/utils'
 
 const toNumber = (value: string | null, fallback: number) => {
     const parsedValue = Number(value)
@@ -62,109 +65,6 @@ const buildSummaryFallback = (answered: number, total: number) => {
         correctCount,
         totalCount: safeTotal,
     }
-}
-
-const normalizeHtmlToText = (value?: string | null) => {
-    if (!value) {
-        return ''
-    }
-
-    return value
-        .replace(/<br\s*\/?>(\s*)/gi, '\n')
-        .replace(/<\/p>/gi, '\n')
-        .replace(/<\/div>/gi, '\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/\u00a0/g, ' ')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim()
-}
-
-const hasRenderableContent = (value?: string | null) =>
-    normalizeHtmlToText(value).length > 0
-
-function FormattedContent({
-    html,
-    className,
-}: {
-    html?: string | null
-    className?: string
-}) {
-    if (!hasRenderableContent(html)) {
-        return null
-    }
-
-    return (
-        <div
-            className={cn(
-                '[&_p]:my-0 [&_strong]:font-semibold [&_b]:font-semibold [&_u]:underline [&_s]:line-through [&_em]:italic [&_i]:italic',
-                className,
-            )}
-            dangerouslySetInnerHTML={{ __html: html as string }}
-        />
-    )
-}
-
-const getAnswerDisplayContent = (answer: StudentAttemptResultQuestionAnswer) => {
-    const questionContent = hasRenderableContent(answer.questionContent)
-        ? answer.questionContent
-        : null
-    const taskContent = hasRenderableContent(answer.taskContent)
-        ? answer.taskContent
-        : null
-    const passageContent = hasRenderableContent(answer.passageContent)
-        ? answer.passageContent
-        : null
-
-    return {
-        questionContent: questionContent ?? taskContent,
-        passageContent,
-    }
-}
-
-const answerColumns = ['A', 'B', 'C', 'D'] as const
-
-function ChoiceOptionsReview({
-    answer,
-}: {
-    answer: StudentAttemptResultQuestionAnswer
-}) {
-    if (!answer.choiceOptions?.length) {
-        return null
-    }
-
-    return (
-        <div className="ml-8 mt-3 grid gap-2">
-            {answer.choiceOptions.map((choice, index) => {
-                const marker = answerColumns[index] ?? String(index + 1)
-
-                return (
-                    <div
-                        key={choice.choiceId}
-                        className={cn(
-                            'rounded border p-3 text-sm',
-                            choice.isSelected && choice.isCorrect && 'border-green-300 bg-green-50',
-                            choice.isSelected && !choice.isCorrect && 'border-red-300 bg-red-50',
-                            !choice.isSelected && choice.isCorrect && 'border-emerald-300 bg-emerald-50',
-                            !choice.isSelected && !choice.isCorrect && 'border-border bg-muted/30',
-                        )}
-                    >
-                        <div className="flex items-start gap-2">
-                            <span className="font-semibold text-foreground">{marker}.</span>
-                            <FormattedContent
-                                html={choice.choiceContent}
-                                className="text-foreground [&_p]:my-0"
-                            />
-                        </div>
-
-                        <div className="mt-1 text-xs text-muted-foreground">
-                            {choice.isSelected ? 'Bạn đã chọn' : 'Không chọn'}
-                            {choice.isCorrect ? ' • Đáp án đúng' : ''}
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
-    )
 }
 
 export default function QuizResultsPage() {
@@ -435,7 +335,7 @@ export default function QuizResultsPage() {
                                                     </div>
                                                 )}
 
-                                                <ChoiceOptionsReview answer={answer} />
+                                                <ChoiceOptionsReview answer={answer} showSelectionStatus />
                                             </div>
                                         ))}
                                     </TabsContent>
@@ -469,7 +369,7 @@ export default function QuizResultsPage() {
                                                     </div>
                                                 </div>
 
-                                                <ChoiceOptionsReview answer={answer} />
+                                                <ChoiceOptionsReview answer={answer} showSelectionStatus />
                                             </div>
                                         ))}
                                     </TabsContent>
@@ -527,7 +427,7 @@ export default function QuizResultsPage() {
                                                     </div>
                                                 </div>
 
-                                                <ChoiceOptionsReview answer={answer} />
+                                                <ChoiceOptionsReview answer={answer} showSelectionStatus />
                                             </div>
                                         ))}
                                     </TabsContent>
