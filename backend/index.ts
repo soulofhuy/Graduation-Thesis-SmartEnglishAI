@@ -10,6 +10,7 @@ import StudentRouter from './src/routes/studentRoutes';
 import AssignmentRouter from './src/routes/assignmentTeacherRoutes';
 import AssignmentStudentRouter from './src/routes/assignmentStudentRoutes';
 import AttemptRouter from './src/routes/attemptRoutes';
+import ViewStudyProgressRouter from './src/routes/students/viewStudyProgressRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api', StudentRouter);
 app.use('/api', AssignmentRouter);
 app.use('/api', AssignmentStudentRouter);
 app.use('/api', AttemptRouter);
+app.use('/api', ViewStudyProgressRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 
