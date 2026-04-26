@@ -1,11 +1,16 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { TrendingUp, Target, Zap, Award } from 'lucide-react'
+import { useAuth } from '@/components/auth-provider'
+import { toast } from 'sonner'
 import {
-  LineChart,
-  Line,
+  getStudentStudyProgress,
+  type StudentStudyProgress,
+} from '@/services/student/study-progress'
+import {
   BarChart,
   Bar,
   XAxis,
@@ -16,45 +21,129 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
+const taskTypeLabelMap: Record<string, string> = {
+  PRONUNCIATION: 'Phat am',
+  WORD_STRESS: 'Trong am',
+  SITUATIONAL_DIALOG: 'Hoi thoai tinh huong',
+  MULTIPLE_CHOICE: 'Trac nghiem',
+  CLOZE_PASSAGE: 'Dien vao doan van',
+  READING_COMPREHENSION: 'Doc hieu',
+}
+
+const getTaskTypeLabel = (taskType: string) => {
+  return taskTypeLabelMap[taskType] ?? taskType
+}
+
+const getMonthLabel = (month: string) => {
+  const monthPart = Number(month.split('-')[1] ?? 0)
+  return monthPart > 0 ? `Thang ${monthPart}` : month
+}
+
 export default function StudentProgressPage() {
-  const scoreData = [
-    { month: 'Tháng 1', average: 6.5 },
-    { month: 'Tháng 2', average: 7.0 },
-    { month: 'Tháng 3', average: 7.5 },
-    { month: 'Tháng 4', average: 8.0 },
-    { month: 'Tháng 5', average: 8.2 },
-  ]
+  const { accessToken, isHydrated } = useAuth()
+  const [progress, setProgress] = useState<StudentStudyProgress | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const topicPerformance = [
-    { name: 'Grammar', score: 8.5 },
-    { name: 'Reading', score: 7.8 },
-    { name: 'Writing', score: 7.2 },
-    { name: 'Listening', score: 6.5 },
-    { name: 'Vocabulary', score: 8.8 },
-  ]
+  useEffect(() => {
+    if (!isHydrated || !accessToken) {
+      return
+    }
 
-  const stats = [
-    {
-      title: 'Tổng bài tập',
-      value: '18',
-      icon: <Target className="w-5 h-5" />,
-    },
-    {
-      title: 'Điểm trung bình',
-      value: '8.2/10',
-      icon: <TrendingUp className="w-5 h-5" />,
-    },
-    {
-      title: 'Chủ đề giỏi nhất',
-      value: 'Vocabulary',
-      icon: <Award className="w-5 h-5" />,
-    },
-    {
-      title: 'Cần cải thiện',
-      value: 'Listening',
-      icon: <Zap className="w-5 h-5" />,
-    },
-  ]
+    const fetchProgress = async () => {
+      setIsLoading(true)
+      try {
+        const result = await getStudentStudyProgress(accessToken)
+        setProgress(result)
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Khong the tai tien do hoc tap'
+        toast.error(message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchProgress()
+  }, [accessToken, isHydrated])
+
+  const scoreData = useMemo(() => {
+    return (progress?.monthlyCorrectByTime ?? []).map((item) => ({
+      month: getMonthLabel(item.month),
+      totalQuestions: item.totalQuestions,
+      correctQuestions: item.correctQuestions,
+    }))
+  }, [progress?.monthlyCorrectByTime])
+
+  const topicPerformance = useMemo(() => {
+    return (progress?.taskTypeStats ?? []).map((item) => ({
+      name: getTaskTypeLabel(item.taskType),
+      correctQuestions: item.correctQuestions,
+      totalQuestions: item.totalQuestions,
+    }))
+  }, [progress?.taskTypeStats])
+
+  const stats = useMemo(() => {
+    const overview = progress?.overview
+
+    return [
+      {
+        title: 'Tong bai tap',
+        value: overview?.totalAssignmentsDone ?? 0,
+        icon: <Target className="w-5 h-5" />,
+      },
+      {
+        title: 'Tong cau da lam',
+        value: overview?.totalQuestionsDone ?? 0,
+        icon: <TrendingUp className="w-5 h-5" />,
+      },
+      {
+        title: 'Task type gioi nhat',
+        value: overview?.bestTaskType
+          ? getTaskTypeLabel(overview.bestTaskType.taskType)
+          : '-',
+        icon: <Award className="w-5 h-5" />,
+      },
+      {
+        title: 'Task type can cai thien',
+        value: overview?.weakestTaskType
+          ? getTaskTypeLabel(overview.weakestTaskType.taskType)
+          : '-',
+        icon: <Zap className="w-5 h-5" />,
+      },
+    ]
+  }, [progress?.overview])
+
+  const recommendation = useMemo(() => {
+    const weakest = progress?.overview.weakestTaskType
+    const best = progress?.overview.bestTaskType
+
+    return {
+      weakestLabel: weakest ? getTaskTypeLabel(weakest.taskType) : '-',
+      weakestCorrect: weakest?.correctQuestions ?? 0,
+      weakestTotal: weakest?.totalQuestions ?? 0,
+      bestLabel: best ? getTaskTypeLabel(best.taskType) : '-',
+      bestCorrect: best?.correctQuestions ?? 0,
+      bestTotal: best?.totalQuestions ?? 0,
+    }
+  }, [progress?.overview])
+
+  if (!isHydrated || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Dang tai tien do hoc tap...</p>
+      </div>
+    )
+  }
+
+  if (!accessToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Vui long dang nhap de xem tien do hoc tap</p>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 md:p-8 space-y-8">
@@ -64,7 +153,7 @@ export default function StudentProgressPage() {
           Tiến độ học tập
         </h1>
         <p className="text-muted-foreground mt-1">
-          Theo dõi tiến độ học tập và hiệu suất của bạn
+          Theo doi tien do hoc tap va hieu suat cua ban
         </p>
       </div>
 
@@ -78,27 +167,30 @@ export default function StudentProgressPage() {
       {/* Score Trend */}
       <Card>
         <CardHeader>
-          <CardTitle>Xu hướng điểm số</CardTitle>
+          <CardTitle>So cau dung theo thang</CardTitle>
           <CardDescription>
-            Biểu đồ điểm trung bình theo tháng
+            Bieu do tong cau va cau dung theo tung thang
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={scoreData}>
+            <BarChart data={scoreData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis domain={[0, 10]} />
+              <YAxis allowDecimals={false} />
               <Tooltip />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="average"
-                stroke="var(--color-primary)"
-                strokeWidth={2}
-                name="Điểm trung bình"
+              <Bar
+                dataKey="totalQuestions"
+                fill="hsl(221 83% 53%)"
+                name="Tong cau"
               />
-            </LineChart>
+              <Bar
+                dataKey="correctQuestions"
+                fill="hsl(142 76% 36%)"
+                name="Cau dung"
+              />
+            </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
@@ -106,9 +198,9 @@ export default function StudentProgressPage() {
       {/* Topic Performance */}
       <Card>
         <CardHeader>
-          <CardTitle>Hiệu suất theo chủ đề</CardTitle>
+          <CardTitle>Hieu suat theo task type</CardTitle>
           <CardDescription>
-            Điểm số trung bình của bạn theo từng chủ đề
+            Tong cau da lam va so cau dung theo tung task type
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -116,12 +208,18 @@ export default function StudentProgressPage() {
             <BarChart data={topicPerformance}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis domain={[0, 10]} />
+              <YAxis allowDecimals={false} />
               <Tooltip />
+              <Legend />
               <Bar
-                dataKey="score"
-                fill="var(--color-primary)"
-                name="Điểm"
+                dataKey="totalQuestions"
+                fill="hsl(221 83% 53%)"
+                name="Tong cau"
+              />
+              <Bar
+                dataKey="correctQuestions"
+                fill="hsl(142 76% 36%)"
+                name="Cau dung"
               />
             </BarChart>
           </ResponsiveContainer>
@@ -131,36 +229,38 @@ export default function StudentProgressPage() {
       {/* Recommendations */}
       <Card>
         <CardHeader>
-          <CardTitle>Gợi ý cải thiện</CardTitle>
+          <CardTitle>Goi y cai thien</CardTitle>
           <CardDescription>
-            Dựa trên hiệu suất của bạn
+            Dua tren hieu suat thuc te tu bai da lam
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <h4 className="font-semibold text-amber-900 mb-1">
-              Tập trung vào Listening
+              Tap trung vao {recommendation.weakestLabel}
             </h4>
             <p className="text-sm text-amber-800">
-              Điểm của bạn trong chủ đề này đang thấp nhất. Hãy làm thêm các bài tập listening để cải thiện kỹ năng.
+              Day la nhom bai co so cau dung thap nhat ({recommendation.weakestCorrect}/{recommendation.weakestTotal}).
+              Ban nen uu tien luyen them dang bai nay.
             </p>
           </div>
 
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <h4 className="font-semibold text-blue-900 mb-1">
-              Duy trì tiến độ Writing
+              Duy tri tien do theo thang
             </h4>
             <p className="text-sm text-blue-800">
-              Mặc dù Writing không phải là điểm mạnh nhất, nhưng bạn đang tiến bộ đều đặn. Tiếp tục cố gắng!
+              Theo doi duong bieu do cau dung va tong cau moi thang de giu nhip hoc on dinh.
             </p>
           </div>
 
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
             <h4 className="font-semibold text-green-900 mb-1">
-              Tuyệt vời! Bạn giỏi Vocabulary
+              The manh hien tai: {recommendation.bestLabel}
             </h4>
             <p className="text-sm text-green-800">
-              Bạn đang làm rất tốt trong chủ đề này. Hãy tiếp tục và hỗ trợ bạn cùng lớp!
+              Ban dang lam rat tot o nhom nay ({recommendation.bestCorrect}/{recommendation.bestTotal}).
+              Tiep tuc duy tri phong do nay.
             </p>
           </div>
         </CardContent>
