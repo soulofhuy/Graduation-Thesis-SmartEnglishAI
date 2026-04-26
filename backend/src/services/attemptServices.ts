@@ -8,6 +8,7 @@ type SubmitAnswerInput = {
 };
 
 type SubmitAttemptPayload = {
+  attemptId?: string;
   assignmentId: string;
   draftAnswer?: Prisma.InputJsonValue | null;
   answers?: SubmitAnswerInput[];
@@ -298,6 +299,37 @@ class AttemptService {
       normalizedAssignmentId
     );
 
+    const includeAttemptDetails = {
+      answers: {
+        include: {
+          question: true,
+          selectedChoice: true
+        }
+      },
+      result: true
+    } as const;
+
+    const latestSubmittedAttempt = await prisma.attempt.findFirst({
+      where: {
+        studentId: normalizedStudentId,
+        assignmentId: normalizedAssignmentId,
+        status: AttemptStatus.SUBMITTED
+      },
+      orderBy: [
+        {
+          submittedAt: 'desc'
+        },
+        {
+          startedAt: 'desc'
+        }
+      ],
+      include: includeAttemptDetails
+    });
+
+    if (latestSubmittedAttempt) {
+      return latestSubmittedAttempt;
+    }
+
     return prisma.attempt.findFirst({
       where: {
         studentId: normalizedStudentId,
@@ -306,15 +338,7 @@ class AttemptService {
       orderBy: {
         startedAt: 'desc'
       },
-      include: {
-        answers: {
-          include: {
-            question: true,
-            selectedChoice: true
-          }
-        },
-        result: true
-      }
+      include: includeAttemptDetails
     });
   };
 
@@ -333,6 +357,13 @@ class AttemptService {
     this.ensureAssignmentNotExpired(assignment.dueDate);
 
     return prisma.$transaction(async tx => {
+      await tx.$executeRaw`
+        SELECT pg_advisory_xact_lock(
+          hashtext(${normalizedStudentId}),
+          hashtext(${normalizedAssignmentId})
+        )
+      `;
+
       await this.ensureSingleAttemptPolicy(
         tx,
         normalizedStudentId,
@@ -340,7 +371,7 @@ class AttemptService {
         assignment.isSingleAttempt
       );
 
-      const inProgressAttempt = await tx.attempt.findFirst({
+      const inProgressAttempts = await tx.attempt.findMany({
         where: {
           studentId: normalizedStudentId,
           assignmentId: normalizedAssignmentId,
@@ -353,6 +384,25 @@ class AttemptService {
           answers: true
         }
       });
+
+      const inProgressAttempt = inProgressAttempts[0];
+
+      if (inProgressAttempts.length > 1) {
+        const staleAttemptIds = inProgressAttempts
+          .slice(1)
+          .map(attempt => attempt.id);
+
+        await tx.attempt.updateMany({
+          where: {
+            id: {
+              in: staleAttemptIds
+            }
+          },
+          data: {
+            status: AttemptStatus.CANCELLED
+          }
+        });
+      }
 
       if (inProgressAttempt) {
         return inProgressAttempt;
@@ -391,6 +441,8 @@ class AttemptService {
       normalizedAssignmentId
     );
 
+    const normalizedAttemptId = payload.attemptId?.trim();
+
     this.ensureAssignmentNotExpired(assignment.dueDate);
 
     return prisma.$transaction(async tx => {
@@ -401,31 +453,39 @@ class AttemptService {
         assignment.isSingleAttempt
       );
 
-      let attempt = await tx.attempt.findFirst({
-        where: {
-          studentId: normalizedStudentId,
-          assignmentId: normalizedAssignmentId,
-          status: AttemptStatus.IN_PROGRESS
-        },
-        orderBy: {
-          startedAt: 'desc'
-        },
-        include: {
-          answers: true
-        }
-      });
+      const attempt = normalizedAttemptId
+        ? await tx.attempt.findFirst({
+            where: {
+              id: normalizedAttemptId,
+              studentId: normalizedStudentId,
+              assignmentId: normalizedAssignmentId
+            },
+            include: {
+              answers: true
+            }
+          })
+        : await tx.attempt.findFirst({
+            where: {
+              studentId: normalizedStudentId,
+              assignmentId: normalizedAssignmentId,
+              status: AttemptStatus.IN_PROGRESS
+            },
+            orderBy: {
+              startedAt: 'desc'
+            },
+            include: {
+              answers: true
+            }
+          });
 
       if (!attempt) {
-        attempt = await tx.attempt.create({
-          data: {
-            studentId: normalizedStudentId,
-            assignmentId: normalizedAssignmentId,
-            status: AttemptStatus.IN_PROGRESS
-          },
-          include: {
-            answers: true
-          }
-        });
+        throw new Error(
+          'No in-progress attempt found. Please start the assignment before submitting.'
+        );
+      }
+
+      if (attempt.status !== AttemptStatus.IN_PROGRESS) {
+        throw new Error('Attempt is not in progress and cannot be submitted');
       }
 
       if (providedAnswers !== undefined) {

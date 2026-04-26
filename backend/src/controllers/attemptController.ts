@@ -98,6 +98,7 @@ class AttemptController {
 
     try {
       const submittedAttempt = await AttemptService.submitAttempt(studentId, {
+        attemptId: req.body.attemptId,
         assignmentId: req.body.assignmentId,
         draftAnswer: req.body.draftAnswer,
         answers: req.body.answers

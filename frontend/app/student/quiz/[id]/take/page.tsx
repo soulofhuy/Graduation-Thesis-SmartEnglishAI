@@ -52,6 +52,7 @@ export default function QuizTakePage() {
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [assignment, setAssignment] = useState<StudentAssignmentDetailResponse | null>(null)
+  const [attemptId, setAttemptId] = useState<string | null>(null)
   const [isLoadingAssignment, setIsLoadingAssignment] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -171,6 +172,7 @@ export default function QuizTakePage() {
         ])
 
         setAssignment(assignmentResult)
+        setAttemptId(attemptResult.id)
         setSelectedAnswers(mapAttemptAnswersToSelectedAnswers(attemptResult))
       } catch (error) {
         const message =
@@ -246,6 +248,7 @@ export default function QuizTakePage() {
 
     try {
       const submittedAttempt = await submitAttempt(accessToken, {
+        attemptId: attemptId ?? undefined,
         assignmentId,
         answers
       })
@@ -260,7 +263,7 @@ export default function QuizTakePage() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [accessToken, assignmentId, router, selectedAnswers, totalQuestions])
+  }, [accessToken, assignmentId, attemptId, router, selectedAnswers, totalQuestions])
 
   if (!isHydrated || isLoadingAssignment) {
     return (
