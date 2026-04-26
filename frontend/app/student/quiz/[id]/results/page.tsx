@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
-import { ArrowLeft, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -40,13 +40,6 @@ const toNumber = (value: string | null, fallback: number) => {
     return Number.isFinite(parsedValue) ? parsedValue : fallback
 }
 
-const getScoreFeedback = (score: number) => {
-    if (score >= 80) return 'Tuyệt vời!'
-    if (score >= 60) return 'Tốt!'
-    if (score >= 40) return 'Chưa tốt'
-    return 'Cần cố gắng hơn'
-}
-
 const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600'
     if (score >= 60) return 'text-blue-600'
@@ -74,7 +67,7 @@ export default function QuizResultsPage() {
     const fallbackAnswered = toNumber(searchParams.get('answered'), 0)
     const fallbackTotal = toNumber(searchParams.get('total'), 0)
     const { accessToken, isHydrated } = useAuth()
-    useLanguage()
+    const { t } = useLanguage()
 
     const [assignment, setAssignment] = useState<StudentAssignmentDetailResponse | null>(null)
     const [attempt, setAttempt] = useState<StudentAttempt | null>(null)
@@ -112,9 +105,8 @@ export default function QuizResultsPage() {
     const questionAnswers = attempt?.result?.questionAnswers ?? []
     const answeredCount = attempt?.answers?.length ?? fallbackAnswered
     const totalCount = attempt?.result?.totalCount ?? fallbackTotal
-    const score = attempt?.result?.score ?? resultSummary.score
     const correctCount = attempt?.result?.correctCount ?? resultSummary.correctCount
-    const incorrectCount = Math.max(totalCount - correctCount, 0)
+    const correctRatio = totalCount > 0 ? (correctCount / totalCount) * 100 : 0
 
     const answerReviewTabs = useMemo(() => {
         const correctAnswers = questionAnswers.filter((item) => item.isCorrect)
@@ -151,115 +143,58 @@ export default function QuizResultsPage() {
         <div className="min-h-screen bg-background">
             <div className="p-4 md:p-8 space-y-8">
                 <Link href="/student/quiz">
-                    <Button variant="ghost" className="gap-2">
+                    <Button variant="outline" className="gap-2 mb-4">
                         <ArrowLeft className="w-4 h-4" />
                         Quay lại danh sách bài tập
                     </Button>
                 </Link>
 
-                <Card className="overflow-hidden">
-                    <CardContent className="p-8">
-                        <div className="text-center space-y-6">
-                            <div>
-                                <p className="text-muted-foreground mb-2">Kết quả của bạn</p>
-                                <h1 className={`text-6xl font-bold ${getScoreColor(score)}`}>
-                                    {Math.round(score)}/100
-                                </h1>
-                            </div>
-
-                            <div>
-                                <p className="text-4xl font-bold text-foreground mb-2">
-                                    {Math.round(score)}%
-                                </p>
-                                <p className="text-xl text-muted-foreground">
-                                    {getScoreFeedback(score)}
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4 pt-6">
-                                <div className="bg-muted/50 rounded-lg p-4">
-                                    <p className="text-sm text-muted-foreground mb-1">Tổng câu</p>
-                                    <p className="text-2xl font-bold text-foreground">{totalCount}</p>
-                                </div>
-                                <div className="bg-green-100 rounded-lg p-4">
-                                    <p className="text-sm text-green-700 mb-1">Đúng</p>
-                                    <p className="text-2xl font-bold text-green-700">{correctCount}</p>
-                                </div>
-                                <div className="bg-red-100 rounded-lg p-4">
-                                    <p className="text-sm text-red-700 mb-1">Sai</p>
-                                    <p className="text-2xl font-bold text-red-700">{incorrectCount}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="text-center space-y-6">
+                    <div>
+                        <p className="text-lg font-bold mb-3">{t.student.assignments.takeAssignment.answerReview.title}</p>
+                        <h1
+                            className={`inline-flex flex-wrap items-end justify-center gap-x-4 gap-y-2 whitespace-nowrap text-6xl font-bold leading-none ${getScoreColor(correctRatio)}`}
+                        >
+                            <span className="tabular-nums">{correctCount}</span>
+                            <span className="pb-2 text-sm font-semibold tracking-wide">{t.student.assignments.takeAssignment.answerReview.correct}</span>
+                            <span className="tabular-nums">/</span>
+                            <span className="tabular-nums">{totalCount}</span>
+                            <span className="pb-2 text-sm font-semibold tracking-wide">{t.student.assignments.takeAssignment.answerReview.total}</span>
+                        </h1>
+                    </div>
+                </div>
 
                 {!canViewResult ? (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Kết quả đã được lưu</CardTitle>
+                            <CardTitle>{t.student.assignments.takeAssignment.answerReview.notAllowToViewResult.title}</CardTitle>
                             <CardDescription>
-                                Bài kiểm tra này không cho phép xem chi tiết từng câu trả lời.
+                                {t.student.assignments.takeAssignment.answerReview.notAllowToViewResult.description}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>Số câu đã làm: {answeredCount}</p>
-                            <p>Tổng số câu: {totalCount}</p>
-                            <p>Điểm đạt được: {Math.round(score)}/100</p>
+                            <p>{t.student.assignments.takeAssignment.answerReview.notAllowToViewResult.details.totalAnsweredQuestions} {answeredCount}</p>
+                            <p>{t.student.assignments.takeAssignment.answerReview.notAllowToViewResult.details.totalQuestions} {totalCount}</p>
+                            <p>{t.student.assignments.takeAssignment.answerReview.notAllowToViewResult.details.totalCorrectAnswers} {correctCount}/{totalCount}</p>
                         </CardContent>
                     </Card>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-sm">Tỉ lệ trả lời đúng</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-3xl font-bold text-primary">
-                                        {totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0}%
-                                    </p>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-sm">Thời gian làm bài</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-primary" />
-                                    <p className="text-3xl font-bold text-primary">Đã nộp</p>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-sm">Trạng thái</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className={`text-xl font-bold ${getScoreColor(score)}`}>
-                                        {Math.round(score) >= 50 ? 'Đạt' : 'Không đạt'}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
-
                         <Card>
-                            <CardHeader>
-                                <CardTitle>Xem lại câu trả lời</CardTitle>
-                                <CardDescription>
-                                    Kiểm tra lại các câu trả lời của bạn
-                                </CardDescription>
+                            <CardHeader className="mb-3 text-center">
+                                <CardTitle>{t.student.assignments.takeAssignment.answerReview.allowToViewResult.title}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Tabs defaultValue="all" className="w-full">
                                     <TabsList className="grid w-full grid-cols-3">
-                                        <TabsTrigger value="all">Tất cả ({questionAnswers.length})</TabsTrigger>
+                                        <TabsTrigger value="all">
+                                            {t.student.assignments.takeAssignment.answerReview.allowToViewResult.tabsView.total} ({questionAnswers.length})
+                                        </TabsTrigger>
                                         <TabsTrigger value="correct">
-                                            Đúng ({answerReviewTabs.correctAnswers.length})
+                                            {t.student.assignments.takeAssignment.answerReview.allowToViewResult.tabsView.correct} ({answerReviewTabs.correctAnswers.length})
                                         </TabsTrigger>
                                         <TabsTrigger value="incorrect">
-                                            Sai ({answerReviewTabs.incorrectAnswers.length})
+                                            {t.student.assignments.takeAssignment.answerReview.allowToViewResult.tabsView.incorrect} ({answerReviewTabs.incorrectAnswers.length})
                                         </TabsTrigger>
                                     </TabsList>
 
@@ -295,45 +230,6 @@ export default function QuizResultsPage() {
                                                         )}
                                                     </div>
                                                 </div>
-
-                                                {!answer.isCorrect && (
-                                                    <div className="space-y-2 ml-8">
-                                                        <div className="bg-red-50 rounded p-3">
-                                                            <p className="text-sm text-red-700">
-                                                                <strong>Câu trả lời của bạn:</strong>{' '}
-                                                                <FormattedContent
-                                                                    html={answer.selectedChoiceContent}
-                                                                    className="inline [&_p]:inline"
-                                                                />
-                                                            </p>
-                                                        </div>
-                                                        <div className="bg-green-50 rounded p-3">
-                                                            <p className="text-sm text-green-700">
-                                                                <strong>Đáp án đúng:</strong>{' '}
-                                                                {answer.correctChoiceContent ? (
-                                                                    <FormattedContent
-                                                                        html={answer.correctChoiceContent}
-                                                                        className="inline [&_p]:inline"
-                                                                    />
-                                                                ) : (
-                                                                    'Chưa có đáp án đúng'
-                                                                )}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {answer.isCorrect && (
-                                                    <div className="ml-8 bg-green-50 rounded p-3">
-                                                        <p className="text-sm text-green-700">
-                                                            <strong>Câu trả lời của bạn:</strong>{' '}
-                                                            <FormattedContent
-                                                                html={answer.selectedChoiceContent}
-                                                                className="inline [&_p]:inline"
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                )}
 
                                                 <ChoiceOptionsReview answer={answer} showSelectionStatus />
                                             </div>
@@ -400,30 +296,6 @@ export default function QuizResultsPage() {
                                                         ) : (
                                                             <p className="font-medium text-foreground">Câu hỏi</p>
                                                         )}
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-2 ml-8">
-                                                    <div className="bg-white rounded p-3 border border-red-200">
-                                                        <p className="text-sm text-red-700">
-                                                            <strong>Câu trả lời của bạn:</strong>{' '}
-                                                            <FormattedContent
-                                                                html={answer.selectedChoiceContent}
-                                                                className="inline [&_p]:inline"
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                    <div className="bg-white rounded p-3 border border-green-200">
-                                                        <p className="text-sm text-green-700">
-                                                            <strong>Đáp án đúng:</strong>{' '}
-                                                            {answer.correctChoiceContent ? (
-                                                                <FormattedContent
-                                                                    html={answer.correctChoiceContent}
-                                                                    className="inline [&_p]:inline"
-                                                                />
-                                                            ) : (
-                                                                'Chưa có đáp án đúng'
-                                                            )}
-                                                        </p>
                                                     </div>
                                                 </div>
 

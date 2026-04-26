@@ -7,6 +7,7 @@ export type StudentAttemptAnswerInput = {
 };
 
 export type StudentAttemptPayload = {
+  attemptId?: string;
   assignmentId: string;
   draftAnswer?: unknown | null;
   answers?: StudentAttemptAnswerInput[];
