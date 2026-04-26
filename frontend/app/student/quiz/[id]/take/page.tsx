@@ -529,17 +529,24 @@ export default function QuizTakePage() {
       <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận nộp bài</AlertDialogTitle>
+            <AlertDialogTitle>{t.student.assignments.takeAssignment.submitConfirmation.title}</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn đã trả lời {answeredCount}/{totalQuestions} câu hỏi.
-              <br />
-              Bạn chắc chắn muốn nộp bài tập này không?
+              {t.student.assignments.takeAssignment.submitConfirmation.description}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogAction onClick={handleSubmitQuiz} disabled={isSubmitting}>
-            Nộp bài
-          </AlertDialogAction>
-          <AlertDialogCancel>Tiếp tục làm bài</AlertDialogCancel>
+          <div className="flex gap-2">
+            <AlertDialogCancel className="flex-1">
+              {t.student.assignments.takeAssignment.submitConfirmation.continueButton}
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handleSubmitQuiz}
+              disabled={isSubmitting}
+              className="flex-1"
+            >
+              {t.student.assignments.takeAssignment.submitConfirmation.submitButton}
+            </AlertDialogAction>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

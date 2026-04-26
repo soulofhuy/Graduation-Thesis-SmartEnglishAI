@@ -51,13 +51,6 @@ export function ChoiceOptionsReview<TAnswer extends AnswerWithChoiceOptions>({
                                 className="text-foreground [&_p]:my-0"
                             />
                         </div>
-
-                        {showSelectionStatus ? (
-                            <div className="mt-1 text-xs text-muted-foreground">
-                                {choice.isSelected ? 'Bạn đã chọn' : 'Không chọn'}
-                                {choice.isCorrect ? ' • Đáp án đúng' : ''}
-                            </div>
-                        ) : null}
                     </div>
                 )
             })}

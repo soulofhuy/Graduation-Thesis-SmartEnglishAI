@@ -477,6 +477,35 @@ export const translations = {
             markedQuestion: 'Marked question',
             previousButton: 'Previous',
             nextButton: 'Next'
+          },
+          submitConfirmation: {
+            title: 'Submit confirmation',
+            description: 'Are you sure you want to submit this assignment?',
+            submitButton: 'Submit',
+            continueButton: 'Continue taking'
+          },
+          answerReview: {
+            title: 'Your result',
+            correct: 'correct',
+            total: 'total',
+            allowToViewResult: {
+              title: 'Assignment result',
+              tabsView: {
+                total: 'Total',
+                correct: 'Correct',
+                incorrect: 'Incorrect'
+              }
+            },
+            notAllowToViewResult: {
+              title: 'Assignment submitted',
+              description:
+                'Your assignment has been submitted successfully. You can view the results once your teacher has reviewed it.',
+              details: {
+                totalAnsweredQuestions: 'Total number of questions answered:',
+                totalQuestions: 'Total number of questions:',
+                totalCorrectAnswers: 'Total number of correct answers:'
+              }
+            }
           }
         },
         viewHistory: {
@@ -1084,6 +1113,35 @@ export const translations = {
             markedQuestion: 'Câu hỏi đã đánh dấu',
             previousButton: 'Câu hỏi trước',
             nextButton: 'Câu hỏi tiếp theo'
+          },
+          submitConfirmation: {
+            title: 'Xác nhận nộp bài',
+            description: 'Bạn có chắc chắn muốn nộp bài tập này không?',
+            submitButton: 'Nộp bài',
+            continueButton: 'Tiếp tục làm bài'
+          },
+          answerReview: {
+            title: 'Kết quả của bạn',
+            correct: 'đúng',
+            total: 'tổng',
+            allowToViewResult: {
+              title: 'Kết quả bài tập',
+              tabsView: {
+                total: 'Tổng',
+                correct: 'Đúng',
+                incorrect: 'Sai'
+              }
+            },
+            notAllowToViewResult: {
+              title: 'Đã nộp bài',
+              description:
+                'Bài tập của bạn đã được nộp thành công. Bạn có thể xem kết quả sau khi giáo viên chấm xong.',
+              details: {
+                totalAnsweredQuestions: 'Tổng số câu đã trả lời:',
+                totalQuestions: 'Tổng số câu hỏi:',
+                totalCorrectAnswers: 'Tổng số câu trả lời đúng:'
+              }
+            }
           }
         },
         viewHistory: {
