@@ -51,11 +51,6 @@ export const teacherNavItems = [
 
 export const studentNavItems = [
   {
-    label: 'Tổng quan',
-    href: '/student/overview',
-    icon: LayoutDashboard
-  },
-  {
     label: 'Lớp học của tôi',
     href: '/student/classes',
     icon: GraduationCap
