@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, Eye, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/table'
 import { useLanguage } from '@/components/language-provider'
 import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 export default function StudentHistoryPage() {
   const { t, language } = useLanguage()
@@ -55,9 +57,8 @@ export default function StudentHistoryPage() {
         setTotalItems(response.pagination.totalItems)
         setTotalPages(response.pagination.totalPages)
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Khong the tai lich su bai tap'
-        toast.error(message)
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
       } finally {
         setIsLoadingHistory(false)
       }
