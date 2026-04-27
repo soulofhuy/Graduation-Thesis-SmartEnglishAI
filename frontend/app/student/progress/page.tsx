@@ -23,10 +23,66 @@ import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
+import { getMonthLabel } from '@/lib/language-mappers/month-mapper'
 
-const getMonthLabel = (month: string) => {
-  const monthPart = Number(month.split('-')[1] ?? 0)
-  return monthPart > 0 ? `Thang ${monthPart}` : month
+const MAX_X_AXIS_LABEL_CHARS_PER_LINE = 20
+
+const getWrappedLabelLines = (
+  label: string,
+  maxCharsPerLine = MAX_X_AXIS_LABEL_CHARS_PER_LINE
+) => {
+  const words = label.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) {
+    return ['']
+  }
+
+  const lines: string[] = []
+  let currentLine = ''
+
+  words.forEach((word) => {
+    const nextLine = currentLine ? `${currentLine} ${word}` : word
+    if (nextLine.length <= maxCharsPerLine || !currentLine) {
+      currentLine = nextLine
+      return
+    }
+
+    lines.push(currentLine)
+    currentLine = word
+  })
+
+  if (currentLine) {
+    lines.push(currentLine)
+  }
+
+  return lines
+}
+
+const renderWrappedXAxisTick = (props: {
+  x?: number
+  y?: number
+  payload?: { value?: string | number }
+}) => {
+  const { x = 0, y = 0, payload } = props
+  const label = String(payload?.value ?? '')
+  const lines = getWrappedLabelLines(label)
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={12}
+        textAnchor="middle"
+        fill="hsl(var(--muted-foreground))"
+        fontSize={16}
+      >
+        {lines.map((line, index) => (
+          <tspan key={`${line}-${index}`} x={0} dy={index === 0 ? 0 : 16}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  )
 }
 
 export default function StudentProgressPage() {
@@ -58,11 +114,11 @@ export default function StudentProgressPage() {
 
   const scoreData = useMemo(() => {
     return (progress?.monthlyCorrectByTime ?? []).map((item) => ({
-      month: getMonthLabel(item.month),
+      month: getMonthLabel(item.month, language),
       totalQuestions: item.totalQuestions,
       correctQuestions: item.correctQuestions,
     }))
-  }, [progress?.monthlyCorrectByTime])
+  }, [language, progress?.monthlyCorrectByTime])
 
   const topicPerformance = useMemo(() => {
     return (progress?.taskTypeStats ?? []).map((item) => ({
@@ -72,45 +128,40 @@ export default function StudentProgressPage() {
     }))
   }, [language, progress?.taskTypeStats])
 
+  const topicXAxisHeight = useMemo(() => {
+    const maxLineCount = Math.max(
+      1,
+      ...topicPerformance.map((item) => getWrappedLabelLines(item.name).length)
+    )
+
+    return Math.max(60, maxLineCount * 16 + 24)
+  }, [topicPerformance])
+
   const stats = useMemo(() => {
     const overview = progress?.overview
 
     return [
       {
-        title: 'Tong bai tap',
+        title: t.student.progress.overallStatistic.fieldTotalCompletedAssignments,
         value: overview?.totalAssignmentsDone ?? 0,
         icon: <CheckCircle className="w-5 h-5 text-green-500" />,
       },
       {
-        title: 'Tong cau da lam',
+        title: t.student.progress.overallStatistic.fieldTotalCompletedQuestion,
         value: overview?.totalQuestionsDone ?? 0,
         icon: <HelpCircle className="w-5 h-5 text-blue-500" />,
       },
       {
-        title: 'Task type gioi nhat',
+        title: t.student.progress.overallStatistic.fieldHighestTaskType,
         value: overview?.bestTaskType ? getTaskTypeLabel(overview.bestTaskType.taskType, language) : '-',
         icon: <Star className="w-5 h-5 text-yellow-500" />,
       },
       {
-        title: 'Task type can cai thien',
+        title: t.student.progress.overallStatistic.fieldLowestTaskType,
         value: overview?.weakestTaskType ? getTaskTypeLabel(overview.weakestTaskType.taskType, language) : '-',
         icon: <AlertTriangle className="w-5 h-5 text-red-500" />,
       },
     ]
-  }, [language, progress?.overview])
-
-  const recommendation = useMemo(() => {
-    const weakest = progress?.overview.weakestTaskType
-    const best = progress?.overview.bestTaskType
-
-    return {
-      weakestLabel: weakest ? getTaskTypeLabel(weakest.taskType, language) : '-',
-      weakestCorrect: weakest?.correctQuestions ?? 0,
-      weakestTotal: weakest?.totalQuestions ?? 0,
-      bestLabel: best ? getTaskTypeLabel(best.taskType, language) : '-',
-      bestCorrect: best?.correctQuestions ?? 0,
-      bestTotal: best?.totalQuestions ?? 0,
-    }
   }, [language, progress?.overview])
 
   if (!isHydrated || isLoading) {
@@ -124,7 +175,7 @@ export default function StudentProgressPage() {
   if (!accessToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Vui long dang nhap de xem tien do hoc tap</p>
+        <p className="text-muted-foreground">{getToastMessage('invalidToken', language)}</p>
       </div>
     )
   }
@@ -134,10 +185,10 @@ export default function StudentProgressPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">
-          Lịch sử học tập của bạn
+          {t.student.progress.title}
         </h1>
         <p className="text-muted-foreground mt-1">
-          description
+          {t.student.progress.description}
         </p>
       </div>
 
@@ -152,7 +203,7 @@ export default function StudentProgressPage() {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-lg font-semibold mb-3">
-            Biểu đồ thể hiện số câu hỏi đúng theo tháng
+            {t.student.progress.monthlyProgress.title}
           </CardTitle>
         </CardHeader>
         <CardContent className="mt-5">
@@ -168,14 +219,14 @@ export default function StudentProgressPage() {
               <Legend wrapperStyle={{ paddingTop: 30 }} />
               <Bar
                 dataKey="totalQuestions"
-                fill="hsl(221 83% 53%)"
-                name="Tong cau"
+                fill=" hsl(215 20% 65%)"
+                name={t.student.progress.monthlyProgress.totalQuestions}
                 barSize={35}
               />
               <Bar
                 dataKey="correctQuestions"
-                fill="hsl(142 76% 36%)"
-                name="Cau dung"
+                fill="hsl(173 58% 39%)"
+                name={t.student.progress.monthlyProgress.correctAnswers}
                 barSize={35}
               />
             </BarChart>
@@ -187,7 +238,7 @@ export default function StudentProgressPage() {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-lg font-semibold mb-3">
-            Biểu đồ thể hiện số câu hỏi đúng theo từng chủ đề
+            {t.student.progress.taskTypeProgress.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -197,20 +248,25 @@ export default function StudentProgressPage() {
               margin={{ top: 8, right: 36, left: 36, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis
+                dataKey="name"
+                interval={0}
+                height={topicXAxisHeight}
+                tick={renderWrappedXAxisTick}
+              />
               <YAxis allowDecimals={false} width={36} />
               <Tooltip />
               <Legend wrapperStyle={{ paddingTop: 30 }} />
               <Bar
                 dataKey="totalQuestions"
-                fill="hsl(221 83% 53%)"
-                name="Tong cau"
+                fill="hsl(73, 65%, 83%)"
+                name={t.student.progress.taskTypeProgress.totalQuestions}
                 barSize={35}
               />
               <Bar
                 dataKey="correctQuestions"
-                fill="hsl(142 76% 36%)"
-                name="Cau dung"
+                fill="hsl(33, 76%, 79%)"
+                name={t.student.progress.taskTypeProgress.correctAnswers}
                 barSize={35}
               />
             </BarChart>

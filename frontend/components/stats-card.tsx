@@ -26,7 +26,7 @@ export function StatsCard({
   return (
     <Card className={cn('overflow-hidden border-0 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-800/70 dark:to-slate-800/50 backdrop-blur-sm shadow-glow hover:shadow-glow hover:scale-105 transition-all duration-300', className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-sm font-semibold text-muted-foreground">
+        <CardTitle className="text-sm font-bold">
           {title}
         </CardTitle>
         {icon && (
