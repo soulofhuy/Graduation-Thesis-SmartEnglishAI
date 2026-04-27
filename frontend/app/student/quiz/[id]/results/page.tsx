@@ -34,6 +34,8 @@ import {
     getLatestAttemptForStudent,
     type StudentAttempt,
 } from '@/services/student/attempts'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 const toNumber = (value: string | null, fallback: number) => {
     const parsedValue = Number(value)
@@ -67,7 +69,7 @@ export default function QuizResultsPage() {
     const fallbackAnswered = toNumber(searchParams.get('answered'), 0)
     const fallbackTotal = toNumber(searchParams.get('total'), 0)
     const { accessToken, isHydrated } = useAuth()
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
 
     const [assignment, setAssignment] = useState<StudentAssignmentDetailResponse | null>(null)
     const [attempt, setAttempt] = useState<StudentAttempt | null>(null)
@@ -89,9 +91,8 @@ export default function QuizResultsPage() {
                 setAssignment(assignmentResult)
                 setAttempt(attemptResult)
             } catch (error) {
-                const message =
-                    error instanceof Error ? error.message : 'Không thể tải kết quả bài làm'
-                toast.error(message)
+                const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+                toast.error(message, { className: TOAST_COLORS.error })
             } finally {
                 setIsLoading(false)
             }
