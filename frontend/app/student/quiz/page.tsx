@@ -22,9 +22,11 @@ import { Badge } from '@/components/ui/badge'
 import type { StudentAssignedAssignment } from '@/services/student/assignments'
 import { dateTimeFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 export default function StudentQuizPage() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(false)
@@ -47,8 +49,8 @@ export default function StudentQuizPage() {
         setTotalItems(response.pagination.totalItems)
         setTotalPages(response.pagination.totalPages)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Khong the tai danh sach bai tap'
-        toast.error(message)
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
       } finally {
         setIsLoadingAssignments(false)
       }

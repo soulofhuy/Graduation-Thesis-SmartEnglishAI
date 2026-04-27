@@ -9,7 +9,7 @@ export function SettingsTab({ t }: { t: any }) {
     return (
         <TabsContent value="setting" className="space-y-6">
             <Card>
-                <CardHeader>
+                <CardHeader className="mb-3">
                     <CardTitle>{t.student.settings.tabs.settingsTab.subTitle}</CardTitle>
                     <CardDescription>{t.student.settings.tabs.settingsTab.description}</CardDescription>
                 </CardHeader>

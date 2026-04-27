@@ -12,6 +12,7 @@ interface StatsCardProps {
     isPositive: boolean
   }
   className?: string
+  iconClassName?: string
 }
 
 export function StatsCard({
@@ -25,25 +26,25 @@ export function StatsCard({
   return (
     <Card className={cn('overflow-hidden border-0 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-800/70 dark:to-slate-800/50 backdrop-blur-sm shadow-glow hover:shadow-glow hover:scale-105 transition-all duration-300', className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-sm font-semibold text-muted-foreground">
+        <CardTitle className="text-sm font-bold">
           {title}
         </CardTitle>
         {icon && (
-          <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+          <div className="p-2 rounded-lg">
             <div className="text-primary">{icon}</div>
           </div>
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="text-4xl font-bold bg-gradient-text">{value}</div>
+        <div className="text-xl font-bold bg-gradient-text">{value}</div>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
         )}
         {trend && (
           <div className={cn(
             'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold',
-            trend.isPositive 
-              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+            trend.isPositive
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
               : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
           )}>
             {trend.isPositive ? '↑' : '↓'}

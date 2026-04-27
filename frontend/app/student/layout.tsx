@@ -6,6 +6,7 @@ import { SidebarLayout } from '@/components/sidebar-layout'
 import { studentNavItems } from '@/lib/constants'
 import { useAuth } from '@/components/auth-provider'
 import { getMyProfile } from '@/services/profiles'
+import { useLanguage } from '@/components/language-provider'
 
 export default function StudentLayout({
   children,
@@ -14,10 +15,11 @@ export default function StudentLayout({
 }) {
   const router = useRouter()
   const { accessToken } = useAuth()
+  const { t } = useLanguage()
   const [userName, setUserName] = useState('')
 
   const navItems = studentNavItems.map((item) => ({
-    label: item.label,
+    label: t.navRoles.student[item.labelKey] ?? item.label,
     href: item.href,
     icon: <item.icon className="w-5 h-5" />,
   }))

@@ -7,7 +7,8 @@ export const translations = {
     // Navigation
     nav: {
       login: 'Login',
-      signUp: 'Sign Up'
+      signUp: 'Sign up',
+      signOut: 'Sign out'
     },
 
     // Landing Page
@@ -365,20 +366,6 @@ export const translations = {
 
     // Student Dashboard
     student: {
-      overview: 'Overview',
-      subtitle: 'Welcome back!',
-      completed: 'Completed',
-      pending: 'Pending',
-      avgScore: 'Avg Score',
-      streak: 'Streak',
-      scoreTrend: 'Score Trends',
-      lastWeek: 'Last 7 days performance',
-      pendingAssignments: 'Pending Assignments',
-      myClasses: 'My Classes',
-      joinClass: 'Join Class',
-      takeQuiz: 'Start Quiz',
-      history: 'History',
-      progress: 'Progress',
       classes: {
         title: 'My Classes',
         description: 'List of classes you are currently attending',
@@ -553,6 +540,27 @@ export const translations = {
           }
         }
       },
+      progress: {
+        title: 'My progress',
+        description:
+          'Track your learning progress and see how you improve over time with detailed statistics and charts',
+        overallStatistic: {
+          fieldTotalCompletedAssignments: 'Total completed assignments',
+          fieldTotalCompletedQuestion: 'Total completed questions',
+          fieldHighestTaskType: 'Your best task type',
+          fieldLowestTaskType: 'Your weakest task type'
+        },
+        monthlyProgress: {
+          title: 'Chart showing the number of correct answers by month',
+          totalQuestions: 'Total questions',
+          correctAnswers: 'Correct answers'
+        },
+        taskTypeProgress: {
+          title: 'Chart showing the number of correct answers by task type',
+          totalQuestions: 'Total questions',
+          correctAnswers: 'Correct answers'
+        }
+      },
       settings: {
         title: 'Account Settings',
         description: 'Manage your personal information and preferences',
@@ -600,6 +608,17 @@ export const translations = {
       }
     },
 
+    // Navigation roles
+    navRoles: {
+      student: {
+        class: 'My classes',
+        assignment: 'Take assignments',
+        history: 'Assignment history',
+        progress: 'My progress',
+        settings: 'Account settings'
+      }
+    },
+
     // Common
     common: {
       active: 'Active',
@@ -637,7 +656,8 @@ export const translations = {
     // Navigation
     nav: {
       login: 'Đăng nhập',
-      signUp: 'Đăng ký'
+      signUp: 'Đăng ký',
+      signOut: 'Đăng xuất'
     },
 
     // Landing Page
@@ -1002,20 +1022,6 @@ export const translations = {
 
     // Student Dashboard
     student: {
-      overview: 'Tổng quan',
-      subtitle: 'Chào mừng quay lại!',
-      completed: 'Đã làm',
-      pending: 'Chưa làm',
-      avgScore: 'Điểm TB',
-      streak: 'Chuỗi ngày',
-      scoreTrend: 'Xu hướng điểm',
-      lastWeek: 'Kết quả 7 ngày gần đây',
-      pendingAssignments: 'Bài chưa làm',
-      myClasses: 'Lớp của tôi',
-      joinClass: 'Tham gia lớp',
-      takeQuiz: 'Làm bài',
-      history: 'Lịch sử',
-      progress: 'Tiến độ',
       classes: {
         title: 'Lớp học của tôi',
         description: 'Danh sách các lớp học bạn đang tham gia',
@@ -1189,6 +1195,27 @@ export const translations = {
           }
         }
       },
+      progress: {
+        title: 'Tiến độ học tập',
+        description:
+          'Theo dõi tiến độ học tập của bạn và xem sự cải thiện theo thời gian thông qua các thống kê và biểu đồ chi tiết',
+        overallStatistic: {
+          fieldTotalCompletedAssignments: 'Tổng số bài tập đã hoàn thành',
+          fieldTotalCompletedQuestion: 'Tổng số câu hỏi đã làm',
+          fieldHighestTaskType: 'Loại bài tập làm tốt nhất',
+          fieldLowestTaskType: 'Loại bài tập cần cải thiện'
+        },
+        monthlyProgress: {
+          title: 'Biểu đồ số câu trả lời đúng theo tháng',
+          totalQuestions: 'Tổng số câu hỏi',
+          correctAnswers: 'Số câu trả lời đúng'
+        },
+        taskTypeProgress: {
+          title: 'Biểu đồ số câu trả lời đúng theo từng loại bài tập',
+          totalQuestions: 'Tổng số câu hỏi',
+          correctAnswers: 'Số câu trả lời đúng'
+        }
+      },
       settings: {
         title: 'Cài đặt tài khoản',
         description: 'Quản lý thông tin cá nhân và tuỳ chọn của bạn',
@@ -1233,6 +1260,17 @@ export const translations = {
             }
           }
         }
+      }
+    },
+
+    // Navigation bar
+    navRoles: {
+      student: {
+        class: 'Lớp học của tôi',
+        assignment: 'Làm bài tập',
+        history: 'Lịch sử bài tập',
+        progress: 'Tiến độ học tập',
+        settings: 'Cài đặt'
       }
     },
 

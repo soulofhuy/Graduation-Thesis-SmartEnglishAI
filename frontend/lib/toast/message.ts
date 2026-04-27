@@ -17,7 +17,10 @@ export const toastMessages = {
     saveFailed: 'Save failed',
     changePasswordSuccess: 'Change password successful',
     changePasswordFailed: 'Change password failed',
-    copySuccess: 'Copy successful'
+    copySuccess: 'Copy successful',
+    classCodeRequired: 'Please enter the class code',
+    submitAssignmentSuccess: 'Assignment submitted successfully',
+    submitAssignmentFailed: 'Failed to submit assignment'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',
@@ -35,7 +38,10 @@ export const toastMessages = {
     saveFailed: 'Lưu thất bại',
     changePasswordSuccess: 'Đổi mật khẩu thành công',
     changePasswordFailed: 'Đổi mật khẩu thất bại',
-    copySuccess: 'Sao chép thành công'
+    copySuccess: 'Sao chép thành công',
+    classCodeRequired: 'Vui lòng nhập mã lớp học',
+    submitAssignmentSuccess: 'Nộp bài tập thành công',
+    submitAssignmentFailed: 'Nộp bài tập thất bại'
   }
 } as const;
 

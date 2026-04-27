@@ -23,7 +23,7 @@ export function JoinClassModal({
     onJoin,
 }: JoinClassModalProps) {
 
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
 
     return (
         <ModalWrapper

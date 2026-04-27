@@ -29,6 +29,8 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 interface Question {
   id: string
@@ -46,7 +48,7 @@ export default function QuizTakePage() {
   const params = useParams<{ id: string }>()
   const assignmentId = Array.isArray(params?.id) ? params.id[0] : params?.id
   const { accessToken, isHydrated } = useAuth()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
@@ -156,10 +158,10 @@ export default function QuizTakePage() {
 
   const totalQuestions = questions.length
   const currentQuestion = questions[currentQuestionIndex]
-  const answeredCount = Object.keys(selectedAnswers).length
 
   useEffect(() => {
     if (!isHydrated || !accessToken || !assignmentId) {
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
@@ -175,9 +177,8 @@ export default function QuizTakePage() {
         setAttemptId(attemptResult.id)
         setSelectedAnswers(mapAttemptAnswersToSelectedAnswers(attemptResult))
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Khong the tai chi tiet bai tap'
-        toast.error(message)
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
         router.push('/student/quiz')
       } finally {
         setIsLoadingAssignment(false)
@@ -229,13 +230,8 @@ export default function QuizTakePage() {
   }
 
   const handleSubmitQuiz = useCallback(async () => {
-    if (!assignmentId) {
-      toast.error('Khong tim thay ma bai tap')
-      return
-    }
-
     if (!accessToken) {
-      toast.error('Vui long dang nhap de nop bai tap')
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
@@ -255,11 +251,10 @@ export default function QuizTakePage() {
 
       const answeredCount = submittedAttempt.answers?.length ?? answers.length
       router.push(`/student/quiz/${assignmentId}/results?answered=${answeredCount}&total=${totalQuestions}`)
-      toast.success('Nộp bài tập thành công!')
+      toast.success(getToastMessage('submitAssignmentSuccess', language), { className: TOAST_COLORS.success })
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Khong the nop bai tap'
-      toast.error(message)
+      const message = error instanceof Error ? error.message : getToastMessage('submitAssignmentFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsSubmitting(false)
     }
@@ -398,14 +393,9 @@ export default function QuizTakePage() {
                     onClick={() => handleFlagQuestion(currentQuestion.id)}
                   >
                     <Flag
-                      className={`w-4 h-4 ${flaggedQuestions.has(currentQuestion.id)
-                        ? 'fill-accent text-accent'
-                        : ''
-                        }`}
+                      className={`w-4 h-4 ${flaggedQuestions.has(currentQuestion.id) ? 'fill-accent text-accent' : ''}`}
                     />
-                    {flaggedQuestions.has(currentQuestion.id)
-                      ? 'Đã đánh dấu'
-                      : 'Đánh dấu'}
+                    {flaggedQuestions.has(currentQuestion.id) ? 'Đã đánh dấu' : 'Đánh dấu'}
                   </Button>
                 </div>
               </CardContent>
@@ -473,8 +463,7 @@ export default function QuizTakePage() {
                         <button
                           type="button"
                           onClick={() => handleJumpToQuestion(index)}
-                          className={`text-left text-xs font-semibold ${isCurrent ? 'text-primary' : 'text-foreground'
-                            }`}
+                          className={`text-left text-xs font-semibold ${isCurrent ? 'text-primary' : 'text-foreground'}`}
                         >
                           {index + 1}
                         </button>

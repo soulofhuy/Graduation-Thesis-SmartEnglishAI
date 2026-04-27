@@ -39,6 +39,7 @@ import {
 } from '../../_components/edit'
 import type { Assignment, Choice, Class, Question, Task, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
+import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
 
 type ActiveTab = 'basic' | 'questions' | 'preview' | 'results'
 
@@ -121,25 +122,7 @@ export default function EditQuizPage() {
     const assignmentId = params?.assignmentId ?? ''
 
     const getTaskTitleFromType = (taskType: TaskType) => {
-        const labels =
-            t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue
-
-        switch (taskType) {
-            case 'PRONUNCIATION':
-                return labels.PRONUNCIATION
-            case 'WORD_STRESS':
-                return labels.WORD_STRESS
-            case 'SITUATIONAL_DIALOG':
-                return labels.SITUATIONAL_DIALOG
-            case 'MULTIPLE_CHOICE':
-                return labels.MULTIPLE_CHOICE
-            case 'CLOZE_PASSAGE':
-                return labels.CLOZE_PASSAGE
-            case 'READING_COMPREHENSION':
-                return labels.READING_COMPREHENSION
-            default:
-                return labels.MULTIPLE_CHOICE
-        }
+        return getTaskTypeLabel(taskType, language)
     }
 
     const initialTask = createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))

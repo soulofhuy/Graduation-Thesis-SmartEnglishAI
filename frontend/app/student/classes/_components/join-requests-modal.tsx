@@ -32,7 +32,7 @@ export function JoinRequestsModal({
     requests,
     isLoading,
 }: JoinRequestsModalProps) {
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
     const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
         if (status === 'approved') return 'Đã duyệt'
         if (status === 'rejected') return 'Từ chối'

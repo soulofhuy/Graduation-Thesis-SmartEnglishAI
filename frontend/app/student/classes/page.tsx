@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
@@ -24,6 +24,7 @@ import { JoinClassModal } from './_components/join-class-modal'
 import { JoinRequestsModal, type JoinRequestItem } from './_components/join-requests-modal'
 import { ClassMembersModal } from './_components/class-members-modal'
 import { BannedClassesModal } from './_components/banned-classes-modal'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 export default function StudentClassesPage() {
   const { t, language } = useLanguage()
@@ -52,7 +53,7 @@ export default function StudentClassesPage() {
       .filter(Boolean)
       .join(' ')
 
-    return teacherName || classItem.teacher?.email || 'Chưa cập nhật giáo viên'
+    return teacherName || classItem.teacher?.email
   }
 
   const getStudentCount = (classItem: BackendClass) => {
@@ -65,11 +66,8 @@ export default function StudentClassesPage() {
       const result = await getAllApprovedClassesByStudent(token)
       setClasses(result.approvedClasses as BackendClass[])
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : getToastMessage('loadFailed', language)
-      toast.error(message)
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsLoadingClasses(false)
     }
@@ -94,10 +92,7 @@ export default function StudentClassesPage() {
 
       setJoinRequests(mappedRequests)
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : getToastMessage('loadFailed', language)
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
       toast.error(message)
     } finally {
       setIsLoadingRequests(false)
@@ -110,11 +105,8 @@ export default function StudentClassesPage() {
       const result = await getBannedClassByStudent(token)
       setBannedClasses(result.bannedClasses as BackendClass[])
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : getToastMessage('loadFailed', language)
-      toast.error(message)
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsLoadingBannedClasses(false)
     }
@@ -134,17 +126,12 @@ export default function StudentClassesPage() {
 
   const handleJoinClass = async () => {
     if (!classCode.trim()) {
-      toast.error('Vui lòng nhập mã lớp học')
+      toast.error(getToastMessage('classCodeRequired', language), { className: TOAST_COLORS.error })
       return
     }
 
-    if (!isHydrated) {
-      toast.error('Đang tải phiên đăng nhập, vui lòng thử lại')
-      return
-    }
-
-    if (!accessToken) {
-      toast.error('Bạn cần đăng nhập để tham gia lớp học')
+    if (!isHydrated || !accessToken) {
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
@@ -184,13 +171,8 @@ export default function StudentClassesPage() {
   }
 
   const handleViewClassMembers = async (classItem: BackendClass) => {
-    if (!isHydrated) {
-      toast.error('Dang tai phien dang nhap, vui long thu lai')
-      return
-    }
-
-    if (!accessToken) {
-      toast.error('Ban can dang nhap de xem danh sach hoc sinh')
+    if (!isHydrated || !accessToken) {
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
@@ -203,11 +185,8 @@ export default function StudentClassesPage() {
       const result = await getStudentsByClassId(accessToken, classItem.id)
       setSelectedClassMembers(result.classDetail.classMembers ?? [])
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : getToastMessage('loadFailed', language)
-      toast.error(message)
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsLoadingClassMembers(false)
     }

@@ -57,7 +57,7 @@ export function ProfileTab({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <Card>
-                        <CardHeader>
+                        <CardHeader className="mb-3">
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div className="space-y-1">
                                     <CardTitle>{t.student.settings.tabs.profileTab.subTitle}</CardTitle>
