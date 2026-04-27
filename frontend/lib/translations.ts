@@ -7,7 +7,8 @@ export const translations = {
     // Navigation
     nav: {
       login: 'Login',
-      signUp: 'Sign Up'
+      signUp: 'Sign up',
+      signOut: 'Sign out'
     },
 
     // Landing Page
@@ -607,6 +608,17 @@ export const translations = {
       }
     },
 
+    // Navigation roles
+    navRoles: {
+      student: {
+        class: 'My classes',
+        assignment: 'Take assignments',
+        history: 'Assignment history',
+        progress: 'My progress',
+        settings: 'Account settings'
+      }
+    },
+
     // Common
     common: {
       active: 'Active',
@@ -644,7 +656,8 @@ export const translations = {
     // Navigation
     nav: {
       login: 'Đăng nhập',
-      signUp: 'Đăng ký'
+      signUp: 'Đăng ký',
+      signOut: 'Đăng xuất'
     },
 
     // Landing Page
@@ -1247,6 +1260,17 @@ export const translations = {
             }
           }
         }
+      }
+    },
+
+    // Navigation bar
+    navRoles: {
+      student: {
+        class: 'Lớp học của tôi',
+        assignment: 'Làm bài tập',
+        history: 'Lịch sử bài tập',
+        progress: 'Tiến độ học tập',
+        settings: 'Cài đặt'
       }
     },
 

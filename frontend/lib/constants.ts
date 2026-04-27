@@ -11,6 +11,13 @@ import {
   Trash2
 } from 'lucide-react';
 
+export type StudentNavLabelKey =
+  | 'class'
+  | 'assignment'
+  | 'history'
+  | 'progress'
+  | 'settings';
+
 export const teacherNavItems = [
   {
     label: 'Tổng quan',
@@ -52,26 +59,31 @@ export const teacherNavItems = [
 export const studentNavItems = [
   {
     label: 'Lớp học của tôi',
+    labelKey: 'class' as StudentNavLabelKey,
     href: '/student/classes',
     icon: GraduationCap
   },
   {
     label: 'Làm bài tập',
+    labelKey: 'assignment' as StudentNavLabelKey,
     href: '/student/quiz',
     icon: Inbox
   },
   {
     label: 'Lịch sử',
+    labelKey: 'history' as StudentNavLabelKey,
     href: '/student/history',
     icon: BarChart3
   },
   {
     label: 'Tiến độ học tập',
+    labelKey: 'progress' as StudentNavLabelKey,
     href: '/student/progress',
     icon: TrendingUp
   },
   {
     label: 'Cài đặt',
+    labelKey: 'settings' as StudentNavLabelKey,
     href: '/student/settings',
     icon: Settings
   }
