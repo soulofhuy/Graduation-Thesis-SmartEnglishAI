@@ -20,6 +20,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 const taskTypeLabelMap: Record<string, string> = {
   PRONUNCIATION: 'Phat am',
@@ -40,6 +43,7 @@ const getMonthLabel = (month: string) => {
 }
 
 export default function StudentProgressPage() {
+  const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
   const [progress, setProgress] = useState<StudentStudyProgress | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -55,11 +59,8 @@ export default function StudentProgressPage() {
         const result = await getStudentStudyProgress(accessToken)
         setProgress(result)
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : 'Khong the tai tien do hoc tap'
-        toast.error(message)
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
       } finally {
         setIsLoading(false)
       }

@@ -50,7 +50,6 @@ export function ClassMembersModal({
     isOpen,
     onOpenChange,
     className,
-    classCode,
     classMembers,
     isLoading,
 }: ClassMembersModalProps) {
