@@ -1,5 +1,6 @@
 import { Role, AttemptStatus } from '../../generated/prisma/enums';
 import prisma from '../../utils/prisma';
+import AssignmentStudentService from '../assignmentStudentServices';
 
 type ClassAssignmentAttempt = {
   attemptId: string;
@@ -418,74 +419,15 @@ class ViewClassProgressOnAssignmentsService {
       throw new Error('Assignment not found in class');
     }
 
-    const attempts = await prisma.attempt.findMany({
-      where: {
-        studentId: studentId.trim(),
-        assignmentId: assignment.id,
-        assignment: {
-          classId: classData.id,
-          isActive: true
-        }
-      },
-      orderBy: {
-        startedAt: 'desc'
-      },
-      select: {
-        id: true,
-        status: true,
-        submittedAt: true,
-        startedAt: true,
-        draftAnswer: true,
-        result: {
-          select: {
-            id: true,
-            score: true,
-            correctCount: true,
-            totalCount: true,
-            questionAnswers: true,
-            createdAt: true
-          }
-        },
-        answers: {
-          select: {
-            id: true,
-            questionId: true,
-            selectedChoiceId: true,
-            question: {
-              select: {
-                id: true,
-                questionContent: true,
-                correctChoiceId: true,
-                task: {
-                  select: {
-                    id: true,
-                    taskContent: true,
-                    taskType: true
-                  }
-                },
-                choices: {
-                  select: {
-                    id: true,
-                    choiceContent: true
-                  }
-                }
-              }
-            },
-            selectedChoice: {
-              select: {
-                id: true,
-                choiceContent: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: {
-            answers: true
-          }
-        }
-      }
-    });
+    // Reuse the existing student service to fetch full attempt history
+    // (ensures consistent result shape and avoids duplication).
+    const attemptHistory =
+      await AssignmentStudentService.getFullAttemptHistoryOfStudent(
+        studentId.trim(),
+        assignment.id
+      );
+
+    const attempts = attemptHistory.data;
 
     return {
       class: classData,

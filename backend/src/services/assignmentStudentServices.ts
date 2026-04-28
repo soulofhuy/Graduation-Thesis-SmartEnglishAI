@@ -505,6 +505,39 @@ class AssignmentStudentService {
             createdAt: true
           }
         },
+        answers: {
+          select: {
+            id: true,
+            questionId: true,
+            selectedChoiceId: true,
+            question: {
+              select: {
+                id: true,
+                questionContent: true,
+                correctChoiceId: true,
+                task: {
+                  select: {
+                    id: true,
+                    taskContent: true,
+                    taskType: true
+                  }
+                },
+                choices: {
+                  select: {
+                    id: true,
+                    choiceContent: true
+                  }
+                }
+              }
+            },
+            selectedChoice: {
+              select: {
+                id: true,
+                choiceContent: true
+              }
+            }
+          }
+        },
         _count: {
           select: {
             answers: true
