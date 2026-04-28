@@ -5,7 +5,7 @@ import ViewClassProgressOnAssignmentsController from '../../controllers/teachers
 const router = Router();
 
 router.get(
-  '/teachers/classes/:classId/progress-on-assignments',
+  '/teachers/classes/:classId/assignments/:assignmentId/progress-on-assignments',
   verifyJWT,
   ViewClassProgressOnAssignmentsController.getClassProgressOnAssignments
 );

@@ -24,14 +24,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/components/auth-provider'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
 import { getAssignmentsByClassId } from '@/services/teacher/assignments'
+import { getClassProgressOnAssignments } from '@/services/teacher/assignment-student-results'
 import type { Assignment, Class } from '@/lib/types'
 
 interface StudentResult {
   id: string
   name: string
   score: number
+  totalQuestions: number
   status: 'submitted' | 'pending'
   submittedDate?: string
+  bestScore: number
+  submittedAttempts: number
 }
 
 export default function TeacherResultsPage() {
@@ -45,8 +49,11 @@ export default function TeacherResultsPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isLoadingClasses, setIsLoadingClasses] = useState(true)
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(false)
+  const [isLoadingResults, setIsLoadingResults] = useState(false)
   const [classesError, setClassesError] = useState<string | null>(null)
   const [assignmentsError, setAssignmentsError] = useState<string | null>(null)
+  const [resultsError, setResultsError] = useState<string | null>(null)
+  const [results, setResults] = useState<StudentResult[]>([])
 
   // Load classes for the teacher
   useEffect(() => {
@@ -113,65 +120,136 @@ export default function TeacherResultsPage() {
     loadAssignments()
   }, [selectedClass, accessToken])
 
-  const results: StudentResult[] = [
+  // Load results when class and assignment are selected
+  useEffect(() => {
+    const loadResults = async () => {
+      if (!selectedClass || !selectedAssignment || !accessToken) {
+        setResults([])
+        return
+      }
+
+      try {
+        setIsLoadingResults(true)
+        setResultsError(null)
+        const progressData = await getClassProgressOnAssignments(
+          accessToken,
+          selectedClass,
+          selectedAssignment
+        )
+
+        console.log('Progress Data:', progressData)
+
+        // Transform API response to results format
+        const transformedResults: StudentResult[] = progressData.students
+          .map((student: any) => {
+            const studentName = student.profile
+              ? `${student.profile.firstName || ''} ${student.profile.lastName || ''}`.trim()
+              : student.email
+
+            return {
+              id: student.studentId,
+              name: studentName,
+              score: student.assignment.latestCorrectCount ?? 0,
+              totalQuestions: student.assignment.totalQuestions,
+              status: student.assignment.latestStatus === 'SUBMITTED' ? 'submitted' : 'pending' as const,
+              submittedDate: student.assignment.submittedAttemptCount > 0 ? new Date().toISOString().split('T')[0] : undefined,
+              bestScore: student.assignment.bestCorrectCount ?? 0,
+              submittedAttempts: student.assignment.submittedAttemptCount,
+            }
+          })
+
+        console.log('Transformed Results:', transformedResults)
+        setResults(transformedResults)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to load results'
+        setResultsError(message)
+        setResults([])
+        console.error('Error loading results:', error)
+      } finally {
+        setIsLoadingResults(false)
+      }
+    }
+
+    loadResults()
+  }, [selectedClass, selectedAssignment, accessToken])
+
+  const mockResults: StudentResult[] = [
     {
       id: '1',
       name: 'Trần Minh Anh',
-      score: 9.5,
+      score: 9,
+      totalQuestions: 10,
       status: 'submitted',
       submittedDate: '2024-03-15',
+      bestScore: 9,
+      submittedAttempts: 2,
     },
     {
       id: '2',
       name: 'Nguyễn Văn Bình',
-      score: 7.8,
+      score: 7,
+      totalQuestions: 10,
       status: 'submitted',
       submittedDate: '2024-03-14',
+      bestScore: 8,
+      submittedAttempts: 3,
     },
     {
       id: '3',
       name: 'Phạm Thị Chung',
-      score: 8.5,
+      score: 8,
+      totalQuestions: 10,
       status: 'submitted',
       submittedDate: '2024-03-13',
+      bestScore: 8,
+      submittedAttempts: 1,
     },
     {
       id: '4',
       name: 'Lê Đức Dũng',
       score: 0,
+      totalQuestions: 10,
       status: 'pending',
+      bestScore: 0,
+      submittedAttempts: 0,
     },
     {
       id: '5',
       name: 'Hồ Thanh Ế',
-      score: 6.5,
+      score: 6,
+      totalQuestions: 10,
       status: 'submitted',
       submittedDate: '2024-03-10',
+      bestScore: 7,
+      submittedAttempts: 2,
     },
   ]
+
+  // Use mock data as fallback (or remove this entirely if you only want API data)
+  const displayResults = results.length > 0 ? results : mockResults
 
   const stats = [
     {
       title: 'Tổng bài nộp',
-      value: results.filter((r) => r.status === 'submitted').length,
+      value: displayResults.filter((r: StudentResult) => r.status === 'submitted').length,
       icon: <FileText className="w-5 h-5" />,
     },
     {
       title: 'Chưa nộp',
-      value: results.filter((r) => r.status === 'pending').length,
+      value: displayResults.filter((r: StudentResult) => r.status === 'pending').length,
       icon: <Clock className="w-5 h-5" />,
     },
     {
       title: 'Điểm trung bình',
       value: (
-        results.reduce((sum, r) => sum + r.score, 0) / results.length
+        displayResults.reduce((sum: number, r: StudentResult) => sum + r.score, 0) / (displayResults.length || 1)
       ).toFixed(1),
       icon: <Users className="w-5 h-5" />,
     },
     {
       title: 'Tỉ lệ đạt',
       value: (
-        (results.filter((r) => r.score >= 5).length / results.length * 100).toFixed(0) + '%'
+        (displayResults.filter((r: StudentResult) => r.score >= 5).length / (displayResults.length || 1) * 100).toFixed(0) + '%'
       ),
       icon: <CheckCircle className="w-5 h-5" />,
     },
@@ -188,7 +266,7 @@ export default function TeacherResultsPage() {
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
       setAiAnalysis(
-        `Phân tích về câu hỏi "${aiQuestion}":\n\n- Tổng số học sinh trả lời: ${results.length}\n- Số câu trả lời đúng: ${Math.floor(Math.random() * results.length)}\n- Độ khó: ${['Dễ', 'Trung bình', 'Khó'][Math.floor(Math.random() * 3)]}\n- Đề xuất: Cần ôn tập thêm về nội dung này với học sinh.`
+        `Phân tích về câu hỏi "${aiQuestion}":\n\n- Tổng số học sinh trả lời: ${displayResults.length}\n- Số câu trả lời đúng: ${Math.floor(Math.random() * displayResults.length)}\n- Độ khó: ${['Dễ', 'Trung bình', 'Khó'][Math.floor(Math.random() * 3)]}\n- Đề xuất: Cần ôn tập thêm về nội dung này với học sinh.`
       )
     } finally {
       setIsAnalyzing(false)
@@ -288,47 +366,71 @@ export default function TeacherResultsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tên học sinh</TableHead>
-                  <TableHead>Điểm</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày nộp</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {results.map((result) => (
-                  <TableRow key={result.id}>
-                    <TableCell className="font-medium">
-                      {result.name}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-lg font-bold text-primary">
-                        {result.score}/10
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${result.status === 'submitted'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                          }`}
-                      >
-                        {result.status === 'submitted'
-                          ? 'Đã nộp'
-                          : 'Chưa nộp'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {result.submittedDate || '-'}
-                    </TableCell>
+          {isLoadingResults ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Đang tải kết quả...
+            </div>
+          ) : resultsError ? (
+            <div className="text-center py-8 text-red-500">
+              {resultsError}
+            </div>
+          ) : displayResults.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Không có dữ liệu kết quả
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tên học sinh</TableHead>
+                    <TableHead>Điểm gần nhất</TableHead>
+                    <TableHead>Điểm cao nhất</TableHead>
+                    <TableHead>Tổng câu hỏi</TableHead>
+                    <TableHead>Lần nộp</TableHead>
+                    <TableHead>Trạng thái</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {displayResults.map((result: StudentResult) => (
+                    <TableRow key={result.id}>
+                      <TableCell className="font-medium">
+                        {result.name}
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-bold text-primary">
+                          {result.score}/{result.totalQuestions}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-bold">
+                          {result.bestScore}/{result.totalQuestions}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {result.totalQuestions}
+                      </TableCell>
+                      <TableCell>
+                        {result.submittedAttempts || 0}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${result.status === 'submitted'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                        >
+                          {result.status === 'submitted'
+                            ? 'Đã nộp'
+                            : 'Chưa nộp'}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

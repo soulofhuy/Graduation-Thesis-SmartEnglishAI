@@ -11,6 +11,7 @@ class ViewClassProgressOnAssignmentsController {
   ) => {
     const teacherId = req.userId;
     const classId = req.params.classId || req.body.classId;
+    const assignmentId = req.params.assignmentId || req.body.assignmentId;
 
     if (!teacherId) {
       return res
@@ -20,17 +21,22 @@ class ViewClassProgressOnAssignmentsController {
         );
     }
 
-    if (!classId) {
+    if (!classId || !assignmentId) {
       return res
         .status(400)
-        .json(Responses.errorResponse(new Error('Class ID is required')));
+        .json(
+          Responses.errorResponse(
+            new Error('Class ID and Assignment ID are required')
+          )
+        );
     }
 
     try {
       const progress =
         await ViewClassProgressOnAssignmentsService.getClassProgressOnAssignments(
           teacherId,
-          classId
+          classId,
+          assignmentId
         );
 
       return res

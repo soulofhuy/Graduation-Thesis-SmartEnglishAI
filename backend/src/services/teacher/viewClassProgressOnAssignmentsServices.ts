@@ -111,7 +111,8 @@ class ViewClassProgressOnAssignmentsService {
 
   static getClassProgressOnAssignments = async (
     teacherId: string,
-    classId: string
+    classId: string,
+    assignmentId: string
   ) => {
     const normalizedTeacherId = await this.ensureActiveTeacher(teacherId);
     const classData = await this.ensureTeacherOwnsClass(
@@ -119,7 +120,13 @@ class ViewClassProgressOnAssignmentsService {
       classId
     );
 
-    const [classMembers, assignments] = await Promise.all([
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    const normalizedAssignmentId = assignmentId.trim();
+
+    const [classMembers, assignment] = await Promise.all([
       prisma.classMember.findMany({
         where: {
           classId: classData.id,
@@ -147,8 +154,9 @@ class ViewClassProgressOnAssignmentsService {
           joinedAt: 'asc'
         }
       }),
-      prisma.assignment.findMany({
+      prisma.assignment.findFirst({
         where: {
+          id: normalizedAssignmentId,
           classId: classData.id,
           isActive: true
         },
@@ -177,12 +185,13 @@ class ViewClassProgressOnAssignmentsService {
               }
             }
           }
-        },
-        orderBy: {
-          createdAt: 'asc'
         }
       })
     ]);
+
+    if (!assignment) {
+      throw new Error('Assignment not found in this class');
+    }
 
     const studentIds = classMembers.map(member => member.student.id);
 
@@ -192,6 +201,7 @@ class ViewClassProgressOnAssignmentsService {
             studentId: {
               in: studentIds
             },
+            assignmentId: normalizedAssignmentId,
             assignment: {
               classId: classData.id,
               isActive: true
@@ -226,16 +236,10 @@ class ViewClassProgressOnAssignmentsService {
         })
       : [];
 
-    const attemptsByStudentAndAssignment = new Map<
-      string,
-      Map<string, ClassAssignmentAttempt[]>
-    >();
+    const attemptsByStudent = new Map<string, ClassAssignmentAttempt[]>();
 
     attempts.forEach(attempt => {
-      const studentMap =
-        attemptsByStudentAndAssignment.get(attempt.studentId) ?? new Map();
-
-      const currentAttempts = studentMap.get(attempt.assignmentId) ?? [];
+      const currentAttempts = attemptsByStudent.get(attempt.studentId) ?? [];
       currentAttempts.push({
         attemptId: attempt.id,
         status: attempt.status,
@@ -249,77 +253,38 @@ class ViewClassProgressOnAssignmentsService {
         answerCount: attempt._count.answers
       });
 
-      studentMap.set(attempt.assignmentId, currentAttempts);
-      attemptsByStudentAndAssignment.set(attempt.studentId, studentMap);
+      attemptsByStudent.set(attempt.studentId, currentAttempts);
     });
 
-    const students: ClassProgressStudent[] = classMembers.map(member => {
-      const studentAssignments = assignments.map(assignment => {
-        const totalQuestions = assignment.tasks.reduce((sum, task) => {
-          const taskQuestionCount = task._count.questions;
-          const passageQuestionCount = task.passages.reduce(
-            (passageSum, passage) => passageSum + passage._count.questions,
-            0
-          );
+    const totalQuestions = assignment.tasks.reduce((sum, task) => {
+      const taskQuestionCount = task._count.questions;
+      const passageQuestionCount = task.passages.reduce(
+        (passageSum, passage) => passageSum + passage._count.questions,
+        0
+      );
 
-          return sum + taskQuestionCount + passageQuestionCount;
-        }, 0);
+      return sum + taskQuestionCount + passageQuestionCount;
+    }, 0);
 
-        const attemptsForAssignment =
-          attemptsByStudentAndAssignment
-            .get(member.student.id)
-            ?.get(assignment.id) ?? [];
+    const students = classMembers.map(member => {
+      const attemptsForStudent = attemptsByStudent.get(member.student.id) ?? [];
 
-        const submittedAttempts = attemptsForAssignment.filter(
-          attempt => attempt.status === AttemptStatus.SUBMITTED
-        );
+      const submittedAttempts = attemptsForStudent.filter(
+        attempt => attempt.status === AttemptStatus.SUBMITTED
+      );
 
-        const scores = submittedAttempts
-          .map(attempt => attempt.score)
-          .filter((score): score is number => typeof score === 'number');
+      const correctCounts = submittedAttempts
+        .map(attempt => attempt.correctCount)
+        .filter((count): count is number => typeof count === 'number');
 
-        const latestAttempt = attemptsForAssignment[0] ?? null;
-        const bestScore = scores.length > 0 ? Math.max(...scores) : null;
+      const latestAttempt = attemptsForStudent[0];
+      const latestCorrectCount = latestAttempt?.correctCount ?? null;
+      const bestCorrectCount = Math.max(...correctCounts, 0) || null;
 
-        return {
-          assignmentId: assignment.id,
-          title: assignment.title,
-          description: assignment.description,
-          dueDate: assignment.dueDate,
-          isSingleAttempt: assignment.isSingleAttempt,
-          canViewResult: assignment.canViewResult,
-          totalQuestions,
-          latestAttemptId: latestAttempt?.attemptId ?? null,
-          latestStatus: latestAttempt?.status ?? null,
-          latestScore: latestAttempt?.correctCount ?? null,
-          bestScore: submittedAttempts
-            .map(attempt => attempt.correctCount)
-            .filter((score): score is number => typeof score === 'number')
-            .reduce<number | null>(
-              (best, correctCount) =>
-                best === null || correctCount > best ? correctCount : best,
-              null
-            ),
-          submittedAttemptCount: submittedAttempts.length
-        };
-      });
-
-      const submittedAssignments = studentAssignments.filter(
-        assignment => assignment.submittedAttemptCount > 0
-      ).length;
-
-      const allSubmittedScores = studentAssignments
-        .map(assignment => assignment.latestScore)
+      const submittedAttemptCount = submittedAttempts.length;
+      const scores = submittedAttempts
+        .map(attempt => attempt.score)
         .filter((score): score is number => typeof score === 'number');
-
-      const highestScore =
-        allSubmittedScores.length > 0 ? Math.max(...allSubmittedScores) : null;
-
-      const averageScore =
-        allSubmittedScores.length > 0
-          ? allSubmittedScores.reduce((sum, score) => sum + score, 0) /
-            allSubmittedScores.length
-          : null;
 
       return {
         studentId: member.student.id,
@@ -331,20 +296,39 @@ class ViewClassProgressOnAssignmentsService {
               phoneNumber: member.student.profile.phoneNumber ?? null
             }
           : null,
-        assignments: studentAssignments,
+        assignment: {
+          assignmentId: assignment.id,
+          title: assignment.title,
+          description: assignment.description,
+          dueDate: assignment.dueDate,
+          isSingleAttempt: assignment.isSingleAttempt,
+          canViewResult: assignment.canViewResult,
+          totalQuestions,
+          latestCorrectCount,
+          bestCorrectCount,
+          latestStatus: latestAttempt?.status ?? null,
+          submittedAttemptCount
+        },
         summary: {
-          totalAssignments: assignments.length,
-          submittedAssignments,
-          averageScore,
-          highestScore
+          submittedAttempts: submittedAttemptCount,
+          averageScore:
+            scores.length > 0
+              ? Number(
+                  (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
+                )
+              : null,
+          highestScore: scores.length > 0 ? Math.max(...scores) : null
         }
       };
     });
 
     return {
       class: classData,
+      assignment: {
+        id: assignment.id,
+        title: assignment.title
+      },
       totalStudents: students.length,
-      totalAssignments: assignments.length,
       students
     };
   };
