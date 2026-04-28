@@ -6,8 +6,11 @@ export interface ClassProgressSummary {
     name: string;
     classCode: string;
   };
+  assignment: {
+    id: string;
+    title: string;
+  };
   totalStudents: number;
-  totalAssignments: number;
   students: Array<{
     studentId: string;
     email: string;
@@ -16,18 +19,21 @@ export interface ClassProgressSummary {
       lastName: string | null;
       phoneNumber: string | null;
     } | null;
-    assignments: Array<{
+    assignment: {
       assignmentId: string;
       title: string;
+      description: string | null;
+      dueDate: string | null;
+      isSingleAttempt: boolean;
+      canViewResult: boolean;
       totalQuestions: number;
       latestCorrectCount: number | null;
       bestCorrectCount: number | null;
       latestStatus: string;
       submittedAttemptCount: number;
-    }>;
+    };
     summary: {
-      totalAssignments: number;
-      submittedAssignments: number;
+      submittedAttempts: number;
       averageScore: number | null;
       highestScore: number | null;
     };
@@ -122,7 +128,7 @@ export async function getClassProgressOnAssignments(
   }
 
   const data = await response.json();
-  if (data.success) {
+  if (data.status) {
     return data.data;
   }
 
@@ -155,7 +161,7 @@ export async function getStudentAssignmentProgressDetail(
   }
 
   const data = await response.json();
-  if (data.success) {
+  if (data.status) {
     return data.data;
   }
 
