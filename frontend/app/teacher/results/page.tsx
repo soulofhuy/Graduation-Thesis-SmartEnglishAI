@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,9 @@ import {
 } from '@/components/ui/table'
 import { Users, FileText, CheckCircle, Clock, Send, Sparkles } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
+import { useAuth } from '@/components/auth-provider'
+import { getClassesByTeacherId } from '@/services/teacher/classes'
+import type { Class } from '@/lib/types'
 
 interface StudentResult {
   id: string
@@ -32,11 +35,47 @@ interface StudentResult {
 }
 
 export default function TeacherResultsPage() {
-  const [selectedClass, setSelectedClass] = useState('9a1')
+  const { user, accessToken } = useAuth()
+  const [classes, setClasses] = useState<Class[]>([])
+  const [selectedClass, setSelectedClass] = useState('')
   const [selectedAssignment, setSelectedAssignment] = useState('assignment1')
   const [aiQuestion, setAiQuestion] = useState('')
   const [aiAnalysis, setAiAnalysis] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true)
+  const [classesError, setClassesError] = useState<string | null>(null)
+
+  // Load classes for the teacher
+  useEffect(() => {
+    const loadClasses = async () => {
+      if (!user?.id || !accessToken) {
+        setIsLoadingClasses(false)
+        return
+      }
+
+      try {
+        setIsLoadingClasses(true)
+        setClassesError(null)
+        const { classes: fetchedClasses } = await getClassesByTeacherId(
+          accessToken,
+          user.id
+        )
+        setClasses(fetchedClasses)
+        // Set the first class as default if available
+        if (fetchedClasses.length > 0) {
+          setSelectedClass(fetchedClasses[0].id)
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to load classes'
+        setClassesError(message)
+        console.error('Error loading classes:', error)
+      } finally {
+        setIsLoadingClasses(false)
+      }
+    }
+
+    loadClasses()
+  }, [user?.id, accessToken])
 
   const results: StudentResult[] = [
     {
@@ -111,7 +150,7 @@ export default function TeacherResultsPage() {
     try {
       // Simulate AI analysis
       await new Promise((resolve) => setTimeout(resolve, 1500))
-      
+
       setAiAnalysis(
         `Phân tích về câu hỏi "${aiQuestion}":\n\n- Tổng số học sinh trả lời: ${results.length}\n- Số câu trả lời đúng: ${Math.floor(Math.random() * results.length)}\n- Độ khó: ${['Dễ', 'Trung bình', 'Khó'][Math.floor(Math.random() * 3)]}\n- Đề xuất: Cần ôn tập thêm về nội dung này với học sinh.`
       )
@@ -150,14 +189,26 @@ export default function TeacherResultsPage() {
               <label className="text-sm font-medium text-foreground block mb-2">
                 Chọn lớp học
               </label>
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <Select value={selectedClass} onValueChange={setSelectedClass} disabled={isLoadingClasses}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={isLoadingClasses ? 'Đang tải...' : 'Chọn lớp'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="9a1">Lớp 9A1</SelectItem>
-                  <SelectItem value="9a2">Lớp 9A2</SelectItem>
-                  <SelectItem value="9a3">Lớp 9A3</SelectItem>
+                  {classesError ? (
+                    <div className="px-2 py-1.5 text-sm text-destructive">
+                      {classesError}
+                    </div>
+                  ) : classes.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      Không có lớp nào
+                    </div>
+                  ) : (
+                    classes.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.name || `Lớp ${cls.classCode}`}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -212,11 +263,10 @@ export default function TeacherResultsPage() {
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          result.status === 'submitted'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
+                        className={`px-2 py-1 rounded text-xs font-medium ${result.status === 'submitted'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                          }`}
                       >
                         {result.status === 'submitted'
                           ? 'Đã nộp'
