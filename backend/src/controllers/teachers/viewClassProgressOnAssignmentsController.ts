@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../../middlewares/authMiddleware';
 import Responses from '../../utils/responses';
 import ViewClassProgressOnAssignmentsService from '../../services/teacher/viewClassProgressOnAssignmentsServices';
+import prisma from '../../utils/prisma';
 
 class ViewClassProgressOnAssignmentsController {
   static getClassProgressOnAssignments = async (
@@ -50,7 +51,6 @@ class ViewClassProgressOnAssignmentsController {
     res: Response
   ) => {
     const teacherId = req.userId;
-    const classId = req.params.classId || req.body.classId;
     const studentId = req.params.studentId || req.body.studentId;
     const assignmentId = req.params.assignmentId || req.body.assignmentId;
 
@@ -62,17 +62,31 @@ class ViewClassProgressOnAssignmentsController {
         );
     }
 
-    if (!classId || !studentId || !assignmentId) {
+    if (!studentId || !assignmentId) {
       return res
         .status(400)
         .json(
           Responses.errorResponse(
-            new Error('Class ID, Student ID, and Assignment ID are required')
+            new Error('Student ID and Assignment ID are required')
           )
         );
     }
 
     try {
+      // Resolve assignment -> class so we can reuse existing service which requires classId
+      const assignment = await prisma.assignment.findUnique({
+        where: { id: assignmentId.trim() },
+        select: { id: true, classId: true, isActive: true }
+      });
+
+      if (!assignment || !assignment.isActive) {
+        return res
+          .status(404)
+          .json(Responses.errorResponse(new Error('Assignment not found')));
+      }
+
+      const classId = assignment.classId;
+
       const detail =
         await ViewClassProgressOnAssignmentsService.getStudentAssignmentProgressDetail(
           teacherId,

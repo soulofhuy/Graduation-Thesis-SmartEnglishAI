@@ -11,7 +11,7 @@ router.get(
 );
 
 router.get(
-  '/teachers/classes/:classId/students/:studentId/assignments/:assignmentId/progress-detail',
+  '/teachers/assignments/:assignmentId/students/:studentId',
   verifyJWT,
   ViewClassProgressOnAssignmentsController.getStudentAssignmentProgressDetail
 );
