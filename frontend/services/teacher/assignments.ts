@@ -105,6 +105,36 @@ export async function getAssignmentById(token: string, assignmentId: string) {
   return payload.data;
 }
 
+export async function getAssignmentsByClassId(token: string, classId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/classes/${encodeURIComponent(classId)}/assignments`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  if (!response.ok) {
+    const errorData: ApiError = await response.json();
+    throw new Error(
+      errorData.message || 'Failed to fetch assignments by class'
+    );
+  }
+
+  const payload = (await response.json()) as
+    | ApiSuccess<Assignment[]>
+    | ApiError;
+
+  if (!payload.status || !payload.data) {
+    throw new Error(payload.message || 'Failed to fetch assignments by class');
+  }
+
+  return payload.data;
+}
+
 // type UpdateAssignmentInput = {
 //   title?: string;
 //   description?: string;

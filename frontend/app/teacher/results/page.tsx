@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -24,7 +23,8 @@ import { Users, FileText, CheckCircle, Clock, Send, Sparkles } from 'lucide-reac
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/components/auth-provider'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
-import type { Class } from '@/lib/types'
+import { getAssignmentsByClassId } from '@/services/teacher/assignments'
+import type { Assignment, Class } from '@/lib/types'
 
 interface StudentResult {
   id: string
@@ -37,13 +37,16 @@ interface StudentResult {
 export default function TeacherResultsPage() {
   const { user, accessToken } = useAuth()
   const [classes, setClasses] = useState<Class[]>([])
+  const [assignments, setAssignments] = useState<Assignment[]>([])
   const [selectedClass, setSelectedClass] = useState('')
-  const [selectedAssignment, setSelectedAssignment] = useState('assignment1')
+  const [selectedAssignment, setSelectedAssignment] = useState('')
   const [aiQuestion, setAiQuestion] = useState('')
   const [aiAnalysis, setAiAnalysis] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isLoadingClasses, setIsLoadingClasses] = useState(true)
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false)
   const [classesError, setClassesError] = useState<string | null>(null)
+  const [assignmentsError, setAssignmentsError] = useState<string | null>(null)
 
   // Load classes for the teacher
   useEffect(() => {
@@ -76,6 +79,39 @@ export default function TeacherResultsPage() {
 
     loadClasses()
   }, [user?.id, accessToken])
+
+  useEffect(() => {
+    const loadAssignments = async () => {
+      if (!selectedClass || !accessToken) {
+        setAssignments([])
+        setSelectedAssignment('')
+        return
+      }
+
+      try {
+        setIsLoadingAssignments(true)
+        setAssignmentsError(null)
+        setSelectedAssignment('')
+        const fetchedAssignments = await getAssignmentsByClassId(
+          accessToken,
+          selectedClass
+        )
+        setAssignments(fetchedAssignments)
+        if (fetchedAssignments.length > 0) {
+          setSelectedAssignment(fetchedAssignments[0].id)
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to load assignments'
+        setAssignmentsError(message)
+        setAssignments([])
+        console.error('Error loading assignments:', error)
+      } finally {
+        setIsLoadingAssignments(false)
+      }
+    }
+
+    loadAssignments()
+  }, [selectedClass, accessToken])
 
   const results: StudentResult[] = [
     {
@@ -195,13 +231,13 @@ export default function TeacherResultsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {classesError ? (
-                    <div className="px-2 py-1.5 text-sm text-destructive">
+                    <SelectItem value="__classes_error" disabled>
                       {classesError}
-                    </div>
+                    </SelectItem>
                   ) : classes.length === 0 ? (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    <SelectItem value="__no_classes" disabled>
                       Không có lớp nào
-                    </div>
+                    </SelectItem>
                   ) : (
                     classes.map((cls) => (
                       <SelectItem key={cls.id} value={cls.id}>
@@ -216,14 +252,26 @@ export default function TeacherResultsPage() {
               <label className="text-sm font-medium text-foreground block mb-2">
                 Chọn bài tập
               </label>
-              <Select value={selectedAssignment} onValueChange={setSelectedAssignment}>
+              <Select value={selectedAssignment} onValueChange={setSelectedAssignment} disabled={!selectedClass || isLoadingAssignments}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={isLoadingAssignments ? 'Đang tải...' : 'Chọn bài tập'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="assignment1">Bài tập ngữ pháp Unit 1</SelectItem>
-                  <SelectItem value="assignment2">Bài tập reading Unit 2</SelectItem>
-                  <SelectItem value="assignment3">Kiểm tra giữa kì</SelectItem>
+                  {assignmentsError ? (
+                    <SelectItem value="__assignments_error" disabled>
+                      {assignmentsError}
+                    </SelectItem>
+                  ) : assignments.length === 0 ? (
+                    <SelectItem value="__no_assignments" disabled>
+                      Không có bài tập
+                    </SelectItem>
+                  ) : (
+                    assignments.map((assignment) => (
+                      <SelectItem key={assignment.id} value={assignment.id}>
+                        {assignment.title || 'Bài tập không tên'}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
