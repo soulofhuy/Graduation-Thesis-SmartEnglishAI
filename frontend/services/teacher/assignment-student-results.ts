@@ -104,9 +104,6 @@ export interface StudentAssignmentDetail {
   }>;
 }
 
-/**
- * Fetch class progress summary for all students for a specific assignment
- */
 export async function getClassProgressOnAssignments(
   token: string,
   classId: string,
@@ -135,9 +132,6 @@ export async function getClassProgressOnAssignments(
   throw new Error(data.message || 'Failed to fetch class progress');
 }
 
-/**
- * Fetch detailed results for a specific student's assignment attempt(s)
- */
 export async function getStudentAssignmentProgressDetail(
   token: string,
   assignmentId: string,
