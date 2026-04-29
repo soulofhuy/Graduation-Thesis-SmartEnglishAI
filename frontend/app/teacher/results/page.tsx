@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
@@ -309,8 +310,10 @@ export default function TeacherResultsPage() {
                         {result.latestSubmittedDate || 'Chưa nộp'}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-5 h-5" />
+                        <Button asChild variant="outline" size="sm" disabled={!selectedAssignment}>
+                          <Link href={`/teacher/results/${selectedAssignment}?studentId=${result.id}`}>
+                            <Eye className="w-5 h-5" />
+                          </Link>
                         </Button>
                       </TableCell>
                     </TableRow>
