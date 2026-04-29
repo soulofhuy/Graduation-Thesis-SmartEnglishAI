@@ -269,10 +269,7 @@ export default function TeacherResultsPage() {
       {/* Results Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Kết quả chi tiết</CardTitle>
-          <CardDescription>
-            Bảng điểm chi tiết của học sinh
-          </CardDescription>
+          <CardTitle className="mb-3">Kết quả chi tiết</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoadingResults ? (
