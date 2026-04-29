@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
 import {
@@ -162,26 +162,24 @@ export default function TeacherResultsPage() {
     loadResults()
   }, [selectedClass, selectedAssignment, accessToken])
 
-  // const displayResults = results.length > 0 ? results : []
-
   const stats = [
     {
-      title: 'Tổng bài nộp',
+      title: t.teacher.results.statistic.totalSubmiitedCount,
       value: statistic ? statistic.submittedCount : '-',
       icon: <FileText className="w-5 h-5" />,
     },
     {
-      title: 'Chưa nộp',
+      title: t.teacher.results.statistic.totalNotSubmittedCount,
       value: statistic ? statistic.notSubmittedCount : '-',
       icon: <Clock className="w-5 h-5" />,
     },
     {
-      title: 'Điểm trung bình',
+      title: t.teacher.results.statistic.highestCorrectCount,
       value: statistic ? statistic.highestCorrectCount : '-',
       icon: <Users className="w-5 h-5" />,
     },
     {
-      title: 'Tỉ lệ đạt',
+      title: t.teacher.results.statistic.highestCorrectStudentName,
       value: statistic ? statistic.highestCorrectStudentName : '-',
       icon: <CheckCircle className="w-5 h-5" />,
     },
@@ -192,10 +190,10 @@ export default function TeacherResultsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">
-          Kết quả học tập
+          {t.teacher.results.title}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Phân tích và quản lý kết quả bài tập của học sinh
+          {t.teacher.results.description}
         </p>
       </div>
 
@@ -208,14 +206,11 @@ export default function TeacherResultsPage() {
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle>Bộ lọc</CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-foreground block mb-2">
-                Chọn lớp học
+                {t.teacher.results.filters.class.title}
               </label>
               <Select value={selectedClass} onValueChange={setSelectedClass} disabled={isLoadingClasses}>
                 <SelectTrigger>
@@ -238,7 +233,7 @@ export default function TeacherResultsPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-foreground block mb-2">
-                Chọn bài tập
+                {t.teacher.results.filters.assignment.title}
               </label>
               <Select value={selectedAssignment} onValueChange={setSelectedAssignment} disabled={!selectedClass || isLoadingAssignments}>
                 <SelectTrigger>
@@ -266,7 +261,7 @@ export default function TeacherResultsPage() {
       {/* Results Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="mb-3">Kết quả chi tiết</CardTitle>
+          <CardTitle className="mb-3">{t.teacher.results.tableView.title}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoadingResults ? (
@@ -282,13 +277,13 @@ export default function TeacherResultsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">Tên học sinh</TableHead>
-                    <TableHead className="text-center">Email</TableHead>
-                    <TableHead className="text-center">Điểm gần nhất</TableHead>
-                    <TableHead className="text-center">Điểm cao nhất</TableHead>
-                    <TableHead className="text-center">Số lần nộp</TableHead>
-                    <TableHead className="text-center">Ngày nộp</TableHead>
-                    <TableHead className="text-center">Hành động</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnName}</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnEmail}</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnLatestResult}</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnHighestResult}</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnSubmittedCount}</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnSubmittedDate}</TableHead>
+                    <TableHead className="text-center">{t.teacher.results.tableView.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
