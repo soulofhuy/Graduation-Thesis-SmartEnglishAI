@@ -10,6 +10,12 @@ export interface ClassProgressSummary {
     id: string;
     title: string;
   };
+  assignmentStatistic: {
+    submittedCount: number;
+    notSubmittedCount: number;
+    highestCorrectCount: number;
+    highestCorrectStudentName: string;
+  };
   totalStudents: number;
   students: Array<{
     studentId: string;
@@ -31,11 +37,6 @@ export interface ClassProgressSummary {
       bestCorrectCount: number | null;
       latestStatus: string;
       submittedAttemptCount: number;
-    };
-    summary: {
-      submittedAttempts: number;
-      averageScore: number | null;
-      highestScore: number | null;
     };
   }>;
 }

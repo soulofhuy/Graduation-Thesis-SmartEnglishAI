@@ -43,11 +43,19 @@ interface StudentResultTable {
   submittedAttempts: number
 }
 
+interface AssignmentResultStatistic {
+  submittedCount: number
+  notSubmittedCount: number
+  highestCorrectCount: number
+  highestCorrectStudentName: string
+}
+
 export default function TeacherResultsPage() {
   const { t, language } = useLanguage()
   const { user, accessToken } = useAuth()
   const [classes, setClasses] = useState<Class[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [statistic, setStatistic] = useState<AssignmentResultStatistic | null>(null)
   const [selectedClass, setSelectedClass] = useState('')
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [isLoadingClasses, setIsLoadingClasses] = useState(true)
@@ -123,13 +131,10 @@ export default function TeacherResultsPage() {
           selectedAssignment
         )
 
-        console.log('Progress Data:', progressData)
-
+        setStatistic(progressData.assignmentStatistic)
         const transformedResults: StudentResultTable[] = progressData.students
           .map((student: any) => {
-            const studentName = student.profile
-              ? `${student.profile.firstName || ''} ${student.profile.lastName || ''}`.trim()
-              : student.email
+            const studentName = `${student.profile.firstName || ''} ${student.profile.lastName || ''}`.trim()
 
             return {
               id: student.studentId,
@@ -143,14 +148,12 @@ export default function TeacherResultsPage() {
               submittedAttempts: student.assignment.submittedAttemptCount,
             }
           })
-
-        console.log('Transformed Results:', transformedResults)
         setResults(transformedResults)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to load results'
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
         setResultsError(message)
         setResults([])
-        console.error('Error loading results:', error)
+        toast.error(message, { className: TOAST_COLORS.error })
       } finally {
         setIsLoadingResults(false)
       }
@@ -159,33 +162,27 @@ export default function TeacherResultsPage() {
     loadResults()
   }, [selectedClass, selectedAssignment, accessToken])
 
-
-
-  const displayResults = results.length > 0 ? results : []
+  // const displayResults = results.length > 0 ? results : []
 
   const stats = [
     {
       title: 'Tổng bài nộp',
-      value: displayResults.filter((r: StudentResultTable) => r.status === 'submitted').length,
+      value: statistic ? statistic.submittedCount : '-',
       icon: <FileText className="w-5 h-5" />,
     },
     {
       title: 'Chưa nộp',
-      value: displayResults.filter((r: StudentResultTable) => r.status === 'pending').length,
+      value: statistic ? statistic.notSubmittedCount : '-',
       icon: <Clock className="w-5 h-5" />,
     },
     {
       title: 'Điểm trung bình',
-      value: (
-        displayResults.reduce((sum: number, r: StudentResultTable) => sum + r.latestCorrectAnswers, 0) / (displayResults.length || 1)
-      ).toFixed(1),
+      value: statistic ? statistic.highestCorrectCount : '-',
       icon: <Users className="w-5 h-5" />,
     },
     {
       title: 'Tỉ lệ đạt',
-      value: (
-        (displayResults.filter((r: StudentResultTable) => r.latestCorrectAnswers >= 5).length / (displayResults.length || 1) * 100).toFixed(0) + '%'
-      ),
+      value: statistic ? statistic.highestCorrectStudentName : '-',
       icon: <CheckCircle className="w-5 h-5" />,
     },
   ]
@@ -280,10 +277,6 @@ export default function TeacherResultsPage() {
             <div className="text-center py-8 text-red-500">
               {resultsError}
             </div>
-          ) : displayResults.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Không có dữ liệu kết quả
-            </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -299,7 +292,7 @@ export default function TeacherResultsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {displayResults.map((result: StudentResultTable) => (
+                  {results.map((result: StudentResultTable) => (
                     <TableRow key={result.id}>
                       <TableCell className="font-medium text-center">
                         {result.name}
