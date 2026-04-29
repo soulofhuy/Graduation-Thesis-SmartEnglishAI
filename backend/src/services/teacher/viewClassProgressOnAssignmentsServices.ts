@@ -309,18 +309,31 @@ class ViewClassProgressOnAssignmentsService {
           latestStatus: latestAttempt?.status ?? null,
           latestSubmittedDate: latestAttempt?.submittedAt ?? null,
           submittedAttemptCount
-        },
-        summary: {
-          submittedAttempts: submittedAttemptCount,
-          averageScore:
-            scores.length > 0
-              ? Number(
-                  (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
-                )
-              : null,
-          highestScore: scores.length > 0 ? Math.max(...scores) : null
         }
       };
+    });
+
+    // Build assignment-level summary
+    const submittedCount = students.filter(
+      s => (s.assignment.submittedAttemptCount ?? 0) > 0
+    ).length;
+    const notSubmittedCount = students.length - submittedCount;
+
+    let highestCorrectCount = 0;
+    let highestCorrectStudentName: string | null = null;
+
+    students.forEach(s => {
+      const best = s.assignment.bestCorrectCount ?? 0;
+      if (typeof best === 'number' && best > highestCorrectCount) {
+        highestCorrectCount = best;
+        if (s.profile) {
+          highestCorrectStudentName =
+            `${s.profile.firstName || ''} ${s.profile.lastName || ''}`.trim() ||
+            s.email;
+        } else {
+          highestCorrectStudentName = s.email;
+        }
+      }
     });
 
     return {
@@ -330,7 +343,13 @@ class ViewClassProgressOnAssignmentsService {
         title: assignment.title
       },
       totalStudents: students.length,
-      students
+      students,
+      assignmentStatistic: {
+        submittedCount,
+        notSubmittedCount,
+        highestCorrectCount,
+        highestCorrectStudentName
+      }
     };
   };
 
