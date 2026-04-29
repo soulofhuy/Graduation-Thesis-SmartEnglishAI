@@ -282,9 +282,6 @@ class ViewClassProgressOnAssignmentsService {
       const bestCorrectCount = Math.max(...correctCounts, 0) || null;
 
       const submittedAttemptCount = submittedAttempts.length;
-      const scores = submittedAttempts
-        .map(attempt => attempt.score)
-        .filter((score): score is number => typeof score === 'number');
 
       return {
         studentId: member.student.id,
