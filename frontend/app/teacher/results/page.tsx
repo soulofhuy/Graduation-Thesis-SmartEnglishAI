@@ -4,13 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+// Filters rendered as pill buttons; no Select needed
 import {
   Table,
   TableBody,
@@ -19,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, FileText, CheckCircle, Clock, Eye } from 'lucide-react'
+import { Users, FileText, CheckCircle, Clock, Eye, XCircle, Trophy, Medal } from 'lucide-react'
 import { useAuth } from '@/components/auth-provider'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
 import { getAssignmentsByClassId } from '@/services/teacher/assignments'
@@ -166,22 +160,22 @@ export default function TeacherResultsPage() {
     {
       title: t.teacher.results.statistic.totalSubmiitedCount,
       value: statistic ? statistic.submittedCount : '-',
-      icon: <FileText className="w-5 h-5" />,
+      icon: <CheckCircle className="w-5 h-5 text-green-500" />,
     },
     {
       title: t.teacher.results.statistic.totalNotSubmittedCount,
       value: statistic ? statistic.notSubmittedCount : '-',
-      icon: <Clock className="w-5 h-5" />,
+      icon: <XCircle className="w-5 h-5 text-red-500" />,
     },
     {
       title: t.teacher.results.statistic.highestCorrectCount,
       value: statistic ? statistic.highestCorrectCount : '-',
-      icon: <Users className="w-5 h-5" />,
+      icon: <Trophy className="w-5 h-5 text-yellow-500" />,
     },
     {
       title: t.teacher.results.statistic.highestCorrectStudentName,
       value: statistic ? statistic.highestCorrectStudentName : '-',
-      icon: <CheckCircle className="w-5 h-5" />,
+      icon: <Medal className="w-5 h-5 text-green-500" />,
     },
   ]
 
@@ -209,50 +203,54 @@ export default function TeacherResultsPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">
-                {t.teacher.results.filters.class.title}
-              </label>
-              <Select value={selectedClass} onValueChange={setSelectedClass} disabled={isLoadingClasses}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isLoadingClasses ? 'Đang tải...' : 'Chọn lớp'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.length === 0 ? (
-                    <SelectItem value="__no_classes" disabled>
-                      Không có lớp nào
-                    </SelectItem>
-                  ) : (
-                    classes.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id}>
-                        {cls.name || `Lớp ${cls.classCode}`}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="flex justify-center mb-4">
+                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.results.filters.class.title}
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                {isLoadingClasses ? (
+                  <div className="text-sm text-muted-foreground">Đang tải...</div>
+                ) : classes.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">Không có lớp nào</div>
+                ) : (
+                  classes.map((cls) => (
+                    <button
+                      key={cls.id}
+                      onClick={() => setSelectedClass(cls.id)}
+                      className={`px-3 py-1 rounded-full border transition-colors ${selectedClass === cls.id ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                      aria-pressed={selectedClass === cls.id}
+                    >
+                      {cls.name || `Lớp ${cls.classCode}`}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">
-                {t.teacher.results.filters.assignment.title}
-              </label>
-              <Select value={selectedAssignment} onValueChange={setSelectedAssignment} disabled={!selectedClass || isLoadingAssignments}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isLoadingAssignments ? 'Đang tải...' : 'Chọn bài tập'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {assignments.length === 0 ? (
-                    <SelectItem value="__no_assignments" disabled>
-                      Không có bài tập
-                    </SelectItem>
-                  ) : (
-                    assignments.map((assignment) => (
-                      <SelectItem key={assignment.id} value={assignment.id}>
-                        {assignment.title || 'Bài tập không tên'}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="flex justify-center mb-4">
+                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.results.filters.assignment.title}
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                {(!selectedClass || isLoadingAssignments) ? (
+                  <div className="text-sm text-muted-foreground">Chọn lớp trước</div>
+                ) : assignments.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">Không có bài tập</div>
+                ) : (
+                  assignments.map((assignment) => (
+                    <button
+                      key={assignment.id}
+                      onClick={() => setSelectedAssignment(assignment.id)}
+                      className={`px-3 py-1 rounded-full border transition-colors ${selectedAssignment === assignment.id ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                      aria-pressed={selectedAssignment === assignment.id}
+                    >
+                      {assignment.title || 'Bài tập không tên'}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
