@@ -307,6 +307,7 @@ class ViewClassProgressOnAssignmentsService {
           latestCorrectCount,
           bestCorrectCount,
           latestStatus: latestAttempt?.status ?? null,
+          latestSubmittedDate: latestAttempt?.submittedAt ?? null,
           submittedAttemptCount
         },
         summary: {

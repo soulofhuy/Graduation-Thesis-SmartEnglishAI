@@ -38,7 +38,7 @@ interface StudentResultTable {
   latestCorrectAnswers: number
   totalQuestions: number
   status: 'submitted' | 'pending'
-  submittedDate?: string
+  latestSubmittedDate?: string
   bestCorrectAnswers: number
   submittedAttempts: number
 }
@@ -138,7 +138,7 @@ export default function TeacherResultsPage() {
               latestCorrectAnswers: student.assignment.latestCorrectCount ?? 0,
               totalQuestions: student.assignment.totalQuestions ?? 0,
               status: student.assignment.latestStatus === 'SUBMITTED' ? 'submitted' : 'pending' as const,
-              submittedDate: student.assignment.submittedAttemptCount > 0 ? dateTimeFormat(student.assignment.submittedDate) : undefined,
+              latestSubmittedDate: student.assignment.latestSubmittedDate ? dateTimeFormat(student.assignment.latestSubmittedDate) : undefined,
               bestCorrectAnswers: student.assignment.bestCorrectCount ?? 0,
               submittedAttempts: student.assignment.submittedAttemptCount,
             }
@@ -324,7 +324,7 @@ export default function TeacherResultsPage() {
                         {result.submittedAttempts || 0}
                       </TableCell>
                       <TableCell className="text-center">
-                        {result.submittedDate || 'Chưa nộp'}
+                        {result.latestSubmittedDate || 'Chưa nộp'}
                       </TableCell>
                       <TableCell className="text-center">
                         <Button variant="outline" size="sm">
