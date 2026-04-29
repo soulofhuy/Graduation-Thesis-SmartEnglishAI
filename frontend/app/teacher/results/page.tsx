@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
-// Filters rendered as pill buttons; no Select needed
 import {
   Table,
   TableBody,
@@ -13,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, FileText, CheckCircle, Clock, Eye, XCircle, Trophy, Medal } from 'lucide-react'
+import { CheckCircle, Eye, XCircle, Trophy, Medal } from 'lucide-react'
 import { useAuth } from '@/components/auth-provider'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
 import { getAssignmentsByClassId } from '@/services/teacher/assignments'
@@ -221,7 +220,7 @@ export default function TeacherResultsPage() {
                       className={`px-3 py-1 rounded-full border transition-colors ${selectedClass === cls.id ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
                       aria-pressed={selectedClass === cls.id}
                     >
-                      {cls.name || `Lớp ${cls.classCode}`}
+                      {cls.name}
                     </button>
                   ))
                 )}
