@@ -25,7 +25,7 @@ export function PasswordTab({ form, isSaving, onSubmit, t }: PasswordTabProps) {
                     <Card>
                         <CardHeader>
                             <div className="flex flex-wrap items-start justify-between gap-4">
-                                <div className="space-y-1">
+                                <div className="space-y-1 mb-3">
                                     <CardTitle>{t.student.settings.tabs.passwordTab.subTitle}</CardTitle>
                                     <CardDescription>{t.student.settings.tabs.passwordTab.description}</CardDescription>
                                 </div>
