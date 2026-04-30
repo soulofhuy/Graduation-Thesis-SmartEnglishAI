@@ -15,6 +15,7 @@ import { toggleClassStatus } from '@/services/teacher/classes'
 import type { Class as BackendClass } from '@/lib/types'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
 
 interface DeleteClassModalProps {
     isOpen: boolean
@@ -31,12 +32,12 @@ export function DeleteClassModal({
     accessToken,
     onSuccess,
 }: DeleteClassModalProps) {
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
     const [isDeleting, setIsDeleting] = React.useState(false)
 
     async function handleDelete() {
         if (!accessToken || !classItem?.id) {
-            toast.error('Vui lòng đăng nhập lại', { className: TOAST_COLORS.error })
+            toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
             return
         }
 
@@ -47,7 +48,7 @@ export function DeleteClassModal({
             onOpenChange(false)
             toast.success(result.message, { className: TOAST_COLORS.success })
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Lỗi khi xóa lớp học'
+            const message = error instanceof Error ? error.message : getToastMessage('deleteFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setIsDeleting(false)
@@ -73,7 +74,6 @@ export function DeleteClassModal({
                         <h3 className="font-semibold text-lg mb-6">{t.teacher.classes.deleteClass.classInformation.title}</h3>
 
                         <div className="grid grid-cols-2 gap-8">
-                            {/* Cột 1 */}
                             <div className="space-y-4">
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">{t.teacher.classes.deleteClass.classInformation.fieldClassName}</p>
@@ -91,7 +91,6 @@ export function DeleteClassModal({
                                 </div>
                             </div>
 
-                            {/* Cột 2 */}
                             <div className="space-y-4">
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">{t.teacher.classes.deleteClass.classInformation.fieldStudentNumber}</p>
