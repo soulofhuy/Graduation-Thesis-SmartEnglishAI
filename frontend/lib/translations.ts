@@ -338,6 +338,44 @@ export const translations = {
           }
         }
       },
+      results: {
+        title: "Students' assignment results",
+        description: 'Manage and review students assignment results in details',
+        statistic: {
+          totalSubmiitedCount: 'Total submitted students',
+          totalNotSubmittedCount: 'Total not submitted students',
+          highestCorrectCount: 'Highest correct answers',
+          highestCorrectStudentName: 'Best student'
+        },
+        filters: {
+          class: {
+            title: 'Choose class'
+          },
+          assignment: {
+            title: 'Choose assignment'
+          }
+        },
+        tableView: {
+          title: 'List of student results',
+          columnName: "Student's name",
+          columnEmail: "Student's email",
+          columnLatestResult: 'Latest result',
+          columnHighestResult: 'Best result',
+          columnSubmittedCount: 'Number of submissions',
+          columnSubmittedDate: 'Last submitted date',
+          columnActions: 'Actions'
+        },
+        viewAssignmentResultDetails: {
+          statistic: {
+            labelClass: 'Class',
+            labelClassCode: 'Class code',
+            labelStudent: 'Student',
+            labelEmail: 'Email',
+            labelDueDate: 'Due date',
+            labelSubmissionCount: 'Number of submissions'
+          }
+        }
+      },
       trashBin: {
         title: 'Trash Bin',
         description:
@@ -991,6 +1029,44 @@ export const translations = {
               passagePlaceholder:
                 'Nhập nội dung đoạn văn. Các câu hỏi sẽ dựa trên đoạn này.'
             }
+          }
+        }
+      },
+      results: {
+        title: 'Kết quả làm bài của học sinh',
+        description: 'Quản lý và xem chi tiết kết quả làm bài của học sinh',
+        statistic: {
+          totalSubmiitedCount: 'Tổng số học sinh đã nộp bài',
+          totalNotSubmittedCount: 'Tổng số học sinh chưa nộp bài',
+          highestCorrectCount: 'Số câu đúng cao nhất',
+          highestCorrectStudentName: 'Học sinh có kết quả cao nhất'
+        },
+        filters: {
+          class: {
+            title: 'Chọn lớp'
+          },
+          assignment: {
+            title: 'Chọn bài tập'
+          }
+        },
+        tableView: {
+          title: 'Danh sách kết quả học sinh',
+          columnName: 'Tên học sinh',
+          columnEmail: 'Email',
+          columnLatestResult: 'Kết quả gần nhất',
+          columnHighestResult: 'Kết quả cao nhất',
+          columnSubmittedCount: 'Số lần nộp bài',
+          columnSubmittedDate: 'Ngày nộp gần nhất',
+          columnActions: 'Thao tác'
+        },
+        viewAssignmentResultDetails: {
+          statistic: {
+            labelClass: 'Lớp',
+            labelClassCode: 'Mã lớp',
+            labelStudent: 'Học sinh',
+            labelEmail: 'Email',
+            labelDueDate: 'Hạn nộp',
+            labelSubmissionCount: 'Số lần nộp bài'
           }
         }
       },
