@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Copy, Edit, Trash2, Users, BookOpen, Eye, UserPlus } from 'lucide-react'
+import { Plus, Copy, Edit, Trash2, Users, BookOpen, UserPlus, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { createClass, getClassesByTeacherId } from '@/services/teacher/classes'
@@ -40,6 +40,11 @@ import { Badge } from '@/components/ui/badge'
 import { PendingRequestsModal } from './_components/pending-requests-modal'
 
 const classSchema = createClassSchema()
+const SORT_FIELDS = ['name', 'students', 'assignments', 'pending'] as const
+const SORT_DIRECTIONS = ['asc', 'desc'] as const
+
+type SortField = (typeof SORT_FIELDS)[number]
+type SortDirection = (typeof SORT_DIRECTIONS)[number]
 
 export default function TeacherClassesPage() {
   const { t, language } = useLanguage();
@@ -47,6 +52,10 @@ export default function TeacherClassesPage() {
   const [classes, setClasses] = useState<BackendClass[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortField, setSortField] = useState<SortField>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -160,6 +169,63 @@ export default function TeacherClassesPage() {
     )
   }
 
+  const getAssignmentCount = (classItem: BackendClass) => {
+    return (
+      classItem.assignmentCount ??
+      (classItem as BackendClass & { assignments?: Array<{ id: string }> }).assignments?.length ??
+      0
+    )
+  }
+
+  const visibleClasses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    const filtered = classes.filter((classItem) => {
+      if (!query) {
+        return true
+      }
+
+      const name = classItem.name?.toLowerCase() ?? ''
+      const classCode = classItem.classCode?.toLowerCase() ?? ''
+
+      return name.includes(query) || classCode.includes(query)
+    })
+
+    const directionFactor = sortDirection === 'asc' ? 1 : -1
+
+    return [...filtered].sort((left, right) => {
+      let comparison = 0
+
+      if (sortField === 'students') {
+        comparison = (left.approvedStudentsCount ?? 0) - (right.approvedStudentsCount ?? 0)
+      } else if (sortField === 'assignments') {
+        comparison = getAssignmentCount(left) - getAssignmentCount(right)
+      } else if (sortField === 'pending') {
+        comparison = getPendingRequestCount(left) - getPendingRequestCount(right)
+      } else {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      if (comparison === 0) {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      return comparison * directionFactor
+    })
+  }, [classes, language, searchQuery, sortDirection, sortField])
+
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchInput.trim())
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchQuery('')
+  }
+
   return (
     <div className="p-4 md:p-8 space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -179,6 +245,106 @@ export default function TeacherClassesPage() {
         </div>
       </div>
 
+      <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+        <CardContent>
+          <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+            <div className="w-full max-w-md mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                  Tìm kiếm
+                </label>
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  handleSearchSubmit()
+                }}
+                className="flex flex-col items-center gap-3 md:max-w-md"
+              >
+                <div className="relative w-full max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder="Tìm theo tên lớp hoặc mã lớp..."
+                    className="h-11 w-full rounded-full pl-10 pr-4"
+                  />
+                </div>
+
+                <div className="flex justify-center gap-2">
+                  <Button type="submit" className="rounded-full px-5">
+                    Tìm
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full px-5"
+                    onClick={clearSearch}
+                  >
+                    Reset
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="w-full max-w-3xl mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                  Sort theo
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center gap-2">
+                  {SORT_FIELDS.map((field) => (
+                    <Button
+                      key={field}
+                      type="button"
+                      variant={sortField === field ? 'default' : 'outline'}
+                      className="rounded-full px-3 py-1"
+                      onClick={() => setSortField(field)}
+                    >
+                      {field === 'name' && 'Tên lớp'}
+                      {field === 'students' && 'Số học sinh'}
+                      {field === 'assignments' && 'Số bài tập'}
+                      {field === 'pending' && 'Số yêu cầu đang chờ'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-3 mb-3">
+                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                  Thứ tự
+                </label>
+              </div>
+
+              <div className="space-y-2 text-center">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('asc')}
+                  >
+                    Tăng
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('desc')}
+                  >
+                    Giảm
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {isLoading && (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
@@ -186,8 +352,6 @@ export default function TeacherClassesPage() {
           </CardContent>
         </Card>
       )}
-
-
 
       {!isLoading && (
         <Card>
@@ -210,9 +374,15 @@ export default function TeacherClassesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classes.map((classItem) => {
+                  {visibleClasses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                        {t.common.noData}
+                      </TableCell>
+                    </TableRow>
+                  ) : visibleClasses.map((classItem) => {
                     const studentCount = classItem.approvedStudentsCount ?? 0
-                    const assignmentCount = 0
+                    const assignmentCount = getAssignmentCount(classItem)
                     const pendingCount = getPendingRequestCount(classItem)
 
                     return (

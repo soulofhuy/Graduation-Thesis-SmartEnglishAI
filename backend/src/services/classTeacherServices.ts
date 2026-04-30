@@ -47,6 +47,11 @@ class ClassTeacherService {
               }
             }
           }
+        },
+        assignments: {
+          select: {
+            id: true
+          }
         }
       }
     });
@@ -63,7 +68,8 @@ class ClassTeacherService {
         ...cls,
         classMembers: includePending ? cls.classMembers : approvedMembers,
         pendingStudentsList: pendingMembers,
-        approvedStudentsCount: approvedMembers.length
+        approvedStudentsCount: approvedMembers.length,
+        assignmentCount: cls.assignments.length
       };
     });
   };
