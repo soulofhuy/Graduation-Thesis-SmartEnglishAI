@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge, Eye, UserPlus } from 'lucide-react'
+import { Plus, Copy, Edit, Trash2, Users, BookOpen, Eye, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { createClass, getClassesByTeacherId } from '@/services/teacher/classes'
@@ -47,7 +47,6 @@ export default function TeacherClassesPage() {
   const [classes, setClasses] = useState<BackendClass[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -173,27 +172,6 @@ export default function TeacherClassesPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 p-1">
-            <span className="px-2 text-xs font-medium tracking-wide text-muted-foreground">
-              {t.common.viewPort}
-            </span>
-            <Button
-              size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              className="rounded-sm"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              className="rounded-sm"
-              onClick={() => setViewMode('table')}
-            >
-              <TableCellsMerge className="h-4 w-4" />
-            </Button>
-          </div>
           <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
             <Plus className="w-4 h-4" />
             {t.common.add}
@@ -209,117 +187,9 @@ export default function TeacherClassesPage() {
         </Card>
       )}
 
-      {!isLoading && viewMode === 'grid' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {classes.map((classItem) => {
-            const studentCount = classItem.approvedStudentsCount ?? 0
-            const assignmentCount = 0
-            const pendingCount = getPendingRequestCount(classItem)
 
-            return (
-              <Card key={classItem.id} className="relative overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative h-8 w-8"
-                    onClick={() => handleViewPendingRequests(classItem)}
-                  >
-                    <Eye className="w-4 h-4" />
-                    {pendingCount > 0 ? (
-                      <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
-                        {pendingCount}
-                      </span>
-                    ) : null}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleEditClass(classItem)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleDeleteClass(classItem)}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
 
-                <CardHeader className="pr-28">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-muted-foreground" />
-                      {classItem?.name}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {classItem?.description || 'Chưa có mô tả cho lớp học này'}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Users className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldStudentNumber}
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {studentCount}
-                      </p>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <BookOpen className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldAssignmentNumber}
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {assignmentCount}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Users className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldPendingRequestNumber}
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {pendingCount}
-                      </p>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {t.teacher.classes.gridViewport.fieldClassCode}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <code className="text-sm font-mono font-bold text-foreground">
-                          {classItem?.classCode}
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6"
-                          onClick={() => copyToClipboard(classItem?.classCode ?? '')}
-                        >
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-      )}
-
-      {!isLoading && viewMode === 'table' && (
+      {!isLoading && (
         <Card>
           <CardHeader className="mb-3">
             <CardTitle>{t.teacher.classes.title}</CardTitle>
