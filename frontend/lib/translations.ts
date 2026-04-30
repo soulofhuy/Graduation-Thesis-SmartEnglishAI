@@ -139,7 +139,8 @@ export const translations = {
           columnStudentNumber: 'Number of students',
           columnAssignmentNumber: 'Number of assignments',
           columnClassCode: 'Class code',
-          columnActions: 'Operations'
+          columnPendingRequestNumber: 'Pending requests',
+          columnActions: 'Actions'
         },
         gridViewport: {
           fieldStudentNumber: 'No. students',
@@ -825,6 +826,7 @@ export const translations = {
           columnDescription: 'Mô tả',
           columnStudentNumber: 'Số lượng học sinh',
           columnAssignmentNumber: 'Số lượng bài tập',
+          columnPendingRequestNumber: 'Số lượng đang yêu cầu',
           columnClassCode: 'Mã lớp',
           columnActions: 'Các thao tác'
         },

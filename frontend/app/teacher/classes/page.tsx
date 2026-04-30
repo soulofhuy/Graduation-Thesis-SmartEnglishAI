@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge, Eye } from 'lucide-react'
+import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge, Eye, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { createClass, getClassesByTeacherId } from '@/services/teacher/classes'
@@ -321,7 +321,7 @@ export default function TeacherClassesPage() {
 
       {!isLoading && viewMode === 'table' && (
         <Card>
-          <CardHeader>
+          <CardHeader className="mb-3">
             <CardTitle>{t.teacher.classes.title}</CardTitle>
             <CardDescription>{t.teacher.classes.description}</CardDescription>
           </CardHeader>
@@ -330,13 +330,13 @@ export default function TeacherClassesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t.teacher.classes.tableViewport.columnName}</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnDescription}</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnStudentNumber}</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnAssignmentNumber}</TableHead>
-                    <TableHead>Pending</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnClassCode}</TableHead>
-                    <TableHead className="text-right">{t.teacher.classes.tableViewport.columnActions}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnName}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnDescription}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnStudentNumber}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnAssignmentNumber}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnPendingRequestNumber}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnClassCode}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -346,7 +346,7 @@ export default function TeacherClassesPage() {
                     const pendingCount = getPendingRequestCount(classItem)
 
                     return (
-                      <TableRow key={classItem.id}>
+                      <TableRow key={classItem.id} className="text-center">
                         <TableCell className="font-medium">
                           {classItem?.name}
                         </TableCell>
@@ -359,7 +359,7 @@ export default function TeacherClassesPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex justify-center items-center gap-2">
                             <code className="text-xs font-mono font-bold">
                               {classItem?.classCode}
                             </code>
@@ -373,15 +373,15 @@ export default function TeacherClassesPage() {
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <TableCell className="text-center">
+                          <div className="flex justify-center gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
                               className="relative"
                               onClick={() => handleViewPendingRequests(classItem)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <UserPlus className="h-4 w-4" />
                               {pendingCount > 0 ? (
                                 <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
                                   {pendingCount}
