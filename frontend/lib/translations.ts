@@ -364,6 +364,16 @@ export const translations = {
           columnSubmittedCount: 'Number of submissions',
           columnSubmittedDate: 'Last submitted date',
           columnActions: 'Actions'
+        },
+        viewAssignmentResultDetails: {
+          statistic: {
+            labelClass: 'Class',
+            labelClassCode: 'Class code',
+            labelStudent: 'Student',
+            labelEmail: 'Email',
+            labelDueDate: 'Due date',
+            labelSubmissionCount: 'Number of submissions'
+          }
         }
       },
       trashBin: {
@@ -1048,6 +1058,16 @@ export const translations = {
           columnSubmittedCount: 'Số lần nộp bài',
           columnSubmittedDate: 'Ngày nộp gần nhất',
           columnActions: 'Thao tác'
+        },
+        viewAssignmentResultDetails: {
+          statistic: {
+            labelClass: 'Lớp',
+            labelClassCode: 'Mã lớp',
+            labelStudent: 'Học sinh',
+            labelEmail: 'Email',
+            labelDueDate: 'Hạn nộp',
+            labelSubmissionCount: 'Số lần nộp bài'
+          }
         }
       },
       trashBin: {

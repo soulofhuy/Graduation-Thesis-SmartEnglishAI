@@ -21,7 +21,7 @@ export default function TeacherResultDetailPage() {
     const searchParams = useSearchParams()
     const studentId = searchParams.get('studentId')
     const { accessToken, isHydrated } = useAuth()
-    const { language } = useLanguage()
+    const { t, language } = useLanguage()
 
     const [detail, setDetail] = useState<StudentAssignmentDetail | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -63,7 +63,7 @@ export default function TeacherResultDetailPage() {
     if (!isHydrated || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Đang tải chi tiết kết quả...</p>
+                <p className="text-muted-foreground">{t.common.loading}</p>
             </div>
         )
     }
@@ -71,7 +71,7 @@ export default function TeacherResultDetailPage() {
     if (!accessToken) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Vui lòng đăng nhập để xem chi tiết</p>
+                <p className="text-muted-foreground">{getToastMessage('invalidToken', language)}</p>
             </div>
         )
     }
@@ -84,33 +84,29 @@ export default function TeacherResultDetailPage() {
         )
     }
 
-    const assignmentTitle = detail?.assignment.title ?? 'Chi tiết kết quả'
     const summaryCards = [
         {
-            label: 'Lớp học',
+            label: t.teacher.results.viewAssignmentResultDetails.statistic.labelClass,
             value: detail?.class.name ?? '-',
         },
         {
-            label: 'Mã lớp',
+            label: t.teacher.results.viewAssignmentResultDetails.statistic.labelClassCode,
             value: detail?.class.classCode ?? '-',
         },
         {
-            label: 'Học sinh',
-            value:
-                detail?.student.profile
-                    ? `${detail.student.profile.firstName ?? ''} ${detail.student.profile.lastName ?? ''}`.trim() || detail.student.email
-                    : detail?.student.email ?? '-',
+            label: t.teacher.results.viewAssignmentResultDetails.statistic.labelStudent,
+            value: detail?.student.profile ? `${detail.student.profile.firstName ?? ''} ${detail.student.profile.lastName ?? ''}`.trim() || detail.student.email : detail?.student.email ?? '-',
         },
         {
-            label: 'Email',
+            label: t.teacher.results.viewAssignmentResultDetails.statistic.labelEmail,
             value: detail?.student.email ?? '-',
         },
         {
-            label: 'Hạn nộp',
+            label: t.teacher.results.viewAssignmentResultDetails.statistic.labelDueDate,
             value: dateTimeFormat(detail?.assignment.dueDate ?? ''),
         },
         {
-            label: 'Số lần làm',
+            label: t.teacher.results.viewAssignmentResultDetails.statistic.labelSubmissionCount,
             value: history.length,
         },
     ]
@@ -119,19 +115,19 @@ export default function TeacherResultDetailPage() {
         <AttemptHistoryDetailView
             backHref="/teacher/results"
             backLabel="Quay lại kết quả"
-            assignmentTitle={assignmentTitle}
+            assignmentTitle={t.student.assignments.viewHistoryDetails.assignmentInfo.title}
             canViewResult={true}
             summaryCards={summaryCards}
-            historyTitle="Lịch sử làm bài"
+            historyTitle={t.student.assignments.viewHistoryDetails.assginmentHistory.title}
             history={history}
             tableLabels={{
-                attempt: 'Lần làm',
-                status: 'Trạng thái',
-                startedAt: 'Bắt đầu lúc',
-                submittedAt: 'Nộp lúc',
-                totalTime: 'Tổng thời gian',
-                totalQuestions: 'Tổng số câu',
-                result: 'Kết quả',
+                attempt: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnAttempt,
+                status: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnStatus,
+                startedAt: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnStartedAt,
+                submittedAt: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnSubmittedAt,
+                totalTime: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnTotalTime,
+                totalQuestions: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnTotalAssignmentQuestions,
+                result: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnResult,
             }}
             statusLabels={{
                 submitted: 'Đã nộp',
@@ -139,10 +135,10 @@ export default function TeacherResultDetailPage() {
                 noResult: 'Chưa có',
             }}
             detailLabels={{
-                reviewTitlePrefix: 'Chi tiết lần làm',
-                result: 'Kết quả',
-                submittedAt: 'Thời điểm nộp',
-                question: 'Câu hỏi',
+                reviewTitlePrefix: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.title,
+                result: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.result,
+                submittedAt: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.submittedAt,
+                question: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.question,
                 noQuestionAnswers: 'Không có dữ liệu câu trả lời cho lần làm này.',
                 noDetailPermission: 'Bạn không có quyền xem chi tiết này.',
             }}

@@ -64,26 +64,28 @@ export default function StudentHistoryDetailPage() {
         )
     }
 
+    const summaryCards = [
+        {
+            label: t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentTitle,
+            value: assignmentInfo?.title ?? '-',
+        },
+        {
+            label: t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentTotalAttempts,
+            value: history.length,
+        },
+        {
+            label: t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentDeadline,
+            value: dateTimeFormat(assignmentInfo?.dueDate ?? ''),
+        },
+    ]
+
     return (
         <AttemptHistoryDetailView
             backHref="/student/history"
             backLabel="Quay lại lịch sử"
             assignmentTitle={t.student.assignments.viewHistoryDetails.assignmentInfo.title}
             canViewResult={assignmentInfo?.canViewResult ?? false}
-            summaryCards={[
-                {
-                    label: t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentTitle,
-                    value: assignmentInfo?.title ?? '-',
-                },
-                {
-                    label: t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentTotalAttempts,
-                    value: history.length,
-                },
-                {
-                    label: t.student.assignments.viewHistoryDetails.assignmentInfo.statistic.assignmentDeadline,
-                    value: dateTimeFormat(assignmentInfo?.dueDate ?? ''),
-                },
-            ]}
+            summaryCards={summaryCards}
             historyTitle={t.student.assignments.viewHistoryDetails.assginmentHistory.title}
             history={history}
             tableLabels={{
