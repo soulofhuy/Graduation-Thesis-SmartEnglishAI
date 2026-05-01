@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, CheckSquare2Icon, XSquareIcon, Check, X, Search } from 'lucide-react'
+import { Plus, Sparkles, Edit, Check, X, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -278,7 +278,7 @@ export default function TeacherQuizzesPage() {
                         <div className="w-full max-w-md mx-auto">
                             <div className="flex justify-center mb-3">
                                 <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
-                                    Tìm kiếm
+                                    {t.teacher.assignments.overview.searchOrSortOrFilter.search.title}
                                 </label>
                             </div>
 
@@ -294,14 +294,14 @@ export default function TeacherQuizzesPage() {
                                     <Input
                                         value={searchInput}
                                         onChange={(event) => setSearchInput(event.target.value)}
-                                        placeholder="Tìm kiếm theo tiêu đề bài tập"
+                                        placeholder={t.teacher.assignments.overview.searchOrSortOrFilter.search.searchFieldPlaceholder}
                                         className="h-11 w-full rounded-full pl-10 pr-4"
                                     />
                                 </div>
 
                                 <div className="flex justify-center gap-2">
                                     <Button type="submit" className="rounded-full px-5">
-                                        Tìm kiếm
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.search.searchButton}
                                     </Button>
                                     <Button
                                         type="button"
@@ -309,7 +309,7 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-5"
                                         onClick={clearSearch}
                                     >
-                                        Đặt lại
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.search.resetButton}
                                     </Button>
                                 </div>
                             </form>
@@ -318,7 +318,7 @@ export default function TeacherQuizzesPage() {
                         <div className="w-full max-w-3xl mx-auto">
                             <div className="flex justify-center mb-3">
                                 <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
-                                    Sắp xếp theo
+                                    {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.title}
                                 </label>
                             </div>
 
@@ -330,7 +330,7 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-3 py-1"
                                         onClick={() => setSortField('title')}
                                     >
-                                        Tiêu đề
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldTitle}
                                     </Button>
                                     <Button
                                         type="button"
@@ -338,7 +338,7 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-3 py-1"
                                         onClick={() => setSortField('questionCount')}
                                     >
-                                        Số câu hỏi
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldNumberOfQuestions}
                                     </Button>
                                     <Button
                                         type="button"
@@ -346,7 +346,7 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-3 py-1"
                                         onClick={() => setSortField('createdDate')}
                                     >
-                                        Ngày tạo
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldCreatedDate}
                                     </Button>
                                     <Button
                                         type="button"
@@ -354,14 +354,14 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-3 py-1"
                                         onClick={() => setSortField('dueDate')}
                                     >
-                                        Ngày hạn
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldDueDate}
                                     </Button>
                                 </div>
                             </div>
 
                             <div className="flex justify-center mt-3 mb-3">
                                 <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
-                                    Thứ tự
+                                    {t.teacher.assignments.overview.searchOrSortOrFilter.sort.order.title}
                                 </label>
                             </div>
 
@@ -373,7 +373,7 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-3 py-1"
                                         onClick={() => setSortDirection('asc')}
                                     >
-                                        Tăng dần
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.order.asc}
                                     </Button>
                                     <Button
                                         type="button"
@@ -381,7 +381,7 @@ export default function TeacherQuizzesPage() {
                                         className="rounded-full px-3 py-1"
                                         onClick={() => setSortDirection('desc')}
                                     >
-                                        Giảm dần
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.order.desc}
                                     </Button>
                                 </div>
                             </div>

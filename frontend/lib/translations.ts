@@ -290,6 +290,28 @@ export const translations = {
             columnIsPublic: 'Public',
             columnIsActive: 'Status',
             columnActions: 'Actions'
+          },
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Search assignments',
+              searchFieldPlaceholder: 'Search by assignment title',
+              searchButton: 'Search',
+              resetButton: 'Reset'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sort by',
+                fieldTitle: 'Title',
+                fieldNumberOfQuestions: 'Number of questions',
+                fieldDueDate: 'Due date',
+                fieldCreatedDate: 'Created date'
+              },
+              order: {
+                title: 'Order',
+                asc: 'Ascending',
+                desc: 'Descending'
+              }
+            }
           }
         },
         createAssignment: {
@@ -1031,6 +1053,28 @@ export const translations = {
             columnIsPublic: 'Công khai',
             columnIsActive: 'Trạng thái',
             columnActions: 'Hành động'
+          },
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Tìm kiếm bài tập',
+              searchFieldPlaceholder: 'Tìm kiếm theo tên bài tập',
+              searchButton: 'Tìm kiếm',
+              resetButton: 'Đặt lại'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sắp xếp theo',
+                fieldTitle: 'Tiêu đề',
+                fieldNumberOfQuestions: 'Số lượng câu hỏi',
+                fieldDueDate: 'Hạn nộp bài tập',
+                fieldCreatedDate: 'Ngày tạo bài tập'
+              },
+              order: {
+                title: 'Thứ tự',
+                asc: 'Tăng dần',
+                desc: 'Giảm dần'
+              }
+            }
           }
         },
         editAssignment: {
