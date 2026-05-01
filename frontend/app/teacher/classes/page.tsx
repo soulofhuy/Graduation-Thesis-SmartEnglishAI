@@ -250,8 +250,8 @@ export default function TeacherClassesPage() {
           <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
             <div className="w-full max-w-md mx-auto">
               <div className="flex justify-center mb-3">
-                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
-                  Tìm kiếm
+                <label className="inline-block border-2 border-black dark:border-white dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.search.title}
                 </label>
               </div>
 
@@ -267,14 +267,14 @@ export default function TeacherClassesPage() {
                   <Input
                     value={searchInput}
                     onChange={(event) => setSearchInput(event.target.value)}
-                    placeholder="Tìm theo tên lớp hoặc mã lớp..."
+                    placeholder={t.teacher.classes.searchOrSortOrFilter.search.searchFieldPlaceholder}
                     className="h-11 w-full rounded-full pl-10 pr-4"
                   />
                 </div>
 
                 <div className="flex justify-center gap-2">
                   <Button type="submit" className="rounded-full px-5">
-                    Tìm
+                    {t.teacher.classes.searchOrSortOrFilter.search.searchButton}
                   </Button>
                   <Button
                     type="button"
@@ -282,7 +282,7 @@ export default function TeacherClassesPage() {
                     className="rounded-full px-5"
                     onClick={clearSearch}
                   >
-                    Reset
+                    {t.teacher.classes.searchOrSortOrFilter.search.resetButton}
                   </Button>
                 </div>
               </form>
@@ -290,8 +290,8 @@ export default function TeacherClassesPage() {
 
             <div className="w-full max-w-3xl mx-auto">
               <div className="flex justify-center mb-3">
-                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
-                  Sort theo
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.title}
                 </label>
               </div>
 
@@ -305,18 +305,18 @@ export default function TeacherClassesPage() {
                       className="rounded-full px-3 py-1"
                       onClick={() => setSortField(field)}
                     >
-                      {field === 'name' && 'Tên lớp'}
-                      {field === 'students' && 'Số học sinh'}
-                      {field === 'assignments' && 'Số bài tập'}
-                      {field === 'pending' && 'Số yêu cầu đang chờ'}
+                      {field === 'name' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldClassName}
+                      {field === 'students' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldStudentCount}
+                      {field === 'assignments' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldAssignmentCount}
+                      {field === 'pending' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldPendingRequestCount}
                     </Button>
                   ))}
                 </div>
               </div>
 
               <div className="flex justify-center mt-3 mb-3">
-                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
-                  Thứ tự
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.sort.order.title}
                 </label>
               </div>
 
@@ -328,7 +328,7 @@ export default function TeacherClassesPage() {
                     className="rounded-full px-3 py-1"
                     onClick={() => setSortDirection('asc')}
                   >
-                    Tăng
+                    {t.teacher.classes.searchOrSortOrFilter.sort.order.asc}
                   </Button>
                   <Button
                     type="button"
@@ -336,7 +336,7 @@ export default function TeacherClassesPage() {
                     className="rounded-full px-3 py-1"
                     onClick={() => setSortDirection('desc')}
                   >
-                    Giảm
+                    {t.teacher.classes.searchOrSortOrFilter.sort.order.desc}
                   </Button>
                 </div>
               </div>

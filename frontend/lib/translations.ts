@@ -130,6 +130,28 @@ export const translations = {
     // Teacher Dashboard
     teacher: {
       classes: {
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search',
+            searchFieldPlaceholder: 'Search by class name or class code',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldClassName: 'Class name',
+              fieldStudentCount: 'Number of students',
+              fieldAssignmentCount: 'Number of assignments',
+              fieldPendingRequestCount: 'Number of pending requests'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
+        },
         title: 'Manage classes',
         description: 'Create and manage your classes',
         tableViewport: {
@@ -818,6 +840,28 @@ export const translations = {
     // Teacher Dashboard
     teacher: {
       classes: {
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm',
+            searchFieldPlaceholder: 'Tìm kiếm theo tên lớp hoặc mã lớp',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldClassName: 'Tên lớp',
+              fieldStudentCount: 'Số lượng học sinh',
+              fieldAssignmentCount: 'Số lượng bài tập',
+              fieldPendingRequestCount: 'Số lượng đang yêu cầu'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
+        },
         title: 'Quản lí lớp học',
         description: 'Tạo và quản lí các lớp học của bạn',
         tableViewport: {
