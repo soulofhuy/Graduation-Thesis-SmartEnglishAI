@@ -451,7 +451,7 @@ export const translations = {
         }
       },
       trashBin: {
-        title: 'Trash Bin',
+        title: 'Trash bin for your deleted items',
         description:
           'Manage deleted items. You can restore or permanently delete them',
         filter: {
@@ -1220,7 +1220,7 @@ export const translations = {
         }
       },
       trashBin: {
-        title: 'Thùng rác',
+        title: 'Thùng rác cho các mục đã xóa của bạn',
         description:
           'Quản lí các mục đã xóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn',
         filter: {

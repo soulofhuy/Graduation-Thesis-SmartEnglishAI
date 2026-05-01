@@ -27,19 +27,18 @@ import { getDeactivatedClasses, toggleClassStatus } from '@/services/teacher/cla
 import { useLanguage } from '@/components/language-provider'
 import { dateTimeFormat } from '@/lib/format'
 
-type TrashItemType = 'class' | 'question' | 'assignment'
+type TrashItemType = 'class' | 'assignment'
 
 interface TrashItem {
     id: string
     name: string
-    type: 'class' | 'question' | 'assignment'
+    type: 'class' | 'assignment'
     deletedAt: string
     description?: string
 }
 
 const typeColors: Record<TrashItem['type'], string> = {
     class: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    question: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
     assignment: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
 }
 
@@ -72,7 +71,6 @@ export default function TrashPage() {
                         }))
                         break
                     }
-                    case 'question':
                     case 'assignment':
                         items = []
                         break
@@ -113,8 +111,9 @@ export default function TrashPage() {
                     setTrashItems(prev => prev.filter(item => item.id !== id))
                     toast.success(getToastMessage('restoreSuccess', language), { className: TOAST_COLORS.success })
                     break
-                case 'question':
                 case 'assignment':
+                    // Handle assignment restoration
+                    break
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : getToastMessage('restoreFailed', language)
@@ -128,7 +127,6 @@ export default function TrashPage() {
         try {
             switch (type) {
                 case 'class':
-                case 'question':
                 case 'assignment':
             }
         } catch (error) {
@@ -148,7 +146,6 @@ export default function TrashPage() {
                 </div>
             </div>
 
-            {/* Filter */}
             <div className="flex items-center gap-3">
                 <Filter className="w-5 h-5 text-muted-foreground" />
                 <Select value={filterType} onValueChange={(value) => setFilterType(value as TrashItemType)}>
@@ -157,15 +154,13 @@ export default function TrashPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="class">{t.teacher.trashBin.filter.class}</SelectItem>
-                        <SelectItem value="question">{t.teacher.trashBin.filter.question}</SelectItem>
                         <SelectItem value="assignment">{t.teacher.trashBin.filter.assignment}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
 
-            {/* Trash Items Table */}
             <Card>
-                <CardHeader>
+                <CardHeader className="mb-3">
                     <CardTitle>{t.teacher.trashBin.table.title}</CardTitle>
                     <CardDescription>
                         {isLoading ? t.common.loading : `${filteredItems.length} ${t.teacher.trashBin.table.description}`}
@@ -185,28 +180,28 @@ export default function TrashPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>{t.teacher.trashBin.table.columnName}</TableHead>
-                                        <TableHead>{t.teacher.trashBin.table.columnType}</TableHead>
-                                        <TableHead>{t.teacher.trashBin.table.columnDescription}</TableHead>
-                                        <TableHead>{t.teacher.trashBin.table.columnDeletedAt}</TableHead>
-                                        <TableHead className="text-right">{t.teacher.trashBin.table.columnActions}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.trashBin.table.columnName}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.trashBin.table.columnType}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.trashBin.table.columnDescription}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.trashBin.table.columnDeletedAt}</TableHead>
+                                        <TableHead className="text-center">{t.teacher.trashBin.table.columnActions}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {filteredItems.map((item) => (
                                         <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.name}</TableCell>
-                                            <TableCell>
+                                            <TableCell className="text-center font-medium">{item.name}</TableCell>
+                                            <TableCell className="text-center">
                                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${typeColors[item.type]}`}>
                                                     {selectedTypeLabel}
                                                 </span>
                                             </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground">
+                                            <TableCell className="text-sm text-muted-foreground text-center">
                                                 {item.description || '-'}
                                             </TableCell>
-                                            <TableCell className="text-sm">{dateTimeFormat(item.deletedAt)}</TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
+                                            <TableCell className="text-sm text-center">{dateTimeFormat(item.deletedAt)}</TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="flex justify-center gap-2">
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
