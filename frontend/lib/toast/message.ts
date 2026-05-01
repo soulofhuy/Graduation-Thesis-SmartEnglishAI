@@ -26,7 +26,9 @@ export const toastMessages = {
     rejectStudentSuccess: 'Student request rejected successfully',
     rejectStudentFailed: 'Failed to reject student request',
     removeStudentSuccess: 'Student removed successfully',
-    removeStudentFailed: 'Failed to remove student'
+    removeStudentFailed: 'Failed to remove student',
+    updateSuccess: 'Update successful',
+    updateFailed: 'Update failed'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',

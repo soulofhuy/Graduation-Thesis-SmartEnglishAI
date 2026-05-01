@@ -460,7 +460,8 @@ class AssignmentService {
     }
 
     const where = {
-      createdBy: teacherId
+      createdBy: teacherId,
+      isActive: true
     };
 
     const [totalItems, assignments] = await Promise.all([
@@ -794,7 +795,8 @@ class AssignmentService {
     const updatedAssignment = await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
-        isActive: !existingAssignment.isActive
+        isActive: !existingAssignment.isActive,
+        deactivatedAt: !existingAssignment.isActive ? null : new Date()
       }
     });
     return updatedAssignment;

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, Check, X, Search } from 'lucide-react'
+import { Plus, Sparkles, Edit, Check, X, Search, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -104,8 +104,7 @@ export default function TeacherQuizzesPage() {
                 setHasNextPage(Boolean(response.pagination.hasNextPage))
                 setHasPrevPage(Boolean(response.pagination.hasPrevPage))
             } catch (error) {
-                const message =
-                    error instanceof Error ? error.message : getToastMessage('loginFailed', language)
+                const message = error instanceof Error ? error.message : getToastMessage('loginFailed', language)
                 toast.error(message, { className: TOAST_COLORS.error })
             } finally {
                 setIsLoading(false)
@@ -153,17 +152,10 @@ export default function TeacherQuizzesPage() {
         setTogglingAssignmentId(assignmentId)
         try {
             const response = await toggleAssignmentActiveStatus(accessToken, assignmentId)
-            setAssignments((prev) =>
-                prev.map((assignment) =>
-                    assignment.id === assignmentId
-                        ? { ...assignment, isActive: response.assignment.isActive }
-                        : assignment
-                )
-            )
-            toast.success(response.message || 'Cap nhat trang thai bai tap thanh cong')
+            setAssignments((prev) => prev.filter((assignment) => assignment.id !== assignmentId))
+            toast.success(response.message || getToastMessage('updateSuccess', language), { className: TOAST_COLORS.success })
         } catch (error) {
-            const message =
-                error instanceof Error ? error.message : 'Khong the cap nhat trang thai bai tap'
+            const message = error instanceof Error ? error.message : getToastMessage('updateFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setTogglingAssignmentId(null)
@@ -437,13 +429,8 @@ export default function TeacherQuizzesPage() {
                                                         size="sm"
                                                         onClick={() => handleToggleAssignmentStatus(assignment.id)}
                                                         disabled={Boolean(togglingAssignmentId)}
-                                                        title={assignment.isActive ? 'Vo hieu hoa bai tap' : 'Kich hoat bai tap'}
                                                     >
-                                                        {assignment.isActive ? (
-                                                            <X className="w-8 h-8 text-destructive" />
-                                                        ) : (
-                                                            <Check className="w-8 h-8 text-green-600" />
-                                                        )}
+                                                        <Trash className="w-8 h-8 text-destructive" />
                                                     </Button>
                                                 </div>
                                             </TableCell>
