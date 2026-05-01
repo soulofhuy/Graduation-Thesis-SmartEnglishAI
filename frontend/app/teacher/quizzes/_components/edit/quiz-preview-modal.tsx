@@ -23,14 +23,14 @@ export function QuizPreviewModal({ isOpen, onClose, payload }: QuizPreviewModalP
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{t.common.preview}</DialogTitle>
+                    <DialogTitle>{t.teacher.assignments.previewAssignment.title}</DialogTitle>
                 </DialogHeader>
 
                 <QuizPreviewContent payload={payload} />
 
                 <div className="flex justify-end gap-2 pt-4 border-t">
                     <Button variant="outline" onClick={onClose}>
-                        Đóng
+                        {t.common.cancel}
                     </Button>
                 </div>
             </DialogContent>

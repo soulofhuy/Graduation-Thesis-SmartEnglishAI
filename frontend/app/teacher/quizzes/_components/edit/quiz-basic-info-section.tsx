@@ -48,12 +48,7 @@ export function QuizBasicInfoSection({
                             className="h-11"
                             value={formData.title}
                             placeholder={t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldAssignmentNamePlaceholder}
-                            onChange={(e) =>
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    title: e.target.value,
-                                }))
-                            }
+                            onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                         />
                     </div>
 
@@ -62,22 +57,11 @@ export function QuizBasicInfoSection({
                             <Label htmlFor="classId">{t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClass}</Label>
                             <Select
                                 value={formData.classId}
-                                onValueChange={(value) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        classId: value,
-                                    }))
-                                }
+                                onValueChange={(value) => setFormData((prev) => ({ ...prev, classId: value }))}
                                 disabled={isClassesLoading || classes.length === 0}
                             >
                                 <SelectTrigger id="classId" className="h-11 w-full">
-                                    <SelectValue
-                                        placeholder={
-                                            isClassesLoading
-                                                ? 'Dang tai danh sach lop...'
-                                                : 'Chon lop hoc'
-                                        }
-                                    />
+                                    <SelectValue placeholder={isClassesLoading ? t.common.loading : t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClassPlaceholder} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {classes.map((classItem) => (
@@ -96,12 +80,7 @@ export function QuizBasicInfoSection({
                                 type="datetime-local"
                                 className="h-11"
                                 value={formData.dueDate}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        dueDate: e.target.value,
-                                    }))
-                                }
+                                onChange={(e) => setFormData((prev) => ({ ...prev, dueDate: e.target.value }))}
                             />
                         </div>
                     </div>
@@ -112,12 +91,7 @@ export function QuizBasicInfoSection({
                             value={formData.description}
                             placeholder={t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldDescriptionPlaceholder}
                             minHeightClass="min-h-18"
-                            onChange={(value) =>
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    description: value,
-                                }))
-                            }
+                            onChange={(value) => setFormData((prev) => ({ ...prev, description: value }))}
                         />
                     </div>
                 </CardContent>
@@ -137,12 +111,7 @@ export function QuizBasicInfoSection({
                             </div>
                             <Switch
                                 checked={formData.isPublic}
-                                onCheckedChange={(checked) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        isPublic: checked,
-                                    }))
-                                }
+                                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isPublic: checked }))}
                             />
                         </div>
 
@@ -153,12 +122,7 @@ export function QuizBasicInfoSection({
                             </div>
                             <Switch
                                 checked={formData.isSingleAttempt}
-                                onCheckedChange={(checked) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        isSingleAttempt: checked,
-                                    }))
-                                }
+                                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isSingleAttempt: checked }))}
                             />
                         </div>
 
@@ -169,12 +133,7 @@ export function QuizBasicInfoSection({
                             </div>
                             <Switch
                                 checked={formData.canViewResult}
-                                onCheckedChange={(checked) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        canViewResult: checked,
-                                    }))
-                                }
+                                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, canViewResult: checked }))}
                             />
                         </div>
                     </div>

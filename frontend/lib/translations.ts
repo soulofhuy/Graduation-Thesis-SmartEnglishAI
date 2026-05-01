@@ -301,6 +301,7 @@ export const translations = {
             fieldAssignmentNamePlaceholder:
               'e.g., Present Simple Tense Exercise',
             fieldClass: 'Is assigned for class',
+            fieldClassPlaceholder: 'Select class to assign',
             fieldDeadline: 'Deadline',
             fieldDescription: 'Description',
             fieldDescriptionPlaceholder: 'Enter assignment description here'
@@ -316,7 +317,8 @@ export const translations = {
             fieldCanViewResult: 'Allow students to view results',
             fieldCanViewResultDescription:
               'If enabled, students can view their results after submission'
-          }
+          },
+          moveNextTabButton: 'Create questions for this assignment'
         },
         editAssignment: {
           title: 'Edit assignment',
@@ -374,6 +376,18 @@ export const translations = {
                 'Enter passage content here. The question will be based on this passage.'
             }
           }
+        },
+        previewAssignment: {
+          title: 'Assignment preview',
+          dueDate: 'Due date: ',
+          isPublic: 'Public',
+          isSingleAttempt: 'Single attempt only',
+          task: 'Task',
+          passage: 'Passage',
+          question: 'Question',
+          isCorrect: 'Correct answer',
+          summary: 'Total',
+          summaryQuestions: 'question(s)'
         }
       },
       results: {
@@ -1043,6 +1057,7 @@ export const translations = {
             fieldAssignmentNamePlaceholder:
               'Ví dụ: Bài tập về thì hiện tại đơn',
             fieldClass: 'Giao cho lớp',
+            fieldClassPlaceholder: 'Chọn lớp để giao bài tập',
             fieldDeadline: 'Hạn nộp',
             fieldDescription: 'Mô tả',
             fieldDescriptionPlaceholder: 'Nhập mô tả bài tập tại đây'
@@ -1059,7 +1074,9 @@ export const translations = {
             fieldCanViewResult: 'Cho phép xem kết quả',
             fieldCanViewResultDescription:
               'Nếu bật, học sinh có thể xem kết quả sau khi nộp bài'
-          }
+          },
+
+          moveNextTabButton: 'Tạo câu hỏi cho bài kiểm tra'
         },
 
         createQuestionsAndTasks: {
@@ -1106,6 +1123,18 @@ export const translations = {
                 'Nhập nội dung đoạn văn. Các câu hỏi sẽ dựa trên đoạn này.'
             }
           }
+        },
+        previewAssignment: {
+          title: 'Xem trước bài tập',
+          dueDate: 'Hạn nộp: ',
+          isPublic: 'Công khai',
+          isSingleAttempt: 'Chỉ được làm một lần',
+          task: 'Phần',
+          passage: 'Đoạn văn',
+          question: 'Câu',
+          isCorrect: 'Đáp án đúng',
+          summary: 'Tổng cộng',
+          summaryQuestions: 'câu hỏi'
         }
       },
       results: {
