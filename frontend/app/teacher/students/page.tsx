@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Eye, Search, Users } from 'lucide-react'
+import { Search, Users, UserX2 } from 'lucide-react'
 import { useAuth } from '@/components/auth-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -314,7 +314,7 @@ export default function TeacherStudentsPage() {
                         <div className="w-full max-w-3xl mx-auto">
                             <div className="flex justify-center mb-3">
                                 <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
-                                    {t.teacher.students.searchEngine.findStudent.title}
+                                    {t.teacher.students.searchOrSortOrFilter.search.title}
                                 </label>
                             </div>
 
@@ -330,7 +330,7 @@ export default function TeacherStudentsPage() {
                                         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                         <Input
                                             className="h-11 w-full rounded-full pl-10 pr-4"
-                                            placeholder={t.teacher.students.searchEngine.findStudent.placeholder}
+                                            placeholder={t.teacher.students.searchOrSortOrFilter.search.searchFieldPlaceholder}
                                             value={searchInput}
                                             onChange={(event) => setSearchInput(event.target.value)}
                                         />
@@ -338,7 +338,7 @@ export default function TeacherStudentsPage() {
 
                                     <div className="flex justify-center gap-2">
                                         <Button type="submit" className="rounded-full px-5">
-                                            {t.common.search}
+                                            {t.teacher.classes.searchOrSortOrFilter.search.searchButton}
                                         </Button>
                                         <Button
                                             type="button"
@@ -346,7 +346,7 @@ export default function TeacherStudentsPage() {
                                             className="rounded-full px-5"
                                             onClick={clearSearch}
                                         >
-                                            Đặt lại
+                                            {t.teacher.classes.searchOrSortOrFilter.search.resetButton}
                                         </Button>
                                     </div>
                                 </form>
@@ -384,8 +384,8 @@ export default function TeacherStudentsPage() {
                                 disabled={!selectedClassId || isBannedStudentsLoading}
                                 className="shrink-0"
                             >
-                                <Eye className="h-4 w-4 mr-1" />
-                                {t.teacher.students.tableView.buttonViewDeactivatedStudents} ({bannedTotalItems})
+                                <UserX2 className="h-4 w-4 mr-1" />
+                                {t.teacher.students.tableView.buttonViewDeactivatedStudents}
                             </Button>
                         </div>
 

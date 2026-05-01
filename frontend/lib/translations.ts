@@ -215,15 +215,30 @@ export const translations = {
       students: {
         title: 'Manage students',
         description: 'View and manage students in your class',
-        searchEngine: {
-          findStudent: {
-            title: 'Search for students',
-            placeholder: "Enter student's name or email"
-          }
-        },
         filter: {
           title: 'Select your class',
           placeholder: 'Choose a class'
+        },
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search for students in the class',
+            searchFieldPlaceholder: "Search by student's name",
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldName: 'Name',
+              fieldEmail: 'Email',
+              fieldJoinedAt: 'Joined date'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
         },
         tableView: {
           title: 'List of students',
@@ -927,15 +942,30 @@ export const translations = {
       students: {
         title: 'Quản lí học sinh',
         description: 'Xem và quản lí học sinh trong lớp học của bạn',
-        searchEngine: {
-          findStudent: {
-            title: 'Tìm kiếm học sinh',
-            placeholder: 'Nhập tên hoặc email của học sinh'
-          }
-        },
         filter: {
           title: 'Chọn lớp của bạn',
           placeholder: 'Chọn một lớp học'
+        },
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm học sinh trong lớp',
+            searchFieldPlaceholder: 'Tìm kiếm theo tên học sinh',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldName: 'Tên',
+              fieldEmail: 'Email',
+              fieldJoinedAt: 'Ngày tham gia'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
         },
         tableView: {
           title: 'Danh sách học sinh',

@@ -24,7 +24,9 @@ export const toastMessages = {
     acceptStudentSuccess: 'Student request accepted successfully',
     acceptStudentFailed: 'Failed to accept student request',
     rejectStudentSuccess: 'Student request rejected successfully',
-    rejectStudentFailed: 'Failed to reject student request'
+    rejectStudentFailed: 'Failed to reject student request',
+    removeStudentSuccess: 'Student removed successfully',
+    removeStudentFailed: 'Failed to remove student'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',
@@ -49,7 +51,11 @@ export const toastMessages = {
     acceptStudentSuccess: 'Duyệt yêu cầu học sinh thành công',
     acceptStudentFailed: 'Duyệt yêu cầu học sinh thất bại',
     rejectStudentSuccess: 'Từ chối yêu cầu học sinh thành công',
-    rejectStudentFailed: 'Từ chối yêu cầu học sinh thất bại'
+    rejectStudentFailed: 'Từ chối yêu cầu học sinh thất bại',
+    removeStudentSuccess: 'Xóa học sinh thành công',
+    removeStudentFailed: 'Xóa học sinh thất bại',
+    updateSuccess: 'Cập nhật thành công',
+    updateFailed: 'Cập nhật thất bại'
   }
 } as const;
 

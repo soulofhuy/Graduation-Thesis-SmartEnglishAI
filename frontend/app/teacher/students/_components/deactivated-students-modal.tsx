@@ -146,9 +146,6 @@ export function DeactivatedStudentsModal({
                             </Button>
                         </div>
                         <div className="flex items-center gap-4">
-                            {/* <p className="text-sm text-muted-foreground">
-                                {t.common.pagination.label}: {currentPage}
-                            </p> */}
                             <PageSizeSelect
                                 value={pageSize}
                                 onChange={onPageSizeChange}
