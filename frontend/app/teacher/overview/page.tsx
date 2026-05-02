@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
-import { Users } from 'lucide-react'
+import { Clock, FileText, School, Users } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -48,22 +48,22 @@ export default function TeacherOverviewPage() {
       {
         title: t.teacher.overview.statistic.fieldTotalClasses,
         value: statistic?.totalClasses || 0,
-        icon: <Users className="w-5 h-5" />,
+        icon: <School className="w-5 h-5 text-blue-500" />,
       },
       {
         title: t.teacher.overview.statistic.fieldTotalStudents,
         value: statistic?.totalStudents || 0,
-        icon: <Users className="w-5 h-5" />,
+        icon: <Users className="w-5 h-5 text-green-500" />,
       },
       {
         title: t.teacher.overview.statistic.fieldTotalPendingRequests,
         value: statistic?.totalPendingStudents || 0,
-        icon: <Users className="w-5 h-5" />,
+        icon: <Clock className="w-5 h-5 text-yellow-500" />,
       },
       {
         title: t.teacher.overview.statistic.fieldTotalAssignments,
         value: statistic?.totalAssignments || 0,
-        icon: <Users className="w-5 h-5" />,
+        icon: <FileText className="w-5 h-5 text-purple-500" />,
       }
     ]
   }, [language, overview?.statistics]);
