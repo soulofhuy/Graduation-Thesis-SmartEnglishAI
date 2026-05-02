@@ -186,6 +186,20 @@ class ClassTeacherService {
       }
     });
   };
+
+  static deleteClass = async (classId: string) => {
+    const existingClass = await prisma.class.findUnique({
+      where: { id: classId }
+    });
+
+    if (!existingClass) {
+      throw new Error('Class not found');
+    }
+
+    return prisma.class.delete({
+      where: { id: classId }
+    });
+  };
 }
 
 export default ClassTeacherService;
