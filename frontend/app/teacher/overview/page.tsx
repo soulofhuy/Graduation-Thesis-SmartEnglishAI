@@ -76,8 +76,8 @@ export default function TeacherOverviewPage() {
       name: item.title,
       class: item.className,
       createdAt: dateFormat(item.createdAt.toString()),
-      dueDate: item.dueDate ? new Date(item.dueDate).toLocaleDateString(language) : 'Không có',
-      submissions: `${item.submittedCount} học sinh đã nộp`,
+      dueDate: item.dueDate ? new Date(item.dueDate).toLocaleDateString(language) : '-',
+      submissions: `${item.submittedCount} ${t.teacher.overview.tableView.submissionCountDescription}`,
     }))
   }, [language, overview?.recentAssignments])
 
