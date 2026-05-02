@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
-import { Users, BookOpen, FileText, BarChart3, Plus, Sparkles } from 'lucide-react'
+import { Clock, FileText, School, Users } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -12,124 +12,112 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { getTeacherOverview, type TeacherOverview } from '@/services/teacher/overview'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/components/auth-provider'
+import { useLanguage } from '@/components/language-provider'
+import { toast } from 'sonner'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { dateFormat } from '@/lib/format'
 
 export default function TeacherOverviewPage() {
-  // Mock data
-  const stats = [
-    {
-      title: 'Tổng lớp học',
-      value: '5',
-      icon: <Users className="w-5 h-5" />,
-      trend: { value: 2, isPositive: true },
-    },
-    {
-      title: 'Tổng học sinh',
-      value: '156',
-      icon: <Users className="w-5 h-5" />,
-      trend: { value: 12, isPositive: true },
-    },
-    {
-      title: 'Tổng bài tập',
-      value: '24',
-      icon: <BookOpen className="w-5 h-5" />,
-      trend: { value: 5, isPositive: true },
-    },
-    {
-      title: 'Điểm trung bình',
-      value: '7.8/10',
-      icon: <BarChart3 className="w-5 h-5" />,
-      trend: { value: 3, isPositive: true },
-    },
-  ]
+  const { accessToken, isHydrated } = useAuth()
+  const { t, language } = useLanguage()
+  const [overview, setOverview] = useState<TeacherOverview | null>(null)
 
-  const recentAssignments = [
-    {
-      id: 1,
-      name: 'Bài tập ngữ pháp Unit 1',
-      class: '9A1',
-      dueDate: '2024-03-25',
-      submissions: '28/30',
-    },
-    {
-      id: 2,
-      name: 'Bài tập reading Unit 2',
-      class: '9A2',
-      dueDate: '2024-03-26',
-      submissions: '25/28',
-    },
-    {
-      id: 3,
-      name: 'Kiểm tra giữa kì',
-      class: '9A1',
-      dueDate: '2024-03-27',
-      submissions: '30/30',
-    },
-    {
-      id: 4,
-      name: 'Bài tập writing Unit 3',
-      class: '9A3',
-      dueDate: '2024-03-28',
-      submissions: '20/25',
-    },
-  ]
+  useEffect(() => {
+    const fetchOverview = async () => {
+      if (!accessToken || !isHydrated) return;
+
+      try {
+        const data = await getTeacherOverview(accessToken);
+        setOverview(data);
+      } catch (error) {
+        toast.error(getToastMessage('loadFailed', language), { className: TOAST_COLORS.error });
+      }
+    };
+
+    void fetchOverview();
+  }, [accessToken, isHydrated]);
+
+  const stats = useMemo(() => {
+    const statistic = overview?.statistics;
+
+    return [
+      {
+        title: t.teacher.overview.statistic.fieldTotalClasses,
+        value: statistic?.totalClasses || 0,
+        icon: <School className="w-5 h-5 text-blue-500" />,
+      },
+      {
+        title: t.teacher.overview.statistic.fieldTotalStudents,
+        value: statistic?.totalStudents || 0,
+        icon: <Users className="w-5 h-5 text-green-500" />,
+      },
+      {
+        title: t.teacher.overview.statistic.fieldTotalPendingRequests,
+        value: statistic?.totalPendingStudents || 0,
+        icon: <Clock className="w-5 h-5 text-yellow-500" />,
+      },
+      {
+        title: t.teacher.overview.statistic.fieldTotalAssignments,
+        value: statistic?.totalAssignments || 0,
+        icon: <FileText className="w-5 h-5 text-purple-500" />,
+      }
+    ]
+  }, [language, overview?.statistics]);
+
+  const recentAssignments = useMemo(() => {
+    const rcasmts = overview?.recentAssignments || [];
+
+    return rcasmts.map((item) => ({
+      id: item.id,
+      name: item.title,
+      class: item.className,
+      createdAt: dateFormat(item.createdAt.toString()),
+      dueDate: item.dueDate ? new Date(item.dueDate).toLocaleDateString(language) : '-',
+      submissions: `${item.submittedCount} ${t.teacher.overview.tableView.submissionCountDescription}`,
+    }))
+  }, [language, overview?.recentAssignments])
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
-      {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-text">
-          Tổng quan
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Chào mừng trở lại, thầy Nguyễn Văn A
-        </p>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{t.teacher.overview.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.teacher.overview.description}</p>
+        </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <StatsCard key={idx} {...stat} />
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Tạo bài tập
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Sparkles className="w-4 h-4" />
-          Tạo câu hỏi bằng AI
-        </Button>
-      </div>
-
-      {/* Recent Assignments */}
       <Card>
-        <CardHeader>
-          <CardTitle>Bài tập gần đây</CardTitle>
-          <CardDescription>
-            Danh sách các bài tập được giao gần đây nhất
-          </CardDescription>
+        <CardHeader className="mb-3">
+          <CardTitle>{t.teacher.overview.tableView.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tên bài tập</TableHead>
-                  <TableHead>Lớp học</TableHead>
-                  <TableHead>Hạn nộp</TableHead>
-                  <TableHead>Nộp bài</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnTitle}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnClass}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnCreatedDate}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnDueDate}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnSubmissionCount}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentAssignments.map((assignment) => (
-                  <TableRow key={assignment.id}>
-                    <TableCell className="font-medium">
-                      {assignment.name}
-                    </TableCell>
+                  <TableRow key={assignment.id} className="text-center">
+                    <TableCell>{assignment.name}</TableCell>
                     <TableCell>{assignment.class}</TableCell>
+                    <TableCell>{assignment.createdAt}</TableCell>
                     <TableCell>{assignment.dueDate}</TableCell>
                     <TableCell>{assignment.submissions}</TableCell>
                   </TableRow>

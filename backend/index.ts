@@ -12,6 +12,7 @@ import AssignmentStudentRouter from './src/routes/assignmentStudentRoutes';
 import AttemptRouter from './src/routes/attemptRoutes';
 import ViewStudyProgressRouter from './src/routes/students/viewStudyProgressRoutes';
 import ViewClassProgressOnAssignmentsRouter from './src/routes/teachers/viewClassProgressOnAssignmentsRoutes';
+import ViewOverviewStatisticRouter from './src/routes/teachers/viewOverviewStatisticRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api', AssignmentStudentRouter);
 app.use('/api', AttemptRouter);
 app.use('/api', ViewStudyProgressRouter);
 app.use('/api', ViewClassProgressOnAssignmentsRouter);
+app.use('/api', ViewOverviewStatisticRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 
