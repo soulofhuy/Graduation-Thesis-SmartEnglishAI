@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
-import { Users, BookOpen, FileText, BarChart3, Plus, Sparkles } from 'lucide-react'
+import { Users } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -12,70 +12,75 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { getTeacherOverview, type TeacherOverview } from '@/services/teacher/overview'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/components/auth-provider'
+import { useLanguage } from '@/components/language-provider'
+import { toast } from 'sonner'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 export default function TeacherOverviewPage() {
-  // Mock data
-  const stats = [
-    {
-      title: 'Tổng lớp học',
-      value: '5',
-      icon: <Users className="w-5 h-5" />,
-      trend: { value: 2, isPositive: true },
-    },
-    {
-      title: 'Tổng học sinh',
-      value: '156',
-      icon: <Users className="w-5 h-5" />,
-      trend: { value: 12, isPositive: true },
-    },
-    {
-      title: 'Tổng bài tập',
-      value: '24',
-      icon: <BookOpen className="w-5 h-5" />,
-      trend: { value: 5, isPositive: true },
-    },
-    {
-      title: 'Điểm trung bình',
-      value: '7.8/10',
-      icon: <BarChart3 className="w-5 h-5" />,
-      trend: { value: 3, isPositive: true },
-    },
-  ]
+  const { accessToken, isHydrated } = useAuth()
+  const { t, language } = useLanguage()
+  const [overview, setOverview] = useState<TeacherOverview | null>(null)
 
-  const recentAssignments = [
-    {
-      id: 1,
-      name: 'Bài tập ngữ pháp Unit 1',
-      class: '9A1',
-      dueDate: '2024-03-25',
-      submissions: '28/30',
-    },
-    {
-      id: 2,
-      name: 'Bài tập reading Unit 2',
-      class: '9A2',
-      dueDate: '2024-03-26',
-      submissions: '25/28',
-    },
-    {
-      id: 3,
-      name: 'Kiểm tra giữa kì',
-      class: '9A1',
-      dueDate: '2024-03-27',
-      submissions: '30/30',
-    },
-    {
-      id: 4,
-      name: 'Bài tập writing Unit 3',
-      class: '9A3',
-      dueDate: '2024-03-28',
-      submissions: '20/25',
-    },
-  ]
+  useEffect(() => {
+    const fetchOverview = async () => {
+      if (!accessToken || !isHydrated) return;
+
+      try {
+        const data = await getTeacherOverview(accessToken);
+        setOverview(data);
+      } catch (error) {
+        toast.error(getToastMessage('loadFailed', language), { className: TOAST_COLORS.error });
+      }
+    };
+
+    void fetchOverview();
+  }, [accessToken, isHydrated]);
+
+  const stats = useMemo(() => {
+    const statistic = overview?.statistics;
+
+    return [
+      {
+        title: 'Tổng số lớp học',
+        value: statistic?.totalClasses || 0,
+        icon: <Users className="w-5 h-5" />,
+      },
+      {
+        title: 'Tổng số học sinh',
+        value: statistic?.totalStudents || 0,
+        icon: <Users className="w-5 h-5" />,
+      },
+      {
+        title: 'Tổng số học sinh đang chờ duyệt',
+        value: statistic?.totalPendingStudents || 0,
+        icon: <Users className="w-5 h-5" />,
+      },
+      {
+        title: 'Tổng số bài tập đã tạo',
+        value: statistic?.totalAssignments || 0,
+        icon: <Users className="w-5 h-5" />,
+      }
+    ]
+  }, [language, overview?.statistics]);
+
+  const recentAssignments = useMemo(() => {
+    const rcasmts = overview?.recentAssignments || [];
+
+    return rcasmts.map((item) => ({
+      id: item.id,
+      name: item.title,
+      class: item.className,
+      dueDate: item.dueDate ? new Date(item.dueDate).toLocaleDateString(language) : 'Không có',
+      submissions: `${item.submittedCount} học sinh đã nộp`,
+    }))
+  }, [language, overview?.recentAssignments])
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
-      {/* Header */}
       <div className="space-y-2">
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-text">
           Tổng quan
@@ -85,7 +90,6 @@ export default function TeacherOverviewPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <StatsCard key={idx} {...stat} />
@@ -93,7 +97,7 @@ export default function TeacherOverviewPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* <div className="flex flex-col sm:flex-row gap-4">
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
           Tạo bài tập
@@ -102,9 +106,8 @@ export default function TeacherOverviewPage() {
           <Sparkles className="w-4 h-4" />
           Tạo câu hỏi bằng AI
         </Button>
-      </div>
+      </div> */}
 
-      {/* Recent Assignments */}
       <Card>
         <CardHeader>
           <CardTitle>Bài tập gần đây</CardTitle>

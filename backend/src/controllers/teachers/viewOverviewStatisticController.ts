@@ -4,10 +4,6 @@ import Responses from '../../utils/responses';
 import { getTeacherOverview } from '../../services/teacher/viewOverviewStatisticServices';
 
 class ViewOverviewStatisticController {
-  /**
-   * Get teacher overview statistics and recent assignments
-   * Endpoint: GET /teacher/overview
-   */
   static getTeacherOverview = async (
     req: AuthenticatedRequest,
     res: Response
