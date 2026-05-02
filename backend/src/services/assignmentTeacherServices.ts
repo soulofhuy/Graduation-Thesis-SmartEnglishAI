@@ -460,7 +460,8 @@ class AssignmentService {
     }
 
     const where = {
-      createdBy: teacherId
+      createdBy: teacherId,
+      isActive: true
     };
 
     const [totalItems, assignments] = await Promise.all([
@@ -794,10 +795,52 @@ class AssignmentService {
     const updatedAssignment = await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
-        isActive: !existingAssignment.isActive
+        isActive: !existingAssignment.isActive,
+        deactivatedAt: !existingAssignment.isActive ? null : new Date()
       }
     });
     return updatedAssignment;
+  };
+
+  static deleteAssignment = async (assignmentId: string) => {
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    const existingAssignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      select: {
+        id: true,
+        class: {
+          select: {
+            isActive: true
+          }
+        }
+      }
+    });
+
+    if (!existingAssignment) {
+      throw new Error('Assignment not found');
+    }
+
+    if (!existingAssignment.class.isActive) {
+      throw new Error('Cannot delete assignment from an inactive class');
+    }
+
+    await prisma.assignment.delete({
+      where: { id: assignmentId }
+    });
+  };
+
+  static getAllDeactivatedAssignmentsByTeacherId = async (
+    teacherId: string
+  ) => {
+    return prisma.assignment.findMany({
+      where: {
+        createdBy: teacherId,
+        isActive: false
+      }
+    });
   };
 }
 

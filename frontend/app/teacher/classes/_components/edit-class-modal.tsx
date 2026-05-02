@@ -23,6 +23,7 @@ import { useLanguage } from '@/components/language-provider'
 import { Switch } from '@/components/ui/switch'
 import { updateClassSchema, type UpdateClassFormValues } from '@/lib/validators/class'
 import { Loader2, RefreshCw } from 'lucide-react'
+import { getToastMessage } from '@/lib/toast/message'
 
 const classSchema = updateClassSchema()
 
@@ -41,7 +42,7 @@ export function EditClassModal({
     accessToken,
     onSuccess,
 }: EditClassModalProps) {
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
     const [isUpdating, setIsUpdating] = React.useState(false)
     const [isGeneratingCode, setIsGeneratingCode] = React.useState(false)
 
@@ -55,7 +56,6 @@ export function EditClassModal({
         },
     })
 
-    // Update form values when classItem changes
     React.useEffect(() => {
         if (classItem) {
             form.reset({
@@ -69,7 +69,7 @@ export function EditClassModal({
 
     const handleGenerateClassCode = async () => {
         if (!accessToken) {
-            toast.error('Vui lòng đăng nhập lại', { className: TOAST_COLORS.error })
+            toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
             return
         }
 
@@ -80,7 +80,7 @@ export function EditClassModal({
                 form.setValue('classCode', result?.classCode)
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Lỗi khi tạo mã lớp'
+            const message = error instanceof Error ? error.message : getToastMessage('saveFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setIsGeneratingCode(false)
@@ -89,7 +89,7 @@ export function EditClassModal({
 
     async function onSubmit(values: UpdateClassFormValues) {
         if (!accessToken || !classItem?.id) {
-            toast.error('Vui lòng đăng nhập lại', { className: TOAST_COLORS.error })
+            toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
             return
         }
 
@@ -106,7 +106,7 @@ export function EditClassModal({
             onOpenChange(false)
             toast.success(result.message, { className: TOAST_COLORS.success })
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Lỗi khi cập nhật lớp học'
+            const message = error instanceof Error ? error.message : getToastMessage('saveFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setIsUpdating(false)

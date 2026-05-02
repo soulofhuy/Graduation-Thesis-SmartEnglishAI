@@ -130,6 +130,28 @@ export const translations = {
     // Teacher Dashboard
     teacher: {
       classes: {
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search',
+            searchFieldPlaceholder: 'Search by class name or class code',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldClassName: 'Class name',
+              fieldStudentCount: 'Number of students',
+              fieldAssignmentCount: 'Number of assignments',
+              fieldPendingRequestCount: 'Number of pending requests'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
+        },
         title: 'Manage classes',
         description: 'Create and manage your classes',
         tableViewport: {
@@ -139,7 +161,8 @@ export const translations = {
           columnStudentNumber: 'Number of students',
           columnAssignmentNumber: 'Number of assignments',
           columnClassCode: 'Class code',
-          columnActions: 'Operations'
+          columnPendingRequestNumber: 'Pending requests',
+          columnActions: 'Actions'
         },
         gridViewport: {
           fieldStudentNumber: 'No. students',
@@ -192,15 +215,30 @@ export const translations = {
       students: {
         title: 'Manage students',
         description: 'View and manage students in your class',
-        searchEngine: {
-          findStudent: {
-            title: 'Search for students',
-            placeholder: "Enter student's name or email"
-          }
-        },
         filter: {
           title: 'Select your class',
           placeholder: 'Choose a class'
+        },
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search for students in the class',
+            searchFieldPlaceholder: "Search by student's name",
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldName: 'Name',
+              fieldEmail: 'Email',
+              fieldJoinedAt: 'Joined date'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
         },
         tableView: {
           title: 'List of students',
@@ -252,6 +290,28 @@ export const translations = {
             columnIsPublic: 'Public',
             columnIsActive: 'Status',
             columnActions: 'Actions'
+          },
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Search assignments',
+              searchFieldPlaceholder: 'Search by assignment title',
+              searchButton: 'Search',
+              resetButton: 'Reset'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sort by',
+                fieldTitle: 'Title',
+                fieldNumberOfQuestions: 'Number of questions',
+                fieldDueDate: 'Due date',
+                fieldCreatedDate: 'Created date'
+              },
+              order: {
+                title: 'Order',
+                asc: 'Ascending',
+                desc: 'Descending'
+              }
+            }
           }
         },
         createAssignment: {
@@ -263,6 +323,7 @@ export const translations = {
             fieldAssignmentNamePlaceholder:
               'e.g., Present Simple Tense Exercise',
             fieldClass: 'Is assigned for class',
+            fieldClassPlaceholder: 'Select class to assign',
             fieldDeadline: 'Deadline',
             fieldDescription: 'Description',
             fieldDescriptionPlaceholder: 'Enter assignment description here'
@@ -278,7 +339,8 @@ export const translations = {
             fieldCanViewResult: 'Allow students to view results',
             fieldCanViewResultDescription:
               'If enabled, students can view their results after submission'
-          }
+          },
+          moveNextTabButton: 'Create questions for this assignment'
         },
         editAssignment: {
           title: 'Edit assignment',
@@ -336,6 +398,18 @@ export const translations = {
                 'Enter passage content here. The question will be based on this passage.'
             }
           }
+        },
+        previewAssignment: {
+          title: 'Assignment preview',
+          dueDate: 'Due date: ',
+          isPublic: 'Public',
+          isSingleAttempt: 'Single attempt only',
+          task: 'Task',
+          passage: 'Passage',
+          question: 'Question',
+          isCorrect: 'Correct answer',
+          summary: 'Total',
+          summaryQuestions: 'question(s)'
         }
       },
       results: {
@@ -377,13 +451,34 @@ export const translations = {
         }
       },
       trashBin: {
-        title: 'Trash Bin',
+        title: 'Trash bin for your deleted items',
         description:
           'Manage deleted items. You can restore or permanently delete them',
-        filter: {
-          class: 'Class',
-          assignment: 'Assignment',
-          question: 'Question'
+        searchOrSortOrFilter: {
+          filter: {
+            title: 'Filter by type',
+            class: 'Class',
+            assignment: 'Assignment'
+          },
+          search: {
+            title: 'Search in trash bin',
+            searchFieldPlaceholder: 'Search by name or description',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldTitle: 'Title/name',
+              fieldDescription: 'Description',
+              fieldDeletedDate: 'Deleted date'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
         },
         table: {
           title: 'List of deleted items',
@@ -817,6 +912,28 @@ export const translations = {
     // Teacher Dashboard
     teacher: {
       classes: {
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm',
+            searchFieldPlaceholder: 'Tìm kiếm theo tên lớp hoặc mã lớp',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldClassName: 'Tên lớp',
+              fieldStudentCount: 'Số lượng học sinh',
+              fieldAssignmentCount: 'Số lượng bài tập',
+              fieldPendingRequestCount: 'Số lượng đang yêu cầu'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
+        },
         title: 'Quản lí lớp học',
         description: 'Tạo và quản lí các lớp học của bạn',
         tableViewport: {
@@ -825,6 +942,7 @@ export const translations = {
           columnDescription: 'Mô tả',
           columnStudentNumber: 'Số lượng học sinh',
           columnAssignmentNumber: 'Số lượng bài tập',
+          columnPendingRequestNumber: 'Số lượng đang yêu cầu',
           columnClassCode: 'Mã lớp',
           columnActions: 'Các thao tác'
         },
@@ -881,15 +999,30 @@ export const translations = {
       students: {
         title: 'Quản lí học sinh',
         description: 'Xem và quản lí học sinh trong lớp học của bạn',
-        searchEngine: {
-          findStudent: {
-            title: 'Tìm kiếm học sinh',
-            placeholder: 'Nhập tên hoặc email của học sinh'
-          }
-        },
         filter: {
           title: 'Chọn lớp của bạn',
           placeholder: 'Chọn một lớp học'
+        },
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm học sinh trong lớp',
+            searchFieldPlaceholder: 'Tìm kiếm theo tên học sinh',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldName: 'Tên',
+              fieldEmail: 'Email',
+              fieldJoinedAt: 'Ngày tham gia'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
         },
         tableView: {
           title: 'Danh sách học sinh',
@@ -941,6 +1074,28 @@ export const translations = {
             columnIsPublic: 'Công khai',
             columnIsActive: 'Trạng thái',
             columnActions: 'Hành động'
+          },
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Tìm kiếm bài tập',
+              searchFieldPlaceholder: 'Tìm kiếm theo tên bài tập',
+              searchButton: 'Tìm kiếm',
+              resetButton: 'Đặt lại'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sắp xếp theo',
+                fieldTitle: 'Tiêu đề',
+                fieldNumberOfQuestions: 'Số lượng câu hỏi',
+                fieldDueDate: 'Hạn nộp bài tập',
+                fieldCreatedDate: 'Ngày tạo bài tập'
+              },
+              order: {
+                title: 'Thứ tự',
+                asc: 'Tăng dần',
+                desc: 'Giảm dần'
+              }
+            }
           }
         },
         editAssignment: {
@@ -967,6 +1122,7 @@ export const translations = {
             fieldAssignmentNamePlaceholder:
               'Ví dụ: Bài tập về thì hiện tại đơn',
             fieldClass: 'Giao cho lớp',
+            fieldClassPlaceholder: 'Chọn lớp để giao bài tập',
             fieldDeadline: 'Hạn nộp',
             fieldDescription: 'Mô tả',
             fieldDescriptionPlaceholder: 'Nhập mô tả bài tập tại đây'
@@ -983,7 +1139,9 @@ export const translations = {
             fieldCanViewResult: 'Cho phép xem kết quả',
             fieldCanViewResultDescription:
               'Nếu bật, học sinh có thể xem kết quả sau khi nộp bài'
-          }
+          },
+
+          moveNextTabButton: 'Tạo câu hỏi cho bài kiểm tra'
         },
 
         createQuestionsAndTasks: {
@@ -1030,6 +1188,18 @@ export const translations = {
                 'Nhập nội dung đoạn văn. Các câu hỏi sẽ dựa trên đoạn này.'
             }
           }
+        },
+        previewAssignment: {
+          title: 'Xem trước bài tập',
+          dueDate: 'Hạn nộp: ',
+          isPublic: 'Công khai',
+          isSingleAttempt: 'Chỉ được làm một lần',
+          task: 'Phần',
+          passage: 'Đoạn văn',
+          question: 'Câu',
+          isCorrect: 'Đáp án đúng',
+          summary: 'Tổng cộng',
+          summaryQuestions: 'câu hỏi'
         }
       },
       results: {
@@ -1071,13 +1241,34 @@ export const translations = {
         }
       },
       trashBin: {
-        title: 'Thùng rác',
+        title: 'Thùng rác cho các mục đã xóa của bạn',
         description:
           'Quản lí các mục đã xóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn',
-        filter: {
-          class: 'Lớp học',
-          assignment: 'Bài tập',
-          question: 'Câu hỏi'
+        searchOrSortOrFilter: {
+          filter: {
+            title: 'Lọc theo loại',
+            class: 'Lớp học',
+            assignment: 'Bài tập'
+          },
+          search: {
+            title: 'Tìm kiếm trong thùng rác',
+            searchFieldPlaceholder: 'Tìm theo tên hoặc mô tả',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldTitle: 'Tên',
+              fieldDescription: 'Mô tả',
+              fieldDeletedDate: 'Ngày xoá'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
         },
         table: {
           title: 'Danh sách mục đã xóa',

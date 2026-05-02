@@ -100,10 +100,7 @@ export function QuizQuestionsSection({
                             <button
                                 key={task.id}
                                 type="button"
-                                className={`px-3 py-1 rounded-full text-sm border ${task.id === selectedTask.id
-                                    ? 'bg-primary text-primary-foreground border-primary'
-                                    : 'bg-background text-foreground'
-                                    }`}
+                                className={`px-3 py-1 rounded-full text-sm border ${task.id === selectedTask.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-foreground'}`}
                                 onClick={() => onSelectTask(task.id)}
                             >
                                 {getTaskTypeLabel(task.taskType)}
@@ -175,10 +172,7 @@ export function QuizQuestionsSection({
                                 <button
                                     key={question.id}
                                     type="button"
-                                    className={`h-11 w-11 rounded-md border text-sm font-medium flex items-center justify-center ${selectedQuestion.id === question.id
-                                        ? 'border-primary bg-primary/5 text-primary'
-                                        : 'border-border bg-background'
-                                        }`}
+                                    className={`h-11 w-11 rounded-md border text-sm font-medium flex items-center justify-center ${selectedQuestion.id === question.id ? 'border-primary bg-primary/5 text-primary' : 'border-border bg-background'}`}
                                     onClick={() => onSelectQuestion(question.id)}
                                 >
                                     {index + 1}
@@ -249,9 +243,7 @@ export function QuizQuestionsSection({
                                         className="flex items-center text-sm font-medium"
                                         onClick={() => onToggleCorrectChoice(choice.id)}
                                     >
-                                        <CheckCircle2
-                                            className={`w-5 h-5 mr-2 stroke-[2.5] ${choice.isCorrect ? 'text-green-600' : 'text-muted-foreground'
-                                                }`}
+                                        <CheckCircle2 className={`w-5 h-5 mr-2 stroke-[2.5] ${choice.isCorrect ? 'text-green-600' : 'text-muted-foreground'}`}
                                         />
                                         {t.teacher.assignments.createQuestionsAndTasks.createQuestion.choice.choiceNo}{index + 1}
                                     </button>

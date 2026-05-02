@@ -140,10 +140,27 @@ export default function TeacherSettingsPage() {
         </div>
 
         <Tabs defaultValue="setting" className="space-y-6">
-          <TabsList className="flex flex-wrap justify-start gap-2">
-            <TabsTrigger value="setting">{t.student.settings.tabs.settingsTab.mainTitle}</TabsTrigger>
-            <TabsTrigger value="profile">{t.student.settings.tabs.profileTab.mainTitle}</TabsTrigger>
-            <TabsTrigger value="password">{t.student.settings.tabs.passwordTab.mainTitle}</TabsTrigger>
+          <TabsList className="flex flex-wrap justify-start gap-20 bg-transparent p-1">
+            <TabsTrigger
+              value="setting"
+              className="rounded-full px-10 py-4 text-base font-medium border border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              {t.student.settings.tabs.settingsTab.mainTitle}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="profile"
+              className="rounded-full px-10 py-4 text-base font-medium border border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              {t.student.settings.tabs.profileTab.mainTitle}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="password"
+              className="rounded-full px-10 py-4 text-base font-medium border border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              {t.student.settings.tabs.passwordTab.mainTitle}
+            </TabsTrigger>
           </TabsList>
 
           <SettingsTab t={t} />

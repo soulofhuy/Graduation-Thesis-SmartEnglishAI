@@ -18,6 +18,12 @@ router.get(
   ClassTeacherController.getAllDeactivatedClassesByTeacherId
 );
 
+router.delete(
+  '/classes/delete/:classId',
+  verifyJWT,
+  ClassTeacherController.deleteClass
+);
+
 router.get('/classes/:classId', verifyJWT, ClassTeacherController.getClassById);
 
 router.patch(

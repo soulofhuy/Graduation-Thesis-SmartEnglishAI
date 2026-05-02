@@ -204,7 +204,7 @@ export default function TeacherResultsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex justify-center mb-4">
-                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                <label className="inline-block rounded-md border-2 border-black rounded-md px-3 py-1 text-sm font-bold">
                   {t.teacher.results.filters.class.title}
                 </label>
               </div>
@@ -229,7 +229,7 @@ export default function TeacherResultsPage() {
             </div>
             <div>
               <div className="flex justify-center mb-4">
-                <label className="inline-block border border-border rounded-md px-3 py-1 text-sm font-bold">
+                <label className="inline-block rounded-md border-2 border-black rounded-md px-3 py-1 text-sm font-bold">
                   {t.teacher.results.filters.assignment.title}
                 </label>
               </div>

@@ -25,6 +25,18 @@ router.put(
   AssignmentController.toggleAssignmentActiveStatus
 );
 
+router.delete(
+  '/assignments/delete/:assignmentId',
+  verifyJWT,
+  AssignmentController.deleteAssignment
+);
+
+router.get(
+  '/assignments/deactivated',
+  verifyJWT,
+  AssignmentController.getDeactivatedAssignmentsByTeacher
+);
+
 router.get(
   '/assignments/created-by-me',
   verifyJWT,

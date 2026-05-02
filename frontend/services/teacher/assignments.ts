@@ -245,3 +245,48 @@ export async function toggleAssignmentActiveStatus(
 
   return { assignment: payload.data, message: payload.message };
 }
+
+export async function getDeactivatedAssignments(token: string) {
+  const response = await fetch(`${getApiBaseUrl()}/assignments/deactivated`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const payload = (await response.json()) as
+    | ApiSuccess<Assignment[]>
+    | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Get deactivated assignments failed';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Deactivated assignments response is missing data');
+  }
+
+  return { assignments: payload.data, message: payload.message };
+}
+
+export async function deleteAssignment(token: string, assignmentId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments/delete/${assignmentId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  const payload = (await response.json()) as ApiSuccess<unknown> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Delete assignment failed';
+    throw new Error(message);
+  }
+  return { message: payload.message };
+}

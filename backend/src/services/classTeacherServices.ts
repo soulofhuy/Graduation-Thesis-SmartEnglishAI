@@ -47,6 +47,11 @@ class ClassTeacherService {
               }
             }
           }
+        },
+        assignments: {
+          select: {
+            id: true
+          }
         }
       }
     });
@@ -63,7 +68,8 @@ class ClassTeacherService {
         ...cls,
         classMembers: includePending ? cls.classMembers : approvedMembers,
         pendingStudentsList: pendingMembers,
-        approvedStudentsCount: approvedMembers.length
+        approvedStudentsCount: approvedMembers.length,
+        assignmentCount: cls.assignments.length
       };
     });
   };
@@ -178,6 +184,20 @@ class ClassTeacherService {
         rejectorId,
         rejectedAt: new Date()
       }
+    });
+  };
+
+  static deleteClass = async (classId: string) => {
+    const existingClass = await prisma.class.findUnique({
+      where: { id: classId }
+    });
+
+    if (!existingClass) {
+      throw new Error('Class not found');
+    }
+
+    return prisma.class.delete({
+      where: { id: classId }
     });
   };
 }

@@ -2,18 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Eye, Search, Users } from 'lucide-react'
+import { Search, Users, UserX2 } from 'lucide-react'
 import { useAuth } from '@/components/auth-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import type { Class, ClassMember } from '@/lib/types'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
 import { getAllStudentsByClassId } from '@/services/classes'
@@ -33,6 +26,7 @@ export default function TeacherStudentsPage() {
     const [classes, setClasses] = useState<Class[]>([])
     const [members, setMembers] = useState<ClassMember[]>([])
     const [selectedClassId, setSelectedClassId] = useState<string>('')
+    const [searchInput, setSearchInput] = useState('')
     const [searchValue, setSearchValue] = useState('')
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
     const [isClassLoading, setIsClassLoading] = useState(false)
@@ -270,6 +264,15 @@ export default function TeacherStudentsPage() {
         await loadStudentsByClass(selectedClassId, currentPage + 1)
     }
 
+    const handleSearchSubmit = () => {
+        setSearchValue(searchInput.trim())
+    }
+
+    const clearSearch = () => {
+        setSearchInput('')
+        setSearchValue('')
+    }
+
     return (
         <div className="space-y-8 p-4 md:p-8">
             <div className="space-y-1">
@@ -279,38 +282,79 @@ export default function TeacherStudentsPage() {
                 </p>
             </div>
 
-            <div className="flex items-end justify-between">
-                <div className="space-y-2 w-full max-w-xs">
-                    <p className="text-sm font-medium text-foreground">{t.teacher.students.filter.title}</p>
-                    <Select
-                        value={selectedClassId}
-                        onValueChange={(value) => void handleSelectClass(value)}
-                    >
-                        <SelectTrigger className="h-10">
-                            <SelectValue placeholder={t.teacher.students.filter.placeholder} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classes.map((classItem) => (
-                                <SelectItem key={classItem.id} value={classItem.id}>
-                                    {classItem.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2 w-full max-w-sm">
-                    <p className="text-sm font-medium text-foreground">{t.teacher.students.searchEngine.findStudent.title}</p>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            className="pl-9 h-10"
-                            placeholder={t.teacher.students.searchEngine.findStudent.placeholder}
-                            value={searchValue}
-                            onChange={(event) => setSearchValue(event.target.value)}
-                        />
+            <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+                <CardContent>
+                    <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+                        <div className="w-full max-w-md mx-auto">
+                            <div className="flex justify-center mb-3">
+                                <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
+                                    {t.teacher.students.filter.title}
+                                </label>
+                            </div>
+
+                            <div className="flex flex-wrap justify-center gap-2">
+                                {classes.map((classItem) => {
+                                    const isSelected = classItem.id === selectedClassId
+
+                                    return (
+                                        <Button
+                                            key={classItem.id}
+                                            type="button"
+                                            variant={isSelected ? 'default' : 'outline'}
+                                            className="rounded-full px-4 py-2"
+                                            onClick={() => void handleSelectClass(classItem.id)}
+                                        >
+                                            {classItem.name}
+                                        </Button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="w-full max-w-3xl mx-auto">
+                            <div className="flex justify-center mb-3">
+                                <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
+                                    {t.teacher.students.searchOrSortOrFilter.search.title}
+                                </label>
+                            </div>
+
+                            <div className="space-y-4">
+                                <form
+                                    className="flex flex-col items-center gap-3 md:max-w-md mx-auto"
+                                    onSubmit={(event) => {
+                                        event.preventDefault()
+                                        handleSearchSubmit()
+                                    }}
+                                >
+                                    <div className="relative w-full max-w-sm">
+                                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            className="h-11 w-full rounded-full pl-10 pr-4"
+                                            placeholder={t.teacher.students.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                                            value={searchInput}
+                                            onChange={(event) => setSearchInput(event.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="flex justify-center gap-2">
+                                        <Button type="submit" className="rounded-full px-5">
+                                            {t.teacher.classes.searchOrSortOrFilter.search.searchButton}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="rounded-full px-5"
+                                            onClick={clearSearch}
+                                        >
+                                            {t.teacher.classes.searchOrSortOrFilter.search.resetButton}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             {isClassLoading ? (
                 <Card>
@@ -340,8 +384,8 @@ export default function TeacherStudentsPage() {
                                 disabled={!selectedClassId || isBannedStudentsLoading}
                                 className="shrink-0"
                             >
-                                <Eye className="h-4 w-4 mr-1" />
-                                {t.teacher.students.tableView.buttonViewDeactivatedStudents} ({bannedTotalItems})
+                                <UserX2 className="h-4 w-4 mr-1" />
+                                {t.teacher.students.tableView.buttonViewDeactivatedStudents}
                             </Button>
                         </div>
 

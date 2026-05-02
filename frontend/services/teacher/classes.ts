@@ -210,3 +210,25 @@ export async function getDeactivatedClasses(token: string) {
 
   return { classes: payload.data, message: payload.message };
 }
+
+export async function deleteClass(token: string, classId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/classes/delete/${encodeURIComponent(classId)}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<unknown> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Delete class failed';
+    throw new Error(message);
+  }
+
+  return { message: payload.message };
+}

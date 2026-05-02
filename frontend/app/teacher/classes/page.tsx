@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Copy, Edit, Trash2, Users, BookOpen, Grid, TableCellsMerge, Eye } from 'lucide-react'
+import { Plus, Copy, Edit, Trash2, Users, BookOpen, UserPlus, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { createClass, getClassesByTeacherId } from '@/services/teacher/classes'
@@ -40,6 +40,11 @@ import { Badge } from '@/components/ui/badge'
 import { PendingRequestsModal } from './_components/pending-requests-modal'
 
 const classSchema = createClassSchema()
+const SORT_FIELDS = ['name', 'students', 'assignments', 'pending'] as const
+const SORT_DIRECTIONS = ['asc', 'desc'] as const
+
+type SortField = (typeof SORT_FIELDS)[number]
+type SortDirection = (typeof SORT_DIRECTIONS)[number]
 
 export default function TeacherClassesPage() {
   const { t, language } = useLanguage();
@@ -47,7 +52,10 @@ export default function TeacherClassesPage() {
   const [classes, setClasses] = useState<BackendClass[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortField, setSortField] = useState<SortField>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -161,6 +169,63 @@ export default function TeacherClassesPage() {
     )
   }
 
+  const getAssignmentCount = (classItem: BackendClass) => {
+    return (
+      classItem.assignmentCount ??
+      (classItem as BackendClass & { assignments?: Array<{ id: string }> }).assignments?.length ??
+      0
+    )
+  }
+
+  const visibleClasses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    const filtered = classes.filter((classItem) => {
+      if (!query) {
+        return true
+      }
+
+      const name = classItem.name?.toLowerCase() ?? ''
+      const classCode = classItem.classCode?.toLowerCase() ?? ''
+
+      return name.includes(query) || classCode.includes(query)
+    })
+
+    const directionFactor = sortDirection === 'asc' ? 1 : -1
+
+    return [...filtered].sort((left, right) => {
+      let comparison = 0
+
+      if (sortField === 'students') {
+        comparison = (left.approvedStudentsCount ?? 0) - (right.approvedStudentsCount ?? 0)
+      } else if (sortField === 'assignments') {
+        comparison = getAssignmentCount(left) - getAssignmentCount(right)
+      } else if (sortField === 'pending') {
+        comparison = getPendingRequestCount(left) - getPendingRequestCount(right)
+      } else {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      if (comparison === 0) {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      return comparison * directionFactor
+    })
+  }, [classes, language, searchQuery, sortDirection, sortField])
+
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchInput.trim())
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchQuery('')
+  }
+
   return (
     <div className="p-4 md:p-8 space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -173,33 +238,112 @@ export default function TeacherClassesPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 p-1">
-            <span className="px-2 text-xs font-medium tracking-wide text-muted-foreground">
-              {t.common.viewPort}
-            </span>
-            <Button
-              size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              className="rounded-sm"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              className="rounded-sm"
-              onClick={() => setViewMode('table')}
-            >
-              <TableCellsMerge className="h-4 w-4" />
-            </Button>
-          </div>
           <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
             <Plus className="w-4 h-4" />
             {t.common.add}
           </Button>
         </div>
       </div>
+
+      <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+        <CardContent>
+          <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+            <div className="w-full max-w-md mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.search.title}
+                </label>
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  handleSearchSubmit()
+                }}
+                className="flex flex-col items-center gap-3 md:max-w-md"
+              >
+                <div className="relative w-full max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder={t.teacher.classes.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                    className="h-11 w-full rounded-full pl-10 pr-4"
+                  />
+                </div>
+
+                <div className="flex justify-center gap-2">
+                  <Button type="submit" className="rounded-full px-5">
+                    {t.teacher.classes.searchOrSortOrFilter.search.searchButton}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full px-5"
+                    onClick={clearSearch}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.search.resetButton}
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="w-full max-w-3xl mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.title}
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center gap-2">
+                  {SORT_FIELDS.map((field) => (
+                    <Button
+                      key={field}
+                      type="button"
+                      variant={sortField === field ? 'default' : 'outline'}
+                      className="rounded-full px-3 py-1"
+                      onClick={() => setSortField(field)}
+                    >
+                      {field === 'name' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldClassName}
+                      {field === 'students' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldStudentCount}
+                      {field === 'assignments' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldAssignmentCount}
+                      {field === 'pending' && t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldPendingRequestCount}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-3 mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.sort.order.title}
+                </label>
+              </div>
+
+              <div className="space-y-2 text-center">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('asc')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.order.asc}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('desc')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.order.desc}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {isLoading && (
         <Card>
@@ -209,119 +353,9 @@ export default function TeacherClassesPage() {
         </Card>
       )}
 
-      {!isLoading && viewMode === 'grid' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {classes.map((classItem) => {
-            const studentCount = classItem.approvedStudentsCount ?? 0
-            const assignmentCount = 0
-            const pendingCount = getPendingRequestCount(classItem)
-
-            return (
-              <Card key={classItem.id} className="relative overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative h-8 w-8"
-                    onClick={() => handleViewPendingRequests(classItem)}
-                  >
-                    <Eye className="w-4 h-4" />
-                    {pendingCount > 0 ? (
-                      <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
-                        {pendingCount}
-                      </span>
-                    ) : null}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleEditClass(classItem)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleDeleteClass(classItem)}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-
-                <CardHeader className="pr-28">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-muted-foreground" />
-                      {classItem?.name}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {classItem?.description || 'Chưa có mô tả cho lớp học này'}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Users className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldStudentNumber}
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {studentCount}
-                      </p>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <BookOpen className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldAssignmentNumber}
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {assignmentCount}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Users className="w-4 h-4" />
-                        {t.teacher.classes.gridViewport.fieldPendingRequestNumber}
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {pendingCount}
-                      </p>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {t.teacher.classes.gridViewport.fieldClassCode}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <code className="text-sm font-mono font-bold text-foreground">
-                          {classItem?.classCode}
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6"
-                          onClick={() => copyToClipboard(classItem?.classCode ?? '')}
-                        >
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-      )}
-
-      {!isLoading && viewMode === 'table' && (
+      {!isLoading && (
         <Card>
-          <CardHeader>
+          <CardHeader className="mb-3">
             <CardTitle>{t.teacher.classes.title}</CardTitle>
             <CardDescription>{t.teacher.classes.description}</CardDescription>
           </CardHeader>
@@ -330,23 +364,29 @@ export default function TeacherClassesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t.teacher.classes.tableViewport.columnName}</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnDescription}</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnStudentNumber}</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnAssignmentNumber}</TableHead>
-                    <TableHead>Pending</TableHead>
-                    <TableHead>{t.teacher.classes.tableViewport.columnClassCode}</TableHead>
-                    <TableHead className="text-right">{t.teacher.classes.tableViewport.columnActions}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnName}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnDescription}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnStudentNumber}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnAssignmentNumber}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnPendingRequestNumber}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnClassCode}</TableHead>
+                    <TableHead className="text-center">{t.teacher.classes.tableViewport.columnActions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classes.map((classItem) => {
+                  {visibleClasses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                        {t.common.noData}
+                      </TableCell>
+                    </TableRow>
+                  ) : visibleClasses.map((classItem) => {
                     const studentCount = classItem.approvedStudentsCount ?? 0
-                    const assignmentCount = 0
+                    const assignmentCount = getAssignmentCount(classItem)
                     const pendingCount = getPendingRequestCount(classItem)
 
                     return (
-                      <TableRow key={classItem.id}>
+                      <TableRow key={classItem.id} className="text-center">
                         <TableCell className="font-medium">
                           {classItem?.name}
                         </TableCell>
@@ -359,7 +399,7 @@ export default function TeacherClassesPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex justify-center items-center gap-2">
                             <code className="text-xs font-mono font-bold">
                               {classItem?.classCode}
                             </code>
@@ -373,15 +413,15 @@ export default function TeacherClassesPage() {
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <TableCell className="text-center">
+                          <div className="flex justify-center gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
                               className="relative"
                               onClick={() => handleViewPendingRequests(classItem)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <UserPlus className="h-4 w-4" />
                               {pendingCount > 0 ? (
                                 <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-4 text-white">
                                   {pendingCount}

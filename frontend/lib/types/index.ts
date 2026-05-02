@@ -57,6 +57,7 @@ export interface Class {
   deactivatedAt?: string | null;
   classCode?: string;
   approvedStudentsCount?: number;
+  assignmentCount?: number;
   pendingStudentsList?: ClassMember[];
 }
 

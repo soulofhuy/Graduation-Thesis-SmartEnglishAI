@@ -252,6 +252,23 @@ class ClassTeacherController {
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
+
+  static deleteClass = async (req: Request, res: Response) => {
+    const classId = req.params.classId || req.body.classId;
+    if (!classId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Class ID is required')));
+    }
+    try {
+      await ClassTeacherService.deleteClass(classId);
+      return res
+        .status(200)
+        .json(Responses.successResponse('Class deleted successfully'));
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
 }
 
 export default ClassTeacherController;

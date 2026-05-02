@@ -20,7 +20,15 @@ export const toastMessages = {
     copySuccess: 'Copy successful',
     classCodeRequired: 'Please enter the class code',
     submitAssignmentSuccess: 'Assignment submitted successfully',
-    submitAssignmentFailed: 'Failed to submit assignment'
+    submitAssignmentFailed: 'Failed to submit assignment',
+    acceptStudentSuccess: 'Student request accepted successfully',
+    acceptStudentFailed: 'Failed to accept student request',
+    rejectStudentSuccess: 'Student request rejected successfully',
+    rejectStudentFailed: 'Failed to reject student request',
+    removeStudentSuccess: 'Student removed successfully',
+    removeStudentFailed: 'Failed to remove student',
+    updateSuccess: 'Update successful',
+    updateFailed: 'Update failed'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',
@@ -41,7 +49,15 @@ export const toastMessages = {
     copySuccess: 'Sao chép thành công',
     classCodeRequired: 'Vui lòng nhập mã lớp học',
     submitAssignmentSuccess: 'Nộp bài tập thành công',
-    submitAssignmentFailed: 'Nộp bài tập thất bại'
+    submitAssignmentFailed: 'Nộp bài tập thất bại',
+    acceptStudentSuccess: 'Duyệt yêu cầu học sinh thành công',
+    acceptStudentFailed: 'Duyệt yêu cầu học sinh thất bại',
+    rejectStudentSuccess: 'Từ chối yêu cầu học sinh thành công',
+    rejectStudentFailed: 'Từ chối yêu cầu học sinh thất bại',
+    removeStudentSuccess: 'Xóa học sinh thành công',
+    removeStudentFailed: 'Xóa học sinh thất bại',
+    updateSuccess: 'Cập nhật thành công',
+    updateFailed: 'Cập nhật thất bại'
   }
 } as const;
 

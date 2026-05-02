@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Sparkles, Edit, CheckSquare2Icon, XSquareIcon, Check, X } from 'lucide-react'
+import { Plus, Sparkles, Edit, Check, X, Search, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Table,
@@ -15,6 +15,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { PageSizeSelect } from '@/components/page-size-select'
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/components/auth-provider'
 import { dateFormat } from '@/lib/format'
 import type { Assignment } from '@/lib/types'
@@ -72,6 +73,10 @@ export default function TeacherQuizzesPage() {
     const [hasNextPage, setHasNextPage] = useState(false)
     const [hasPrevPage, setHasPrevPage] = useState(false)
     const [togglingAssignmentId, setTogglingAssignmentId] = useState<string | null>(null)
+    const [searchInput, setSearchInput] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [sortField, setSortField] = useState<'title' | 'questionCount' | 'createdDate' | 'dueDate'>('title')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
     const fetchQuizzes = useCallback(
         async (page: number, limit: number, showSkeleton = false) => {
@@ -99,8 +104,7 @@ export default function TeacherQuizzesPage() {
                 setHasNextPage(Boolean(response.pagination.hasNextPage))
                 setHasPrevPage(Boolean(response.pagination.hasPrevPage))
             } catch (error) {
-                const message =
-                    error instanceof Error ? error.message : getToastMessage('loginFailed', language)
+                const message = error instanceof Error ? error.message : getToastMessage('loginFailed', language)
                 toast.error(message, { className: TOAST_COLORS.error })
             } finally {
                 setIsLoading(false)
@@ -148,22 +152,62 @@ export default function TeacherQuizzesPage() {
         setTogglingAssignmentId(assignmentId)
         try {
             const response = await toggleAssignmentActiveStatus(accessToken, assignmentId)
-            setAssignments((prev) =>
-                prev.map((assignment) =>
-                    assignment.id === assignmentId
-                        ? { ...assignment, isActive: response.assignment.isActive }
-                        : assignment
-                )
-            )
-            toast.success(response.message || 'Cap nhat trang thai bai tap thanh cong')
+            setAssignments((prev) => prev.filter((assignment) => assignment.id !== assignmentId))
+            toast.success(response.message || getToastMessage('updateSuccess', language), { className: TOAST_COLORS.success })
         } catch (error) {
-            const message =
-                error instanceof Error ? error.message : 'Khong the cap nhat trang thai bai tap'
+            const message = error instanceof Error ? error.message : getToastMessage('updateFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setTogglingAssignmentId(null)
         }
     }
+
+    const handleSearchSubmit = () => {
+        setSearchQuery(searchInput.trim())
+    }
+
+    const clearSearch = () => {
+        setSearchInput('')
+        setSearchQuery('')
+    }
+
+    const filteredAndSortedAssignments = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase()
+        const filtered = assignments.filter((assignment) => {
+            if (!query) {
+                return true
+            }
+
+            const title = assignment.title?.toLowerCase() ?? ''
+            return title.includes(query)
+        })
+
+        const directionFactor = sortDirection === 'asc' ? 1 : -1
+
+        return [...filtered].sort((left, right) => {
+            let comparison = 0
+
+            if (sortField === 'questionCount') {
+                comparison = left.questionCount - right.questionCount
+            } else if (sortField === 'createdDate') {
+                comparison = new Date(left.createdDate).getTime() - new Date(right.createdDate).getTime()
+            } else if (sortField === 'dueDate') {
+                comparison = new Date(left.dueDate).getTime() - new Date(right.dueDate).getTime()
+            } else {
+                comparison = (left.title ?? '').localeCompare(right.title ?? '', language === 'vi' ? 'vi' : 'en', {
+                    sensitivity: 'base'
+                })
+            }
+
+            if (comparison === 0) {
+                comparison = (left.title ?? '').localeCompare(right.title ?? '', language === 'vi' ? 'vi' : 'en', {
+                    sensitivity: 'base'
+                })
+            }
+
+            return comparison * directionFactor
+        })
+    }, [assignments, language, searchQuery, sortDirection, sortField])
 
     const renderPagination = () => (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
@@ -220,6 +264,124 @@ export default function TeacherQuizzesPage() {
                 </div>
             </div>
 
+            <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+                <CardContent>
+                    <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+                        <div className="w-full max-w-md mx-auto">
+                            <div className="flex justify-center mb-3">
+                                <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
+                                    {t.teacher.assignments.overview.searchOrSortOrFilter.search.title}
+                                </label>
+                            </div>
+
+                            <form
+                                className="flex flex-col items-center gap-3 md:max-w-md"
+                                onSubmit={(event) => {
+                                    event.preventDefault()
+                                    handleSearchSubmit()
+                                }}
+                            >
+                                <div className="relative w-full max-w-sm">
+                                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        value={searchInput}
+                                        onChange={(event) => setSearchInput(event.target.value)}
+                                        placeholder={t.teacher.assignments.overview.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                                        className="h-11 w-full rounded-full pl-10 pr-4"
+                                    />
+                                </div>
+
+                                <div className="flex justify-center gap-2">
+                                    <Button type="submit" className="rounded-full px-5">
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.search.searchButton}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="rounded-full px-5"
+                                        onClick={clearSearch}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.search.resetButton}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div className="w-full max-w-3xl mx-auto">
+                            <div className="flex justify-center mb-3">
+                                <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
+                                    {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.title}
+                                </label>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'title' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('title')}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldTitle}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'questionCount' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('questionCount')}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldNumberOfQuestions}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'createdDate' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('createdDate')}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldCreatedDate}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'dueDate' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('dueDate')}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldDueDate}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-center mt-3 mb-3">
+                                <label className="inline-block rounded-md border-2 border-black px-3 py-1 text-sm font-bold dark:border-white">
+                                    {t.teacher.assignments.overview.searchOrSortOrFilter.sort.order.title}
+                                </label>
+                            </div>
+
+                            <div className="space-y-2 text-center">
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortDirection('asc')}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.order.asc}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortDirection('desc')}
+                                    >
+                                        {t.teacher.assignments.overview.searchOrSortOrFilter.sort.order.desc}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             <Card className="border-0 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-800/70 dark:to-slate-800/50 backdrop-blur-sm shadow-glow">
                 <CardHeader>
                     <CardTitle className="bg-gradient-text">{t.teacher.assignments.overview.tableView.title}</CardTitle>
@@ -228,7 +390,7 @@ export default function TeacherQuizzesPage() {
                 <CardContent>
                     {isLoading ? (
                         <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
-                    ) : assignments.length === 0 ? (
+                    ) : filteredAndSortedAssignments.length === 0 ? (
                         <div className="py-10 text-center text-muted-foreground">{t.common.noData}</div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -246,7 +408,7 @@ export default function TeacherQuizzesPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {assignments.map((assignment) => (
+                                    {filteredAndSortedAssignments.map((assignment: TableAssignment) => (
                                         <TableRow key={assignment.id}>
                                             <TableCell className="font-medium text-center">{assignment.title}</TableCell>
                                             <TableCell className="text-center">{assignment.description || '-'}</TableCell>
@@ -267,13 +429,8 @@ export default function TeacherQuizzesPage() {
                                                         size="sm"
                                                         onClick={() => handleToggleAssignmentStatus(assignment.id)}
                                                         disabled={Boolean(togglingAssignmentId)}
-                                                        title={assignment.isActive ? 'Vo hieu hoa bai tap' : 'Kich hoat bai tap'}
                                                     >
-                                                        {assignment.isActive ? (
-                                                            <X className="w-8 h-8 text-destructive" />
-                                                        ) : (
-                                                            <Check className="w-8 h-8 text-green-600" />
-                                                        )}
+                                                        <Trash className="w-8 h-8 text-destructive" />
                                                     </Button>
                                                 </div>
                                             </TableCell>

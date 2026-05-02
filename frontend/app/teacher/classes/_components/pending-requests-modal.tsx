@@ -12,6 +12,7 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 import { Loader2, UserCheck, UserX, QrCode } from 'lucide-react'
 import { useLanguage } from '@/components/language-provider'
 import { dateTimeFormat } from '@/lib/format'
+import { getToastMessage } from '@/lib/toast/message'
 
 interface PendingRequestsModalProps {
     isOpen: boolean
@@ -47,12 +48,7 @@ export function PendingRequestsModal({
         if (!isOpen) {
             return
         }
-
-        setPendingRequests(
-            classItem?.classMembers?.filter(
-                request => !request.isApproved && !request.isRejected && !request.isBanned
-            ) ?? []
-        )
+        setPendingRequests(classItem?.classMembers?.filter(request => !request.isApproved && !request.isRejected && !request.isBanned) ?? [])
     }, [classItem, isOpen])
 
     const removePendingRequest = (studentId: string) => {
@@ -73,7 +69,7 @@ export function PendingRequestsModal({
             await onActionSuccess()
         } catch (error) {
             setPendingRequests(snapshot)
-            const message = error instanceof Error ? error.message : 'Không thể duyệt yêu cầu'
+            const message = error instanceof Error ? error.message : getToastMessage('acceptStudentFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setProcessingRequestId(null)
@@ -92,7 +88,7 @@ export function PendingRequestsModal({
             await onActionSuccess()
         } catch (error) {
             setPendingRequests(snapshot)
-            const message = error instanceof Error ? error.message : 'Không thể từ chối yêu cầu'
+            const message = error instanceof Error ? error.message : getToastMessage('rejectStudentFailed', language)
             toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setProcessingRequestId(null)

@@ -24,6 +24,9 @@ import {
 import { dateTimeFormat } from '@/lib/format'
 import type { ClassMember } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
+import { toast } from 'sonner'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
 type StudentListTableProps = {
     members: ClassMember[]
@@ -99,7 +102,7 @@ export function StudentListTable({
     onPrevPage,
     onNextPage,
 }: StudentListTableProps) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [memberToRemove, setMemberToRemove] = useState<ClassMember | null>(null)
 
     const normalizedSearch = searchValue.trim().toLowerCase()
@@ -126,7 +129,7 @@ export function StudentListTable({
             await onDeactivateMember(memberToRemove)
             setMemberToRemove(null)
         } catch {
-            // Error toast is handled by page container.
+            toast.error(getToastMessage('removeStudentFailed', language), { className: TOAST_COLORS.error })
         }
     }
 
@@ -248,7 +251,6 @@ export function StudentListTable({
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-
         </>
     )
 }
