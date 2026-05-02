@@ -768,6 +768,15 @@ export const translations = {
         history: 'Assignment history',
         progress: 'My progress',
         settings: 'Account settings'
+      },
+      teacher: {
+        overview: 'Overview',
+        classes: 'Class management',
+        students: 'Student management',
+        assignments: 'Assignment management',
+        results: 'Learning results',
+        trashBin: 'Trash bin',
+        settings: 'Account settings'
       }
     },
 
@@ -1576,6 +1585,15 @@ export const translations = {
         history: 'Lịch sử bài tập',
         progress: 'Tiến độ học tập',
         settings: 'Cài đặt'
+      },
+      teacher: {
+        overview: 'Tổng quan',
+        classes: 'Quản lí lớp học',
+        students: 'Quản lí học sinh',
+        assignments: 'Quản lí câu hỏi',
+        results: 'Kết quả học tập',
+        trashBin: 'Thùng rác',
+        settings: 'Cài đặt tài khoản'
       }
     },
 

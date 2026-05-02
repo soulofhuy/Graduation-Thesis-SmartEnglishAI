@@ -6,6 +6,7 @@ import { SidebarLayout } from '@/components/sidebar-layout'
 import { teacherNavItems } from '@/lib/constants'
 import { useAuth } from '@/components/auth-provider'
 import { getMyProfile } from '@/services/profiles'
+import { useLanguage } from '@/components/language-provider'
 
 export default function TeacherLayout({
   children,
@@ -14,10 +15,11 @@ export default function TeacherLayout({
 }) {
   const router = useRouter()
   const { accessToken } = useAuth()
+  const { t } = useLanguage()
   const [userName, setUserName] = useState('')
 
   const navItems = teacherNavItems.map((item) => ({
-    label: item.label,
+    label: t.navRoles.teacher[item.labelKey] ?? item.label,
     href: item.href,
     icon: <item.icon className="w-5 h-5" />,
   }))
