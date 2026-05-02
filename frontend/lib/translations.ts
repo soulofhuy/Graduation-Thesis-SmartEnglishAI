@@ -129,6 +129,24 @@ export const translations = {
 
     // Teacher Dashboard
     teacher: {
+      overview: {
+        title: 'Teacher dashboard',
+        description: 'View an overview of your teaching activities',
+        statistic: {
+          fieldTotalClasses: 'Total classes',
+          fieldTotalStudents: 'Total students',
+          fieldTotalAssignments: 'Total assignments',
+          fieldTotalPendingRequests: 'Pending requests'
+        },
+        tableView: {
+          title: 'Recent assignments',
+          columnTitle: 'Assignment name',
+          columnClass: 'Class',
+          columnCreatedDate: 'Created date',
+          columnDueDate: 'Due date',
+          columnSubmissionCount: 'Submissions'
+        }
+      },
       classes: {
         searchOrSortOrFilter: {
           search: {
@@ -911,6 +929,24 @@ export const translations = {
 
     // Teacher Dashboard
     teacher: {
+      overview: {
+        title: 'Trang tổng quan dành cho giáo viên',
+        description: 'Xem tổng quan các công việc của giáo viên qua dashboard',
+        statistic: {
+          fieldTotalClasses: 'Tổng số lớp học',
+          fieldTotalStudents: 'Tổng số học sinh',
+          fieldTotalAssignments: 'Tổng số bài tập',
+          fieldTotalPendingRequests: 'Tổng số yêu cầu đang chờ duyệt'
+        },
+        tableView: {
+          title: 'Danh sách các bài tập gần đây',
+          columnTitle: 'Tiêu đề',
+          columnClass: 'Lớp học',
+          columnCreatedDate: 'Ngày tạo',
+          columnDueDate: 'Ngày đến hạn',
+          columnSubmissionCount: 'Số lượng học sinh nộp bài'
+        }
+      },
       classes: {
         searchOrSortOrFilter: {
           search: {

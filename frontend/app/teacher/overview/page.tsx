@@ -19,6 +19,7 @@ import { useLanguage } from '@/components/language-provider'
 import { toast } from 'sonner'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
+import { dateFormat } from '@/lib/format'
 
 export default function TeacherOverviewPage() {
   const { accessToken, isHydrated } = useAuth()
@@ -45,22 +46,22 @@ export default function TeacherOverviewPage() {
 
     return [
       {
-        title: 'Tổng số lớp học',
+        title: t.teacher.overview.statistic.fieldTotalClasses,
         value: statistic?.totalClasses || 0,
         icon: <Users className="w-5 h-5" />,
       },
       {
-        title: 'Tổng số học sinh',
+        title: t.teacher.overview.statistic.fieldTotalStudents,
         value: statistic?.totalStudents || 0,
         icon: <Users className="w-5 h-5" />,
       },
       {
-        title: 'Tổng số học sinh đang chờ duyệt',
+        title: t.teacher.overview.statistic.fieldTotalPendingRequests,
         value: statistic?.totalPendingStudents || 0,
         icon: <Users className="w-5 h-5" />,
       },
       {
-        title: 'Tổng số bài tập đã tạo',
+        title: t.teacher.overview.statistic.fieldTotalAssignments,
         value: statistic?.totalAssignments || 0,
         icon: <Users className="w-5 h-5" />,
       }
@@ -74,6 +75,7 @@ export default function TeacherOverviewPage() {
       id: item.id,
       name: item.title,
       class: item.className,
+      createdAt: dateFormat(item.createdAt.toString()),
       dueDate: item.dueDate ? new Date(item.dueDate).toLocaleDateString(language) : 'Không có',
       submissions: `${item.submittedCount} học sinh đã nộp`,
     }))
@@ -82,12 +84,10 @@ export default function TeacherOverviewPage() {
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
       <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-text">
-          Tổng quan
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Chào mừng trở lại, thầy Nguyễn Văn A
-        </p>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{t.teacher.overview.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.teacher.overview.description}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -96,43 +96,28 @@ export default function TeacherOverviewPage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      {/* <div className="flex flex-col sm:flex-row gap-4">
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Tạo bài tập
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Sparkles className="w-4 h-4" />
-          Tạo câu hỏi bằng AI
-        </Button>
-      </div> */}
-
       <Card>
-        <CardHeader>
-          <CardTitle>Bài tập gần đây</CardTitle>
-          <CardDescription>
-            Danh sách các bài tập được giao gần đây nhất
-          </CardDescription>
+        <CardHeader className="mb-3">
+          <CardTitle>{t.teacher.overview.tableView.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tên bài tập</TableHead>
-                  <TableHead>Lớp học</TableHead>
-                  <TableHead>Hạn nộp</TableHead>
-                  <TableHead>Nộp bài</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnTitle}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnClass}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnCreatedDate}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnDueDate}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnSubmissionCount}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentAssignments.map((assignment) => (
-                  <TableRow key={assignment.id}>
-                    <TableCell className="font-medium">
-                      {assignment.name}
-                    </TableCell>
+                  <TableRow key={assignment.id} className="text-center">
+                    <TableCell>{assignment.name}</TableCell>
                     <TableCell>{assignment.class}</TableCell>
+                    <TableCell>{assignment.createdAt}</TableCell>
                     <TableCell>{assignment.dueDate}</TableCell>
                     <TableCell>{assignment.submissions}</TableCell>
                   </TableRow>
