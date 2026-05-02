@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
     Table,
     TableBody,
@@ -11,14 +12,7 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { RotateCcw, Trash2, Filter } from 'lucide-react'
+import { RotateCcw, Trash2, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getToastMessage } from '@/lib/toast/message'
@@ -29,6 +23,8 @@ import { dateTimeFormat } from '@/lib/format'
 import { deleteAssignment, getDeactivatedAssignments, toggleAssignmentActiveStatus } from '@/services/teacher/assignments'
 
 type TrashItemType = 'class' | 'assignment'
+type TrashSortField = 'title' | 'description' | 'deletedAt'
+type SortDirection = 'asc' | 'desc'
 
 interface TrashItem {
     id: string
@@ -49,6 +45,10 @@ export default function TrashPage() {
     const [trashItems, setTrashItems] = useState<TrashItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [filterType, setFilterType] = useState<TrashItemType>('class')
+    const [searchInput, setSearchInput] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [sortField, setSortField] = useState<TrashSortField>('deletedAt')
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
     useEffect(() => {
         if (!accessToken) return
@@ -106,8 +106,44 @@ export default function TrashPage() {
         }
     }, [accessToken, filterType])
 
-    const filteredItems = trashItems.filter(item => item.type === filterType)
-    const selectedTypeLabel = t.teacher.trashBin.filter[filterType]
+    const handleSearchSubmit = () => {
+        setSearchQuery(searchInput.trim())
+    }
+
+    const clearSearch = () => {
+        setSearchInput('')
+        setSearchQuery('')
+    }
+
+    const filteredItems = trashItems
+        .filter(item => item.type === filterType)
+        .filter(item => {
+            const keyword = searchQuery.trim().toLowerCase()
+            if (!keyword) return true
+
+            return (
+                item.name.toLowerCase().includes(keyword) ||
+                (item.description || '').toLowerCase().includes(keyword)
+            )
+        })
+        .sort((a, b) => {
+            const direction = sortDirection === 'asc' ? 1 : -1
+
+            if (sortField === 'title') {
+                return direction * a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' })
+            }
+
+            if (sortField === 'description') {
+                const aDesc = a.description || ''
+                const bDesc = b.description || ''
+                return direction * aDesc.localeCompare(bDesc, 'vi', { sensitivity: 'base' })
+            }
+
+            const aTime = new Date(a.deletedAt).getTime()
+            const bTime = new Date(b.deletedAt).getTime()
+            return direction * ((Number.isNaN(aTime) ? 0 : aTime) - (Number.isNaN(bTime) ? 0 : bTime))
+        })
+    const selectedTypeLabel = t.teacher.trashBin.searchOrSortOrFilter.filter[filterType]
 
     const handleRestore = async (id: string, type: TrashItemType) => {
         if (!accessToken) return
@@ -164,18 +200,139 @@ export default function TrashPage() {
                 </div>
             </div>
 
-            <div className="flex items-center gap-3">
-                <Filter className="w-5 h-5 text-muted-foreground" />
-                <Select value={filterType} onValueChange={(value) => setFilterType(value as TrashItemType)}>
-                    <SelectTrigger className="w-[200px]">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="class">{t.teacher.trashBin.filter.class}</SelectItem>
-                        <SelectItem value="assignment">{t.teacher.trashBin.filter.assignment}</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+            <Card>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <div className="flex justify-center mb-4">
+                                <label className="inline-block rounded-md border-2 border-black rounded-md px-3 py-1 text-sm font-bold">
+                                    {t.teacher.trashBin.searchOrSortOrFilter.filter.title}
+                                </label>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                                <Button
+                                    onClick={() => setFilterType('class')}
+                                    className={`px-3 py-1 rounded-full border transition-colors ${filterType === 'class' ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                                >
+                                    {t.teacher.trashBin.searchOrSortOrFilter.filter.class}
+                                </Button>
+
+                                <Button
+                                    onClick={() => setFilterType('assignment')}
+                                    className={`px-3 py-1 rounded-full border transition-colors ${filterType === 'assignment' ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                                >
+                                    {t.teacher.trashBin.searchOrSortOrFilter.filter.assignment}
+                                </Button>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex justify-center mb-4">
+                                <label className="inline-block rounded-md border-2 border-black rounded-md px-3 py-1 text-sm font-bold">
+                                    {t.teacher.trashBin.searchOrSortOrFilter.search.title}
+                                </label>
+                            </div>
+                            <form
+                                className="flex flex-col items-center gap-3 md:max-w-md"
+                                onSubmit={(event) => {
+                                    event.preventDefault()
+                                    handleSearchSubmit()
+                                }}
+                            >
+                                <div className="relative w-full max-w-sm">
+                                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        value={searchInput}
+                                        onChange={(event) => setSearchInput(event.target.value)}
+                                        placeholder={t.teacher.trashBin.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                                        className="h-11 w-full rounded-full pl-10 pr-4"
+                                    />
+                                </div>
+
+                                <div className="flex justify-center gap-2">
+                                    <Button type="submit" className="rounded-full px-5">
+                                        {t.teacher.trashBin.searchOrSortOrFilter.search.searchButton}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="rounded-full px-5"
+                                        onClick={clearSearch}
+                                    >
+                                        {t.teacher.trashBin.searchOrSortOrFilter.search.resetButton}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <div className="flex justify-center mb-4">
+                                    <label className="inline-block border-2 border-black rounded-md px-3 py-1 text-sm font-bold dark:border-white">
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.sortItems.title}
+                                    </label>
+                                </div>
+
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'title' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('title')}
+                                    >
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.sortItems.fieldTitle}
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'description' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('description')}
+                                    >
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.sortItems.fieldDescription}
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        variant={sortField === 'deletedAt' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortField('deletedAt')}
+                                    >
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.sortItems.fieldDeletedDate}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* SORT ORDER */}
+                            <div>
+                                <div className="flex justify-center mb-4">
+                                    <label className="inline-block border-2 border-black rounded-md px-3 py-1 text-sm font-bold dark:border-white">
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.order.title}
+                                    </label>
+                                </div>
+
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortDirection('asc')}
+                                    >
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.order.asc}
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                                        className="rounded-full px-3 py-1"
+                                        onClick={() => setSortDirection('desc')}
+                                    >
+                                        {t.teacher.trashBin.searchOrSortOrFilter.sort.order.desc}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader className="mb-3">

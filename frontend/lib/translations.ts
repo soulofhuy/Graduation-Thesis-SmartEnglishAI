@@ -454,10 +454,31 @@ export const translations = {
         title: 'Trash bin for your deleted items',
         description:
           'Manage deleted items. You can restore or permanently delete them',
-        filter: {
-          class: 'Class',
-          assignment: 'Assignment',
-          question: 'Question'
+        searchOrSortOrFilter: {
+          filter: {
+            title: 'Filter by type',
+            class: 'Class',
+            assignment: 'Assignment'
+          },
+          search: {
+            title: 'Search in trash bin',
+            searchFieldPlaceholder: 'Search by name or description',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldTitle: 'Title/name',
+              fieldDescription: 'Description',
+              fieldDeletedDate: 'Deleted date'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
         },
         table: {
           title: 'List of deleted items',
@@ -1223,10 +1244,31 @@ export const translations = {
         title: 'Thùng rác cho các mục đã xóa của bạn',
         description:
           'Quản lí các mục đã xóa. Bạn có thể khôi phục hoặc xóa vĩnh viễn',
-        filter: {
-          class: 'Lớp học',
-          assignment: 'Bài tập',
-          question: 'Câu hỏi'
+        searchOrSortOrFilter: {
+          filter: {
+            title: 'Lọc theo loại',
+            class: 'Lớp học',
+            assignment: 'Bài tập'
+          },
+          search: {
+            title: 'Tìm kiếm trong thùng rác',
+            searchFieldPlaceholder: 'Tìm theo tên hoặc mô tả',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldTitle: 'Tên',
+              fieldDescription: 'Mô tả',
+              fieldDeletedDate: 'Ngày xoá'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
         },
         table: {
           title: 'Danh sách mục đã xóa',
