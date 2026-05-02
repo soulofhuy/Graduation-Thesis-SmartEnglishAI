@@ -26,6 +26,7 @@ import { useAuth } from '@/components/auth-provider'
 import { getDeactivatedClasses, toggleClassStatus } from '@/services/teacher/classes'
 import { useLanguage } from '@/components/language-provider'
 import { dateTimeFormat } from '@/lib/format'
+import { getDeactivatedAssignments, toggleAssignmentActiveStatus } from '@/services/teacher/assignments'
 
 type TrashItemType = 'class' | 'assignment'
 
@@ -67,12 +68,19 @@ export default function TrashPage() {
                             name: cls.name || '',
                             type: 'class',
                             deletedAt: cls.deactivatedAt || new Date().toLocaleString('vi-VN'),
-                            description: cls.description || undefined
+                            description: cls.description || ''
                         }))
                         break
                     }
                     case 'assignment':
-                        items = []
+                        const result = await getDeactivatedAssignments(accessToken)
+                        items = result.assignments.map(ast => ({
+                            id: ast.id,
+                            name: ast.title || '',
+                            type: 'assignment',
+                            deletedAt: ast.deactivatedAt || new Date().toLocaleString('vi-VN'),
+                            description: ast.description || ''
+                        }))
                         break
                 }
 
@@ -112,7 +120,9 @@ export default function TrashPage() {
                     toast.success(getToastMessage('restoreSuccess', language), { className: TOAST_COLORS.success })
                     break
                 case 'assignment':
-                    // Handle assignment restoration
+                    await toggleAssignmentActiveStatus(accessToken, id)
+                    setTrashItems(prev => prev.filter(item => item.id !== id))
+                    toast.success(getToastMessage('restoreSuccess', language), { className: TOAST_COLORS.success })
                     break
             }
         } catch (error) {
@@ -162,9 +172,6 @@ export default function TrashPage() {
             <Card>
                 <CardHeader className="mb-3">
                     <CardTitle>{t.teacher.trashBin.table.title}</CardTitle>
-                    <CardDescription>
-                        {isLoading ? t.common.loading : `${filteredItems.length} ${t.teacher.trashBin.table.description}`}
-                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
@@ -173,7 +180,7 @@ export default function TrashPage() {
                         </div>
                     ) : filteredItems.length === 0 ? (
                         <div className="py-8 text-center">
-                            <p className="text-muted-foreground">{t.teacher.trashBin.table.description}</p>
+                            <p className="text-muted-foreground">{t.common.noData}</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
