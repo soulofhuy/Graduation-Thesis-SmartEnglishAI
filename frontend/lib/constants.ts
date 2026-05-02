@@ -18,39 +18,55 @@ export type StudentNavLabelKey =
   | 'progress'
   | 'settings';
 
+export type TeacherNavLabelKey =
+  | 'overview'
+  | 'classes'
+  | 'students'
+  | 'assignments'
+  | 'results'
+  | 'trashBin'
+  | 'settings';
+
 export const teacherNavItems = [
   {
     label: 'Tổng quan',
+    labelKey: 'overview' as TeacherNavLabelKey,
     href: '/teacher/overview',
     icon: LayoutDashboard
   },
   {
     label: 'Quản lí lớp học',
+    labelKey: 'classes' as TeacherNavLabelKey,
     href: '/teacher/classes',
     icon: Users
   },
   {
     label: 'Quản lí học sinh',
+    labelKey: 'students' as TeacherNavLabelKey,
     href: '/teacher/students',
     icon: UserRound
   },
   {
     label: 'Quản lí câu hỏi',
+    labelKey: 'assignments' as TeacherNavLabelKey,
     href: '/teacher/quizzes',
     icon: BookOpen
   },
   {
     label: 'Kết quả học tập',
+    labelKey: 'results' as TeacherNavLabelKey,
     href: '/teacher/results',
     icon: BarChart3
   },
   {
     label: 'Thùng rác',
+    labelKey: 'trashBin' as TeacherNavLabelKey,
     href: '/teacher/trash',
     icon: Trash2
   },
   {
     label: 'Cài đặt tài khoản',
+    labelKey: 'settings' as TeacherNavLabelKey,
     href: '/teacher/settings',
     icon: Settings
   }
