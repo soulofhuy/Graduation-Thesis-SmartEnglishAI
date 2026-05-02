@@ -18,7 +18,7 @@ router.get(
   ClassTeacherController.getAllDeactivatedClassesByTeacherId
 );
 
-router.get(
+router.delete(
   '/classes/delete/:classId',
   verifyJWT,
   ClassTeacherController.deleteClass

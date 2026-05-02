@@ -23,10 +23,10 @@ import { toast } from 'sonner'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getToastMessage } from '@/lib/toast/message'
 import { useAuth } from '@/components/auth-provider'
-import { getDeactivatedClasses, toggleClassStatus } from '@/services/teacher/classes'
+import { deleteClass, getDeactivatedClasses, toggleClassStatus } from '@/services/teacher/classes'
 import { useLanguage } from '@/components/language-provider'
 import { dateTimeFormat } from '@/lib/format'
-import { getDeactivatedAssignments, toggleAssignmentActiveStatus } from '@/services/teacher/assignments'
+import { deleteAssignment, getDeactivatedAssignments, toggleAssignmentActiveStatus } from '@/services/teacher/assignments'
 
 type TrashItemType = 'class' | 'assignment'
 
@@ -137,7 +137,15 @@ export default function TrashPage() {
         try {
             switch (type) {
                 case 'class':
+                    await deleteClass(accessToken, id)
+                    setTrashItems(prev => prev.filter(item => item.id !== id))
+                    toast.success(getToastMessage('deleteSuccess', language), { className: TOAST_COLORS.success })
+                    break
                 case 'assignment':
+                    await deleteAssignment(accessToken, id)
+                    setTrashItems(prev => prev.filter(item => item.id !== id))
+                    toast.success(getToastMessage('deleteSuccess', language), { className: TOAST_COLORS.success })
+                    break
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : getToastMessage('deleteFailed', language)

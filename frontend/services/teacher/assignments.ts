@@ -270,3 +270,23 @@ export async function getDeactivatedAssignments(token: string) {
 
   return { assignments: payload.data, message: payload.message };
 }
+
+export async function deleteAssignment(token: string, assignmentId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/assignments/delete/${assignmentId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  const payload = (await response.json()) as ApiSuccess<unknown> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Delete assignment failed';
+    throw new Error(message);
+  }
+  return { message: payload.message };
+}
