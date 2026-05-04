@@ -270,12 +270,15 @@ export default function CreateQuizPage() {
             { key: 'preview', label: 'View preview' },
         ]
 
-    const handleGoBack = () => {
-        if (window.history.length > 1) {
-            router.back()
-            return
+    const handleBackButton = () => {
+        if (step === 'create') {
+            setStep('mode-select')
+        } else {
+            router.push('/teacher/quizzes')
         }
+    }
 
+    const handleGoBack = () => {
         router.push('/teacher/quizzes')
     }
 
@@ -404,7 +407,7 @@ export default function CreateQuizPage() {
                         type="button"
                         variant="outline"
                         size="icon"
-                        onClick={handleGoBack}
+                        onClick={handleBackButton}
                     >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
@@ -416,6 +419,7 @@ export default function CreateQuizPage() {
                 <AICreateModeCard
                     onSelectTraditional={handleSelectTraditionalMode}
                     onSelectAI={handleSelectAiMode}
+                    onClose={handleGoBack}
                 />
             ) : (
                 <Card className="overflow-hidden py-0">
