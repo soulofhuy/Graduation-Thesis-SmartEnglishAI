@@ -549,17 +549,30 @@ export default function CreateQuizPage() {
                             />
                         )}
 
-                        {activeTab === 'edit' && createMode === 'ai' && (
-                            <div className="space-y-4">
-                                <div className="bg-white dark:bg-slate-900 border rounded-lg p-6">
-                                    <div className="text-sm text-muted-foreground mb-4">
-                                        <p>Nội dung JSON từ AI - Bạn có thể edit chi tiết:</p>
-                                    </div>
-                                    <pre className="bg-slate-100 dark:bg-slate-800 p-4 rounded overflow-auto max-h-[500px] text-xs">
-                                        {JSON.stringify(payloadPreview.tasks, null, 2)}
-                                    </pre>
-                                </div>
-                            </div>
+                        {activeTab === 'edit' && createMode === 'ai' && selectedTask && selectedQuestion && (
+                            <QuizQuestionsSection
+                                tasks={tasks}
+                                selectedTask={selectedTask}
+                                selectedQuestion={selectedQuestion}
+                                usesSharedPassage={usesSharedPassage}
+                                showQuestionComposer={showQuestionComposer}
+                                isReadingComprehension={isReadingComprehension}
+                                getSharedPassageContent={getSharedPassageContent}
+                                onAddTask={handleAddTask}
+                                onSelectTask={handleSelectTask}
+                                onDeleteTask={handleDeleteTask}
+                                onChangeTaskType={handleChangeTaskType}
+                                onChangeTaskDescription={handleChangeTaskDescription}
+                                onAddQuestion={handleAddQuestion}
+                                onDeleteQuestion={handleDeleteSelectedQuestion}
+                                onSelectQuestion={handleSelectQuestion}
+                                onChangeSharedPassage={updateSharedPassageContent}
+                                onChangeQuestionContent={handleChangeQuestionContent}
+                                onAddChoice={handleAddChoice}
+                                onToggleCorrectChoice={handleToggleCorrectChoice}
+                                onDeleteChoice={handleDeleteChoice}
+                                onChangeChoiceContent={handleChangeChoiceContent}
+                            />
                         )}
 
                         {activeTab === 'preview' && (
