@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Wand2, ClipboardList } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,7 @@ import {
     type QuestionDraft,
     type TaskDraft
 } from '../_components/create'
+import { AICreateModeCard, AIChatSection } from '../_components/create-by-ai'
 import type { Class, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
@@ -60,6 +61,7 @@ export default function CreateQuizPage() {
         isSingleAttempt: true,
         canViewResult: true,
     })
+    const [aiPrompt, setAiPrompt] = useState('')
     const [tasks, setTasks] = useState<TaskDraft[]>([initialTask])
     const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask.id)
     const [selectedQuestionId, setSelectedQuestionId] = useState<string>(initialTask.questions[0].id)
@@ -199,7 +201,34 @@ export default function CreateQuizPage() {
             return
         }
 
+        if (createMode === 'ai') {
+            setActiveTab('chat')
+            return
+        }
+
         setActiveTab('questions')
+    }
+
+    const handleSelectTraditionalMode = () => {
+        setCreateMode('traditional')
+        setStep('create')
+        setActiveTab('basic')
+    }
+
+    const handleSelectAiMode = () => {
+        setCreateMode('ai')
+        setStep('create')
+        setActiveTab('basic')
+    }
+
+    const handleGenerateAiContent = () => {
+        if (!aiPrompt.trim()) {
+            toast.error('Vui lòng nhập yêu cầu cho AI trước khi tạo')
+            return
+        }
+
+        toast.success('Đã nhận yêu cầu. Phần sinh nội dung AI sẽ được cập nhật tiếp.')
+        setActiveTab('edit')
     }
 
     const submitCreateAssignment = async () => {
@@ -384,52 +413,10 @@ export default function CreateQuizPage() {
             </div>
 
             {step === 'mode-select' ? (
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <Card className="w-full max-w-2xl overflow-hidden py-0">
-                        <div className="p-8">
-                            <div className="space-y-6">
-                                <div className="text-center space-y-2">
-                                    <h2 className="text-xl font-semibold">{t.teacher.assignments.createAssignment.title}</h2>
-                                    <p className="text-sm text-muted-foreground">Chọn cách tạo bài tập</p>
-                                </div>
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setCreateMode('traditional')
-                                            setStep('create')
-                                            setActiveTab('basic')
-                                        }}
-                                        className="group rounded-2xl border border-border/70 bg-background/70 p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
-                                    >
-                                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 p-4 text-primary mb-4">
-                                            <ClipboardList className="h-10 w-10" />
-                                        </div>
-                                        <div className="text-sm font-semibold text-foreground text-center">
-                                            Tạo câu hỏi cho bài kiểm tra
-                                        </div>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setCreateMode('ai')
-                                            setStep('create')
-                                            setActiveTab('basic')
-                                        }}
-                                        className="group rounded-2xl border border-border/70 bg-background/70 p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
-                                    >
-                                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 p-4 text-primary mb-4">
-                                            <Wand2 className="h-10 w-10" />
-                                        </div>
-                                        <div className="text-sm font-semibold text-foreground text-center">
-                                            Tạo bằng AI
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </Card>
-                </div>
+                <AICreateModeCard
+                    onSelectTraditional={handleSelectTraditionalMode}
+                    onSelectAI={handleSelectAiMode}
+                />
             ) : (
                 <Card className="overflow-hidden py-0">
                     <div className="border-b px-8">
@@ -522,6 +509,7 @@ export default function CreateQuizPage() {
                                 classes={teacherClasses}
                                 isClassesLoading={isClassesLoading}
                                 onContinue={goToQuestionTab}
+                                continueLabel={createMode === 'ai' ? 'Sang tab Chat' : undefined}
                             />
                         )}
 
@@ -552,13 +540,13 @@ export default function CreateQuizPage() {
                         )}
 
                         {activeTab === 'chat' && createMode === 'ai' && (
-                            <div className="space-y-4">
-                                <div className="bg-white dark:bg-slate-900 border rounded-lg p-6 min-h-[500px]">
-                                    <div className="text-center text-muted-foreground">
-                                        <p>Hệ thống AI Chat - Sắp cập nhật</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <AIChatSection
+                                prompt={aiPrompt}
+                                onPromptChange={setAiPrompt}
+                                onGenerate={handleGenerateAiContent}
+                                isGenerating={false}
+                                canGenerate={Boolean(aiPrompt.trim())}
+                            />
                         )}
 
                         {activeTab === 'edit' && createMode === 'ai' && (
