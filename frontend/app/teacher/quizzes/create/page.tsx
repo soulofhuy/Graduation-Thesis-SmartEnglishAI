@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Wand2, ClipboardList } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
@@ -44,7 +44,9 @@ export default function CreateQuizPage() {
     }
 
     const initialTask = createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))
-    const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview'>('basic')
+    const [step, setStep] = useState<'mode-select' | 'create'>('mode-select')
+    const [createMode, setCreateMode] = useState<'traditional' | 'ai' | null>(null)
+    const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview' | 'chat' | 'edit'>('basic')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isClassesLoading, setIsClassesLoading] = useState(true)
@@ -226,11 +228,18 @@ export default function CreateQuizPage() {
         }
     }
 
-    const topTabs = [
-        { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
-        { key: 'questions', label: t.teacher.assignments.createAssignment.title },
-        { key: 'preview', label: 'View preview' },
-    ] as const
+    const topTabs = (createMode === 'traditional' || step === 'mode-select')
+        ? [
+            { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
+            { key: 'questions', label: t.teacher.assignments.createAssignment.title },
+            { key: 'preview', label: 'View preview' },
+        ]
+        : [
+            { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
+            { key: 'chat', label: 'Chat' },
+            { key: 'edit', label: 'Edit nội dung' },
+            { key: 'preview', label: 'View preview' },
+        ]
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -374,10 +383,57 @@ export default function CreateQuizPage() {
                 </div>
             </div>
 
-            <Card className="overflow-hidden py-0">
-                <div className="border-b px-8">
-                    <div className="flex items-center justify-between py-4">
-                        <div className="flex items-center justify-between gap-3">
+            {step === 'mode-select' ? (
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <Card className="w-full max-w-2xl overflow-hidden py-0">
+                        <div className="p-8">
+                            <div className="space-y-6">
+                                <div className="text-center space-y-2">
+                                    <h2 className="text-xl font-semibold">{t.teacher.assignments.createAssignment.title}</h2>
+                                    <p className="text-sm text-muted-foreground">Chọn cách tạo bài tập</p>
+                                </div>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setCreateMode('traditional')
+                                            setStep('create')
+                                            setActiveTab('basic')
+                                        }}
+                                        className="group rounded-2xl border border-border/70 bg-background/70 p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+                                    >
+                                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 p-4 text-primary mb-4">
+                                            <ClipboardList className="h-10 w-10" />
+                                        </div>
+                                        <div className="text-sm font-semibold text-foreground text-center">
+                                            Tạo câu hỏi cho bài kiểm tra
+                                        </div>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setCreateMode('ai')
+                                            setStep('create')
+                                            setActiveTab('basic')
+                                        }}
+                                        className="group rounded-2xl border border-border/70 bg-background/70 p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+                                    >
+                                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 p-4 text-primary mb-4">
+                                            <Wand2 className="h-10 w-10" />
+                                        </div>
+                                        <div className="text-sm font-semibold text-foreground text-center">
+                                            Tạo bằng AI
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            ) : (
+                <Card className="overflow-hidden py-0">
+                    <div className="border-b px-8">
+                        <div className="flex items-center justify-between py-4">
                             <div className="flex gap-5 overflow-auto">
                                 {topTabs.map((tab) => {
                                     const isActive = activeTab === tab.key
@@ -406,11 +462,21 @@ export default function CreateQuizPage() {
                                                         return
                                                     }
 
-                                                    setActiveTab(tab.key)
+                                                    setActiveTab(tab.key as 'basic' | 'questions' | 'preview' | 'chat' | 'edit')
                                                     return
                                                 }
 
-                                                setActiveTab(tab.key)
+                                                if (tab.key === 'chat' || tab.key === 'edit') {
+                                                    const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
+                                                    if (!basicValidation.success) {
+                                                        toast.error(basicValidation.error.issues[0]?.message)
+                                                        return
+                                                    }
+                                                    setActiveTab(tab.key as 'basic' | 'questions' | 'preview' | 'chat' | 'edit')
+                                                    return
+                                                }
+
+                                                setActiveTab(tab.key as 'basic' | 'questions' | 'preview' | 'chat' | 'edit')
                                             }}
                                         >
                                             {tab.label}
@@ -420,8 +486,19 @@ export default function CreateQuizPage() {
                             </div>
                         </div>
 
-                        <div>
-                            <div className="flex gap-2">
+                        <div className="border-t px-8">
+                            <div className="flex gap-2 py-4">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setStep('mode-select')
+                                        setCreateMode(null)
+                                        setActiveTab('basic')
+                                    }}
+                                >
+                                    Thay đổi
+                                </Button>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -436,56 +513,81 @@ export default function CreateQuizPage() {
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="p-4">
-                    {activeTab === 'basic' && (
-                        <QuizBasicInfoSection
-                            formData={formData}
-                            setFormData={setFormData}
-                            classes={teacherClasses}
-                            isClassesLoading={isClassesLoading}
-                            onContinue={goToQuestionTab}
-                        />
-                    )}
+                    <div className="p-4">
+                        {activeTab === 'basic' && (
+                            <QuizBasicInfoSection
+                                formData={formData}
+                                setFormData={setFormData}
+                                classes={teacherClasses}
+                                isClassesLoading={isClassesLoading}
+                                onContinue={goToQuestionTab}
+                            />
+                        )}
 
-                    {activeTab === 'questions' && selectedTask && selectedQuestion && (
-                        <QuizQuestionsSection
-                            tasks={tasks}
-                            selectedTask={selectedTask}
-                            selectedQuestion={selectedQuestion}
-                            usesSharedPassage={usesSharedPassage}
-                            showQuestionComposer={showQuestionComposer}
-                            isReadingComprehension={isReadingComprehension}
-                            getSharedPassageContent={getSharedPassageContent}
-                            onAddTask={handleAddTask}
-                            onSelectTask={handleSelectTask}
-                            onDeleteTask={handleDeleteTask}
-                            onChangeTaskType={handleChangeTaskType}
-                            onChangeTaskDescription={handleChangeTaskDescription}
-                            onAddQuestion={handleAddQuestion}
-                            onDeleteQuestion={handleDeleteSelectedQuestion}
-                            onSelectQuestion={handleSelectQuestion}
-                            onChangeSharedPassage={updateSharedPassageContent}
-                            onChangeQuestionContent={handleChangeQuestionContent}
-                            onAddChoice={handleAddChoice}
-                            onToggleCorrectChoice={handleToggleCorrectChoice}
-                            onDeleteChoice={handleDeleteChoice}
-                            onChangeChoiceContent={handleChangeChoiceContent}
-                        />
-                    )}
+                        {activeTab === 'questions' && selectedTask && selectedQuestion && (
+                            <QuizQuestionsSection
+                                tasks={tasks}
+                                selectedTask={selectedTask}
+                                selectedQuestion={selectedQuestion}
+                                usesSharedPassage={usesSharedPassage}
+                                showQuestionComposer={showQuestionComposer}
+                                isReadingComprehension={isReadingComprehension}
+                                getSharedPassageContent={getSharedPassageContent}
+                                onAddTask={handleAddTask}
+                                onSelectTask={handleSelectTask}
+                                onDeleteTask={handleDeleteTask}
+                                onChangeTaskType={handleChangeTaskType}
+                                onChangeTaskDescription={handleChangeTaskDescription}
+                                onAddQuestion={handleAddQuestion}
+                                onDeleteQuestion={handleDeleteSelectedQuestion}
+                                onSelectQuestion={handleSelectQuestion}
+                                onChangeSharedPassage={updateSharedPassageContent}
+                                onChangeQuestionContent={handleChangeQuestionContent}
+                                onAddChoice={handleAddChoice}
+                                onToggleCorrectChoice={handleToggleCorrectChoice}
+                                onDeleteChoice={handleDeleteChoice}
+                                onChangeChoiceContent={handleChangeChoiceContent}
+                            />
+                        )}
 
-                    {activeTab === 'preview' && (
-                        <QuizPreviewContent payload={payloadPreview} />
-                    )}
-                </div>
-            </Card >
+                        {activeTab === 'chat' && createMode === 'ai' && (
+                            <div className="space-y-4">
+                                <div className="bg-white dark:bg-slate-900 border rounded-lg p-6 min-h-[500px]">
+                                    <div className="text-center text-muted-foreground">
+                                        <p>Hệ thống AI Chat - Sắp cập nhật</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'edit' && createMode === 'ai' && (
+                            <div className="space-y-4">
+                                <div className="bg-white dark:bg-slate-900 border rounded-lg p-6">
+                                    <div className="text-sm text-muted-foreground mb-4">
+                                        <p>Nội dung JSON từ AI - Bạn có thể edit chi tiết:</p>
+                                    </div>
+                                    <pre className="bg-slate-100 dark:bg-slate-800 p-4 rounded overflow-auto max-h-[500px] text-xs">
+                                        {JSON.stringify(payloadPreview.tasks, null, 2)}
+                                    </pre>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'preview' && (
+                            <QuizPreviewContent payload={payloadPreview} />
+                        )}
+                    </div>
+                </Card>
+            )}
 
             <QuizPreviewModal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 payload={payloadPreview}
             />
-        </div >
+        </div>
     )
 }
+
+
