@@ -1,43 +1,81 @@
 export interface InstructionStep {
   stepNumber: number;
   title: string;
-  description: string;
+  description?: string;
 }
 
-export const AI_INSTRUCTION_STEPS: InstructionStep[] = [
+type Lang = 'en' | 'vi';
+
+const STEPS_VI: InstructionStep[] = [
   {
     stepNumber: 1,
-    title: 'Đăng nhập vào role Teacher',
-    description:
-      'Đăng nhập vào hệ thống bằng tài khoản Teacher trước khi thao tác.'
+    title: 'Đăng nhập vào hệ thống với phân quyền "Giáo viên"'
   },
   {
     stepNumber: 2,
-    title: 'Chuyển vào tab quản lý câu hỏi',
-    description:
-      'Mở tab quản lý câu hỏi bên navbar để vào đúng khu vực tạo bài tập.'
+    title: 'Nhấn vào tab "Quản lí câu hỏi" trên thanh điều hướng'
   },
   {
     stepNumber: 3,
-    title: 'Nhấn vào nút "Tạo BT bằng AI"',
-    description: 'Tìm và nhấn vào nút "Tạo BT bằng AI" trên trang quản lý.'
+    title: 'Nhấn vào nút "Tạo bài tập"'
   },
   {
     stepNumber: 4,
-    title: 'Kéo xuống dưới cùng và chọn "Bắt đầu"',
-    description:
-      'Lướt xuống cuối trang, tìm button có nội dung "Bắt đầu" rồi nhấn vào đó.'
+    title: 'Nhấn vào tùy chọn "Tạo bài tập bằng AI"'
   },
   {
     stepNumber: 5,
-    title: 'Điền thông tin bài tập cần thiết',
-    description:
-      'Nhập đầy đủ thông tin bài tập như tiêu đề, mô tả và các trường bắt buộc khác.'
+    title: 'Điền thông tin cần thiết cho bài tập cần tạo'
   },
   {
     stepNumber: 6,
-    title: 'Bắt đầu nhập prompt và xem câu hỏi',
-    description:
-      'Nhập prompt để AI sinh câu hỏi, sau đó xem và tinh chỉnh kết quả nếu cần.'
+    title: 'Bắt đầu nhập prompt và chờ phản hồi'
+  },
+  {
+    stepNumber: 7,
+    title: 'Xem lại các câu hỏi đã được tạo và chỉnh sửa nếu cần thiết'
+  },
+  {
+    stepNumber: 8,
+    title: 'Lưu bài tập của bạn'
   }
 ];
+
+const STEPS_EN: InstructionStep[] = [
+  {
+    stepNumber: 1,
+    title: 'Sign in as "Teacher"'
+  },
+  {
+    stepNumber: 2,
+    title: 'Go to "Assignment management" tab in the navbar'
+  },
+  {
+    stepNumber: 3,
+    title: 'Click button "Create assignment"'
+  },
+  {
+    stepNumber: 4,
+    title: 'Click option "Create assignment with AI"'
+  },
+  {
+    stepNumber: 5,
+    title: 'Fill in the necessary assignment information'
+  },
+  {
+    stepNumber: 6,
+    title: 'Enter prompt and wait for generated questions'
+  },
+  {
+    stepNumber: 7,
+    title: 'Review the generated questions and make necessary edits'
+  },
+  {
+    stepNumber: 8,
+    title: 'Save your assignment'
+  }
+];
+
+export function getInstructionSteps(lang: Lang = 'vi'): InstructionStep[] {
+  return lang === 'en' ? STEPS_EN : STEPS_VI;
+}

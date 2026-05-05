@@ -256,12 +256,12 @@ export default function TeacherQuizzesPage() {
                 <div className="flex gap-3">
                     <Button variant="outline" className="gap-2" onClick={() => setShowInstructionModal(true)}>
                         <Sparkles className="w-4 h-4" />
-                        {t.teacher.assignments.overview.createAssignmentByAIButton}
+                        {t.teacher.assignments.overview.viewAIInstructionButton}
                     </Button>
                     <Button asChild className="gap-2">
                         <Link href="/teacher/quizzes/create">
                             <Plus className="w-4 h-4" />
-                            {t.teacher.assignments.overview.createAssignmentManuallyButton}
+                            {t.teacher.assignments.overview.createAssignmentButton}
                         </Link>
                     </Button>
                 </div>

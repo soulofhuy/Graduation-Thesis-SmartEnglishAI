@@ -295,8 +295,8 @@ export const translations = {
           title: 'Manage your assignment',
           description:
             'Create and manage your assignments, and view assignment results',
-          createAssignmentByAIButton: 'Create assignment with AI',
-          createAssignmentManuallyButton: 'Create assignment manually',
+          viewAIInstructionButton: 'How to create assignment with AI?',
+          createAssignmentButton: 'Create assignment',
           tableView: {
             title: 'List of assignments',
             description: 'All assignments you have created',
@@ -1107,8 +1107,8 @@ export const translations = {
           title: 'Quản lí bài tập của bạn',
           description:
             'Tạo và quản lí các bài tập của bạn, và xem kết quả làm bài',
-          createAssignmentByAIButton: 'Tạo bài tập bằng AI',
-          createAssignmentManuallyButton: 'Tạo bài tập thủ công',
+          viewAIInstructionButton: 'Làm thế nào để tạo bài tập với AI?',
+          createAssignmentButton: 'Tạo bài tập thủ công',
           tableView: {
             title: 'Danh sách bài tập',
             description: 'Tất cả các bài tập bạn đã tạo',

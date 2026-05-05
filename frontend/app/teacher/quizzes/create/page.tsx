@@ -475,33 +475,9 @@ export default function CreateQuizPage() {
                                     )
                                 })}
                             </div>
-                        </div>
-
-                        <div className="border-t px-8">
-                            <div className="flex gap-2 py-4">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={() => {
-                                        setStep('mode-select')
-                                        setCreateMode(null)
-                                        setActiveTab('basic')
-                                    }}
-                                >
-                                    Thay đổi
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsPreviewOpen(true)}
-                                    disabled={!canOpenPreview}
-                                >
-                                    Xem trước
-                                </Button>
-                                <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
-                                    {isSubmitting ? t.common.isSaving : t.common.save}
-                                </Button>
-                            </div>
+                            <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
+                                {isSubmitting ? t.common.isSaving : t.common.save}
+                            </Button>
                         </div>
                     </div>
 
