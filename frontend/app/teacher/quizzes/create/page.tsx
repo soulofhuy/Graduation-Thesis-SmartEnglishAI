@@ -261,13 +261,13 @@ export default function CreateQuizPage() {
         ? [
             { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
             { key: 'questions', label: t.teacher.assignments.createAssignment.title },
-            { key: 'preview', label: 'View preview' },
+            { key: 'preview', label: t.teacher.assignments.createAssignment.tabViewPreview.title },
         ]
         : [
             { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
-            { key: 'chat', label: 'Chat' },
-            { key: 'edit', label: 'Edit nội dung' },
-            { key: 'preview', label: 'View preview' },
+            { key: 'chat', label: t.teacher.assignments.createAssignment.tabChatWithAI.title },
+            { key: 'edit', label: t.teacher.assignments.createAssignment.tabEditCOntentFromAI.title },
+            { key: 'preview', label: t.teacher.assignments.createAssignment.tabViewPreview.title },
         ]
 
     const handleBackButton = () => {
@@ -489,7 +489,7 @@ export default function CreateQuizPage() {
                                 classes={teacherClasses}
                                 isClassesLoading={isClassesLoading}
                                 onContinue={goToQuestionTab}
-                                continueLabel={createMode === 'ai' ? 'Sang tab Chat' : undefined}
+                                continueLabel={createMode === 'ai' ? t.teacher.assignments.createAssignment.moveNextTabButtonWithAI : undefined}
                             />
                         )}
 

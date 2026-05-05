@@ -1,7 +1,7 @@
 'use client'
 
-import { ClipboardList, Wand2, X } from 'lucide-react'
-import { Card, CardDescription } from '@/components/ui/card'
+import { ClipboardList, Wand2 } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 import { useLanguage } from '@/components/language-provider'
 
 type AICreateModeCardProps = {
@@ -18,7 +18,7 @@ export function AICreateModeCard({ onSelectTraditional, onSelectAI, onClose }: A
             <Card className="w-full max-w-2xl overflow-hidden py-0 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
                 <div className="flex justify-center mt-8">
                     <h2 className="text-lg font-bold text-center">
-                        Chọn cách bạn tạo bài tập
+                        {t.teacher.assignments.chooseTypeOfAssignmentCreation.title}
                     </h2>
                 </div>
                 <div className="p-8 sm:p-10">
@@ -33,7 +33,7 @@ export function AICreateModeCard({ onSelectTraditional, onSelectAI, onClose }: A
                                     <ClipboardList className="h-10 w-10" />
                                 </div>
                                 <div className="text-center text-base text-foreground">
-                                    Tạo thủ công
+                                    {t.teacher.assignments.chooseTypeOfAssignmentCreation.manually}
                                 </div>
                             </button>
 
@@ -45,7 +45,7 @@ export function AICreateModeCard({ onSelectTraditional, onSelectAI, onClose }: A
                                     <Wand2 className="h-10 w-10" />
                                 </div>
                                 <div className="text-center text-sm text-foreground">
-                                    Tạo bằng AI
+                                    {t.teacher.assignments.chooseTypeOfAssignmentCreation.withAI}
                                 </div>
                             </button>
                         </div>

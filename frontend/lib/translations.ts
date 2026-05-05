@@ -359,7 +359,24 @@ export const translations = {
             fieldCanViewResultDescription:
               'If enabled, students can view their results after submission'
           },
-          moveNextTabButton: 'Create questions for this assignment'
+          tabEditCOntentFromAI: {
+            title: 'Edit your assignment content'
+          },
+          tabViewPreview: {
+            title: 'View assignment preview'
+          },
+          tabChatWithAI: {
+            title: 'Chat with AI to create assignment',
+            description:
+              'Use AI to quickly create high-quality assignments, saving time on preparation. Just provide some basic information and let AI handle the rest!'
+          },
+          moveNextTabButton: 'Create questions for this assignment',
+          moveNextTabButtonWithAI: 'Go to "Chat with AI" tab to create content'
+        },
+        chooseTypeOfAssignmentCreation: {
+          title: 'Choose how to create your assignment',
+          manually: 'Create manually',
+          withAI: 'Create with AI'
         },
         editAssignment: {
           title: 'Edit assignment',
@@ -1187,10 +1204,25 @@ export const translations = {
             fieldCanViewResultDescription:
               'Nếu bật, học sinh có thể xem kết quả sau khi nộp bài'
           },
-
-          moveNextTabButton: 'Tạo câu hỏi cho bài kiểm tra'
+          tabEditCOntentFromAI: {
+            title: 'Chỉnh sửa nội dung bài tập'
+          },
+          tabViewPreview: {
+            title: 'Xem trước bài tập'
+          },
+          tabChatWithAI: {
+            title: 'Trò chuyện với AI để tạo bài tập',
+            description:
+              'Sử dụng AI để tạo nhanh các bài tập chất lượng, không cần mất thời gian soạn đề. Chỉ cần cung cấp một số thông tin cơ bản và để AI lo phần còn lại!'
+          },
+          moveNextTabButton: 'Tạo câu hỏi cho bài kiểm tra',
+          moveNextTabButtonWithAI: 'Sang tab "Chat với AI" để tạo nội dung'
         },
-
+        chooseTypeOfAssignmentCreation: {
+          title: 'Chọn cách tạo bài tập',
+          manually: 'Tạo thủ công',
+          withAI: 'Tạo với AI'
+        },
         createQuestionsAndTasks: {
           createTask: {
             title: 'Danh sách phần lớn',

@@ -138,7 +138,7 @@ export function QuizBasicInfoSection({
                     </div>
 
                     <div className="pt-2 flex justify-center">
-                        <Button className="w-[50%] h-11 text-base font-medium" onClick={onContinue}>
+                        <Button className="w-[80%] h-11 text-base font-medium" onClick={onContinue}>
                             {buttonLabel}
                         </Button>
                     </div>
