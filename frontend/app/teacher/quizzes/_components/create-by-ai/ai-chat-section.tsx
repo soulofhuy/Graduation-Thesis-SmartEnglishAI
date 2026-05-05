@@ -27,62 +27,55 @@ export function AIChatSection({
     canGenerate,
 }: AIChatSectionProps) {
     return (
-        <div className="space-y-4">
-            <Card className="overflow-hidden border-muted/40 shadow-sm">
-                <div className="border-b bg-gradient-to-r from-primary/5 to-accent/5 px-6 py-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                            <Bot className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h3 className="text-base font-semibold">AI Chat</h3>
-                            <p className="text-sm text-muted-foreground">Nhập yêu cầu, AI sẽ sinh bài tập và nội dung để bạn chỉnh tiếp</p>
-                        </div>
-                    </div>
+        <div className="relative">
+            <div className="hidden lg:block">
+                <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background" />
+                <div className="absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_30%_30%,#f3f4f6_0%,#e6e7e9_40%,#d9dade_100%)] blur-[80px] opacity-60 dark:opacity-40 animate-bubble-drift pointer-events-none" />
+            </div>
+
+            <div className="flex flex-col items-center justify-center min-h-[72vh] gap-8 relative z-10">
+                <div className="flex flex-col items-center gap-3">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                    <h2 className="text-lg font-medium text-foreground">Ask our AI anything</h2>
                 </div>
 
-                <div className="space-y-5 p-6">
-                    <div className="rounded-2xl border border-dashed border-primary/20 bg-muted/20 p-4">
-                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <Sparkles className="h-4 w-4 text-primary" />
-                            Gợi ý nhanh
-                        </div>
-                        <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <Card className="w-full max-w-4xl border-muted/40 shadow-sm bg-card/90">
+                    <div className="p-6">
+                        <div className="flex items-center justify-center gap-3 flex-wrap">
                             {quickPrompts.map((item) => (
                                 <button
                                     key={item}
                                     type="button"
                                     onClick={() => onPromptChange(item)}
-                                    className="rounded-xl border border-border/70 bg-background px-4 py-3 text-left text-sm text-foreground transition-all hover:border-primary/40 hover:shadow-sm"
+                                    className="rounded-full border border-border/60 bg-background/80 px-4 py-2 text-sm text-foreground hover:border-primary/40"
                                 >
                                     {item}
                                 </button>
                             ))}
                         </div>
-                    </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">Yêu cầu của bạn</label>
-                        <Textarea
-                            value={prompt}
-                            onChange={(event) => onPromptChange(event.target.value)}
-                            placeholder="Ví dụ: Tạo bài tập 10 câu trắc nghiệm về thì hiện tại đơn cho học sinh lớp 6"
-                            className="min-h-[180px] resize-none rounded-2xl border-muted/60 bg-background/80 p-4 text-sm shadow-sm"
-                        />
-                    </div>
+                        <div className="mt-6">
+                            <div className="relative">
+                                <Textarea
+                                    value={prompt}
+                                    onChange={(event) => onPromptChange(event.target.value)}
+                                    placeholder="Ask me anything about your projects"
+                                    className="min-h-[56px] resize-none rounded-full border-muted/40 bg-background/80 p-3 pr-14 text-sm shadow-sm"
+                                />
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-background/80 p-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Wand2 className="h-4 w-4 text-primary" />
-                            Sau khi tạo xong, bạn có thể chỉnh nội dung ở tab Edit nội dung.
+                                <Button
+                                    onClick={onGenerate}
+                                    disabled={!canGenerate || isGenerating}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 p-0"
+                                    aria-label="Send"
+                                >
+                                    <SendHorizontal className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
-                        <Button onClick={onGenerate} disabled={!canGenerate || isGenerating} className="gap-2">
-                            <SendHorizontal className="h-4 w-4" />
-                            {isGenerating ? 'Đang tạo...' : 'Tạo nội dung'}
-                        </Button>
                     </div>
-                </div>
-            </Card>
+                </Card>
+            </div>
         </div>
     )
 }
