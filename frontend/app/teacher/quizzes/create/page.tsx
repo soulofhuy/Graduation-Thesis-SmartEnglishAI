@@ -481,7 +481,7 @@ export default function CreateQuizPage() {
                         </div>
                     </div>
 
-                    <div className="p-4">
+                    <div className={`${activeTab === 'chat' ? '' : 'p-4'}`}>
                         {activeTab === 'basic' && (
                             <QuizBasicInfoSection
                                 formData={formData}

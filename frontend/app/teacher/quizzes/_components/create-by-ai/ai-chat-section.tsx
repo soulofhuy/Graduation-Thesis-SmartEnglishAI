@@ -1,8 +1,8 @@
 'use client'
 
-import { Bot, Sparkles, SendHorizontal, Wand2 } from 'lucide-react'
+import { Plus, Sparkles, SendHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 
 type AIChatSectionProps = {
@@ -27,54 +27,55 @@ export function AIChatSection({
     canGenerate,
 }: AIChatSectionProps) {
     return (
-        <div className="relative">
-            <div className="hidden lg:block">
+        <div className="relative flex h-screen flex-col overflow-hidden">
+            <div className="hidden lg:block absolute inset-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background" />
                 <div className="absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_30%_30%,#f3f4f6_0%,#e6e7e9_40%,#d9dade_100%)] blur-[80px] opacity-60 dark:opacity-40 animate-bubble-drift pointer-events-none" />
             </div>
 
-            <div className="flex flex-col items-center justify-center min-h-[72vh] gap-8 relative z-10">
-                <div className="flex flex-col items-center gap-3">
-                    <Sparkles className="h-6 w-6 text-primary" />
-                    <h2 className="text-lg font-medium text-foreground">Ask our AI anything</h2>
-                </div>
+            <ScrollArea className="relative z-10 flex-1 min-h-0">
+                <div className="flex min-h-full flex-col items-center justify-center gap-8 py-8">
+                    <div className="flex flex-col items-center gap-3">
+                        <Sparkles className="h-6 w-6 text-primary" />
+                        <h2 className="text-lg font-medium text-foreground">Ask our AI anything</h2>
+                    </div>
 
-                <Card className="w-full max-w-4xl border-muted/40 shadow-sm bg-card/90">
-                    <div className="p-6">
+                    <div className="w-full max-w-4xl px-4">
                         <div className="flex items-center justify-center gap-3 flex-wrap">
                             {quickPrompts.map((item) => (
-                                <button
+                                <Button
                                     key={item}
-                                    type="button"
                                     onClick={() => onPromptChange(item)}
                                     className="rounded-full border border-border/60 bg-background/80 px-4 py-2 text-sm text-foreground hover:border-primary/40"
                                 >
                                     {item}
-                                </button>
+                                </Button>
                             ))}
                         </div>
-
-                        <div className="mt-6">
-                            <div className="relative">
-                                <Textarea
-                                    value={prompt}
-                                    onChange={(event) => onPromptChange(event.target.value)}
-                                    placeholder="Ask me anything about your projects"
-                                    className="min-h-[56px] resize-none rounded-full border-muted/40 bg-background/80 p-3 pr-14 text-sm shadow-sm"
-                                />
-
-                                <Button
-                                    onClick={onGenerate}
-                                    disabled={!canGenerate || isGenerating}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 p-0"
-                                    aria-label="Send"
-                                >
-                                    <SendHorizontal className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
                     </div>
-                </Card>
+                </div>
+            </ScrollArea>
+
+            <div className="relative z-10 w-full px-4 pb-4 flex-shrink-0">
+                <div className="flex items-end gap-3 max-w-4xl mx-auto">
+                    <div className="relative flex-1">
+                        <Textarea
+                            value={prompt}
+                            onChange={(event) => onPromptChange(event.target.value)}
+                            placeholder="Hỏi bất kỳ điều gì"
+                            className="min-h-[48px] max-h-[200px] resize-none border-muted/40 bg-background/80 pl-4 pr-14 py-3 text-sm shadow-sm"
+                        />
+
+                        <Button
+                            onClick={onGenerate}
+                            disabled={!canGenerate || isGenerating}
+                            className="absolute right-2 bottom-2 rounded-full h-8 w-8 p-0 bg-orange-500 hover:bg-orange-600"
+                            aria-label="Send"
+                        >
+                            <SendHorizontal className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
     )

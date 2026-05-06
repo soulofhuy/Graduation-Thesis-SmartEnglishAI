@@ -1125,7 +1125,7 @@ export const translations = {
           description:
             'Tạo và quản lí các bài tập của bạn, và xem kết quả làm bài',
           viewAIInstructionButton: 'Làm thế nào để tạo bài tập với AI?',
-          createAssignmentButton: 'Tạo bài tập thủ công',
+          createAssignmentButton: 'Tạo bài tập',
           tableView: {
             title: 'Danh sách bài tập',
             description: 'Tất cả các bài tập bạn đã tạo',
