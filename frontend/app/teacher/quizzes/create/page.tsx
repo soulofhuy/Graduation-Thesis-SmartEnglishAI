@@ -8,6 +8,7 @@ import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
+import { generateAssignmentFromPrompt } from '@/services/teacher/ai-create-assignments'
 import {
     createAssignmentBasicInfoSchema,
     createAssignmentPreviewSchema,
@@ -31,7 +32,7 @@ import {
     type TaskDraft
 } from '../_components/create'
 import { AICreateModeCard, AIChatSection } from '../_components/create-by-ai'
-import type { Class, TaskType } from '@/lib/types'
+import type { Class, CreateAssignmentInput, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
 
@@ -49,6 +50,7 @@ export default function CreateQuizPage() {
     const [createMode, setCreateMode] = useState<'traditional' | 'ai' | null>(null)
     const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview' | 'chat' | 'edit'>('basic')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isGeneratingAi, setIsGeneratingAi] = useState(false)
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isClassesLoading, setIsClassesLoading] = useState(true)
     const [teacherClasses, setTeacherClasses] = useState<Array<{ id: string; name: string }>>([])
@@ -78,6 +80,30 @@ export default function CreateQuizPage() {
     const isReadingComprehension = selectedTask?.taskType === 'READING_COMPREHENSION'
     const usesSharedPassage = isClozePassage || isReadingComprehension
     const showQuestionComposer = !isPronunciationOrStress && !isClozePassage
+
+    const mapGeneratedAssignmentToDrafts = (generatedTasks: CreateAssignmentInput['tasks']) => {
+        return generatedTasks.map((task) => ({
+            id: createId(),
+            taskTitle: task.taskContent?.trim() || getTaskTitleFromType(task.taskType),
+            taskDescription: '',
+            taskType: task.taskType,
+            passages: (task.passages ?? []).map((passage) => ({
+                id: createId(),
+                passageContent: passage.passageContent ?? '',
+            })),
+            questions: task.questions.map((question) => ({
+                id: createId(),
+                questionContent: question.questionContent ?? '',
+                topicTag: '',
+                passageIndex: typeof question.passageIndex === 'number' ? String(question.passageIndex) : 'none',
+                choices: question.choices.map((choice) => ({
+                    id: createId(),
+                    choiceContent: choice.choiceContent ?? '',
+                    isCorrect: choice.isCorrect,
+                })),
+            })),
+        }))
+    }
 
     useEffect(() => {
         const fetchTeacherClasses = async () => {
@@ -113,8 +139,6 @@ export default function CreateQuizPage() {
         }
 
         void fetchTeacherClasses()
-        // This fetch should only run when auth identity changes.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accessToken, user?.id])
 
     useEffect(() => {
@@ -221,14 +245,43 @@ export default function CreateQuizPage() {
         setActiveTab('basic')
     }
 
-    const handleGenerateAiContent = () => {
+    const handleGenerateAiContent = async () => {
         if (!aiPrompt.trim()) {
             toast.error('Vui lòng nhập yêu cầu cho AI trước khi tạo')
             return
         }
 
-        toast.success('Đã nhận yêu cầu. Phần sinh nội dung AI sẽ được cập nhật tiếp.')
-        setActiveTab('edit')
+        if (!accessToken) {
+            toast.error('Vui long dang nhap lai')
+            return
+        }
+
+        setIsGeneratingAi(true)
+
+        try {
+            const result = await generateAssignmentFromPrompt(accessToken, aiPrompt.trim())
+            const generatedTasks = mapGeneratedAssignmentToDrafts(result.assignment.tasks)
+
+            setFormData((prev) => ({
+                ...prev,
+                title: result.assignment.title?.trim() || prev.title,
+                description: result.assignment.description ?? prev.description,
+            }))
+
+            setTasks(generatedTasks)
+
+            const firstTask = generatedTasks[0]
+            setSelectedTaskId(firstTask?.id ?? '')
+            setSelectedQuestionId(firstTask?.questions[0]?.id ?? '')
+            setActiveTab('preview')
+
+            toast.success(result.message || 'Đã tạo nội dung AI thành công')
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Tạo nội dung AI thất bại'
+            toast.error(message)
+        } finally {
+            setIsGeneratingAi(false)
+        }
     }
 
     const submitCreateAssignment = async () => {
@@ -523,8 +576,10 @@ export default function CreateQuizPage() {
                             <AIChatSection
                                 prompt={aiPrompt}
                                 onPromptChange={setAiPrompt}
-                                onGenerate={handleGenerateAiContent}
-                                isGenerating={false}
+                                onGenerate={() => {
+                                    void handleGenerateAiContent()
+                                }}
+                                isGenerating={isGeneratingAi}
                                 canGenerate={Boolean(aiPrompt.trim())}
                             />
                         )}
