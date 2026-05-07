@@ -259,13 +259,15 @@ export default function CreateQuizPage() {
         setIsGeneratingAi(true)
 
         try {
-            const result = await generateAssignmentFromPrompt(accessToken, aiPrompt.trim())
+            const combinedTopic = `Context:\nTitle: ${formData.title || '<no title>'}\nDescription: ${formData.description || '<no description>'}\nClassId: ${formData.classId || '<no class>'}\nDueDate: ${formData.dueDate || '<no dueDate>'}\nUser prompt: ${aiPrompt.trim()}`
+
+            const result = await generateAssignmentFromPrompt(accessToken, combinedTopic)
             const generatedTasks = mapGeneratedAssignmentToDrafts(result.assignment.tasks)
 
             setFormData((prev) => ({
                 ...prev,
-                title: result.assignment.title?.trim() || prev.title,
-                description: result.assignment.description ?? prev.description,
+                title: prev.title?.trim() ? prev.title : (result.assignment.title?.trim() ?? prev.title),
+                description: prev.description?.trim() ? prev.description : (result.assignment.description ?? prev.description),
             }))
 
             setTasks(generatedTasks)
