@@ -21,23 +21,30 @@ export function AIChatSection({
     canGenerate,
 }: AIChatSectionProps) {
     return (
-        <div className="relative z-10 flex flex-col gap-4 rounded-xl border border-border/60 bg-card/70 p-4 shadow-sm h-[600px]">
+        <div className="relative z-10 flex h-[610px] flex-col gap-4 rounded-xl border border-border/60 bg-card/70 p-4 shadow-sm">
             <div className="hidden lg:block absolute inset-0 rounded-xl bg-gradient-to-br from-background via-background to-background" />
             <div className="absolute -right-24 top-1/2 h-[560px] w-[560px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_30%_30%,#f3f4f6_0%,#e6e7e9_40%,#d9dade_100%)] blur-[70px] opacity-50 dark:opacity-30 pointer-events-none" />
 
-            <div className="relative flex flex-col items-center gap-3 py-6">
-                <Sparkles className="h-6 w-6 text-primary" />
-                <h2 className="text-lg font-medium text-foreground">Ask our AI anything</h2>
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                    <h2 className="text-lg font-medium text-foreground">
+                        Ask our AI anything
+                    </h2>
+                </div>
             </div>
 
-            <div className="relative flex flex-col gap-4">
-                <div className="relative w-full">
-                    <Textarea
-                        value={prompt}
-                        onChange={(event) => onPromptChange(event.target.value)}
-                        placeholder="Hỏi bất kỳ điều gì"
-                        className="min-h-[48px] resize-none rounded-xl border-muted/40 bg-background/80 pl-4 pr-14 py-3 text-sm shadow-sm"
-                    />
+            <div className="mt-auto flex justify-center">
+                <div className="relative w-full max-w-[62%]">
+
+                    <ScrollArea className="w-full max-h-[180px] rounded-xl border border-muted/40 bg-background/80 shadow-sm">
+                        <Textarea
+                            value={prompt}
+                            onChange={(event) => onPromptChange(event.target.value)}
+                            placeholder="Hỏi bất kỳ điều gì"
+                            className="min-h-[48px] max-h-none resize-none border-0 bg-transparent pl-4 pr-14 py-3 text-sm shadow-none focus-visible:ring-0"
+                        />
+                    </ScrollArea>
 
                     <Button
                         onClick={onGenerate}
