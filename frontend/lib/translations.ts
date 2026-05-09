@@ -826,7 +826,8 @@ export const translations = {
       yes: 'Yes',
       no: 'No',
       confirm: 'Confirm',
-      back: 'Back'
+      back: 'Back',
+      understandLabel: 'Got it'
     }
   },
 
@@ -1658,7 +1659,8 @@ export const translations = {
       yes: 'Có',
       no: 'Không',
       confirm: 'Xác nhận',
-      back: 'Quay lại'
+      back: 'Quay lại',
+      understandLabel: 'Tôi đã hiểu'
     }
   }
 };

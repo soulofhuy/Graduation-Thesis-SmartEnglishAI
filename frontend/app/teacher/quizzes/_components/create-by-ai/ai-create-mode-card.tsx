@@ -32,7 +32,7 @@ export function AICreateModeCard({ onSelectTraditional, onSelectAI, onClose }: A
                                 <div className="mb-4 flex h-25 w-25 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 text-primary mx-auto">
                                     <ClipboardList className="h-10 w-10" />
                                 </div>
-                                <div className="text-center text-base text-foreground">
+                                <div className="text-center text-base text-foreground font-bold">
                                     {t.teacher.assignments.chooseTypeOfAssignmentCreation.manually}
                                 </div>
                             </button>
@@ -44,7 +44,7 @@ export function AICreateModeCard({ onSelectTraditional, onSelectAI, onClose }: A
                                 <div className="mb-4 flex h-25 w-25 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 text-primary mx-auto">
                                     <Wand2 className="h-10 w-10" />
                                 </div>
-                                <div className="text-center text-sm text-foreground">
+                                <div className="text-center text-base text-foreground font-bold">
                                     {t.teacher.assignments.chooseTypeOfAssignmentCreation.withAI}
                                 </div>
                             </button>
