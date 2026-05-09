@@ -24,7 +24,7 @@ const STEPS_VI: InstructionStep[] = [
   },
   {
     stepNumber: 4,
-    title: 'Nhấn vào tùy chọn "Tạo bài tập bằng AI"',
+    title: 'Nhấn vào tùy chọn "Tạo với AI"',
     imageUrl: '/ai-instruction/vi/step-4.png'
   },
   {
@@ -65,7 +65,7 @@ const STEPS_EN: InstructionStep[] = [
   },
   {
     stepNumber: 4,
-    title: 'Click option "Create assignment with AI"',
+    title: 'Click option "Create with AI"',
     imageUrl: '/ai-instruction/en/step-4.png'
   },
   {

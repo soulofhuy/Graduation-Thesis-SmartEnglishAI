@@ -18,9 +18,9 @@ export function AIInstructionModal({ open, onOpenChange }: AIInstructionModalPro
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="!max-w-5xl !sm:max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl">{t.teacher.assignments.createAssignment.title}</DialogTitle>
+                    <DialogTitle className="text-2xl">{t.teacher.assignments.overview.viewAIInstruction.title}</DialogTitle>
                     <DialogDescription>
-                        {t.teacher.assignments.createAssignment.description}
+                        {t.teacher.assignments.overview.viewAIInstruction.description}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -32,7 +32,7 @@ export function AIInstructionModal({ open, onOpenChange }: AIInstructionModalPro
                                     {step.stepNumber}
                                 </div>
 
-                                <h3 className="text-base leading-none">
+                                <h3 className="text-base leading-none font-bold">
                                     {step.title}
                                 </h3>
                             </div>
@@ -42,7 +42,7 @@ export function AIInstructionModal({ open, onOpenChange }: AIInstructionModalPro
                                     <img
                                         src={step.imageUrl}
                                         alt={step.title}
-                                        className="max-h-64 rounded-lg border object-cover"
+                                        className="max-h-64 rounded-lg border border-gray-300 object-cover"
                                     />
                                 </div>
                             )}
@@ -51,9 +51,6 @@ export function AIInstructionModal({ open, onOpenChange }: AIInstructionModalPro
                 </div>
 
                 <div className="flex justify-end gap-2 border-t pt-4">
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
-                        {t.common.close}
-                    </Button>
                     <Button onClick={() => onOpenChange(false)}>
                         {t.common.understandLabel}
                     </Button>
