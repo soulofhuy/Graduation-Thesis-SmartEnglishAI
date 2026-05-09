@@ -26,6 +26,7 @@ import {
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
+import { AIInstructionModal } from './_components/ai-instruction'
 
 interface TableAssignment {
     id: string
@@ -77,6 +78,7 @@ export default function TeacherQuizzesPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [sortField, setSortField] = useState<'title' | 'questionCount' | 'createdDate' | 'dueDate'>('title')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const [showInstructionModal, setShowInstructionModal] = useState(false)
 
     const fetchQuizzes = useCallback(
         async (page: number, limit: number, showSkeleton = false) => {
@@ -243,6 +245,7 @@ export default function TeacherQuizzesPage() {
 
     return (
         <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+            <AIInstructionModal open={showInstructionModal} onOpenChange={setShowInstructionModal} />
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-bold text-foreground">{t.teacher.assignments.overview.title}</h1>
@@ -251,14 +254,14 @@ export default function TeacherQuizzesPage() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => setShowInstructionModal(true)}>
                         <Sparkles className="w-4 h-4" />
-                        {t.teacher.assignments.overview.createAssignmentByAIButton}
+                        {t.teacher.assignments.overview.viewAIInstruction.titleButton}
                     </Button>
                     <Button asChild className="gap-2">
                         <Link href="/teacher/quizzes/create">
                             <Plus className="w-4 h-4" />
-                            {t.teacher.assignments.overview.createAssignmentManuallyButton}
+                            {t.teacher.assignments.overview.createAssignmentButton}
                         </Link>
                     </Button>
                 </div>

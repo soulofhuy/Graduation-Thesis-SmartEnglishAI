@@ -103,11 +103,20 @@ function mapTaskToDraft(
 }
 
 function mapAssignmentToFormData(assignment: Assignment): AssignmentFormData {
+    const dueDate = assignment.dueDate
+        ? new Date(assignment.dueDate)
+        : null
+
     return {
         title: assignment.title ?? '',
         description: assignment.description ?? '',
         classId: assignment.classId ?? '',
-        dueDate: assignment.dueDate ? assignment.dueDate.slice(0, 16) : '',
+        dueDate:
+            dueDate && !Number.isNaN(dueDate.getTime())
+                ? new Date(dueDate.getTime() - dueDate.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .slice(0, 16)
+                : '',
         isPublic: Boolean(assignment.isPublic),
         isSingleAttempt: Boolean(assignment.isSingleAttempt),
         canViewResult: Boolean(assignment.canViewResult)
@@ -332,17 +341,7 @@ export default function EditQuizPage() {
 
         setIsSubmitting(true)
         try {
-            const updatePayload = {
-                title: formData.title.trim(),
-                description: formData.description,
-                dueDate: formData.dueDate || null,
-                isPublic: formData.isPublic,
-                isSingleAttempt: formData.isSingleAttempt,
-                canViewResult: formData.canViewResult,
-                tasks: payloadPreview.tasks
-            }
-
-            const result = await updateAssignmentFullById(accessToken, assignmentId, updatePayload)
+            const result = await updateAssignmentFullById(accessToken, assignmentId, payloadPreview)
 
             setFormData(mapAssignmentToFormData(result.assignment))
             if ((result.assignment.tasks ?? []).length > 0) {

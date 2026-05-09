@@ -22,6 +22,7 @@ type QuizBasicInfoSectionProps = {
     classes: TeacherClassOption[]
     isClassesLoading: boolean
     onContinue: () => void
+    continueLabel?: string
 }
 
 export function QuizBasicInfoSection({
@@ -30,8 +31,10 @@ export function QuizBasicInfoSection({
     classes,
     isClassesLoading,
     onContinue,
+    continueLabel,
 }: QuizBasicInfoSectionProps) {
     const { t } = useLanguage();
+    const buttonLabel = continueLabel ?? t.teacher.assignments.createAssignment.moveNextTabButton
 
     return (
         <div className="grid grid-cols-1 xl:grid-cols-9 gap-6">
@@ -135,8 +138,8 @@ export function QuizBasicInfoSection({
                     </div>
 
                     <div className="pt-2 flex justify-center">
-                        <Button className="w-[50%] h-11 text-base font-medium" onClick={onContinue}>
-                            {t.teacher.assignments.createAssignment.moveNextTabButton}
+                        <Button className="w-[80%] h-11 text-base font-medium" onClick={onContinue}>
+                            {buttonLabel}
                         </Button>
                     </div>
                 </CardContent>

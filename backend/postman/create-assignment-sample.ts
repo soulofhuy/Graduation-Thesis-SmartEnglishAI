@@ -1,0 +1,105 @@
+export const sampleAssignmentPayload = {
+  title: 'Midterm English Test - Reading & Grammar',
+  description: 'Sample payload for testing assignment creation API',
+  classId: 'REPLACE_WITH_CLASS_ID',
+  isPublic: false,
+  dueDate: '2026-05-31T16:59:59.000Z',
+  isSingleAttempt: true,
+  canViewResult: true,
+  tasks: [
+    {
+      taskContent: 'Part 1: Reading comprehension',
+      taskType: 'READING_COMPREHENSION',
+      passages: [
+        {
+          passageContent:
+            'In many cities, people are choosing bicycles over cars for short trips. Riding a bike can reduce traffic congestion and improve public health. However, safe bike lanes are still limited in several areas.'
+        }
+      ],
+      questions: [
+        {
+          questionContent:
+            'What is one benefit of using bicycles mentioned in the passage?',
+          passageIndex: 0,
+          choices: [
+            {
+              choiceContent: 'It increases traffic congestion',
+              isCorrect: false
+            },
+            {
+              choiceContent: 'It can improve public health',
+              isCorrect: true
+            },
+            {
+              choiceContent: 'It requires expensive fuel',
+              isCorrect: false
+            },
+            {
+              choiceContent: 'It replaces all public transport',
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionContent: 'What challenge is highlighted in the passage?',
+          passageIndex: 0,
+          choices: [
+            {
+              choiceContent: 'Bicycles are too slow for short trips',
+              isCorrect: false
+            },
+            {
+              choiceContent: 'People do not know how to ride bicycles',
+              isCorrect: false
+            },
+            {
+              choiceContent: 'Safe bike lanes are still limited',
+              isCorrect: true
+            },
+            {
+              choiceContent: 'Cars are banned in most cities',
+              isCorrect: false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      taskContent: 'Part 2: Grammar and vocabulary',
+      taskType: 'MULTIPLE_CHOICE',
+      questions: [
+        {
+          questionContent:
+            'Choose the correct sentence in present perfect tense.',
+          choices: [
+            {
+              choiceContent: 'She has finished her homework.',
+              isCorrect: true
+            },
+            {
+              choiceContent: 'She finish her homework yesterday.',
+              isCorrect: false
+            },
+            {
+              choiceContent: 'She is finish her homework.',
+              isCorrect: false
+            },
+            {
+              choiceContent: 'She has finish her homework last night.',
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionContent: "Select the best synonym for the word 'rapid'.",
+          choices: [
+            { choiceContent: 'Slow', isCorrect: false },
+            { choiceContent: 'Quick', isCorrect: true },
+            { choiceContent: 'Careful', isCorrect: false },
+            { choiceContent: 'Late', isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ]
+};

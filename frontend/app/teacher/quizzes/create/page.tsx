@@ -8,6 +8,8 @@ import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
+import { sendAIChatMessage } from '@/services/teacher/ai-chat-sessions'
+import { linkAIChatSessionToAssignment } from '@/services/teacher/ai-chat-sessions'
 import {
     createAssignmentBasicInfoSchema,
     createAssignmentPreviewSchema,
@@ -30,9 +32,11 @@ import {
     type QuestionDraft,
     type TaskDraft
 } from '../_components/create'
-import type { Class, TaskType } from '@/lib/types'
+import { AICreateModeCard, AIChatSection } from '../_components/create-by-ai'
+import type { Class, CreateAssignmentInput, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
+import type { ChatMessage } from '../_components/create-by-ai/ai-chat-section'
 
 export default function CreateQuizPage() {
     const { t, language } = useLanguage()
@@ -44,8 +48,11 @@ export default function CreateQuizPage() {
     }
 
     const initialTask = createTask('MULTIPLE_CHOICE', getTaskTitleFromType('MULTIPLE_CHOICE'))
-    const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview'>('basic')
+    const [step, setStep] = useState<'mode-select' | 'create'>('mode-select')
+    const [createMode, setCreateMode] = useState<'traditional' | 'ai' | null>(null)
+    const [activeTab, setActiveTab] = useState<'basic' | 'questions' | 'preview' | 'chat' | 'edit'>('basic')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isGeneratingAi, setIsGeneratingAi] = useState(false)
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isClassesLoading, setIsClassesLoading] = useState(true)
     const [teacherClasses, setTeacherClasses] = useState<Array<{ id: string; name: string }>>([])
@@ -58,6 +65,9 @@ export default function CreateQuizPage() {
         isSingleAttempt: true,
         canViewResult: true,
     })
+    const [aiPrompt, setAiPrompt] = useState('')
+    const [aiChatSessionId, setAiChatSessionId] = useState<string | null>(null)
+    const [aiMessages, setAiMessages] = useState<ChatMessage[]>([])
     const [tasks, setTasks] = useState<TaskDraft[]>([initialTask])
     const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask.id)
     const [selectedQuestionId, setSelectedQuestionId] = useState<string>(initialTask.questions[0].id)
@@ -74,6 +84,30 @@ export default function CreateQuizPage() {
     const isReadingComprehension = selectedTask?.taskType === 'READING_COMPREHENSION'
     const usesSharedPassage = isClozePassage || isReadingComprehension
     const showQuestionComposer = !isPronunciationOrStress && !isClozePassage
+
+    const mapGeneratedAssignmentToDrafts = (generatedTasks: CreateAssignmentInput['tasks']) => {
+        return generatedTasks.map((task) => ({
+            id: createId(),
+            taskTitle: task.taskContent?.trim() || getTaskTitleFromType(task.taskType),
+            taskDescription: '',
+            taskType: task.taskType,
+            passages: (task.passages ?? []).map((passage) => ({
+                id: createId(),
+                passageContent: passage.passageContent ?? '',
+            })),
+            questions: task.questions.map((question) => ({
+                id: createId(),
+                questionContent: question.questionContent ?? '',
+                topicTag: '',
+                passageIndex: typeof question.passageIndex === 'number' ? String(question.passageIndex) : 'none',
+                choices: question.choices.map((choice) => ({
+                    id: createId(),
+                    choiceContent: choice.choiceContent ?? '',
+                    isCorrect: choice.isCorrect,
+                })),
+            })),
+        }))
+    }
 
     useEffect(() => {
         const fetchTeacherClasses = async () => {
@@ -109,8 +143,6 @@ export default function CreateQuizPage() {
         }
 
         void fetchTeacherClasses()
-        // This fetch should only run when auth identity changes.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accessToken, user?.id])
 
     useEffect(() => {
@@ -197,7 +229,108 @@ export default function CreateQuizPage() {
             return
         }
 
+        if (createMode === 'ai') {
+            setActiveTab('chat')
+            return
+        }
+
         setActiveTab('questions')
+    }
+
+    const handleSelectTraditionalMode = () => {
+        setCreateMode('traditional')
+        setStep('create')
+        setActiveTab('basic')
+    }
+
+    const handleSelectAiMode = () => {
+        setCreateMode('ai')
+        setStep('create')
+        setActiveTab('basic')
+    }
+
+    const handleGenerateAiContent = async (promptText: string) => {
+        const trimmedPrompt = promptText.trim()
+
+        if (!trimmedPrompt) {
+            toast.error('Vui lòng nhập yêu cầu cho AI trước khi tạo')
+            return
+        }
+
+        if (!accessToken) {
+            toast.error('Vui long dang nhap lai')
+            return
+        }
+
+        setIsGeneratingAi(true)
+
+        try {
+            setAiMessages((prev) => [
+                ...prev,
+                {
+                    id: `${Date.now()}-user`,
+                    role: 'user',
+                    content: trimmedPrompt,
+                },
+            ])
+
+            const combinedTopic = `Context:\nTitle: ${formData.title || '<no title>'}\nDescription: ${formData.description || '<no description>'}\nClassId: ${formData.classId || '<no class>'}\nDueDate: ${formData.dueDate || '<no dueDate>'}\nUser prompt: ${trimmedPrompt}`
+
+            // Persist prompt/response via chat-session API so sessions and prompts are saved
+            const result = await sendAIChatMessage(accessToken, {
+                prompt: combinedTopic,
+                assignmentTitle: formData.title || undefined,
+                assignmentDescription: formData.description || undefined,
+                classId: formData.classId || undefined,
+                dueDate: formData.dueDate || undefined,
+                isPublic: formData.isPublic,
+                isSingleAttempt: formData.isSingleAttempt,
+                canViewResult: formData.canViewResult,
+                chatSessionId: aiChatSessionId ?? undefined,
+            })
+
+            const assignment = result.data.assignment
+            const generatedTasks = mapGeneratedAssignmentToDrafts(assignment.tasks)
+
+            setFormData((prev) => ({
+                ...prev,
+                title: prev.title?.trim() ? prev.title : (assignment.title?.trim() ?? prev.title),
+                description: prev.description?.trim() ? prev.description : (assignment.description ?? prev.description),
+            }))
+
+            setTasks(generatedTasks)
+
+            const firstTask = generatedTasks[0]
+            setSelectedTaskId(firstTask?.id ?? '')
+            setSelectedQuestionId(firstTask?.questions[0]?.id ?? '')
+            setActiveTab('preview')
+
+            // store chat session id for subsequent messages
+            if (result.data?.chatSession?.id) {
+                setAiChatSessionId(result.data.chatSession.id)
+            }
+
+            if (result.data?.response?.response) {
+                setAiMessages((prev) => [
+                    ...prev,
+                    {
+                        id: `${Date.now()}-assistant`,
+                        role: 'assistant',
+                        content: result.data.response.response,
+                    },
+                ])
+            }
+
+            // Reset textarea after successful send
+            setAiPrompt('')
+
+            toast.success(result.message || 'Đã tạo nội dung AI thành công')
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Tạo nội dung AI thất bại'
+            toast.error(message)
+        } finally {
+            setIsGeneratingAi(false)
+        }
     }
 
     const submitCreateAssignment = async () => {
@@ -216,6 +349,15 @@ export default function CreateQuizPage() {
         try {
             console.log('Payload for preview:', payloadPreview)
             const result = await createAssignment(accessToken, payloadPreview)
+
+            if (aiChatSessionId) {
+                try {
+                    await linkAIChatSessionToAssignment(accessToken, aiChatSessionId, result.assignment.id)
+                } catch (linkError) {
+                    console.error('Failed to link AI chat session to saved assignment', linkError)
+                }
+            }
+
             toast.success(result.message || 'Tao de thi thanh cong')
             router.push('/teacher/quizzes')
         } catch (error) {
@@ -226,18 +368,28 @@ export default function CreateQuizPage() {
         }
     }
 
-    const topTabs = [
-        { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
-        { key: 'questions', label: t.teacher.assignments.createAssignment.title },
-        { key: 'preview', label: 'View preview' },
-    ] as const
+    const topTabs = (createMode === 'traditional' || step === 'mode-select')
+        ? [
+            { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
+            { key: 'questions', label: t.teacher.assignments.createAssignment.title },
+            { key: 'preview', label: t.teacher.assignments.createAssignment.tabViewPreview.title },
+        ]
+        : [
+            { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
+            { key: 'chat', label: t.teacher.assignments.createAssignment.tabChatWithAI.title },
+            { key: 'edit', label: t.teacher.assignments.createAssignment.tabEditCOntentFromAI.title },
+            { key: 'preview', label: t.teacher.assignments.createAssignment.tabViewPreview.title },
+        ]
+
+    const handleBackButton = () => {
+        if (step === 'create') {
+            setStep('mode-select')
+        } else {
+            router.push('/teacher/quizzes')
+        }
+    }
 
     const handleGoBack = () => {
-        if (window.history.length > 1) {
-            router.back()
-            return
-        }
-
         router.push('/teacher/quizzes')
     }
 
@@ -366,7 +518,7 @@ export default function CreateQuizPage() {
                         type="button"
                         variant="outline"
                         size="icon"
-                        onClick={handleGoBack}
+                        onClick={handleBackButton}
                     >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
@@ -374,10 +526,16 @@ export default function CreateQuizPage() {
                 </div>
             </div>
 
-            <Card className="overflow-hidden py-0">
-                <div className="border-b px-8">
-                    <div className="flex items-center justify-between py-4">
-                        <div className="flex items-center justify-between gap-3">
+            {step === 'mode-select' ? (
+                <AICreateModeCard
+                    onSelectTraditional={handleSelectTraditionalMode}
+                    onSelectAI={handleSelectAiMode}
+                    onClose={handleGoBack}
+                />
+            ) : (
+                <Card className="overflow-hidden py-0">
+                    <div className="border-b px-8">
+                        <div className="flex items-center justify-between py-4">
                             <div className="flex gap-5 overflow-auto">
                                 {topTabs.map((tab) => {
                                     const isActive = activeTab === tab.key
@@ -406,11 +564,21 @@ export default function CreateQuizPage() {
                                                         return
                                                     }
 
-                                                    setActiveTab(tab.key)
+                                                    setActiveTab(tab.key as 'basic' | 'questions' | 'preview' | 'chat' | 'edit')
                                                     return
                                                 }
 
-                                                setActiveTab(tab.key)
+                                                if (tab.key === 'chat' || tab.key === 'edit') {
+                                                    const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
+                                                    if (!basicValidation.success) {
+                                                        toast.error(basicValidation.error.issues[0]?.message)
+                                                        return
+                                                    }
+                                                    setActiveTab(tab.key as 'basic' | 'questions' | 'preview' | 'chat' | 'edit')
+                                                    return
+                                                }
+
+                                                setActiveTab(tab.key as 'basic' | 'questions' | 'preview' | 'chat' | 'edit')
                                             }}
                                         >
                                             {tab.label}
@@ -418,74 +586,103 @@ export default function CreateQuizPage() {
                                     )
                                 })}
                             </div>
-                        </div>
-
-                        <div>
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsPreviewOpen(true)}
-                                    disabled={!canOpenPreview}
-                                >
-                                    Xem trước
-                                </Button>
-                                <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
-                                    {isSubmitting ? t.common.isSaving : t.common.save}
-                                </Button>
-                            </div>
+                            <Button onClick={submitCreateAssignment} disabled={isSubmitting}>
+                                {isSubmitting ? t.common.isSaving : t.common.save}
+                            </Button>
                         </div>
                     </div>
-                </div>
 
-                <div className="p-4">
-                    {activeTab === 'basic' && (
-                        <QuizBasicInfoSection
-                            formData={formData}
-                            setFormData={setFormData}
-                            classes={teacherClasses}
-                            isClassesLoading={isClassesLoading}
-                            onContinue={goToQuestionTab}
-                        />
-                    )}
+                    <div className={`${activeTab === 'chat' ? '' : 'p-4'}`}>
+                        {activeTab === 'basic' && (
+                            <QuizBasicInfoSection
+                                formData={formData}
+                                setFormData={setFormData}
+                                classes={teacherClasses}
+                                isClassesLoading={isClassesLoading}
+                                onContinue={goToQuestionTab}
+                                continueLabel={createMode === 'ai' ? t.teacher.assignments.createAssignment.moveNextTabButtonWithAI : undefined}
+                            />
+                        )}
 
-                    {activeTab === 'questions' && selectedTask && selectedQuestion && (
-                        <QuizQuestionsSection
-                            tasks={tasks}
-                            selectedTask={selectedTask}
-                            selectedQuestion={selectedQuestion}
-                            usesSharedPassage={usesSharedPassage}
-                            showQuestionComposer={showQuestionComposer}
-                            isReadingComprehension={isReadingComprehension}
-                            getSharedPassageContent={getSharedPassageContent}
-                            onAddTask={handleAddTask}
-                            onSelectTask={handleSelectTask}
-                            onDeleteTask={handleDeleteTask}
-                            onChangeTaskType={handleChangeTaskType}
-                            onChangeTaskDescription={handleChangeTaskDescription}
-                            onAddQuestion={handleAddQuestion}
-                            onDeleteQuestion={handleDeleteSelectedQuestion}
-                            onSelectQuestion={handleSelectQuestion}
-                            onChangeSharedPassage={updateSharedPassageContent}
-                            onChangeQuestionContent={handleChangeQuestionContent}
-                            onAddChoice={handleAddChoice}
-                            onToggleCorrectChoice={handleToggleCorrectChoice}
-                            onDeleteChoice={handleDeleteChoice}
-                            onChangeChoiceContent={handleChangeChoiceContent}
-                        />
-                    )}
+                        {activeTab === 'questions' && selectedTask && selectedQuestion && (
+                            <QuizQuestionsSection
+                                tasks={tasks}
+                                selectedTask={selectedTask}
+                                selectedQuestion={selectedQuestion}
+                                usesSharedPassage={usesSharedPassage}
+                                showQuestionComposer={showQuestionComposer}
+                                isReadingComprehension={isReadingComprehension}
+                                getSharedPassageContent={getSharedPassageContent}
+                                onAddTask={handleAddTask}
+                                onSelectTask={handleSelectTask}
+                                onDeleteTask={handleDeleteTask}
+                                onChangeTaskType={handleChangeTaskType}
+                                onChangeTaskDescription={handleChangeTaskDescription}
+                                onAddQuestion={handleAddQuestion}
+                                onDeleteQuestion={handleDeleteSelectedQuestion}
+                                onSelectQuestion={handleSelectQuestion}
+                                onChangeSharedPassage={updateSharedPassageContent}
+                                onChangeQuestionContent={handleChangeQuestionContent}
+                                onAddChoice={handleAddChoice}
+                                onToggleCorrectChoice={handleToggleCorrectChoice}
+                                onDeleteChoice={handleDeleteChoice}
+                                onChangeChoiceContent={handleChangeChoiceContent}
+                            />
+                        )}
 
-                    {activeTab === 'preview' && (
-                        <QuizPreviewContent payload={payloadPreview} />
-                    )}
-                </div>
-            </Card >
+                        {activeTab === 'chat' && createMode === 'ai' && (
+                            <AIChatSection
+                                prompt={aiPrompt}
+                                onPromptChange={setAiPrompt}
+                                onSendPrompt={(value) => {
+                                    void handleGenerateAiContent(value)
+                                }}
+                                isGenerating={isGeneratingAi}
+                                canGenerate={Boolean(aiPrompt.trim())}
+                                messages={aiMessages}
+                            />
+                        )}
+
+                        {activeTab === 'edit' && createMode === 'ai' && selectedTask && selectedQuestion && (
+                            <QuizQuestionsSection
+                                tasks={tasks}
+                                selectedTask={selectedTask}
+                                selectedQuestion={selectedQuestion}
+                                usesSharedPassage={usesSharedPassage}
+                                showQuestionComposer={showQuestionComposer}
+                                isReadingComprehension={isReadingComprehension}
+                                getSharedPassageContent={getSharedPassageContent}
+                                onAddTask={handleAddTask}
+                                onSelectTask={handleSelectTask}
+                                onDeleteTask={handleDeleteTask}
+                                onChangeTaskType={handleChangeTaskType}
+                                onChangeTaskDescription={handleChangeTaskDescription}
+                                onAddQuestion={handleAddQuestion}
+                                onDeleteQuestion={handleDeleteSelectedQuestion}
+                                onSelectQuestion={handleSelectQuestion}
+                                onChangeSharedPassage={updateSharedPassageContent}
+                                onChangeQuestionContent={handleChangeQuestionContent}
+                                onAddChoice={handleAddChoice}
+                                onToggleCorrectChoice={handleToggleCorrectChoice}
+                                onDeleteChoice={handleDeleteChoice}
+                                onChangeChoiceContent={handleChangeChoiceContent}
+                            />
+                        )}
+
+                        {activeTab === 'preview' && (
+                            <QuizPreviewContent payload={payloadPreview} />
+                        )}
+                    </div>
+                </Card>
+            )}
 
             <QuizPreviewModal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 payload={payloadPreview}
             />
-        </div >
+        </div>
     )
 }
+
+

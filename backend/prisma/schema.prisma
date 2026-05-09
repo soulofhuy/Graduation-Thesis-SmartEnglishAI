@@ -34,6 +34,11 @@ enum AttemptStatus {
   EXPIRED
 }
 
+enum AIPromptType {
+  ASSIGMMENT_CREATION
+  RESULT_ANALYSIS
+}
+
 model User {
   id                    String            @id @default(uuid())
   email                 String            @unique
@@ -53,6 +58,8 @@ model User {
   createdPassages       Passage[]         @relation("PassageCreator")
   attempts              Attempt[]         @relation("AttemptStudent")
   results               Result[]          @relation("ResultStudent")
+  aiChatSessions        ChatSession[]
+  aiPrompts             AIPrompt[]
 }
 
 model Profile {
@@ -126,9 +133,56 @@ model Assignment {
   class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
   tasks                 Task[]
   attempts              Attempt[]
+  aiChatSessions        ChatSession[]
 
   @@index([classId])
   @@index([createdBy])
+}
+
+model ChatSession {
+  id                    String            @id @default(uuid())
+  assignmentId          String?           @map("assignment_id")
+  userId                String            @map("user_id")
+  title                 String
+  updatedAt             DateTime          @updatedAt @map("updated_at")
+  createdAt             DateTime          @default(now()) @map("created_at")
+  deletedAt             DateTime?         @map("deleted_at")
+
+  assignment            Assignment?       @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompts               AIPrompt[]
+
+  @@index([assignmentId])
+  @@index([userId])
+  @@map("ChatSessions")
+}
+
+model AIPrompt {
+  id                    String            @id @default(uuid())
+  userId                String            @map("user_id")
+  chatSessionId         String            @map("chat_session_id")
+  prompt                String            @db.Text
+  type                  AIPromptType
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatSession           ChatSession       @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  response              AIResponse?
+
+  @@index([userId])
+  @@index([chatSessionId])
+  @@map("AIPrompts")
+}
+
+model AIResponse {
+  id                    String            @id @default(uuid())
+  promptId              String            @unique @map("prompt_id")
+  response              String            @db.Text
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  prompt                AIPrompt          @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@map("AIResponse")
 }
 
 model Attempt {
@@ -157,7 +211,7 @@ model Result {
   score                 Float
   correctCount          Int               @map("correct_count")
   totalCount            Int               @map("total_count")
-  questionAnswers        Json              @map("question_answers")
+  questionAnswers       Json              @map("question_answers")
   createdAt             DateTime          @default(now()) @map("created_at")
 
   attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)

@@ -41,6 +41,7 @@ type CreateAssignmentInput = {
 type UpdateAssignmentInput = {
   title?: string;
   description?: string;
+  classId?: string;
   dueDate?: string | null;
   isPublic?: boolean;
   isSingleAttempt?: boolean;
@@ -594,6 +595,37 @@ class AssignmentService {
       );
     }
 
+    if (payload.classId !== undefined) {
+      const normalizedClassId = payload.classId.trim();
+
+      if (!normalizedClassId) {
+        throw new Error('Class ID cannot be empty');
+      }
+
+      const targetClass = await prisma.class.findUnique({
+        where: { id: normalizedClassId },
+        select: {
+          id: true,
+          teacherId: true,
+          isActive: true
+        }
+      });
+
+      if (!targetClass) {
+        throw new Error('Class not found');
+      }
+
+      if (!targetClass.isActive) {
+        throw new Error('Cannot update assignment to an inactive class');
+      }
+
+      if (!isAdmin && targetClass.teacherId !== updaterId) {
+        throw new Error(
+          'Only class owner or admin can move assignment to this class'
+        );
+      }
+    }
+
     // Prepare update data
     const normalizedTitle =
       payload.title !== undefined ? payload.title.trim() : undefined;
@@ -620,6 +652,7 @@ class AssignmentService {
       description?: string | null;
       dueDate?: Date | null;
       isPublic?: boolean;
+      classId?: string;
       isSingleAttempt?: boolean;
       canViewResult?: boolean;
     } = {};
@@ -630,6 +663,10 @@ class AssignmentService {
 
     if (payload.description !== undefined) {
       data.description = payload.description.trim() || null;
+    }
+
+    if (payload.classId !== undefined) {
+      data.classId = payload.classId.trim();
     }
 
     if (parsedDueDate !== undefined) {

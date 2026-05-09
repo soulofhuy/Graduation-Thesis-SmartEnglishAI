@@ -295,8 +295,13 @@ export const translations = {
           title: 'Manage your assignment',
           description:
             'Create and manage your assignments, and view assignment results',
-          createAssignmentByAIButton: 'Create assignment with AI',
-          createAssignmentManuallyButton: 'Create assignment manually',
+          viewAIInstruction: {
+            titleButton: 'How to create assignment with AI?',
+            title: 'Instruction on creating assignment with AI',
+            description:
+              'Use AI to quickly create high-quality assignments, saving time on preparation!'
+          },
+          createAssignmentButton: 'Create assignment',
           tableView: {
             title: 'List of assignments',
             description: 'All assignments you have created',
@@ -359,7 +364,31 @@ export const translations = {
             fieldCanViewResultDescription:
               'If enabled, students can view their results after submission'
           },
-          moveNextTabButton: 'Create questions for this assignment'
+          tabEditCOntentFromAI: {
+            title: 'Edit your assignment content'
+          },
+          tabViewPreview: {
+            title: 'View assignment preview'
+          },
+          tabChatWithAI: {
+            title: 'Chat with AI to create assignment',
+            description:
+              'Use AI to quickly create high-quality assignments, saving time on preparation. Just provide some basic information and let AI handle the rest!'
+          },
+          moveNextTabButton: 'Create questions for this assignment',
+          moveNextTabButtonWithAI: 'Go to "Chat with AI" tab to create content'
+        },
+        chooseTypeOfAssignmentCreation: {
+          title: 'Choose how to create your assignment',
+          manually: 'Create manually',
+          withAI: 'Create with AI'
+        },
+        chatWithAISession: {
+          initialChatAIMessage:
+            'Make your requirements clear to get the best result from AI.',
+          AILoadingMessage:
+            'AI is creating your assignment, please wait a moment...',
+          chatMessageFieldPlaceholder: 'Type your message here to chat with AI'
         },
         editAssignment: {
           title: 'Edit assignment',
@@ -809,7 +838,8 @@ export const translations = {
       yes: 'Yes',
       no: 'No',
       confirm: 'Confirm',
-      back: 'Back'
+      back: 'Back',
+      understandLabel: 'Got it'
     }
   },
 
@@ -1107,8 +1137,12 @@ export const translations = {
           title: 'Quản lí bài tập của bạn',
           description:
             'Tạo và quản lí các bài tập của bạn, và xem kết quả làm bài',
-          createAssignmentByAIButton: 'Tạo bài tập bằng AI',
-          createAssignmentManuallyButton: 'Tạo bài tập thủ công',
+          viewAIInstruction: {
+            buttonContent: 'Làm thế nào để tạo bài tập với AI?',
+            title: 'Hướng dẫn tạo bài tập với AI',
+            description: 'Sử dụng AI để tạo nhanh các bài tập chất lượng!'
+          },
+          createAssignmentButton: 'Tạo bài tập',
           tableView: {
             title: 'Danh sách bài tập',
             description: 'Tất cả các bài tập bạn đã tạo',
@@ -1187,10 +1221,32 @@ export const translations = {
             fieldCanViewResultDescription:
               'Nếu bật, học sinh có thể xem kết quả sau khi nộp bài'
           },
-
-          moveNextTabButton: 'Tạo câu hỏi cho bài kiểm tra'
+          tabEditCOntentFromAI: {
+            title: 'Chỉnh sửa nội dung bài tập'
+          },
+          tabViewPreview: {
+            title: 'Xem trước bài tập'
+          },
+          tabChatWithAI: {
+            title: 'Trò chuyện với AI để tạo bài tập',
+            description:
+              'Sử dụng AI để tạo nhanh các bài tập chất lượng, không cần mất thời gian soạn đề. Chỉ cần cung cấp một số thông tin cơ bản và để AI lo phần còn lại!'
+          },
+          moveNextTabButton: 'Tạo câu hỏi cho bài kiểm tra',
+          moveNextTabButtonWithAI: 'Sang tab "Chat với AI" để tạo nội dung'
         },
-
+        chooseTypeOfAssignmentCreation: {
+          title: 'Chọn cách tạo bài tập',
+          manually: 'Tạo thủ công',
+          withAI: 'Tạo với AI'
+        },
+        chatWithAISession: {
+          initialChatAIMessage:
+            'Chào mừng bạn đến với phiên trò chuyện với AI để tạo bài tập! Hãy cung cấp cho tôi một số thông tin cơ bản về bài tập bạn muốn tạo, và tôi sẽ giúp bạn soạn đề nhanh chóng và dễ dàng.',
+          AILoadingMessage:
+            'Đang kết nối với AI để tạo bài tập cho bạn, vui lòng chờ trong giây lát...',
+          chatMessageFieldPlaceholder: 'Nhập thông tin về bài tập bạn muốn tạo'
+        },
         createQuestionsAndTasks: {
           createTask: {
             title: 'Danh sách phần lớn',
@@ -1626,7 +1682,8 @@ export const translations = {
       yes: 'Có',
       no: 'Không',
       confirm: 'Xác nhận',
-      back: 'Quay lại'
+      back: 'Quay lại',
+      understandLabel: 'Tôi đã hiểu'
     }
   }
 };
