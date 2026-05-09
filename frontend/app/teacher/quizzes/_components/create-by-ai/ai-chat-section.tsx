@@ -5,6 +5,7 @@ import { SendHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
+import { useLanguage } from '@/components/language-provider'
 
 type AIChatSectionProps = {
     prompt: string
@@ -27,6 +28,7 @@ export function AIChatSection({
     isGenerating,
     canGenerate,
 }: AIChatSectionProps) {
+    const { t } = useLanguage()
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const viewportRef = useRef<HTMLDivElement | null>(null)
 
@@ -73,15 +75,15 @@ export function AIChatSection({
                     <div className="space-y-4">
                         {messages.length === 0 && (
                             <div className="flex justify-start">
-                                <div className="max-w-[85%] rounded-2xl rounded-bl-sm border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
-                                    Hãy mô tả yêu cầu của bạn. Tôi sẽ giúp tạo bộ câu hỏi phù hợp.
+                                <div className="max-w-[60%] rounded-2xl rounded-bl-sm border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
+                                    {t.teacher.assignments.chatWithAISession.initialChatAIMessage}
                                 </div>
                             </div>
                         )}
 
                         {messages.map((message) => (
                             <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-sm bg-orange-100 text-orange-950 dark:bg-orange-500/20 dark:text-orange-100' : 'rounded-bl-sm border bg-muted/40 text-foreground'}`}>
+                                <div className={`max-w-[60%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-sm bg-orange-100 text-orange-950 dark:bg-orange-500/20 dark:text-orange-100' : 'rounded-bl-sm border bg-muted/40 text-foreground'}`}>
                                     {message.content}
                                 </div>
                             </div>
@@ -89,8 +91,8 @@ export function AIChatSection({
 
                         {isGenerating && (
                             <div className="flex justify-start">
-                                <div className="max-w-[85%] rounded-2xl rounded-bl-sm border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
-                                    AI đang tạo nội dung, vui lòng đợi...
+                                <div className="max-w-[60%] rounded-2xl rounded-bl-sm border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
+                                    {t.teacher.assignments.chatWithAISession.AILoadingMessage}
                                 </div>
                             </div>
                         )}
@@ -106,7 +108,7 @@ export function AIChatSection({
                             value={prompt}
                             onChange={(event) => onPromptChange(event.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Hỏi bất kỳ điều gì"
+                            placeholder={t.teacher.assignments.chatWithAISession.chatMessageFieldPlaceholder}
                             className="min-h-[48px] max-h-none resize-none border-0 bg-transparent pl-4 pr-14 py-3 text-sm shadow-none focus-visible:ring-0"
                         />
                     </ScrollArea>

@@ -383,6 +383,13 @@ export const translations = {
           manually: 'Create manually',
           withAI: 'Create with AI'
         },
+        chatWithAISession: {
+          initialChatAIMessage:
+            'Make your requirements clear to get the best result from AI.',
+          AILoadingMessage:
+            'AI is creating your assignment, please wait a moment...',
+          chatMessageFieldPlaceholder: 'Type your message here to chat with AI'
+        },
         editAssignment: {
           title: 'Edit assignment',
           description: 'Update assignment information and configuration',
@@ -1232,6 +1239,13 @@ export const translations = {
           title: 'Chọn cách tạo bài tập',
           manually: 'Tạo thủ công',
           withAI: 'Tạo với AI'
+        },
+        chatWithAISession: {
+          initialChatAIMessage:
+            'Chào mừng bạn đến với phiên trò chuyện với AI để tạo bài tập! Hãy cung cấp cho tôi một số thông tin cơ bản về bài tập bạn muốn tạo, và tôi sẽ giúp bạn soạn đề nhanh chóng và dễ dàng.',
+          AILoadingMessage:
+            'Đang kết nối với AI để tạo bài tập cho bạn, vui lòng chờ trong giây lát...',
+          chatMessageFieldPlaceholder: 'Nhập thông tin về bài tập bạn muốn tạo'
         },
         createQuestionsAndTasks: {
           createTask: {
