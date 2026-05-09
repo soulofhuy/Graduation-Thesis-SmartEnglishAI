@@ -8,7 +8,8 @@ import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { getClassesByTeacherId } from '@/services/teacher/classes'
-import { generateAssignmentFromPrompt } from '@/services/teacher/ai-create-assignments'
+import { sendAIChatMessage } from '@/services/teacher/ai-chat-sessions'
+import { linkAIChatSessionToAssignment } from '@/services/teacher/ai-chat-sessions'
 import {
     createAssignmentBasicInfoSchema,
     createAssignmentPreviewSchema,
@@ -35,6 +36,7 @@ import { AICreateModeCard, AIChatSection } from '../_components/create-by-ai'
 import type { Class, CreateAssignmentInput, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
+import type { ChatMessage } from '../_components/create-by-ai/ai-chat-section'
 
 export default function CreateQuizPage() {
     const { t, language } = useLanguage()
@@ -64,6 +66,8 @@ export default function CreateQuizPage() {
         canViewResult: true,
     })
     const [aiPrompt, setAiPrompt] = useState('')
+    const [aiChatSessionId, setAiChatSessionId] = useState<string | null>(null)
+    const [aiMessages, setAiMessages] = useState<ChatMessage[]>([])
     const [tasks, setTasks] = useState<TaskDraft[]>([initialTask])
     const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask.id)
     const [selectedQuestionId, setSelectedQuestionId] = useState<string>(initialTask.questions[0].id)
@@ -245,8 +249,10 @@ export default function CreateQuizPage() {
         setActiveTab('basic')
     }
 
-    const handleGenerateAiContent = async () => {
-        if (!aiPrompt.trim()) {
+    const handleGenerateAiContent = async (promptText: string) => {
+        const trimmedPrompt = promptText.trim()
+
+        if (!trimmedPrompt) {
             toast.error('Vui lòng nhập yêu cầu cho AI trước khi tạo')
             return
         }
@@ -259,15 +265,37 @@ export default function CreateQuizPage() {
         setIsGeneratingAi(true)
 
         try {
-            const combinedTopic = `Context:\nTitle: ${formData.title || '<no title>'}\nDescription: ${formData.description || '<no description>'}\nClassId: ${formData.classId || '<no class>'}\nDueDate: ${formData.dueDate || '<no dueDate>'}\nUser prompt: ${aiPrompt.trim()}`
+            setAiMessages((prev) => [
+                ...prev,
+                {
+                    id: `${Date.now()}-user`,
+                    role: 'user',
+                    content: trimmedPrompt,
+                },
+            ])
 
-            const result = await generateAssignmentFromPrompt(accessToken, combinedTopic)
-            const generatedTasks = mapGeneratedAssignmentToDrafts(result.assignment.tasks)
+            const combinedTopic = `Context:\nTitle: ${formData.title || '<no title>'}\nDescription: ${formData.description || '<no description>'}\nClassId: ${formData.classId || '<no class>'}\nDueDate: ${formData.dueDate || '<no dueDate>'}\nUser prompt: ${trimmedPrompt}`
+
+            // Persist prompt/response via chat-session API so sessions and prompts are saved
+            const result = await sendAIChatMessage(accessToken, {
+                prompt: combinedTopic,
+                assignmentTitle: formData.title || undefined,
+                assignmentDescription: formData.description || undefined,
+                classId: formData.classId || undefined,
+                dueDate: formData.dueDate || undefined,
+                isPublic: formData.isPublic,
+                isSingleAttempt: formData.isSingleAttempt,
+                canViewResult: formData.canViewResult,
+                chatSessionId: aiChatSessionId ?? undefined,
+            })
+
+            const assignment = result.data.assignment
+            const generatedTasks = mapGeneratedAssignmentToDrafts(assignment.tasks)
 
             setFormData((prev) => ({
                 ...prev,
-                title: prev.title?.trim() ? prev.title : (result.assignment.title?.trim() ?? prev.title),
-                description: prev.description?.trim() ? prev.description : (result.assignment.description ?? prev.description),
+                title: prev.title?.trim() ? prev.title : (assignment.title?.trim() ?? prev.title),
+                description: prev.description?.trim() ? prev.description : (assignment.description ?? prev.description),
             }))
 
             setTasks(generatedTasks)
@@ -276,6 +304,25 @@ export default function CreateQuizPage() {
             setSelectedTaskId(firstTask?.id ?? '')
             setSelectedQuestionId(firstTask?.questions[0]?.id ?? '')
             setActiveTab('preview')
+
+            // store chat session id for subsequent messages
+            if (result.data?.chatSession?.id) {
+                setAiChatSessionId(result.data.chatSession.id)
+            }
+
+            if (result.data?.response?.response) {
+                setAiMessages((prev) => [
+                    ...prev,
+                    {
+                        id: `${Date.now()}-assistant`,
+                        role: 'assistant',
+                        content: result.data.response.response,
+                    },
+                ])
+            }
+
+            // Reset textarea after successful send
+            setAiPrompt('')
 
             toast.success(result.message || 'Đã tạo nội dung AI thành công')
         } catch (error) {
@@ -302,6 +349,15 @@ export default function CreateQuizPage() {
         try {
             console.log('Payload for preview:', payloadPreview)
             const result = await createAssignment(accessToken, payloadPreview)
+
+            if (aiChatSessionId) {
+                try {
+                    await linkAIChatSessionToAssignment(accessToken, aiChatSessionId, result.assignment.id)
+                } catch (linkError) {
+                    console.error('Failed to link AI chat session to saved assignment', linkError)
+                }
+            }
+
             toast.success(result.message || 'Tao de thi thanh cong')
             router.push('/teacher/quizzes')
         } catch (error) {
@@ -578,11 +634,12 @@ export default function CreateQuizPage() {
                             <AIChatSection
                                 prompt={aiPrompt}
                                 onPromptChange={setAiPrompt}
-                                onGenerate={() => {
-                                    void handleGenerateAiContent()
+                                onSendPrompt={(value) => {
+                                    void handleGenerateAiContent(value)
                                 }}
                                 isGenerating={isGeneratingAi}
                                 canGenerate={Boolean(aiPrompt.trim())}
+                                messages={aiMessages}
                             />
                         )}
 

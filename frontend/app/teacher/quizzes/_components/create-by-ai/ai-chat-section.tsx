@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { SendHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -10,12 +10,13 @@ import { useLanguage } from '@/components/language-provider'
 type AIChatSectionProps = {
     prompt: string
     onPromptChange: (value: string) => void
-    onGenerate: () => void
+    onSendPrompt: (value: string) => void
     isGenerating: boolean
     canGenerate: boolean
+    messages: ChatMessage[]
 }
 
-type ChatMessage = {
+export type ChatMessage = {
     id: string
     role: 'assistant' | 'user'
     content: string
@@ -24,12 +25,12 @@ type ChatMessage = {
 export function AIChatSection({
     prompt,
     onPromptChange,
-    onGenerate,
+    onSendPrompt,
     isGenerating,
     canGenerate,
+    messages,
 }: AIChatSectionProps) {
     const { t } = useLanguage()
-    const [messages, setMessages] = useState<ChatMessage[]>([])
     const viewportRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
@@ -46,16 +47,8 @@ export function AIChatSection({
             return
         }
 
-        setMessages((previous) => [
-            ...previous,
-            {
-                id: `${Date.now()}`,
-                role: 'user',
-                content: trimmedPrompt,
-            },
-        ])
-
-        onGenerate()
+        onSendPrompt(trimmedPrompt)
+        onPromptChange('')
     }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {

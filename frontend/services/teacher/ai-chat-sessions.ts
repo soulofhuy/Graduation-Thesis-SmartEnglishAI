@@ -34,6 +34,13 @@ export type ChatSessionModel = {
 
 export type SendChatMessageRequest = {
   prompt: string;
+  assignmentTitle?: string;
+  assignmentDescription?: string;
+  classId?: string;
+  dueDate?: string;
+  isPublic?: boolean;
+  isSingleAttempt?: boolean;
+  canViewResult?: boolean;
   assignmentId?: string;
   chatSessionId?: string;
   chatSessionTitle?: string;

@@ -38,6 +38,22 @@ class AIChatSessionController {
   static sendMessage = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     const prompt = normalizeStringInput(req.body?.prompt);
+    const assignmentTitle = normalizeStringInput(req.body?.assignmentTitle);
+    const assignmentDescription = normalizeStringInput(
+      req.body?.assignmentDescription
+    );
+    const classId = normalizeStringInput(req.body?.classId);
+    const dueDate = normalizeStringInput(req.body?.dueDate);
+    const isPublic =
+      typeof req.body?.isPublic === 'boolean' ? req.body.isPublic : undefined;
+    const isSingleAttempt =
+      typeof req.body?.isSingleAttempt === 'boolean'
+        ? req.body.isSingleAttempt
+        : undefined;
+    const canViewResult =
+      typeof req.body?.canViewResult === 'boolean'
+        ? req.body.canViewResult
+        : undefined;
     const assignmentId = normalizeStringInput(req.body?.assignmentId);
     const chatSessionId = normalizeStringInput(req.body?.chatSessionId);
     const chatSessionTitle = normalizeStringInput(req.body?.chatSessionTitle);
@@ -59,6 +75,13 @@ class AIChatSessionController {
       const result = await AIChatSessionServices.sendMessage({
         userId,
         prompt,
+        ...(assignmentTitle ? { assignmentTitle } : {}),
+        ...(assignmentDescription ? { assignmentDescription } : {}),
+        ...(classId ? { classId } : {}),
+        ...(dueDate ? { dueDate } : {}),
+        ...(typeof isPublic === 'boolean' ? { isPublic } : {}),
+        ...(typeof isSingleAttempt === 'boolean' ? { isSingleAttempt } : {}),
+        ...(typeof canViewResult === 'boolean' ? { canViewResult } : {}),
         ...(assignmentId ? { assignmentId } : {}),
         ...(chatSessionId ? { chatSessionId } : {}),
         ...(chatSessionTitle ? { chatSessionTitle } : {}),

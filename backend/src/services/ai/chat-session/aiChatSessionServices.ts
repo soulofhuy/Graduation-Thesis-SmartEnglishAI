@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import prisma from '@/utils/prisma';
 import AIGenerateAssignmentServices from '@/services/ai/generate-assignment/aiGenerateAssignmentServices';
 import { AIPromptType } from '@/generated/prisma/client';
@@ -9,7 +10,6 @@ export type SendChatMessageInput = {
   prompt: string;
   assignmentId?: string;
   chatSessionId?: string;
-  chatSessionTitle?: string;
   type?: AIPromptType;
 };
 
@@ -34,20 +34,44 @@ class AIChatSessionServices {
     title?: string;
     assignmentId?: string;
   }): Promise<ChatSessionRecord> {
-    return prisma.chatSession.create({
-      data: {
-        userId: params.userId,
-        title: params.title?.trim() || 'AI Chat Session',
-        ...(params.assignmentId ? { assignmentId: params.assignmentId } : {})
-      }
+    const now = new Date();
+    const id = randomUUID();
+
+    await prisma.$executeRaw`
+      INSERT INTO "ChatSessions" (
+        "id",
+        "assignment_id",
+        "user_id",
+        "title",
+        "created_at",
+        "updated_at",
+        "deleted_at"
+      ) VALUES (
+        ${id},
+        ${params.assignmentId ?? null},
+        ${params.userId},
+        ${params.title?.trim() || 'AI Chat Session'},
+        ${now},
+        ${now},
+        ${null}
+      )
+    `;
+
+    const session = await prisma.chatSession.findUnique({
+      where: { id }
     });
+
+    if (!session) {
+      throw new Error('Failed to create chat session');
+    }
+
+    return session;
   }
 
   static async resolveSession(input: {
     userId: string;
     assignmentId?: string;
     chatSessionId?: string;
-    chatSessionTitle?: string;
     prompt: string;
   }): Promise<ChatSessionRecord> {
     let session: ChatSessionRecord | null = input.chatSessionId
@@ -77,21 +101,25 @@ class AIChatSessionServices {
       session = await AIChatSessionServices.createChatSession({
         userId: input.userId,
         ...(input.assignmentId ? { assignmentId: input.assignmentId } : {}),
-        title:
-          input.chatSessionTitle ||
-          AIChatSessionServices.buildDefaultTitle(input.prompt)
+        title: AIChatSessionServices.buildDefaultTitle(input.prompt)
       });
     }
 
     if (input.assignmentId && !session.assignmentId) {
-      session = await prisma.chatSession.update({
-        where: {
-          id: session.id
-        },
-        data: {
-          assignmentId: input.assignmentId
-        }
+      await prisma.$executeRaw`
+        UPDATE "ChatSessions"
+        SET "assignment_id" = ${input.assignmentId},
+            "updated_at" = NOW()
+        WHERE "id" = ${session.id}
+      `;
+
+      session = await prisma.chatSession.findUnique({
+        where: { id: session.id }
       });
+
+      if (!session) {
+        throw new Error('Failed to update chat session');
+      }
     }
 
     return session;
@@ -138,14 +166,22 @@ class AIChatSessionServices {
       throw new Error('Chat session already linked to another assignment');
     }
 
-    return prisma.chatSession.update({
-      where: {
-        id: chatSessionId
-      },
-      data: {
-        assignmentId
-      }
+    await prisma.$executeRaw`
+      UPDATE "ChatSessions"
+      SET "assignment_id" = ${assignmentId},
+          "updated_at" = NOW()
+      WHERE "id" = ${chatSessionId}
+    `;
+
+    const updatedSession = await prisma.chatSession.findUnique({
+      where: { id: chatSessionId }
     });
+
+    if (!updatedSession) {
+      throw new Error('Failed to link chat session to assignment');
+    }
+
+    return updatedSession;
   }
 
   static async getChatSessionsByAssignmentId(
@@ -208,9 +244,6 @@ class AIChatSessionServices {
       userId: input.userId,
       ...(input.assignmentId ? { assignmentId: input.assignmentId } : {}),
       ...(input.chatSessionId ? { chatSessionId: input.chatSessionId } : {}),
-      ...(input.chatSessionTitle
-        ? { chatSessionTitle: input.chatSessionTitle }
-        : {}),
       prompt: promptText
     });
 
