@@ -77,6 +77,7 @@ export default function TeacherOverviewPage() {
       class: item.className,
       createdAt: dateFormat(item.createdAt.toString()),
       dueDate: item.dueDate ? new Date(item.dueDate).toLocaleDateString(language) : '-',
+      submitedStudent: `${item.submittedStudentsCount} / ${item.totalStudentsInClass} ${t.teacher.overview.tableView.submittedStudentsCountDescription}`,
       submissions: `${item.submittedCount} ${t.teacher.overview.tableView.submissionCountDescription}`,
     }))
   }, [language, overview?.recentAssignments])
@@ -110,6 +111,7 @@ export default function TeacherOverviewPage() {
                   <TableHead className="text-center">{t.teacher.overview.tableView.columnCreatedDate}</TableHead>
                   <TableHead className="text-center">{t.teacher.overview.tableView.columnDueDate}</TableHead>
                   <TableHead className="text-center">{t.teacher.overview.tableView.columnSubmissionCount}</TableHead>
+                  <TableHead className="text-center">{t.teacher.overview.tableView.columnSubmittedStudents}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -120,6 +122,7 @@ export default function TeacherOverviewPage() {
                     <TableCell>{assignment.createdAt}</TableCell>
                     <TableCell>{assignment.dueDate}</TableCell>
                     <TableCell>{assignment.submissions}</TableCell>
+                    <TableCell>{assignment.submitedStudent}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
