@@ -15,6 +15,8 @@ export type RecentAssignmentDetail = {
   createdAt: Date;
   dueDate: Date | null;
   submittedCount: number;
+  totalStudentsInClass: number;
+  submittedStudentsCount: number;
 };
 
 export type TeacherOverview = {

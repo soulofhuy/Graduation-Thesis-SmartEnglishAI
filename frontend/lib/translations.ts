@@ -145,7 +145,9 @@ export const translations = {
           columnCreatedDate: 'Created date',
           columnDueDate: 'Due date',
           columnSubmissionCount: 'Submissions',
-          submissionCountDescription: 'student(s) submitted'
+          columnSubmittedStudents: 'Submitted students',
+          submissionCountDescription: 'submission(s)',
+          submittedStudentsCountDescription: 'student(s)'
         }
       },
       classes: {
@@ -984,8 +986,10 @@ export const translations = {
           columnClass: 'Lớp học',
           columnCreatedDate: 'Ngày tạo',
           columnDueDate: 'Ngày đến hạn',
-          columnSubmissionCount: 'Số lượng học sinh nộp bài',
-          submissionCountDescription: 'học sinh đã nộp bài'
+          columnSubmissionCount: 'Số lượt nộp bài của học sinh',
+          columnSubmittedStudents: 'Số học sinh đã nộp bài',
+          submissionCountDescription: 'lượt',
+          submittedStudentsCountDescription: 'học sinh'
         }
       },
       classes: {
