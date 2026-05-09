@@ -14,6 +14,7 @@ import ViewStudyProgressRouter from './src/routes/students/viewStudyProgressRout
 import ViewClassProgressOnAssignmentsRouter from './src/routes/teachers/viewClassProgressOnAssignmentsRoutes';
 import ViewOverviewStatisticRouter from './src/routes/teachers/viewOverviewStatisticRoutes';
 import AIGenerateAssignmentRouter from './src/routes/ai/generate-assignment/aiGenerateAssignmentRoutes';
+import AIChatSessionRouter from './src/routes/ai/chat-session/aiChatSessionRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -40,6 +41,7 @@ app.use('/api', ViewStudyProgressRouter);
 app.use('/api', ViewClassProgressOnAssignmentsRouter);
 app.use('/api', ViewOverviewStatisticRouter);
 app.use('/api', AIGenerateAssignmentRouter);
+app.use('/api', AIChatSessionRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 

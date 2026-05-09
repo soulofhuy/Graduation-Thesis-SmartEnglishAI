@@ -56,8 +56,19 @@ const extractJsonPayload = (rawText: string): string | null => {
   return null;
 };
 
+export type GenerateAssignmentPayload = {
+  topic: string;
+};
+
+export type GenerateAssignmentResult = {
+  assignment: any;
+  rawText: string;
+};
+
 class AIGenerateAssignmentServices {
-  static generateAssignment = async (topic: string) => {
+  static generateAssignmentContent = async (
+    topic: string
+  ): Promise<GenerateAssignmentResult> => {
     try {
       const prompt = `
                     Prompt: ${topic}
@@ -70,15 +81,17 @@ class AIGenerateAssignmentServices {
       });
 
       const rawText = typeof response.text === 'string' ? response.text : '';
-      console.log(rawText);
-
       const jsonPayload = extractJsonPayload(rawText);
+
       if (!jsonPayload) {
         throw new Error('AI returned empty content');
       }
 
       try {
-        return JSON.parse(jsonPayload);
+        return {
+          assignment: JSON.parse(jsonPayload),
+          rawText
+        };
       } catch {
         throw new Error('AI returned non-JSON content');
       }
@@ -86,6 +99,13 @@ class AIGenerateAssignmentServices {
       console.error('Error generating assignment:', error);
       throw new Error('Failed to generate assignment');
     }
+  };
+
+  static generateAssignment = async (topic: string) => {
+    const result =
+      await AIGenerateAssignmentServices.generateAssignmentContent(topic);
+
+    return result.assignment;
   };
 }
 
