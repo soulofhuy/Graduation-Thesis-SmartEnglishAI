@@ -67,7 +67,7 @@ export default function LoginPage() {
       } else if (role === 'TEACHER') {
         router.push('/teacher/overview')
       } else {
-        router.push('/student/overview')
+        router.push('/class')
       }
 
       if (message) {
