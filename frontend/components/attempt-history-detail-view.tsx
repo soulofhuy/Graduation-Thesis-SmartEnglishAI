@@ -20,6 +20,7 @@ import { FormattedContent } from '@/lib/view-details-assignment-helpers/format-c
 import { getAnswerDisplayContent } from '@/lib/view-details-assignment-helpers/get-answer-display-content'
 import { getDurationMinutes } from '@/lib/view-details-assignment-helpers/get-duration-minutes'
 import type { StudentAttemptHistoryItem } from '@/services/student/assignments'
+import { useLanguage } from './language-provider'
 
 type SummaryCard = {
     label: ReactNode
@@ -74,6 +75,9 @@ export function AttemptHistoryDetailView({
     detailLabels,
     emptyLabels,
 }: AttemptHistoryDetailViewProps) {
+
+    const { language } = useLanguage()
+
     return (
         <div className="p-4 md:p-8 space-y-6">
             <Link href={backHref}>
@@ -152,6 +156,7 @@ export function AttemptHistoryDetailView({
                                             {getDurationMinutes({
                                                 startedAt: attempt.startedAt,
                                                 submittedAt: attempt.submittedAt,
+                                                language
                                             })}
                                         </TableCell>
                                         <TableCell className="text-center">{attempt._count?.answers ?? 0}</TableCell>

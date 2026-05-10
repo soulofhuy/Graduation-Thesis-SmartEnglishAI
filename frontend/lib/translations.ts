@@ -728,6 +728,28 @@ export const translations = {
           }
         },
         viewHistory: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Search',
+              searchFieldPlaceholder: 'Search by assignment title/class name',
+              searchButton: 'Search',
+              resetButton: 'Reset'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sort by',
+                fieldAssignmentTitle: "Assignment's title",
+                fieldClassName: "Class's name",
+                fieldSubmittedDate: 'Submitted date',
+                fieldTotalTime: 'Total time'
+              },
+              order: {
+                title: 'Order',
+                asc: 'Ascending',
+                desc: 'Descending'
+              }
+            }
+          },
           title: 'My assignment history',
           description:
             'Review your past assignments and results to track your learning progress',
@@ -740,7 +762,8 @@ export const translations = {
             columnSubmittedAt: 'Submitted at',
             columnTotalTime: 'Total time',
             columnStatus: 'Status',
-            columnActions: 'Actions'
+            columnActions: 'Actions',
+            actionDescriptionViewDetails: 'View details'
           }
         },
         viewHistoryDetails: {
@@ -1623,6 +1646,29 @@ export const translations = {
           }
         },
         viewHistory: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Tìm kiếm bài tập',
+              searchFieldPlaceholder:
+                'Tìm kiếm theo tiêu đề của bài tập/tên lớp học',
+              searchButton: 'Tìm kiếm',
+              resetButton: 'Đặt lại'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sắp xếp theo',
+                fieldAssignmentTitle: 'Tiêu đề bài tập',
+                fieldClassName: 'Tên lớp học',
+                fieldSubmittedDate: 'Ngày nộp bài',
+                fieldTotalTime: 'Thời gian làm bài'
+              },
+              order: {
+                title: 'Thứ tự',
+                asc: 'Tăng dần',
+                desc: 'Giảm dần'
+              }
+            }
+          },
           title: 'Lịch sử bài tập của tôi',
           description:
             'Xem lại các bài tập đã làm và kết quả để theo dõi tiến trình học tập của bạn',
@@ -1635,7 +1681,8 @@ export const translations = {
             columnSubmittedAt: 'Ngày nộp',
             columnTotalTime: 'Thời gian tổng cộng',
             columnStatus: 'Trạng thái',
-            columnActions: 'Các thao tác'
+            columnActions: 'Các thao tác',
+            actionDescriptionViewDetails: 'Xem chi tiết'
           }
         },
         viewHistoryDetails: {
