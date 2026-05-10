@@ -202,24 +202,24 @@ export const translations = {
         },
         editClass: {
           title: 'Edit Class',
-          description: 'Update Class Information',
-          fieldName: 'Class Name',
+          description: 'Update Class information',
+          fieldName: 'Class name',
           fieldNamePlaceholder: 'Example: Class 9CB1',
-          fieldDescription: 'Class Description',
+          fieldDescription: 'Class description',
           fieldDescriptionPlaceholder: 'Example: Class for 9CB students',
           fieldNeedsTeacherApproval: 'Needs your approval to join?',
-          fieldClassCode: 'Class Code'
+          fieldClassCode: 'Class code'
         },
         deleteClass: {
           title: 'Delete class',
           description: 'Are you sure you want to delete this class?',
           classInformation: {
-            title: 'Class Information',
-            fieldClassName: 'Class Name',
-            fieldClassDescription: 'Class Description',
-            fieldStudentNumber: 'Number of Students',
-            fieldAssignmentNumber: 'Number of Assignments',
-            fieldClassCode: 'Class Code'
+            title: 'Class information',
+            fieldClassName: 'Class name',
+            fieldClassDescription: 'Class description',
+            fieldStudentNumber: 'Number of students',
+            fieldAssignmentNumber: 'Number of assignments',
+            fieldClassCode: 'Class code'
           }
         },
         viewPendingRequests: {
@@ -536,7 +536,7 @@ export const translations = {
           columnName: 'Name',
           columnType: 'Type',
           columnDescription: 'Description',
-          columnDeletedAt: 'Deleted Date',
+          columnDeletedAt: 'Deleted date',
           columnActions: 'Actions'
         },
         note: {
@@ -755,7 +755,7 @@ export const translations = {
             'Review your past assignments and results to track your learning progress',
           searchPlaceholder: 'Search by assignment title...',
           tableView: {
-            columnAssignmentTitle: 'Assignment Title',
+            columnAssignmentTitle: 'Assignment title',
             columnClass: 'Class',
             columnIsSingleAttempt: 'Single attempt',
             columnResult: 'Result',
@@ -817,12 +817,12 @@ export const translations = {
         }
       },
       settings: {
-        title: 'Account Settings',
+        title: 'Account settings',
         description: 'Manage your personal information and preferences',
         tabs: {
           settingsTab: {
-            mainTitle: 'System Settings',
-            subTitle: 'Interface Options',
+            mainTitle: 'System settings',
+            subTitle: 'Interface options',
             description: 'Adjust language and light/dark mode',
             option: [
               {
@@ -837,16 +837,16 @@ export const translations = {
           },
           profileTab: {
             mainTitle: 'Profile',
-            subTitle: 'Personal Information',
+            subTitle: 'Personal information',
             description: 'View and update your profile',
             fields: {
-              firstName: 'First Name',
-              lastName: 'Last Name',
+              firstName: 'First name',
+              lastName: 'Last name',
               address: 'Address',
-              phoneNumber: 'Phone Number',
-              dateOfBirth: 'Date of Birth',
-              createdAt: 'Created At',
-              updatedAt: 'Last Updated'
+              phoneNumber: 'Phone number',
+              dateOfBirth: 'Date of birth',
+              createdAt: 'Created at',
+              updatedAt: 'Last updated'
             }
           },
           passwordTab: {
@@ -854,9 +854,9 @@ export const translations = {
             subTitle: 'Change password',
             description: 'Update password to protect your account',
             fields: {
-              currentPassword: 'Current Password',
-              newPassword: 'New Password',
-              confirmPassword: 'Confirm Password'
+              currentPassword: 'Current password',
+              newPassword: 'New password',
+              confirmPassword: 'Confirm password'
             }
           }
         }
