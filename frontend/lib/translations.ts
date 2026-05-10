@@ -611,9 +611,9 @@ export const translations = {
           noData: 'No data to display'
         },
         viewBannedClasses: {
-          title: 'List of locked classes',
-          description:
-            'Classes you no longer have access to because you have been banned',
+          buttonName: 'View banned classes',
+          title: 'List of your banned classes',
+          description: 'These are classes you no longer have access to!',
           columnClassName: 'Class name',
           columnTeacherName: 'Teacher name',
           columnClassCode: 'Class code',
@@ -1498,9 +1498,9 @@ export const translations = {
           noData: 'Không có dữ liệu để hiển thị'
         },
         viewBannedClasses: {
+          buttonName: 'Lớp học bị khóa',
           title: 'Danh sách các lớp học bị khóa',
-          description:
-            'Các lớp bạn không còn quyền truy cập do đã bị cấm tham gia',
+          description: 'Bạn không còn quyền truy cập vào các lớp này!',
           columnClassName: 'Tên lớp',
           columnTeacherName: 'Tên giáo viên',
           columnClassCode: 'Mã lớp',

@@ -322,13 +322,6 @@ export default function StudentClassesPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            className="gap-2"
-            onClick={() => setIsJoinModalOpen(true)}
-          >
-            <Plus className="w-4 h-4" />
-            {t.student.classes.buttonJoinClass.buttonName}
-          </Button>
-          <Button
             variant="outline"
             className="gap-2"
             onClick={() => setIsJoinRequestsModalOpen(true)}
@@ -342,7 +335,14 @@ export default function StudentClassesPage() {
             onClick={() => setIsBannedClassesModalOpen(true)}
           >
             <UserX className="w-4 h-4" />
-            Banned Class
+            {t.student.classes.viewBannedClasses.buttonName}
+          </Button>
+          <Button
+            className="gap-2"
+            onClick={() => setIsJoinModalOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            {t.student.classes.buttonJoinClass.buttonName}
           </Button>
         </div>
       </div>
