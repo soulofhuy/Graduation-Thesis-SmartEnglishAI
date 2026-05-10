@@ -82,7 +82,7 @@ export default function StudentHistoryDetailPage() {
     return (
         <AttemptHistoryDetailView
             backHref="/student/history"
-            backLabel="Quay lại lịch sử"
+            backLabel={t.common.back}
             assignmentTitle={t.student.assignments.viewHistoryDetails.assignmentInfo.title}
             canViewResult={assignmentInfo?.canViewResult ?? false}
             summaryCards={summaryCards}

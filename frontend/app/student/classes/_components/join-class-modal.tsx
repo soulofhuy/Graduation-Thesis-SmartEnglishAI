@@ -33,11 +33,11 @@ export function JoinClassModal({
             description={t.student.classes.buttonJoinClass.description}
             footer={
                 <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button variant="secondary" onClick={() => onOpenChange(false)}>
                         {t.common.cancel}
                     </Button>
                     <Button onClick={onJoin} disabled={isJoining || !classCode.trim()}>
-                        {isJoining ? 'Đang tham gia...' : 'Tham gia'}
+                        {isJoining ? t.student.classes.buttonJoinClass.isJoining : t.student.classes.buttonJoinClass.joinButton}
                     </Button>
                 </div>
             }
@@ -48,14 +48,11 @@ export function JoinClassModal({
                         {t.student.classes.buttonJoinClass.fieldClassCode}
                     </label>
                     <Input
-                        placeholder="Ví dụ: ABC123"
+                        placeholder={t.student.classes.buttonJoinClass.fieldClassCodePlaceholder}
                         value={classCode}
                         onChange={e => onClassCodeChange(e.target.value)}
                         disabled={isJoining}
                     />
-                    <p className="text-xs text-muted-foreground mt-2">
-                        {t.student.classes.buttonJoinClass.fieldClassCodePlaceholder}
-                    </p>
                 </div>
             </div>
         </ModalWrapper>

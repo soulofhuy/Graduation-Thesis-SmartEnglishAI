@@ -3,10 +3,15 @@ type DurationRange = {
   submittedAt?: string | null;
 };
 
+type Language = 'vi' | 'en';
+
 export const getDurationMinutes = ({
   startedAt,
-  submittedAt
-}: DurationRange) => {
+  submittedAt,
+  language = 'vi'
+}: DurationRange & {
+  language?: Language;
+}) => {
   if (!startedAt || !submittedAt) {
     return '-';
   }
@@ -22,5 +27,9 @@ export const getDurationMinutes = ({
     0,
     Math.round((submittedAtMs - startedAtMs) / 60000)
   );
-  return `${durationMinutes} phút`;
+
+  const minuteLabel =
+    language === 'vi' ? 'phút' : durationMinutes === 1 ? 'minute' : 'minutes';
+
+  return `${durationMinutes} ${minuteLabel}`;
 };

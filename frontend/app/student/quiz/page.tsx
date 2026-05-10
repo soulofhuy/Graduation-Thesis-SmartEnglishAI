@@ -24,11 +24,21 @@ import { dateTimeFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
+import { useMemo } from 'react'
+
+const SORT_FIELDS = ['title', 'className', 'questionCount', 'dueDate'] as const
+const SORT_DIRECTIONS = ['asc', 'desc'] as const
+
+type SortField = (typeof SORT_FIELDS)[number]
+type SortDirection = (typeof SORT_DIRECTIONS)[number]
 
 export default function StudentQuizPage() {
   const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortField, setSortField] = useState<SortField>('title')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [isLoadingAssignments, setIsLoadingAssignments] = useState(false)
   const [assignments, setAssignments] = useState<StudentAssignedAssignment[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -59,9 +69,58 @@ export default function StudentQuizPage() {
     void fetchAssignments()
   }, [accessToken, isHydrated, currentPage, pageSize])
 
-  const filteredAssignments = assignments.filter((assignment) =>
-    (assignment.title ?? '').toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchInput.trim())
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchQuery('')
+  }
+
+  const filteredAssignments = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    const filtered = assignments.filter((assignment) => {
+      if (!query) {
+        return true
+      }
+
+      const title = assignment.title?.toLowerCase() ?? ''
+      const className = assignment.class?.name?.toLowerCase() ?? ''
+
+      return title.includes(query) || className.includes(query)
+    })
+
+    const directionFactor = sortDirection === 'asc' ? 1 : -1
+
+    return [...filtered].sort((left, right) => {
+      let comparison = 0
+
+      if (sortField === 'questionCount') {
+        comparison = (left._count?.tasks ?? 0) - (right._count?.tasks ?? 0)
+      } else if (sortField === 'className') {
+        comparison = (left.class?.name ?? '').localeCompare(right.class?.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      } else if (sortField === 'dueDate') {
+        const leftDate = new Date(left.dueDate ?? 0).getTime()
+        const rightDate = new Date(right.dueDate ?? 0).getTime()
+        comparison = leftDate - rightDate
+      } else {
+        comparison = (left.title ?? '').localeCompare(right.title ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      if (comparison === 0) {
+        comparison = (left.title ?? '').localeCompare(right.title ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      return comparison * directionFactor
+    })
+  }, [assignments, language, searchQuery, sortDirection, sortField])
 
   const handlePrevPage = () => {
     setCurrentPage((prevPage) => Math.max(1, prevPage - 1))
@@ -159,15 +218,105 @@ export default function StudentQuizPage() {
         </p>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-        <Input
-          placeholder="Tìm kiếm bài tập..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+      <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+        <CardContent>
+          <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+            <div className="w-full max-w-md mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.student.assignments.overview.searchOrSortOrFilter.search.title}
+                </label>
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  handleSearchSubmit()
+                }}
+                className="flex flex-col items-center gap-3 md:max-w-md"
+              >
+                <div className="relative w-full max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder={t.student.assignments.overview.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                    className="h-11 w-full rounded-full pl-10 pr-4"
+                  />
+                </div>
+
+                <div className="flex justify-center gap-2">
+                  <Button type="submit" className="rounded-full px-5">
+                    {t.student.assignments.overview.searchOrSortOrFilter.search.searchButton}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full px-5"
+                    onClick={clearSearch}
+                  >
+                    {t.student.assignments.overview.searchOrSortOrFilter.search.resetButton}
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="w-full max-w-3xl mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.student.assignments.overview.searchOrSortOrFilter.sort.sortItems.title}
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center gap-2">
+                  {SORT_FIELDS.map((field) => (
+                    <Button
+                      key={field}
+                      type="button"
+                      variant={sortField === field ? 'default' : 'outline'}
+                      className="rounded-full px-3 py-1"
+                      onClick={() => setSortField(field)}
+                    >
+                      {field === 'title' && t.student.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldAssignmentTitle}
+                      {field === 'className' && t.student.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldClassName}
+                      {field === 'questionCount' && t.student.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldQuestionCount}
+                      {field === 'dueDate' && t.student.assignments.overview.searchOrSortOrFilter.sort.sortItems.fieldDueDate}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-3 mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.student.assignments.overview.searchOrSortOrFilter.sort.order.title}
+                </label>
+              </div>
+
+              <div className="space-y-2 text-center">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('asc')}
+                  >
+                    {t.student.assignments.overview.searchOrSortOrFilter.sort.order.asc}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('desc')}
+                  >
+                    {t.student.assignments.overview.searchOrSortOrFilter.sort.order.desc}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="mt-6">
         <CardHeader className="space-y-3">

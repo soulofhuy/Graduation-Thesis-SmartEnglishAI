@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, BookOpen, Eye, Grid, TableCellsMerge, ClockAlert, UserX } from 'lucide-react'
+import { Plus, Eye, ClockAlert, UserX, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
@@ -25,12 +25,39 @@ import { JoinRequestsModal, type JoinRequestItem } from './_components/join-requ
 import { ClassMembersModal } from './_components/class-members-modal'
 import { BannedClassesModal } from './_components/banned-classes-modal'
 import { TOAST_COLORS } from '@/lib/toast/color'
+import { Input } from '@/components/ui/input'
+import { PageSizeSelect } from '@/components/page-size-select'
+
+const SORT_FIELDS = ['name', 'students', 'teacher', 'classCode'] as const
+const SORT_DIRECTIONS = ['asc', 'desc'] as const
+
+type SortField = (typeof SORT_FIELDS)[number]
+type SortDirection = (typeof SORT_DIRECTIONS)[number]
+
+type Pagination = {
+  page: number
+  limit: number
+  totalItems: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+}
 
 export default function StudentClassesPage() {
   const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [classes, setClasses] = useState<BackendClass[]>([])
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
+  const [isPaging, setIsPaging] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [hasPrevPage, setHasPrevPage] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortField, setSortField] = useState<SortField>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
   const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false)
@@ -38,7 +65,6 @@ export default function StudentClassesPage() {
   const [isClassMembersModalOpen, setIsClassMembersModalOpen] = useState(false)
   const [classCode, setClassCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
-  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
   const [isLoadingRequests, setIsLoadingRequests] = useState(false)
   const [isLoadingClassMembers, setIsLoadingClassMembers] = useState(false)
   const [isLoadingBannedClasses, setIsLoadingBannedClasses] = useState(false)
@@ -47,31 +73,97 @@ export default function StudentClassesPage() {
   const [selectedClass, setSelectedClass] = useState<BackendClass | null>(null)
   const [selectedClassMembers, setSelectedClassMembers] = useState<ClassMember[]>([])
 
-  const getTeacherLabel = (classItem: BackendClass) => {
+  const getTeacherLabel = (classItem: BackendClass): string => {
     const profile = classItem.teacher?.profile
     const teacherName = [profile?.lastName, profile?.firstName]
       .filter(Boolean)
       .join(' ')
 
-    return teacherName || classItem.teacher?.email
+    return teacherName || classItem.teacher?.email || 'N/A'
   }
 
   const getStudentCount = (classItem: BackendClass) => {
     return classItem.classMembers?.length ?? 0
   }
 
-  const fetchApprovedClasses = async (token: string) => {
-    setIsLoadingClasses(true)
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchInput.trim())
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchQuery('')
+  }
+
+  const visibleClasses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    const filtered = classes.filter((classItem) => {
+      if (!query) {
+        return true
+      }
+
+      const name = classItem.name?.toLowerCase() ?? ''
+      const classCode = classItem.classCode?.toLowerCase() ?? ''
+      const teacherName = getTeacherLabel(classItem).toLowerCase()
+
+      return name.includes(query) || classCode.includes(query) || teacherName.includes(query)
+    })
+
+    const directionFactor = sortDirection === 'asc' ? 1 : -1
+
+    return [...filtered].sort((left, right) => {
+      let comparison = 0
+
+      if (sortField === 'students') {
+        comparison = getStudentCount(left) - getStudentCount(right)
+      } else if (sortField === 'teacher') {
+        comparison = getTeacherLabel(left).localeCompare(getTeacherLabel(right), language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      } else if (sortField === 'classCode') {
+        comparison = (left.classCode ?? '').localeCompare(right.classCode ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      } else {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      if (comparison === 0) {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base'
+        })
+      }
+
+      return comparison * directionFactor
+    })
+  }, [classes, language, searchQuery, sortDirection, sortField])
+
+  const fetchApprovedClasses = useCallback(async (token: string, page: number, limit: number, showSkeleton = false) => {
+    if (showSkeleton) {
+      setIsLoadingClasses(true)
+    } else {
+      setIsPaging(true)
+    }
+
     try {
-      const result = await getAllApprovedClassesByStudent(token)
+      const result = await getAllApprovedClassesByStudent(token, page, limit)
       setClasses(result.approvedClasses as BackendClass[])
+
+      const pagination = result.pagination as Pagination | undefined
+      setCurrentPage(pagination?.page ?? page)
+      setTotalItems(pagination?.totalItems ?? result.approvedClasses.length)
+      setHasNextPage(Boolean(pagination?.hasNextPage))
+      setHasPrevPage(Boolean(pagination?.hasPrevPage))
     } catch (error) {
       const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
       toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsLoadingClasses(false)
+      setIsPaging(false)
     }
-  }
+  }, [language])
 
   const fetchPendingRequests = async (token: string) => {
     setIsLoadingRequests(true)
@@ -118,11 +210,36 @@ export default function StudentClassesPage() {
     }
 
     void Promise.all([
-      fetchApprovedClasses(accessToken),
+      fetchApprovedClasses(accessToken, currentPage, pageSize, true),
       fetchPendingRequests(accessToken),
       fetchBannedClasses(accessToken)
     ])
-  }, [accessToken, isHydrated])
+  }, [accessToken, currentPage, fetchApprovedClasses, isHydrated, pageSize])
+
+  const handleNextPage = () => {
+    if (!hasNextPage || isPaging) {
+      return
+    }
+
+    setCurrentPage((prev) => prev + 1)
+  }
+
+  const handlePrevPage = () => {
+    if (!hasPrevPage || isPaging) {
+      return
+    }
+
+    setCurrentPage((prev) => Math.max(1, prev - 1))
+  }
+
+  const handlePageSizeChange = (nextValue: number) => {
+    if (nextValue === pageSize) {
+      return
+    }
+
+    setCurrentPage(1)
+    setPageSize(nextValue)
+  }
 
   const handleJoinClass = async () => {
     if (!classCode.trim()) {
@@ -159,14 +276,17 @@ export default function StudentClassesPage() {
 
       await Promise.all([
         fetchPendingRequests(accessToken),
-        fetchApprovedClasses(accessToken)
+        fetchApprovedClasses(accessToken, currentPage, pageSize)
       ])
 
       toast.success(result.message)
+      setIsJoinModalOpen(false)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsJoining(false)
       setClassCode('')
-      setIsJoinModalOpen(false)
     }
   }
 
@@ -204,34 +324,6 @@ export default function StudentClassesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 p-1">
-            <span className="px-2 text-xs font-medium tracking-wide text-muted-foreground">
-              {t.common.viewPort}
-            </span>
-            <Button
-              size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              className="rounded-sm"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              className="rounded-sm"
-              onClick={() => setViewMode('table')}
-            >
-              <TableCellsMerge className="h-4 w-4" />
-            </Button>
-          </div>
-          <Button
-            className="gap-2"
-            onClick={() => setIsJoinModalOpen(true)}
-          >
-            <Plus className="w-4 h-4" />
-            {t.student.classes.buttonJoinClass.buttonName}
-          </Button>
           <Button
             variant="outline"
             className="gap-2"
@@ -246,141 +338,219 @@ export default function StudentClassesPage() {
             onClick={() => setIsBannedClassesModalOpen(true)}
           >
             <UserX className="w-4 h-4" />
-            Banned Class
+            {t.student.classes.viewBannedClasses.buttonName}
+          </Button>
+          <Button
+            className="gap-2"
+            onClick={() => setIsJoinModalOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            {t.student.classes.buttonJoinClass.buttonName}
           </Button>
         </div>
       </div>
 
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {classes.map((classItem) => (
-            <Card key={classItem.id} className="relative min-h-[210px] overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-lg border bg-background/90 p-1 backdrop-blur-sm">
+      <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+        <CardContent>
+          <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+            <div className="w-full max-w-md mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.student.classes.searchOrSortOrFilter.search.title}
+                </label>
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  handleSearchSubmit()
+                }}
+                className="flex flex-col items-center gap-3 md:max-w-md"
+              >
+                <div className="relative w-full max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder={t.student.classes.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                    className="h-11 w-full rounded-full pl-10 pr-4"
+                  />
+                </div>
+
+                <div className="flex justify-center gap-2">
+                  <Button type="submit" className="rounded-full px-5">
+                    {t.student.classes.searchOrSortOrFilter.search.searchButton}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full px-5"
+                    onClick={clearSearch}
+                  >
+                    {t.student.classes.searchOrSortOrFilter.search.resetButton}
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="w-full max-w-3xl mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.student.classes.searchOrSortOrFilter.sort.sortItems.title}
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center gap-2">
+                  {SORT_FIELDS.map((field) => (
+                    <Button
+                      key={field}
+                      type="button"
+                      variant={sortField === field ? 'default' : 'outline'}
+                      className="rounded-full px-3 py-1"
+                      onClick={() => setSortField(field)}
+                    >
+                      {field === 'name' && t.student.classes.searchOrSortOrFilter.sort.sortItems.fieldClassName}
+                      {field === 'students' && t.student.classes.searchOrSortOrFilter.sort.sortItems.fieldStudentCount}
+                      {field === 'teacher' && t.student.classes.searchOrSortOrFilter.sort.sortItems.fieldTeacherName}
+                      {field === 'classCode' && t.student.classes.searchOrSortOrFilter.sort.sortItems.fieldClassCode}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-3 mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.student.classes.searchOrSortOrFilter.sort.order.title}
+                </label>
+              </div>
+
+              <div className="space-y-2 text-center">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('asc')}
+                  >
+                    {t.student.classes.searchOrSortOrFilter.sort.order.asc}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('desc')}
+                  >
+                    {t.student.classes.searchOrSortOrFilter.sort.order.desc}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="mb-3">
+          <CardTitle>{t.student.classes.tableViewport.title}</CardTitle>
+          <CardDescription>{t.student.classes.tableViewport.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnClassName}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnTeacherName}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnStudentNumber}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnClassStatus}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnClassCode}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnActions}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingClasses ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        {t.common.loading}...
+                      </TableCell>
+                    </TableRow>
+                  ) : visibleClasses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        {t.common.noData}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    visibleClasses.map(classItem => (
+                      <TableRow key={classItem.id}>
+                        <TableCell className="font-medium text-center">{classItem.name}</TableCell>
+                        <TableCell className="text-center">{getTeacherLabel(classItem)}</TableCell>
+                        <TableCell className="text-center">{getStudentCount(classItem)}</TableCell>
+                        <TableCell className="text-center">
+                          <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                            Đang học
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm font-semibold text-center">
+                          {classItem.classCode ?? '---'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleViewClassMembers(classItem)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+              <p className="text-sm text-muted-foreground">
+                {t.common.pagination.total} {totalItems}
+              </p>
+
+              <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => handleViewClassMembers(classItem)}
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasPrevPage || isPaging}
+                  onClick={handlePrevPage}
                 >
-                  <Eye className="w-4 h-4" />
+                  {t.common.pagination.previous}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasNextPage || isPaging}
+                  onClick={handleNextPage}
+                >
+                  {t.common.pagination.next}
                 </Button>
               </div>
 
-              <CardHeader className="pr-24">
-                <div className="space-y-1">
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-muted-foreground" />
-                    {classItem.name ?? `Lớp ${classItem.classCode ?? ''}`}
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl bg-muted/50 p-3">
-                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                      <BookOpen className="w-4 h-4" />
-                      {t.student.classes.gridViewport.fieldTeacherName}
-                    </div>
-                    <p className="text-base font-semibold text-foreground leading-tight">
-                      {getTeacherLabel(classItem)}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-muted/50 p-3">
-                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      {t.student.classes.gridViewport.fieldStudentNumber}
-                    </div>
-                    <p className="text-2xl font-bold text-foreground leading-none">
-                      {getStudentCount(classItem)}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-muted/50 p-3">
-                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                      <Eye className="w-4 h-4" />
-                      {t.student.classes.gridViewport.fieldClassStatus}
-                    </div>
-                    <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                      Đang học
-                    </span>
-                  </div>
-
-                  <div className="rounded-xl bg-muted/50 p-3">
-                    <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                      <BookOpen className="w-4 h-4" />
-                      {t.student.classes.gridViewport.fieldClassCode}
-                    </div>
-                    <p className="text-base font-semibold text-foreground leading-tight">
-                      {classItem.classCode ?? '---'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t.student.classes.tableViewport.columnClassName}</TableHead>
-                  <TableHead>{t.student.classes.tableViewport.columnTeacherName}</TableHead>
-                  <TableHead>{t.student.classes.tableViewport.columnStudentNumber}</TableHead>
-                  <TableHead>{t.student.classes.tableViewport.columnClassStatus}</TableHead>
-                  <TableHead>{t.student.classes.tableViewport.columnClassCode}</TableHead>
-                  <TableHead className="text-right">{t.student.classes.tableViewport.columnActions}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoadingClasses ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      {t.common.loading}...
-                    </TableCell>
-                  </TableRow>
-                ) : classes.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  classes.map(classItem => (
-                    <TableRow key={classItem.id}>
-                      <TableCell className="font-medium">{classItem.name ?? `Lớp ${classItem.classCode ?? ''}`}</TableCell>
-                      <TableCell>{getTeacherLabel(classItem)}</TableCell>
-                      <TableCell>{getStudentCount(classItem)}</TableCell>
-                      <TableCell>
-                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                          Đang học
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm font-semibold">
-                        {classItem.classCode ?? '---'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleViewClassMembers(classItem)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+              <div className="flex items-center gap-4">
+                <PageSizeSelect
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  options={[10, 20, 25, 50]}
+                  disabled={isPaging}
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <JoinClassModal
         isOpen={isJoinModalOpen}

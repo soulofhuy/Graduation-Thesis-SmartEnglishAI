@@ -202,24 +202,24 @@ export const translations = {
         },
         editClass: {
           title: 'Edit Class',
-          description: 'Update Class Information',
-          fieldName: 'Class Name',
+          description: 'Update Class information',
+          fieldName: 'Class name',
           fieldNamePlaceholder: 'Example: Class 9CB1',
-          fieldDescription: 'Class Description',
+          fieldDescription: 'Class description',
           fieldDescriptionPlaceholder: 'Example: Class for 9CB students',
           fieldNeedsTeacherApproval: 'Needs your approval to join?',
-          fieldClassCode: 'Class Code'
+          fieldClassCode: 'Class code'
         },
         deleteClass: {
           title: 'Delete class',
           description: 'Are you sure you want to delete this class?',
           classInformation: {
-            title: 'Class Information',
-            fieldClassName: 'Class Name',
-            fieldClassDescription: 'Class Description',
-            fieldStudentNumber: 'Number of Students',
-            fieldAssignmentNumber: 'Number of Assignments',
-            fieldClassCode: 'Class Code'
+            title: 'Class information',
+            fieldClassName: 'Class name',
+            fieldClassDescription: 'Class description',
+            fieldStudentNumber: 'Number of students',
+            fieldAssignmentNumber: 'Number of assignments',
+            fieldClassCode: 'Class code'
           }
         },
         viewPendingRequests: {
@@ -536,7 +536,7 @@ export const translations = {
           columnName: 'Name',
           columnType: 'Type',
           columnDescription: 'Description',
-          columnDeletedAt: 'Deleted Date',
+          columnDeletedAt: 'Deleted date',
           columnActions: 'Actions'
         },
         note: {
@@ -550,16 +550,40 @@ export const translations = {
     // Student Dashboard
     student: {
       classes: {
-        title: 'My Classes',
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search',
+            searchFieldPlaceholder: 'Search by class name or class code',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldClassName: 'Class name',
+              fieldStudentCount: 'Number of students',
+              fieldTeacherName: 'Teacher name',
+              fieldClassCode: 'Class code'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
+        },
+        title: 'My classes',
         description: 'List of classes you are currently attending',
         buttonJoinClass: {
-          buttonName: 'Join Class',
-          title: 'Join New Class',
+          buttonName: 'Join class',
+          title: 'Join new class',
           description:
             'Enter the class code provided by your teacher to join the new class',
-          fieldClassCode: 'Class Code',
+          fieldClassCode: 'Class code',
           fieldClassCodePlaceholder: 'Example: ABC123',
-          note: 'You need a class code to join. Please contact your teacher to get the class code.'
+          note: 'You need a class code to join. Please contact your teacher to get the class code.',
+          joinButton: 'Join',
+          isJoining: 'Joining'
         },
         buttonViewRequests: {
           buttonName: 'Request history',
@@ -567,12 +591,12 @@ export const translations = {
           description:
             'Track the list of submitted requests and approval status.',
           noRequests: 'You have not submitted any requests to join the class.',
-          columnClassCode: 'Class Code',
-          columnTimeRequest: 'Request Time',
+          columnClassCode: 'Class code',
+          columnTimeRequest: 'Request time',
           columnStatus: 'Status'
         },
         viewClassMembersList: {
-          title: 'Class Member List - Class: ',
+          title: 'Class member list - class: ',
           description: 'List of members in your class',
           fieldSearch: 'Search by full name, email, or phone number...',
           fieldSearchPlaceholder: 'Enter search keyword',
@@ -582,39 +606,64 @@ export const translations = {
           sortJoinedAtAsc: 'Joined date: Oldest first',
           sortJoinedAtDesc: 'Joined date: Newest first',
           columnNo: 'No.',
-          columnName: 'Full Name',
+          columnName: 'Fullname',
           columnEmail: 'Email',
-          columnPhoneNumber: 'Phone Number',
-          columnDateJoined: 'Date Joined',
+          columnPhoneNumber: 'Phone number',
+          columnDateJoined: 'Date joined',
           noData: 'No data to display'
         },
         viewBannedClasses: {
-          title: 'List of locked classes',
-          description:
-            'Classes you no longer have access to because you have been banned',
-          columnClassName: 'Class Name',
-          columnTeacherName: 'Teacher Name',
-          columnClassCode: 'Class Code',
-          columnBannedDate: 'Banned Date',
+          buttonName: 'View banned classes',
+          title: 'List of your banned classes',
+          description: 'These are classes you no longer have access to!',
+          columnClassName: 'Class name',
+          columnTeacherName: 'Teacher name',
+          columnClassCode: 'Class code',
+          columnBannedDate: 'Banned date',
           noData: 'You are not banned from any classes'
         },
         gridViewport: {
-          fieldTeacherName: 'Teacher Name',
+          fieldTeacherName: 'Teacher name',
           fieldStudentNumber: 'Number of students',
-          fieldClassCode: 'Class Code',
-          fieldClassStatus: 'Class Status'
+          fieldClassCode: 'Class code',
+          fieldClassStatus: 'Class status'
         },
         tableViewport: {
-          columnClassName: 'Class Name',
-          columnTeacherName: 'Teacher Name',
+          title: 'List of your classes',
+          description: 'Here are the classes you have joined',
+          columnClassName: 'Class name',
+          columnTeacherName: 'Teacher name',
           columnStudentNumber: 'Number of students',
-          columnClassCode: 'Class Code',
-          columnClassStatus: 'Class Status',
+          columnClassCode: 'Class code',
+          columnClassStatus: 'Class status',
           columnActions: 'Actions'
         }
       },
       assignments: {
         overview: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Search',
+              searchFieldPlaceholder:
+                "Search by assignment's title or class's name",
+              searchButton: 'Search',
+              resetButton: 'Reset'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sort by',
+                fieldAssignmentTitle: "Assignment's title",
+                fieldClassName: "Class's name",
+                fieldQuestionCount: 'Number of questions',
+                fieldDueDate: 'Due date'
+              },
+              order: {
+                title: 'Order',
+                asc: 'Ascending',
+                desc: 'Descending'
+              }
+            }
+          },
           title: 'My assignments',
           description:
             'Do my assignments and practice English to improve my skills',
@@ -679,19 +728,42 @@ export const translations = {
           }
         },
         viewHistory: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Search',
+              searchFieldPlaceholder: 'Search by assignment title/class name',
+              searchButton: 'Search',
+              resetButton: 'Reset'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sort by',
+                fieldAssignmentTitle: "Assignment's title",
+                fieldClassName: "Class's name",
+                fieldSubmittedDate: 'Submitted date',
+                fieldTotalTime: 'Total time'
+              },
+              order: {
+                title: 'Order',
+                asc: 'Ascending',
+                desc: 'Descending'
+              }
+            }
+          },
           title: 'My assignment history',
           description:
             'Review your past assignments and results to track your learning progress',
           searchPlaceholder: 'Search by assignment title...',
           tableView: {
-            columnAssignmentTitle: 'Assignment Title',
+            columnAssignmentTitle: 'Assignment title',
             columnClass: 'Class',
             columnIsSingleAttempt: 'Single attempt',
             columnResult: 'Result',
             columnSubmittedAt: 'Submitted at',
             columnTotalTime: 'Total time',
             columnStatus: 'Status',
-            columnActions: 'Actions'
+            columnActions: 'Actions',
+            actionDescriptionViewDetails: 'View details'
           }
         },
         viewHistoryDetails: {
@@ -745,12 +817,12 @@ export const translations = {
         }
       },
       settings: {
-        title: 'Account Settings',
+        title: 'Account settings',
         description: 'Manage your personal information and preferences',
         tabs: {
           settingsTab: {
-            mainTitle: 'System Settings',
-            subTitle: 'Interface Options',
+            mainTitle: 'System settings',
+            subTitle: 'Interface options',
             description: 'Adjust language and light/dark mode',
             option: [
               {
@@ -765,16 +837,16 @@ export const translations = {
           },
           profileTab: {
             mainTitle: 'Profile',
-            subTitle: 'Personal Information',
+            subTitle: 'Personal information',
             description: 'View and update your profile',
             fields: {
-              firstName: 'First Name',
-              lastName: 'Last Name',
+              firstName: 'First name',
+              lastName: 'Last name',
               address: 'Address',
-              phoneNumber: 'Phone Number',
-              dateOfBirth: 'Date of Birth',
-              createdAt: 'Created At',
-              updatedAt: 'Last Updated'
+              phoneNumber: 'Phone number',
+              dateOfBirth: 'Date of birth',
+              createdAt: 'Created at',
+              updatedAt: 'Last updated'
             }
           },
           passwordTab: {
@@ -782,9 +854,9 @@ export const translations = {
             subTitle: 'Change password',
             description: 'Update password to protect your account',
             fields: {
-              currentPassword: 'Current Password',
-              newPassword: 'New Password',
-              confirmPassword: 'Confirm Password'
+              currentPassword: 'Current password',
+              newPassword: 'New password',
+              confirmPassword: 'Confirm password'
             }
           }
         }
@@ -1397,6 +1469,28 @@ export const translations = {
     // Student Dashboard
     student: {
       classes: {
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm',
+            searchFieldPlaceholder: 'Tìm kiếm theo tên lớp hoặc mã lớp',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldClassName: 'Tên lớp',
+              fieldStudentCount: 'Số học sinh',
+              fieldTeacherName: 'Tên giáo viên',
+              fieldClassCode: 'Mã lớp'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
+        },
         title: 'Lớp học của tôi',
         description: 'Danh sách các lớp học bạn đang tham gia',
         buttonJoinClass: {
@@ -1406,7 +1500,9 @@ export const translations = {
             'Nhập mã lớp do giáo viên cung cấp để tham gia lớp học mới',
           fieldClassCode: 'Mã lớp học',
           fieldClassCodePlaceholder: 'Ví dụ: ABC123',
-          note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.'
+          note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.',
+          joinButton: 'Tham gia',
+          isJoining: 'Đang tham gia...'
         },
         buttonViewRequests: {
           buttonName: 'Lịch sử yêu cầu',
@@ -1425,6 +1521,8 @@ export const translations = {
           fieldClassStatus: 'Trạng thái lớp'
         },
         tableViewport: {
+          title: 'Danh sách các lớp học',
+          description: 'Các lớp học bạn đang tham gia',
           columnClassName: 'Tên lớp',
           columnTeacherName: 'Tên giáo viên',
           columnStudentNumber: 'Số học sinh',
@@ -1450,9 +1548,9 @@ export const translations = {
           noData: 'Không có dữ liệu để hiển thị'
         },
         viewBannedClasses: {
+          buttonName: 'Lớp học bị khóa',
           title: 'Danh sách các lớp học bị khóa',
-          description:
-            'Các lớp bạn không còn quyền truy cập do đã bị cấm tham gia',
+          description: 'Bạn không còn quyền truy cập vào các lớp này!',
           columnClassName: 'Tên lớp',
           columnTeacherName: 'Tên giáo viên',
           columnClassCode: 'Mã lớp',
@@ -1462,6 +1560,29 @@ export const translations = {
       },
       assignments: {
         overview: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Tìm kiếm bài tập',
+              searchFieldPlaceholder:
+                'Tìm kiếm theo tiêu đề của bài tập/tên lớp học',
+              searchButton: 'Tìm kiếm',
+              resetButton: 'Đặt lại'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sắp xếp theo',
+                fieldAssignmentTitle: 'Tiêu đề bài tập',
+                fieldClassName: 'Tên lớp học',
+                fieldQuestionCount: 'Số câu hỏi',
+                fieldDueDate: 'Hạn nộp'
+              },
+              order: {
+                title: 'Thứ tự',
+                asc: 'Tăng dần',
+                desc: 'Giảm dần'
+              }
+            }
+          },
           title: 'Bài tập của tôi',
           description:
             'Làm bài tập và luyện tập tiếng Anh để cải thiện kỹ năng của mình',
@@ -1525,6 +1646,29 @@ export const translations = {
           }
         },
         viewHistory: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Tìm kiếm bài tập',
+              searchFieldPlaceholder:
+                'Tìm kiếm theo tiêu đề của bài tập/tên lớp học',
+              searchButton: 'Tìm kiếm',
+              resetButton: 'Đặt lại'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sắp xếp theo',
+                fieldAssignmentTitle: 'Tiêu đề bài tập',
+                fieldClassName: 'Tên lớp học',
+                fieldSubmittedDate: 'Ngày nộp bài',
+                fieldTotalTime: 'Thời gian làm bài'
+              },
+              order: {
+                title: 'Thứ tự',
+                asc: 'Tăng dần',
+                desc: 'Giảm dần'
+              }
+            }
+          },
           title: 'Lịch sử bài tập của tôi',
           description:
             'Xem lại các bài tập đã làm và kết quả để theo dõi tiến trình học tập của bạn',
@@ -1537,7 +1681,8 @@ export const translations = {
             columnSubmittedAt: 'Ngày nộp',
             columnTotalTime: 'Thời gian tổng cộng',
             columnStatus: 'Trạng thái',
-            columnActions: 'Các thao tác'
+            columnActions: 'Các thao tác',
+            actionDescriptionViewDetails: 'Xem chi tiết'
           }
         },
         viewHistoryDetails: {
