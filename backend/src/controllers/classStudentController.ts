@@ -2,6 +2,20 @@ import { Request, Response } from 'express';
 import ClassStudentService from '../services/classStudentServices';
 import Responses from '../utils/responses';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
+import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
+
+function parsePaginationQuery(pageQuery: unknown, limitQuery: unknown) {
+  const page = Number.parseInt(String(pageQuery ?? '1'), 10);
+  const limit = Number.parseInt(
+    String(limitQuery ?? MINIMUM_ITEMS_PER_PAGE),
+    10
+  );
+
+  return {
+    page: Number.isNaN(page) ? 1 : page,
+    limit: Number.isNaN(limit) ? MINIMUM_ITEMS_PER_PAGE : limit
+  };
+}
 
 class ClassStudentController {
   static getAllApprovedClassesByStudent = async (
@@ -9,6 +23,9 @@ class ClassStudentController {
     res: Response
   ) => {
     const studentId = req.userId;
+    const hasPaginationQuery =
+      req.query.page !== undefined || req.query.limit !== undefined;
+
     if (!studentId) {
       return res
         .status(400)
@@ -16,8 +33,13 @@ class ClassStudentController {
     }
 
     try {
-      const approvedClasses =
-        await ClassStudentService.getAllApprovedClassesByStudent(studentId);
+      const approvedClasses = hasPaginationQuery
+        ? await ClassStudentService.getAllApprovedClassesByStudent(
+            studentId,
+            parsePaginationQuery(req.query.page, req.query.limit).page,
+            parsePaginationQuery(req.query.page, req.query.limit).limit
+          )
+        : await ClassStudentService.getAllApprovedClassesByStudent(studentId);
       return res.json(
         Responses.successResponse(
           'Approved class list retrieved successfully',
@@ -34,6 +56,9 @@ class ClassStudentController {
     res: Response
   ) => {
     const studentId = req.userId;
+    const hasPaginationQuery =
+      req.query.page !== undefined || req.query.limit !== undefined;
+
     if (!studentId) {
       return res
         .status(400)
@@ -41,8 +66,13 @@ class ClassStudentController {
     }
 
     try {
-      const bannedClasses =
-        await ClassStudentService.getAllBannedClassesByStudent(studentId);
+      const bannedClasses = hasPaginationQuery
+        ? await ClassStudentService.getAllBannedClassesByStudent(
+            studentId,
+            parsePaginationQuery(req.query.page, req.query.limit).page,
+            parsePaginationQuery(req.query.page, req.query.limit).limit
+          )
+        : await ClassStudentService.getAllBannedClassesByStudent(studentId);
       return res.json(
         Responses.successResponse(
           'Banned class list retrieved successfully',
@@ -59,6 +89,9 @@ class ClassStudentController {
     res: Response
   ) => {
     const studentId = req.userId;
+    const hasPaginationQuery =
+      req.query.page !== undefined || req.query.limit !== undefined;
+
     if (!studentId) {
       return res
         .status(400)
@@ -66,8 +99,15 @@ class ClassStudentController {
     }
 
     try {
-      const pendingRequests =
-        await ClassStudentService.getAllRequestsToJoinClassByStudent(studentId);
+      const pendingRequests = hasPaginationQuery
+        ? await ClassStudentService.getAllRequestsToJoinClassByStudent(
+            studentId,
+            parsePaginationQuery(req.query.page, req.query.limit).page,
+            parsePaginationQuery(req.query.page, req.query.limit).limit
+          )
+        : await ClassStudentService.getAllRequestsToJoinClassByStudent(
+            studentId
+          );
       return res.json(
         Responses.successResponse(
           'Requests retrieved successfully',
