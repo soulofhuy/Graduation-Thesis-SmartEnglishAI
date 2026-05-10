@@ -280,10 +280,13 @@ export default function StudentClassesPage() {
       ])
 
       toast.success(result.message)
+      setIsJoinModalOpen(false)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsJoining(false)
       setClassCode('')
-      setIsJoinModalOpen(false)
     }
   }
 
