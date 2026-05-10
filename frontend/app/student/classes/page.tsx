@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import { Plus, Users, BookOpen, Eye, ClockAlert, UserX, Search } from 'lucide-react'
+import { Plus, Eye, ClockAlert, UserX, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
@@ -26,6 +26,7 @@ import { ClassMembersModal } from './_components/class-members-modal'
 import { BannedClassesModal } from './_components/banned-classes-modal'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { Input } from '@/components/ui/input'
+import { PageSizeSelect } from '@/components/page-size-select'
 
 const SORT_FIELDS = ['name', 'students', 'teacher', 'classCode'] as const
 const SORT_DIRECTIONS = ['asc', 'desc'] as const
@@ -33,10 +34,26 @@ const SORT_DIRECTIONS = ['asc', 'desc'] as const
 type SortField = (typeof SORT_FIELDS)[number]
 type SortDirection = (typeof SORT_DIRECTIONS)[number]
 
+type Pagination = {
+  page: number
+  limit: number
+  totalItems: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+}
+
 export default function StudentClassesPage() {
   const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
   const [classes, setClasses] = useState<BackendClass[]>([])
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
+  const [isPaging, setIsPaging] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [hasPrevPage, setHasPrevPage] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('name')
@@ -48,7 +65,6 @@ export default function StudentClassesPage() {
   const [isClassMembersModalOpen, setIsClassMembersModalOpen] = useState(false)
   const [classCode, setClassCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
-  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
   const [isLoadingRequests, setIsLoadingRequests] = useState(false)
   const [isLoadingClassMembers, setIsLoadingClassMembers] = useState(false)
   const [isLoadingBannedClasses, setIsLoadingBannedClasses] = useState(false)
@@ -124,18 +140,30 @@ export default function StudentClassesPage() {
     })
   }, [classes, language, searchQuery, sortDirection, sortField])
 
-  const fetchApprovedClasses = async (token: string) => {
-    setIsLoadingClasses(true)
+  const fetchApprovedClasses = useCallback(async (token: string, page: number, limit: number, showSkeleton = false) => {
+    if (showSkeleton) {
+      setIsLoadingClasses(true)
+    } else {
+      setIsPaging(true)
+    }
+
     try {
-      const result = await getAllApprovedClassesByStudent(token)
+      const result = await getAllApprovedClassesByStudent(token, page, limit)
       setClasses(result.approvedClasses as BackendClass[])
+
+      const pagination = result.pagination as Pagination | undefined
+      setCurrentPage(pagination?.page ?? page)
+      setTotalItems(pagination?.totalItems ?? result.approvedClasses.length)
+      setHasNextPage(Boolean(pagination?.hasNextPage))
+      setHasPrevPage(Boolean(pagination?.hasPrevPage))
     } catch (error) {
       const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
       toast.error(message, { className: TOAST_COLORS.error })
     } finally {
       setIsLoadingClasses(false)
+      setIsPaging(false)
     }
-  }
+  }, [language])
 
   const fetchPendingRequests = async (token: string) => {
     setIsLoadingRequests(true)
@@ -182,11 +210,36 @@ export default function StudentClassesPage() {
     }
 
     void Promise.all([
-      fetchApprovedClasses(accessToken),
+      fetchApprovedClasses(accessToken, currentPage, pageSize, true),
       fetchPendingRequests(accessToken),
       fetchBannedClasses(accessToken)
     ])
-  }, [accessToken, isHydrated])
+  }, [accessToken, currentPage, fetchApprovedClasses, isHydrated, pageSize])
+
+  const handleNextPage = () => {
+    if (!hasNextPage || isPaging) {
+      return
+    }
+
+    setCurrentPage((prev) => prev + 1)
+  }
+
+  const handlePrevPage = () => {
+    if (!hasPrevPage || isPaging) {
+      return
+    }
+
+    setCurrentPage((prev) => Math.max(1, prev - 1))
+  }
+
+  const handlePageSizeChange = (nextValue: number) => {
+    if (nextValue === pageSize) {
+      return
+    }
+
+    setCurrentPage(1)
+    setPageSize(nextValue)
+  }
 
   const handleJoinClass = async () => {
     if (!classCode.trim()) {
@@ -223,7 +276,7 @@ export default function StudentClassesPage() {
 
       await Promise.all([
         fetchPendingRequests(accessToken),
-        fetchApprovedClasses(accessToken)
+        fetchApprovedClasses(accessToken, currentPage, pageSize)
       ])
 
       toast.success(result.message)
@@ -400,61 +453,99 @@ export default function StudentClassesPage() {
           <CardDescription>{t.student.classes.tableViewport.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center">{t.student.classes.tableViewport.columnClassName}</TableHead>
-                <TableHead className="text-center">{t.student.classes.tableViewport.columnTeacherName}</TableHead>
-                <TableHead className="text-center">{t.student.classes.tableViewport.columnStudentNumber}</TableHead>
-                <TableHead className="text-center">{t.student.classes.tableViewport.columnClassStatus}</TableHead>
-                <TableHead className="text-center">{t.student.classes.tableViewport.columnClassCode}</TableHead>
-                <TableHead className="text-center">{t.student.classes.tableViewport.columnActions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingClasses ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    {t.common.loading}...
-                  </TableCell>
-                </TableRow>
-              ) : visibleClasses.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    {t.common.noData}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                visibleClasses.map(classItem => (
-                  <TableRow key={classItem.id}>
-                    <TableCell className="font-medium text-center">{classItem.name}</TableCell>
-                    <TableCell className="text-center">{getTeacherLabel(classItem)}</TableCell>
-                    <TableCell className="text-center">{getStudentCount(classItem)}</TableCell>
-                    <TableCell className="text-center">
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                        Đang học
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm font-semibold text-center">
-                      {classItem.classCode ?? '---'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleViewClassMembers(classItem)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          <div className="space-y-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnClassName}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnTeacherName}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnStudentNumber}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnClassStatus}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnClassCode}</TableHead>
+                    <TableHead className="text-center">{t.student.classes.tableViewport.columnActions}</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingClasses ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        {t.common.loading}...
+                      </TableCell>
+                    </TableRow>
+                  ) : visibleClasses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        {t.common.noData}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    visibleClasses.map(classItem => (
+                      <TableRow key={classItem.id}>
+                        <TableCell className="font-medium text-center">{classItem.name}</TableCell>
+                        <TableCell className="text-center">{getTeacherLabel(classItem)}</TableCell>
+                        <TableCell className="text-center">{getStudentCount(classItem)}</TableCell>
+                        <TableCell className="text-center">
+                          <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                            Đang học
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm font-semibold text-center">
+                          {classItem.classCode ?? '---'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleViewClassMembers(classItem)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+              <p className="text-sm text-muted-foreground">
+                {t.common.pagination.total} {totalItems}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasPrevPage || isPaging}
+                  onClick={handlePrevPage}
+                >
+                  {t.common.pagination.previous}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasNextPage || isPaging}
+                  onClick={handleNextPage}
+                >
+                  {t.common.pagination.next}
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <PageSizeSelect
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  options={[10, 20, 25, 50]}
+                  disabled={isPaging}
+                />
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
