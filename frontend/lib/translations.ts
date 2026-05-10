@@ -641,6 +641,29 @@ export const translations = {
       },
       assignments: {
         overview: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Search',
+              searchFieldPlaceholder:
+                "Search by assignment's title or class's name",
+              searchButton: 'Search',
+              resetButton: 'Reset'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sort by',
+                fieldAssignmentTitle: "Assignment's title",
+                fieldClassName: "Class's name",
+                fieldQuestionCount: 'Number of questions',
+                fieldDueDate: 'Due date'
+              },
+              order: {
+                title: 'Order',
+                asc: 'Ascending',
+                desc: 'Descending'
+              }
+            }
+          },
           title: 'My assignments',
           description:
             'Do my assignments and practice English to improve my skills',
@@ -1514,6 +1537,29 @@ export const translations = {
       },
       assignments: {
         overview: {
+          searchOrSortOrFilter: {
+            search: {
+              title: 'Tìm kiếm bài tập',
+              searchFieldPlaceholder:
+                'Tìm kiếm theo tiêu đề của bài tập/tên lớp học',
+              searchButton: 'Tìm kiếm',
+              resetButton: 'Đặt lại'
+            },
+            sort: {
+              sortItems: {
+                title: 'Sắp xếp theo',
+                fieldAssignmentTitle: 'Tiêu đề bài tập',
+                fieldClassName: 'Tên lớp học',
+                fieldQuestionCount: 'Số câu hỏi',
+                fieldDueDate: 'Hạn nộp'
+              },
+              order: {
+                title: 'Thứ tự',
+                asc: 'Tăng dần',
+                desc: 'Giảm dần'
+              }
+            }
+          },
           title: 'Bài tập của tôi',
           description:
             'Làm bài tập và luyện tập tiếng Anh để cải thiện kỹ năng của mình',
