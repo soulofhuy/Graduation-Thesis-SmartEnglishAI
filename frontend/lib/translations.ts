@@ -550,14 +550,36 @@ export const translations = {
     // Student Dashboard
     student: {
       classes: {
-        title: 'My Classes',
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search',
+            searchFieldPlaceholder: 'Search by class name or class code',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldClassName: 'Class name',
+              fieldStudentCount: 'Number of students',
+              fieldTeacherName: 'Teacher name',
+              fieldClassCode: 'Class code'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
+        },
+        title: 'My classes',
         description: 'List of classes you are currently attending',
         buttonJoinClass: {
-          buttonName: 'Join Class',
-          title: 'Join New Class',
+          buttonName: 'Join class',
+          title: 'Join new class',
           description:
             'Enter the class code provided by your teacher to join the new class',
-          fieldClassCode: 'Class Code',
+          fieldClassCode: 'Class code',
           fieldClassCodePlaceholder: 'Example: ABC123',
           note: 'You need a class code to join. Please contact your teacher to get the class code.'
         },
@@ -567,12 +589,12 @@ export const translations = {
           description:
             'Track the list of submitted requests and approval status.',
           noRequests: 'You have not submitted any requests to join the class.',
-          columnClassCode: 'Class Code',
-          columnTimeRequest: 'Request Time',
+          columnClassCode: 'Class code',
+          columnTimeRequest: 'Request time',
           columnStatus: 'Status'
         },
         viewClassMembersList: {
-          title: 'Class Member List - Class: ',
+          title: 'Class member list - class: ',
           description: 'List of members in your class',
           fieldSearch: 'Search by full name, email, or phone number...',
           fieldSearchPlaceholder: 'Enter search keyword',
@@ -582,34 +604,36 @@ export const translations = {
           sortJoinedAtAsc: 'Joined date: Oldest first',
           sortJoinedAtDesc: 'Joined date: Newest first',
           columnNo: 'No.',
-          columnName: 'Full Name',
+          columnName: 'Fullname',
           columnEmail: 'Email',
-          columnPhoneNumber: 'Phone Number',
-          columnDateJoined: 'Date Joined',
+          columnPhoneNumber: 'Phone number',
+          columnDateJoined: 'Date joined',
           noData: 'No data to display'
         },
         viewBannedClasses: {
           title: 'List of locked classes',
           description:
             'Classes you no longer have access to because you have been banned',
-          columnClassName: 'Class Name',
-          columnTeacherName: 'Teacher Name',
-          columnClassCode: 'Class Code',
-          columnBannedDate: 'Banned Date',
+          columnClassName: 'Class name',
+          columnTeacherName: 'Teacher name',
+          columnClassCode: 'Class code',
+          columnBannedDate: 'Banned date',
           noData: 'You are not banned from any classes'
         },
         gridViewport: {
-          fieldTeacherName: 'Teacher Name',
+          fieldTeacherName: 'Teacher name',
           fieldStudentNumber: 'Number of students',
-          fieldClassCode: 'Class Code',
-          fieldClassStatus: 'Class Status'
+          fieldClassCode: 'Class code',
+          fieldClassStatus: 'Class status'
         },
         tableViewport: {
-          columnClassName: 'Class Name',
-          columnTeacherName: 'Teacher Name',
+          title: 'List of your classes',
+          description: 'Here are the classes you have joined',
+          columnClassName: 'Class name',
+          columnTeacherName: 'Teacher name',
           columnStudentNumber: 'Number of students',
-          columnClassCode: 'Class Code',
-          columnClassStatus: 'Class Status',
+          columnClassCode: 'Class code',
+          columnClassStatus: 'Class status',
           columnActions: 'Actions'
         }
       },
@@ -1397,6 +1421,28 @@ export const translations = {
     // Student Dashboard
     student: {
       classes: {
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm',
+            searchFieldPlaceholder: 'Tìm kiếm theo tên lớp hoặc mã lớp',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldClassName: 'Tên lớp',
+              fieldStudentCount: 'Số học sinh',
+              fieldTeacherName: 'Tên giáo viên',
+              fieldClassCode: 'Mã lớp'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
+        },
         title: 'Lớp học của tôi',
         description: 'Danh sách các lớp học bạn đang tham gia',
         buttonJoinClass: {
@@ -1425,6 +1471,8 @@ export const translations = {
           fieldClassStatus: 'Trạng thái lớp'
         },
         tableViewport: {
+          title: 'Danh sách các lớp học',
+          description: 'Các lớp học bạn đang tham gia',
           columnClassName: 'Tên lớp',
           columnTeacherName: 'Tên giáo viên',
           columnStudentNumber: 'Số học sinh',
