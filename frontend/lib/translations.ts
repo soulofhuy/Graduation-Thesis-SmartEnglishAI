@@ -581,7 +581,9 @@ export const translations = {
             'Enter the class code provided by your teacher to join the new class',
           fieldClassCode: 'Class code',
           fieldClassCodePlaceholder: 'Example: ABC123',
-          note: 'You need a class code to join. Please contact your teacher to get the class code.'
+          note: 'You need a class code to join. Please contact your teacher to get the class code.',
+          joinButton: 'Join',
+          isJoining: 'Joining'
         },
         buttonViewRequests: {
           buttonName: 'Request history',
@@ -1452,7 +1454,9 @@ export const translations = {
             'Nhập mã lớp do giáo viên cung cấp để tham gia lớp học mới',
           fieldClassCode: 'Mã lớp học',
           fieldClassCodePlaceholder: 'Ví dụ: ABC123',
-          note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.'
+          note: 'Bạn cần mã lớp để tham gia. Vui lòng liên hệ giáo viên của bạn để lấy mã lớp.',
+          joinButton: 'Tham gia',
+          isJoining: 'Đang tham gia...'
         },
         buttonViewRequests: {
           buttonName: 'Lịch sử yêu cầu',

@@ -3,12 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { useLanguage } from '@/components/language-provider'
 
@@ -55,9 +50,10 @@ export function JoinRequestsModal({
             onOpenChange={onOpenChange}
             title={t.student.classes.buttonViewRequests.title}
             description={t.student.classes.buttonViewRequests.description}
+            contentClassName="w-[98vw] sm:max-w-2xl"
             footer={
                 <div className="flex justify-end gap-3">
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button variant="secondary" onClick={() => onOpenChange(false)}>
                         {t.common.close}
                     </Button>
                 </div>
@@ -66,9 +62,9 @@ export function JoinRequestsModal({
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>{t.student.classes.buttonViewRequests.columnClassCode}</TableHead>
-                        <TableHead>{t.student.classes.buttonViewRequests.columnTimeRequest}</TableHead>
-                        <TableHead>{t.student.classes.buttonViewRequests.columnStatus}</TableHead>
+                        <TableHead className="text-center">{t.student.classes.buttonViewRequests.columnClassCode}</TableHead>
+                        <TableHead className="text-center">{t.student.classes.buttonViewRequests.columnTimeRequest}</TableHead>
+                        <TableHead className="text-center">{t.student.classes.buttonViewRequests.columnStatus}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -87,9 +83,9 @@ export function JoinRequestsModal({
                     ) : (
                         requests.map(request => (
                             <TableRow key={request.id}>
-                                <TableCell className="font-semibold">{request.classCode}</TableCell>
-                                <TableCell>{new Date(request.requestedAt).toLocaleString('vi-VN')}</TableCell>
-                                <TableCell>
+                                <TableCell className="font-semibold text-center">{request.classCode}</TableCell>
+                                <TableCell className="text-center">{new Date(request.requestedAt).toLocaleString('vi-VN')}</TableCell>
+                                <TableCell className="text-center">
                                     <span
                                         className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getRequestStatusClassName(request.status)}`}
                                     >
