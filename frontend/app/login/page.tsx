@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createLoginSchema, type LoginFormValues } from '@/lib/validators/login'
@@ -28,7 +27,6 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 
 export default function LoginPage() {
   const { t, language } = useLanguage()
-  const router = useRouter()
   const { login } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -62,13 +60,9 @@ export default function LoginPage() {
       })
 
       const role: Role = user.role
-      if (role === 'ADMIN') {
-        router.push('/admin/overview')
-      } else if (role === 'TEACHER') {
-        router.push('/teacher/overview')
-      } else {
-        router.push('/class')
-      }
+      const targetHref = role === 'ADMIN' ? '/admin/overview' : role === 'TEACHER' ? '/teacher/overview' : '/class'
+
+      window.location.replace(targetHref)
 
       if (message) {
         toast.success(getToastMessage('loginSuccess', language), { className: TOAST_COLORS.success })
