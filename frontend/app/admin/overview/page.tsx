@@ -146,36 +146,36 @@ export default function AdminOverviewPage() {
         ))}
       </div>
 
-      <Card className="border-0 bg-gradient-to-br from-white/70 to-white/50 dark:from-slate-800/70 dark:to-slate-800/50 backdrop-blur-sm shadow-glow">
-        <CardHeader>
-          <CardTitle>Tăng trưởng người dùng</CardTitle>
-          <CardDescription>
-            Biểu đồ số lượng giáo viên và học sinh theo từng tháng
-          </CardDescription>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-lg font-semibold mb-3">
+            {t.student.progress.monthlyProgress.title}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={userGrowthData}>
+        <CardContent className="mt-5">
+          <ResponsiveContainer width="90%" height={400} className="mx-auto">
+            <BarChart
+              data={userGrowthData}
+              margin={{ top: 8, right: 36, left: 36, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <XAxis dataKey="month" tick={{ fontSize: 15 }} interval={0} />
+              <YAxis allowDecimals={false} width={36} />
               <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
+              <Legend wrapperStyle={{ paddingTop: 30 }} />
+              <Bar
                 dataKey="teachers"
-                stroke="var(--color-primary)"
-                strokeWidth={3}
-                name="Giáo viên"
+                fill="var(--color-primary)"
+                name={t.admin.overview.userGrowthByMonthChart.teacher}
+                barSize={24}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="students"
-                stroke="var(--color-accent)"
-                strokeWidth={3}
-                name="Học sinh"
+                fill="var(--color-accent)"
+                name={t.admin.overview.userGrowthByMonthChart.student}
+                barSize={24}
               />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
@@ -188,13 +188,16 @@ export default function AdminOverviewPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={assignmentGrowthData}>
+          <ResponsiveContainer width="90%" height={400} className="mx-auto">
+            <LineChart
+              data={assignmentGrowthData}
+              margin={{ top: 8, right: 36, left: 36, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} />
+              <YAxis allowDecimals={false} width={36} />
               <Tooltip />
-              <Legend />
+              <Legend wrapperStyle={{ paddingTop: 30 }} />
               <Line
                 type="monotone"
                 dataKey="assignments"
@@ -215,13 +218,16 @@ export default function AdminOverviewPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={submissionGrowthData}>
+          <ResponsiveContainer width="90%" height={400} className="mx-auto">
+            <BarChart
+              data={submissionGrowthData}
+              margin={{ top: 8, right: 36, left: 36, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} />
+              <YAxis allowDecimals={false} width={36} />
               <Tooltip />
-              <Legend />
+              <Legend wrapperStyle={{ paddingTop: 30 }} />
               <Bar
                 dataKey="submissions"
                 fill="var(--color-primary)"
