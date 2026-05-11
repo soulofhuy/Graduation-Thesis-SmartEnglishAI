@@ -33,7 +33,7 @@ const monthFallback = Array.from({ length: 12 }, (_, index) => ({
 
 export default function AdminOverviewPage() {
   const { accessToken, isHydrated } = useAuth()
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const [overview, setOverview] = useState<AdminOverview | null>(null)
 
   useEffect(() => {
@@ -128,12 +128,12 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
-      <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-text">
-          Tổng quan hệ thống
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t.student.progress.title}
         </h1>
-        <p className="text-lg text-muted-foreground">
-          Thống kê toàn hệ thống và xu hướng theo tháng trong năm {overview?.year ?? new Date().getFullYear()}
+        <p className="text-muted-foreground mt-1">
+          {t.student.progress.description}
         </p>
       </div>
 
