@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getAdminOverview, type AdminOverview } from '@/services/admin/overview'
 import { getMonthLabel } from '@/lib/language-mappers/month-mapper'
 import { useLanguage } from '@/components/language-provider'
-import { BookOpen, GraduationCap, Users } from 'lucide-react'
+import { BookOpen, ClipboardList, GraduationCap, UserRound, Users } from 'lucide-react'
 import {
   Bar,
   BarChart,
@@ -21,6 +21,8 @@ import {
   YAxis
 } from 'recharts'
 import { toast } from 'sonner'
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { getToastMessage } from '@/lib/toast/message'
 
 const monthFallback = Array.from({ length: 12 }, (_, index) => ({
   month: `2026-${String(index + 1).padStart(2, '0')}`,
@@ -46,7 +48,8 @@ export default function AdminOverviewPage() {
         const data = await getAdminOverview(accessToken)
         setOverview(data)
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Không thể tải overview admin')
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
       }
     }
 
@@ -58,36 +61,36 @@ export default function AdminOverviewPage() {
   const stats = useMemo(
     () => [
       {
-        title: 'Tổng người dùng',
+        title: t.admin.overview.statistic.fieldTotalUsers,
         value: statistics?.totalUsers.total ?? 0,
-        icon: <Users className="w-5 h-5" />,
+        icon: <Users className="w-5 h-5 text-blue-500" />,
         trend: {
           value: Math.abs(statistics?.totalUsers.growthRate ?? 0),
           isPositive: (statistics?.totalUsers.growthRate ?? 0) >= 0
         }
       },
       {
-        title: 'Giáo viên',
+        title: t.admin.overview.statistic.fieldTotalTeachers,
         value: statistics?.totalTeachers.total ?? 0,
-        icon: <GraduationCap className="w-5 h-5" />,
+        icon: <GraduationCap className="w-5 h-5 text-green-500" />,
         trend: {
           value: Math.abs(statistics?.totalTeachers.growthRate ?? 0),
           isPositive: (statistics?.totalTeachers.growthRate ?? 0) >= 0
         }
       },
       {
-        title: 'Học sinh',
+        title: t.admin.overview.statistic.fieldTotalStudents,
         value: statistics?.totalStudents.total ?? 0,
-        icon: <Users className="w-5 h-5" />,
+        icon: <UserRound className="w-5 h-5 text-purple-500" />,
         trend: {
           value: Math.abs(statistics?.totalStudents.growthRate ?? 0),
           isPositive: (statistics?.totalStudents.growthRate ?? 0) >= 0
         }
       },
       {
-        title: 'Tổng bài tập',
+        title: t.admin.overview.statistic.fieldTotalAssignments,
         value: statistics?.totalAssignments.total ?? 0,
-        icon: <BookOpen className="w-5 h-5" />,
+        icon: <ClipboardList className="w-5 h-5 text-yellow-500" />,
         trend: {
           value: Math.abs(statistics?.totalAssignments.growthRate ?? 0),
           isPositive: (statistics?.totalAssignments.growthRate ?? 0) >= 0

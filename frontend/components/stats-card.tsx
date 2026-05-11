@@ -36,21 +36,17 @@ export function StatsCard({
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="text-xl font-bold bg-gradient-text">{value}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-xl font-bold bg-gradient-text">{value}</div>
+          {trend && (
+            <div className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold', trend.isPositive ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400')}>
+              {trend.isPositive ? '+ ' : ''}
+              {trend.value}%
+            </div>
+          )}
+        </div>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
-        )}
-        {trend && (
-          <div className={cn(
-            'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold',
-            trend.isPositive
-              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-          )}>
-            {trend.isPositive ? '↑' : '↓'}
-            {trend.isPositive ? '+' : ''}
-            {trend.value}%
-          </div>
         )}
       </CardContent>
     </Card>
