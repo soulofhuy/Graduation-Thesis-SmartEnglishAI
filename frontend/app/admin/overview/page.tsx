@@ -149,7 +149,7 @@ export default function AdminOverviewPage() {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-lg font-semibold mb-3">
-            {t.student.progress.monthlyProgress.title}
+            {t.admin.overview.userGrowthByMonthChart.title}
           </CardTitle>
         </CardHeader>
         <CardContent className="mt-5">
@@ -162,7 +162,14 @@ export default function AdminOverviewPage() {
               <XAxis dataKey="month" tick={{ fontSize: 15 }} interval={0} />
               <YAxis allowDecimals={false} width={36} />
               <Tooltip />
-              <Legend wrapperStyle={{ paddingTop: 30 }} />
+              <Legend
+                wrapperStyle={{ paddingTop: 30 }}
+                formatter={(value) => (
+                  <span style={{ marginRight: 100 }}>
+                    {value}
+                  </span>
+                )}
+              />
               <Bar
                 dataKey="teachers"
                 fill="var(--color-primary)"
@@ -181,11 +188,10 @@ export default function AdminOverviewPage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Tăng trưởng bài tập</CardTitle>
-          <CardDescription>
-            Biểu đồ số lượng bài tập được tạo theo từng tháng
-          </CardDescription>
+        <CardHeader className="text-center">
+          <CardTitle className="text-lg font-semibold mb-3">
+            {t.admin.overview.assignmentGrowthByMonthChart.title}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="90%" height={400} className="mx-auto">
@@ -194,16 +200,15 @@ export default function AdminOverviewPage() {
               margin={{ top: 8, right: 36, left: 36, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} />
+              <XAxis dataKey="month" tick={{ fontSize: 15 }} interval={0} />
               <YAxis allowDecimals={false} width={36} />
               <Tooltip />
-              <Legend wrapperStyle={{ paddingTop: 30 }} />
               <Line
                 type="monotone"
                 dataKey="assignments"
                 stroke="var(--color-primary)"
                 strokeWidth={3}
-                name="Bài tập"
+                name={t.admin.overview.assignmentGrowthByMonthChart.assignment}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -211,11 +216,10 @@ export default function AdminOverviewPage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Submission theo tháng</CardTitle>
-          <CardDescription>
-            Số lượng submission của học sinh và số submission đạt yêu cầu trên 50%
-          </CardDescription>
+        <CardHeader className="text-center">
+          <CardTitle className="text-lg font-semibold mb-3">
+            {t.admin.overview.submissionGrowthByMonthChart.title}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="90%" height={400} className="mx-auto">
@@ -224,19 +228,26 @@ export default function AdminOverviewPage() {
               margin={{ top: 8, right: 36, left: 36, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} />
+              <XAxis dataKey="month" tick={{ fontSize: 15 }} interval={0} />
               <YAxis allowDecimals={false} width={36} />
               <Tooltip />
-              <Legend wrapperStyle={{ paddingTop: 30 }} />
+              <Legend
+                wrapperStyle={{ paddingTop: 30 }}
+                formatter={(value) => (
+                  <span style={{ marginRight: 100 }}>
+                    {value}
+                  </span>
+                )}
+              />
               <Bar
                 dataKey="submissions"
                 fill="var(--color-primary)"
-                name="Submission"
+                name={t.admin.overview.submissionGrowthByMonthChart.totalSubmissionsInMonth}
               />
               <Bar
                 dataKey="passedSubmissions"
                 fill="var(--color-accent)"
-                name="Đạt yêu cầu"
+                name={t.admin.overview.submissionGrowthByMonthChart.totalPassedAssignmentsInMonth}
               />
             </BarChart>
           </ResponsiveContainer>

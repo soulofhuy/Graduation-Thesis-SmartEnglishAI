@@ -144,7 +144,8 @@ export const translations = {
           student: 'Student'
         },
         assignmentGrowthByMonthChart: {
-          title: 'Monthly assignment growth'
+          title: 'Monthly assignment growth',
+          assignment: 'Assignment'
         },
         submissionGrowthByMonthChart: {
           title: 'Monthly submission growth',
@@ -1085,7 +1086,8 @@ export const translations = {
           student: 'Học sinh'
         },
         assignmentGrowthByMonthChart: {
-          title: 'Theo dõi bài tập theo tháng'
+          title: 'Theo dõi bài tập theo tháng',
+          assignment: 'Bài tập'
         },
         submissionGrowthByMonthChart: {
           title: 'Theo dõi bài nộp theo tháng',
