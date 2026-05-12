@@ -12,7 +12,7 @@ import { useAuth } from '@/components/auth-provider'
 import { dateFormat } from '@/lib/format'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
-import { getAllUsers, type AdminUser } from '@/services/admin/user-management'
+import { getAllUsers, type AdminUser, toggleUserActive } from '@/services/admin/user-management'
 import { UpdatePasswordModal } from './_components/update-password-modal'
 import { UpdateProfileModal } from './_components/update-profile-modal'
 
@@ -142,6 +142,19 @@ export default function AdminUsersPage() {
   const openProfileModal = (userId: string) => {
     setSelectedUser(apiUsers.find((item) => item.id === userId) ?? null)
     setIsProfileModalOpen(true)
+  }
+
+  const handleToggleActive = async (userId: string) => {
+    if (!accessToken) return
+
+    try {
+      await toggleUserActive(accessToken, userId)
+      toast.success('Cập nhật trạng thái người dùng thành công', { className: TOAST_COLORS.success })
+      void fetchUsers(currentPage, pageSize, false)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : getToastMessage('updateFailed', 'vi')
+      toast.error(message, { className: TOAST_COLORS.error })
+    }
   }
 
   const tableUsers = useMemo(
@@ -289,6 +302,13 @@ export default function AdminUsersPage() {
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => openPasswordModal(user.id)}>
                               Đổi mật khẩu
+                            </Button>
+                            <Button
+                              variant={user.status === 'active' ? 'destructive' : 'secondary'}
+                              size="sm"
+                              onClick={() => handleToggleActive(user.id)}
+                            >
+                              {user.status === 'active' ? 'Vô hiệu' : 'Kích hoạt'}
                             </Button>
                           </div>
                         </TableCell>

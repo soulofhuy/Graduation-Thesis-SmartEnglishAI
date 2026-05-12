@@ -119,13 +119,15 @@ export async function getUserProfile(token: string, userId: string) {
     }
   );
 
-  const payload = (await response.json()) as ApiSuccess<{
-    id: string;
-    email: string;
-    role: 'TEACHER' | 'STUDENT';
-    isActive: boolean;
-    profile?: AdminUserProfile | null;
-  }> | ApiError;
+  const payload = (await response.json()) as
+    | ApiSuccess<{
+        id: string;
+        email: string;
+        role: 'TEACHER' | 'STUDENT';
+        isActive: boolean;
+        profile?: AdminUserProfile | null;
+      }>
+    | ApiError;
 
   if (!response.ok || !payload.status) {
     const message = payload?.message || 'Failed to fetch user profile';
@@ -162,6 +164,30 @@ export async function updateUserProfile(
   }
 
   if (!body.data) throw new Error('Update profile response is missing data');
+
+  return body.data;
+}
+
+export async function toggleUserActive(token: string, userId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/admin/toggle-user/${encodeURIComponent(userId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  const body = (await response.json()) as ApiSuccess<any> | ApiError;
+
+  if (!response.ok || !body.status) {
+    const message = body?.message || 'Failed to toggle user active status';
+    throw new Error(message);
+  }
+
+  if (!body.data) throw new Error('Toggle response is missing data');
 
   return body.data;
 }
