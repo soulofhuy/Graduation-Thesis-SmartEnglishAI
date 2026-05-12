@@ -1,91 +1,154 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { Plus, Search, Users, GraduationCap, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Plus, Search, Edit, Trash2, MoreVertical } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { PageSizeSelect } from '@/components/page-size-select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useAuth } from '@/components/auth-provider'
+import { dateFormat } from '@/lib/format'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { getAllUsers, type AdminUser } from '@/services/admin/user-management'
 
-interface User {
+type TableUser = {
   id: string
   name: string
   email: string
-  role: 'admin' | 'teacher' | 'student'
+  role: 'TEACHER' | 'STUDENT'
   status: 'active' | 'inactive'
   createdDate: string
 }
 
-export default function AdminUsersPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@example.com',
-      role: 'teacher',
-      status: 'active',
-      createdDate: '2024-01-15',
-    },
-    {
-      id: '2',
-      name: 'Trần Minh Anh',
-      email: 'tranminhanh@example.com',
-      role: 'student',
-      status: 'active',
-      createdDate: '2024-02-01',
-    },
-    {
-      id: '3',
-      name: 'Cô Trần Thị B',
-      email: 'tranthib@example.com',
-      role: 'teacher',
-      status: 'active',
-      createdDate: '2024-01-20',
-    },
-    {
-      id: '4',
-      name: 'Phạm Thị Chung',
-      email: 'phamthichung@example.com',
-      role: 'student',
-      status: 'inactive',
-      createdDate: '2024-02-10',
-    },
-    {
-      id: '5',
-      name: 'Lê Đức Dũng',
-      email: 'leducdung@example.com',
-      role: 'student',
-      status: 'active',
-      createdDate: '2024-02-15',
-    },
-  ])
+const getFullName = (user: AdminUser) => {
+  const firstName = user.profile?.firstName?.trim() ?? ''
+  const lastName = user.profile?.lastName?.trim() ?? ''
+  const fullName = `${firstName} ${lastName}`.trim()
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  return fullName || user.email
+}
+
+const mapUserToTableUser = (user: AdminUser): TableUser => ({
+  id: user.id,
+  name: getFullName(user),
+  email: user.email,
+  role: user.role,
+  status: user.isActive ? 'active' : 'inactive',
+  createdDate: user.createdAt ? dateFormat(user.createdAt) : '-'
+})
+
+export default function AdminUsersPage() {
+  const { accessToken, isHydrated } = useAuth()
+
+  const [users, setUsers] = useState<TableUser[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isPaging, setIsPaging] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [hasPrevPage, setHasPrevPage] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const fetchUsers = useCallback(
+    async (page: number, limit: number, showSkeleton = false) => {
+      if (!accessToken) {
+        setUsers([])
+        setTotalItems(0)
+        setHasNextPage(false)
+        setHasPrevPage(false)
+        setIsLoading(false)
+        setIsPaging(false)
+        return
+      }
+
+      if (showSkeleton) {
+        setIsLoading(true)
+      } else {
+        setIsPaging(true)
+      }
+
+      try {
+        const response = await getAllUsers(accessToken, page, limit)
+        setUsers((response.data ?? []).map(mapUserToTableUser))
+        setCurrentPage(response.pagination.page)
+        setTotalItems(response.pagination.totalItems)
+        setHasNextPage(Boolean(response.pagination.hasNextPage))
+        setHasPrevPage(Boolean(response.pagination.hasPrevPage))
+      } catch (error) {
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', 'vi')
+        toast.error(message, { className: TOAST_COLORS.error })
+      } finally {
+        setIsLoading(false)
+        setIsPaging(false)
+      }
+    },
+    [accessToken]
   )
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return
+    }
+
+    void fetchUsers(currentPage, pageSize, true)
+  }, [currentPage, fetchUsers, isHydrated, pageSize])
+
+  const handleNextPage = () => {
+    if (!hasNextPage || isPaging) {
+      return
+    }
+    setCurrentPage((prev) => prev + 1)
+  }
+
+  const handlePrevPage = () => {
+    if (!hasPrevPage || isPaging) {
+      return
+    }
+    setCurrentPage((prev) => Math.max(1, prev - 1))
+  }
+
+  const handlePageSizeChange = (nextValue: number) => {
+    if (nextValue === pageSize) {
+      return
+    }
+    setCurrentPage(1)
+    setPageSize(nextValue)
+  }
+
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchInput.trim())
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchQuery('')
+  }
+
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    if (!query) {
+      return users
+    }
+
+    return users.filter((user) => {
+      return (
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query)
+      )
+    })
+  }, [searchQuery, users])
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin':
-        return 'bg-destructive/10 text-destructive'
-      case 'teacher':
+      case 'TEACHER':
         return 'bg-primary/10 text-primary'
-      case 'student':
+      case 'STUDENT':
         return 'bg-accent/10 text-accent'
       default:
         return 'bg-muted text-muted-foreground'
@@ -94,11 +157,9 @@ export default function AdminUsersPage() {
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin':
-        return 'Quản trị viên'
-      case 'teacher':
+      case 'TEACHER':
         return 'Giáo viên'
-      case 'student':
+      case 'STUDENT':
         return 'Học sinh'
       default:
         return role
@@ -106,15 +167,14 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Quản lí người dùng
           </h1>
           <p className="text-muted-foreground mt-1">
-            Quản lý tất cả người dùng trong hệ thống
+            Quản lý giáo viên và học sinh trong hệ thống
           </p>
         </div>
         <Button className="gap-2">
@@ -123,111 +183,106 @@ export default function AdminUsersPage() {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-        <Input
-          placeholder="Tìm kiếm theo tên hoặc email..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      {/* Users Table */}
-      <Card>
+      <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Danh sách người dùng</CardTitle>
           <CardDescription>
-            Quản lý thông tin và quyền hạn của người dùng
+            Dữ liệu được lấy trực tiếp từ API, hỗ trợ phân trang theo page/limit
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tên</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Vai trò</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày tạo</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.name}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {user.email}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${getRoleColor(
-                            user.role
-                          )}`}
-                        >
-                          {getRoleLabel(user.role)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            user.status === 'active'
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="py-10 text-center text-muted-foreground">
+                Đang tải dữ liệu...
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="py-10 text-center text-muted-foreground">
+                Không tìm thấy người dùng nào
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Vai trò</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead>Ngày tạo</TableHead>
+                      <TableHead>Hành động</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {user.email}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(
+                              user.role
+                            )}`}
+                          >
+                            {getRoleLabel(user.role)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`rounded px-2 py-1 text-xs font-medium ${user.status === 'active'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {user.createdDate}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2">
-                              <Edit className="w-4 h-4" />
-                              Chỉnh sửa
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
-                              Đặt lại mật khẩu
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="gap-2 text-destructive"
-                              onClick={() => {
-                                setUsers(users.filter((u) => u.id !== user.id))
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              Xóa
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <p className="text-muted-foreground">
-                        Không tìm thấy người dùng nào
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                              }`}
+                          >
+                            {user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {user.createdDate}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="outline" size="sm">
+                            Xem chi tiết
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+              <p className="text-sm text-muted-foreground">
+                Tổng số: {totalItems}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasPrevPage || isPaging}
+                  onClick={handlePrevPage}
+                >
+                  Trang trước
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasNextPage || isPaging}
+                  onClick={handleNextPage}
+                >
+                  Trang sau
+                </Button>
+              </div>
+              <PageSizeSelect
+                value={pageSize}
+                onChange={handlePageSizeChange}
+                options={[10, 20, 25, 50]}
+                disabled={isPaging}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
