@@ -14,6 +14,7 @@ import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllUsers, type AdminUser } from '@/services/admin/user-management'
 import { UpdatePasswordModal } from './_components/update-password-modal'
+import { UpdateProfileModal } from './_components/update-profile-modal'
 
 type TableUser = {
   id: string
@@ -56,6 +57,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
 
   const fetchUsers = useCallback(
     async (page: number, limit: number, showSkeleton = false) => {
@@ -137,6 +139,11 @@ export default function AdminUsersPage() {
     setIsPasswordModalOpen(true)
   }
 
+  const openProfileModal = (userId: string) => {
+    setSelectedUser(apiUsers.find((item) => item.id === userId) ?? null)
+    setIsProfileModalOpen(true)
+  }
+
   const tableUsers = useMemo(
     () => apiUsers.map(mapUserToTableUser),
     [apiUsers]
@@ -184,6 +191,16 @@ export default function AdminUsersPage() {
       <UpdatePasswordModal
         open={isPasswordModalOpen}
         onOpenChange={setIsPasswordModalOpen}
+        token={accessToken}
+        user={selectedUser}
+        onUpdated={() => {
+          void fetchUsers(currentPage, pageSize, false)
+        }}
+      />
+
+      <UpdateProfileModal
+        open={isProfileModalOpen}
+        onOpenChange={setIsProfileModalOpen}
         token={accessToken}
         user={selectedUser}
         onUpdated={() => {
@@ -266,9 +283,14 @@ export default function AdminUsersPage() {
                           {user.createdDate}
                         </TableCell>
                         <TableCell>
-                          <Button variant="outline" size="sm" onClick={() => openPasswordModal(user.id)}>
-                            Đổi mật khẩu
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => openProfileModal(user.id)}>
+                              Chỉnh sửa
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => openPasswordModal(user.id)}>
+                              Đổi mật khẩu
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

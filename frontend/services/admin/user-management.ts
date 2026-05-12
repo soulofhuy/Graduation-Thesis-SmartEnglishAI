@@ -106,3 +106,62 @@ export async function updateAdminUserPassword(
 
   return payload.data;
 }
+
+export async function getUserProfile(token: string, userId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/admin/get-user/${encodeURIComponent(userId)}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<{
+    id: string;
+    email: string;
+    role: 'TEACHER' | 'STUDENT';
+    isActive: boolean;
+    profile?: AdminUserProfile | null;
+  }> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch user profile';
+    throw new Error(message);
+  }
+
+  if (!payload.data) throw new Error('Profile response is missing data');
+
+  return payload.data;
+}
+
+export async function updateUserProfile(
+  token: string,
+  userId: string,
+  payload: Partial<AdminUserProfile>
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/admin/update-user/${encodeURIComponent(userId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  const body = (await response.json()) as ApiSuccess<any> | ApiError;
+
+  if (!response.ok || !body.status) {
+    const message = body?.message || 'Failed to update user profile';
+    throw new Error(message);
+  }
+
+  if (!body.data) throw new Error('Update profile response is missing data');
+
+  return body.data;
+}
