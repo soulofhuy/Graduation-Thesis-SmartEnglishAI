@@ -13,6 +13,7 @@ import { dateFormat } from '@/lib/format'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllUsers, type AdminUser } from '@/services/admin/user-management'
+import { UpdatePasswordModal } from './_components/update-password-modal'
 
 type TableUser = {
   id: string
@@ -43,7 +44,7 @@ const mapUserToTableUser = (user: AdminUser): TableUser => ({
 export default function AdminUsersPage() {
   const { accessToken, isHydrated } = useAuth()
 
-  const [users, setUsers] = useState<TableUser[]>([])
+  const [apiUsers, setApiUsers] = useState<AdminUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isPaging, setIsPaging] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -53,11 +54,13 @@ export default function AdminUsersPage() {
   const [hasPrevPage, setHasPrevPage] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
 
   const fetchUsers = useCallback(
     async (page: number, limit: number, showSkeleton = false) => {
       if (!accessToken) {
-        setUsers([])
+        setApiUsers([])
         setTotalItems(0)
         setHasNextPage(false)
         setHasPrevPage(false)
@@ -74,7 +77,7 @@ export default function AdminUsersPage() {
 
       try {
         const response = await getAllUsers(accessToken, page, limit)
-        setUsers((response.data ?? []).map(mapUserToTableUser))
+        setApiUsers(response.data ?? [])
         setCurrentPage(response.pagination.page)
         setTotalItems(response.pagination.totalItems)
         setHasNextPage(Boolean(response.pagination.hasNextPage))
@@ -129,20 +132,30 @@ export default function AdminUsersPage() {
     setSearchQuery('')
   }
 
+  const openPasswordModal = (userId: string) => {
+    setSelectedUser(apiUsers.find((item) => item.id === userId) ?? null)
+    setIsPasswordModalOpen(true)
+  }
+
+  const tableUsers = useMemo(
+    () => apiUsers.map(mapUserToTableUser),
+    [apiUsers]
+  )
+
   const filteredUsers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
     if (!query) {
-      return users
+      return tableUsers
     }
 
-    return users.filter((user) => {
+    return tableUsers.filter((user) => {
       return (
         user.name.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query)
       )
     })
-  }, [searchQuery, users])
+  }, [searchQuery, tableUsers])
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -168,6 +181,16 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+      <UpdatePasswordModal
+        open={isPasswordModalOpen}
+        onOpenChange={setIsPasswordModalOpen}
+        token={accessToken}
+        user={selectedUser}
+        onUpdated={() => {
+          void fetchUsers(currentPage, pageSize, false)
+        }}
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
@@ -243,8 +266,8 @@ export default function AdminUsersPage() {
                           {user.createdDate}
                         </TableCell>
                         <TableCell>
-                          <Button variant="outline" size="sm">
-                            Xem chi tiết
+                          <Button variant="outline" size="sm" onClick={() => openPasswordModal(user.id)}>
+                            Đổi mật khẩu
                           </Button>
                         </TableCell>
                       </TableRow>

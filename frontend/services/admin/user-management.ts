@@ -34,6 +34,13 @@ export type AdminUsersResponse = {
   pagination: AdminUsersPagination;
 };
 
+export type UpdateAdminUserPasswordResponse = {
+  id: string;
+  email: string;
+  role: 'TEACHER' | 'STUDENT';
+  isActive: boolean;
+};
+
 export async function getAllUsers(token: string, page = 1, limit = 10) {
   const searchParams = new URLSearchParams({
     page: String(page),
@@ -62,6 +69,39 @@ export async function getAllUsers(token: string, page = 1, limit = 10) {
 
   if (!payload.data) {
     throw new Error('Users response is missing data');
+  }
+
+  return payload.data;
+}
+
+export async function updateAdminUserPassword(
+  token: string,
+  userId: string,
+  newPassword: string
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/admin/update-password/${encodeURIComponent(userId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ newPassword })
+    }
+  );
+
+  const payload = (await response.json()) as
+    | ApiSuccess<UpdateAdminUserPasswordResponse>
+    | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to update password';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Password update response is missing data');
   }
 
   return payload.data;

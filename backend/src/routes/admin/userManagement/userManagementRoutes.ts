@@ -1,13 +1,10 @@
 import { Router } from 'express';
-import verifyJWT from '../../../middlewares/authMiddleware';
-import UserManagementController from '../../../controllers/admin/userManagement/userManagementController';
+import GetAllUsersRoutes from './getAllUsersRoutes';
+import UpdateUserPasswordRoutes from './updateUserPasswordRoutes';
 
 const router = Router();
 
-router.get(
-  '/admin/get-all-users',
-  verifyJWT,
-  UserManagementController.getAllUsers
-);
+router.use(GetAllUsersRoutes);
+router.use(UpdateUserPasswordRoutes);
 
 export default router;
