@@ -1,25 +1,11 @@
 import prisma from '../../../utils/prisma';
 import { Role } from '../../../generated/prisma/enums';
-import { MINIMUM_ITEMS_PER_PAGE } from '@/utils/constants';
-
-const DEFAULT_ITEMS_PER_PAGE = MINIMUM_ITEMS_PER_PAGE;
-
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
-
-interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    totalItems: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
+import {
+  DEFAULT_ITEMS_PER_PAGE,
+  PaginationParams,
+  PaginatedResponse,
+  buildPagination
+} from '../../../utils/pagination';
 
 class UserManagementService {
   static getAllUsers = async (
@@ -70,18 +56,9 @@ class UserManagementService {
         })
       ]);
 
-      const totalPages = Math.max(1, Math.ceil(totalItems / limit));
-
       return {
         data: users,
-        pagination: {
-          page,
-          limit,
-          totalItems,
-          totalPages,
-          hasNextPage: page * limit < totalItems,
-          hasPrevPage: page > 1
-        }
+        pagination: buildPagination(page, limit, totalItems)
       };
     } catch (error) {
       throw new Error(
