@@ -1,7 +1,5 @@
-import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
+import { DEFAULT_ITEMS_PER_PAGE, buildPagination } from '../utils/pagination';
 import prisma from '../utils/prisma';
-
-const DEFAULT_ITEMS_PER_PAGE = MINIMUM_ITEMS_PER_PAGE;
 
 class ClassService {
   static getStudentsByClassId = async (
@@ -67,14 +65,7 @@ class ClassService {
     return {
       ...classInfo,
       classMembers,
-      pagination: {
-        page: normalizedPage,
-        limit: normalizedLimit,
-        totalItems,
-        totalPages,
-        hasNextPage: normalizedPage < totalPages,
-        hasPrevPage: normalizedPage > 1
-      }
+      pagination: buildPagination(normalizedPage, normalizedLimit, totalItems)
     };
   };
 }

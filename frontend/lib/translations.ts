@@ -127,6 +127,34 @@ export const translations = {
       signIn: 'Sign In'
     },
 
+    // Admin Dashboard
+    admin: {
+      overview: {
+        title: 'Admin dashboard',
+        description: 'View an overview of the system',
+        statistic: {
+          fieldTotalUsers: 'Total users',
+          fieldTotalTeachers: 'Total teachers',
+          fieldTotalStudents: 'Total students',
+          fieldTotalAssignments: 'Total assignments'
+        },
+        userGrowthByMonthChart: {
+          title: 'Monthly user growth',
+          teacher: 'Teacher',
+          student: 'Student'
+        },
+        assignmentGrowthByMonthChart: {
+          title: 'Monthly assignment growth',
+          assignment: 'Assignment'
+        },
+        submissionGrowthByMonthChart: {
+          title: 'Monthly submission growth',
+          totalSubmissionsInMonth: 'Total submissions in month',
+          totalPassedAssignmentsInMonth: 'Total passed assignments in month'
+        }
+      }
+    },
+
     // Teacher Dashboard
     teacher: {
       overview: {
@@ -1039,6 +1067,34 @@ export const translations = {
       or: 'Hoặc tiếp tục với',
       description: 'Bạn đã có tài khoản? ',
       signIn: 'Đăng nhập'
+    },
+
+    // Admin Dashboard
+    admin: {
+      overview: {
+        title: 'Bảng điều khiển quản trị',
+        description: 'Xem tổng quan về hệ thống',
+        statistic: {
+          fieldTotalUsers: 'Tổng số người dùng',
+          fieldTotalTeachers: 'Tổng số giáo viên',
+          fieldTotalStudents: 'Tổng số học sinh',
+          fieldTotalAssignments: 'Tổng số bài tập'
+        },
+        userGrowthByMonthChart: {
+          title: 'Theo dõi người dùng theo tháng',
+          teacher: 'Giáo viên',
+          student: 'Học sinh'
+        },
+        assignmentGrowthByMonthChart: {
+          title: 'Theo dõi bài tập theo tháng',
+          assignment: 'Bài tập'
+        },
+        submissionGrowthByMonthChart: {
+          title: 'Theo dõi bài nộp theo tháng',
+          totalSubmissionsInMonth: 'Tổng số bài nộp trong tháng',
+          totalPassedAssignmentsInMonth: 'Tổng số bài đạt yêu cầu trong tháng'
+        }
+      }
     },
 
     // Teacher Dashboard

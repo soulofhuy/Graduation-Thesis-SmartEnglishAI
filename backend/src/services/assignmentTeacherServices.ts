@@ -1,9 +1,7 @@
 import { Role } from '../generated/prisma/enums';
 import { TaskType } from '../generated/prisma/enums';
-import { MINIMUM_ITEMS_PER_PAGE } from '../utils/constants';
+import { DEFAULT_ITEMS_PER_PAGE, buildPagination } from '../utils/pagination';
 import prisma from '../utils/prisma';
-
-const DEFAULT_ITEMS_PER_PAGE = MINIMUM_ITEMS_PER_PAGE;
 
 type CreateChoiceInput = {
   choiceContent: string;
@@ -508,14 +506,7 @@ class AssignmentService {
 
     return {
       data: assignments,
-      pagination: {
-        page,
-        limit,
-        totalItems,
-        totalPages: Math.max(1, Math.ceil(totalItems / limit)),
-        hasNextPage: page * limit < totalItems,
-        hasPrevPage: page > 1
-      }
+      pagination: buildPagination(page, limit, totalItems)
     };
   };
 
