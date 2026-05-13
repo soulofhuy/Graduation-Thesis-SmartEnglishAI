@@ -247,8 +247,7 @@ export default function AdminUsersPage() {
                           {user.email}
                         </TableCell>
                         <TableCell className="text-center">
-                          <span className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(user.role)}`}
-                          >
+                          <span className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(user.role)}`}>
                             {getRoleLabel(user.role, language)}
                           </span>
                         </TableCell>

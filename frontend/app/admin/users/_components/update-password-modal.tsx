@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -10,6 +12,12 @@ import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { dateFormat } from '@/lib/format'
 import { updateAdminUserPassword, type AdminUser } from '@/services/admin/user-management'
+import { useLanguage } from '@/components/language-provider'
+import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
+import { createChangePasswordSchema, type AdminChangePasswordFormValues } from '@/lib/validators/admin-change-password'
+import { getRoleLabel } from '@/lib/language-mappers/user-role-mapper'
+import { getActiveStatusLabel } from '@/lib/language-mappers/active-deactive-mapper'
+import { getRoleColor } from '@/lib/color-mappers/user-role-mapper'
 
 type UpdatePasswordModalProps = {
     open: boolean
@@ -32,41 +40,32 @@ export function UpdatePasswordModal({
     user,
     onUpdated
 }: UpdatePasswordModalProps) {
-    const [newPassword, setNewPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
+    const { t, language } = useLanguage()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const changePasswordSchema = useMemo(
+        () => createChangePasswordSchema(getAuthValidationMessages(language)),
+        [language]
+    )
+    const form = useForm<AdminChangePasswordFormValues>({
+        resolver: zodResolver(changePasswordSchema),
+        defaultValues: { newPassword: '', confirmPassword: '' }
+    })
 
     useEffect(() => {
         if (!open) {
-            setNewPassword('')
-            setConfirmPassword('')
+            form.reset({ newPassword: '', confirmPassword: '' })
         }
-    }, [open])
+    }, [form, open])
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (values: AdminChangePasswordFormValues) => {
         if (!token || !user) {
-            return
-        }
-
-        if (!newPassword.trim()) {
-            toast.error('Vui lòng nhập mật khẩu mới', { className: TOAST_COLORS.error })
-            return
-        }
-
-        if (newPassword.trim().length < 6) {
-            toast.error('Mật khẩu mới phải có ít nhất 6 ký tự', { className: TOAST_COLORS.error })
-            return
-        }
-
-        if (newPassword !== confirmPassword) {
-            toast.error('Mật khẩu xác nhận không khớp', { className: TOAST_COLORS.error })
             return
         }
 
         setIsSubmitting(true)
         try {
-            await updateAdminUserPassword(token, user.id, newPassword)
-            toast.success('Cập nhật mật khẩu thành công', { className: TOAST_COLORS.success })
+            await updateAdminUserPassword(token, user.id, values.newPassword)
+            toast.success(getToastMessage('updateSuccess', language), { className: TOAST_COLORS.success })
             onOpenChange(false)
             onUpdated?.()
         } catch (error) {
@@ -81,82 +80,90 @@ export function UpdatePasswordModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Đổi mật khẩu người dùng</DialogTitle>
-                    <DialogDescription>
-                        Kiểm tra thông tin cơ bản của người dùng trước khi cập nhật mật khẩu mới.
-                    </DialogDescription>
+                    <DialogTitle>{t.admin.userManagement.changePassword.title}</DialogTitle>
+                    <DialogDescription>{t.admin.userManagement.changePassword.description}</DialogDescription>
                 </DialogHeader>
 
                 {user ? (
-                    <div className="space-y-6">
+                    <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
                         <div className="grid gap-3 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2">
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Họ tên</p>
+                                <p className="text-xs tracking-wide text-muted-foreground">{t.admin.userManagement.changePassword.userInfo.fieldFullName}</p>
                                 <p className="mt-1 font-medium">{getFullName(user)}</p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Email</p>
+                                <p className="text-xs tracking-wide text-muted-foreground">{t.admin.userManagement.changePassword.userInfo.fieldEmail}</p>
                                 <p className="mt-1 font-medium">{user.email}</p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Vai trò</p>
+                                <p className="text-xs tracking-wide text-muted-foreground">{t.admin.userManagement.changePassword.userInfo.fieldRole}</p>
                                 <div className="mt-1">
-                                    <Badge variant="secondary">{user.role === 'TEACHER' ? 'Giáo viên' : 'Học sinh'}</Badge>
+                                    <span className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(user.role)}`}>
+                                        {getRoleLabel(user.role, language)}
+                                    </span>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Trạng thái</p>
+                                <p className="text-xs tracking-wide text-muted-foreground">{t.admin.userManagement.changePassword.userInfo.fieldStatus}</p>
                                 <div className="mt-1">
-                                    <Badge variant={user.isActive ? 'default' : 'destructive'}>
-                                        {user.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                                    </Badge>
+                                    <span className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(user.role)}`}>
+                                        {getActiveStatusLabel(user.isActive, language)}
+                                    </span>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Ngày tạo</p>
+                                <p className="text-xs tracking-wide text-muted-foreground">{t.admin.userManagement.changePassword.userInfo.fieldCreatedDate}</p>
                                 <p className="mt-1 font-medium">
                                     {user.createdAt ? dateFormat(user.createdAt) : '-'}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-muted-foreground">Mã người dùng</p>
-                                <p className="mt-1 font-medium break-all">{user.id}</p>
+                                <p className="text-xs tracking-wide text-muted-foreground">{t.admin.userManagement.changePassword.userInfo.fieldAddress}</p>
+                                <p className="mt-1 font-medium break-all">{user.profile?.address}</p>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="mb-2 block text-sm font-medium">Mật khẩu mới</label>
+                                <label className="mb-2 block text-sm font-medium">{t.admin.userManagement.changePassword.newPassword}</label>
                                 <Input
+                                    {...form.register('newPassword')}
                                     type="password"
-                                    placeholder="Nhập mật khẩu mới"
-                                    value={newPassword}
-                                    onChange={(event) => setNewPassword(event.target.value)}
+                                    placeholder={t.admin.userManagement.changePassword.newPasswordPlaceholder}
                                 />
+                                {form.formState.errors.newPassword?.message ? (
+                                    <p className="mt-1 text-sm text-destructive">
+                                        {form.formState.errors.newPassword.message}
+                                    </p>
+                                ) : null}
                             </div>
                             <div>
-                                <label className="mb-2 block text-sm font-medium">Xác nhận mật khẩu</label>
+                                <label className="mb-2 block text-sm font-medium">{t.admin.userManagement.changePassword.passwordConfirmation}</label>
                                 <Input
+                                    {...form.register('confirmPassword')}
                                     type="password"
-                                    placeholder="Nhập lại mật khẩu mới"
-                                    value={confirmPassword}
-                                    onChange={(event) => setConfirmPassword(event.target.value)}
+                                    placeholder={t.admin.userManagement.changePassword.passwordConfirmationPlaceholder}
                                 />
+                                {form.formState.errors.confirmPassword?.message ? (
+                                    <p className="mt-1 text-sm text-destructive">
+                                        {form.formState.errors.confirmPassword.message}
+                                    </p>
+                                ) : null}
                             </div>
                         </div>
-                    </div>
+                    </form>
                 ) : (
                     <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        Không có dữ liệu người dùng được chọn.
+                        {t.common.noData}
                     </div>
                 )}
 
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-                        Hủy
+                        {t.common.cancel}
                     </Button>
-                    <Button onClick={() => void handleSubmit()} disabled={!user || isSubmitting}>
-                        {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+                    <Button onClick={() => void form.handleSubmit(handleSubmit)()} disabled={!user || isSubmitting}>
+                        {isSubmitting ? t.common.isSaving : t.common.isSaving}
                     </Button>
                 </DialogFooter>
             </DialogContent>
