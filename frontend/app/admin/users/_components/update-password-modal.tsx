@@ -163,7 +163,7 @@ export function UpdatePasswordModal({
                         {t.common.cancel}
                     </Button>
                     <Button onClick={() => void form.handleSubmit(handleSubmit)()} disabled={!user || isSubmitting}>
-                        {isSubmitting ? t.common.isSaving : t.common.isSaving}
+                        {isSubmitting ? t.common.isSaving : t.common.save}
                     </Button>
                 </DialogFooter>
             </DialogContent>
