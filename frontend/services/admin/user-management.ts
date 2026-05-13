@@ -191,3 +191,55 @@ export async function toggleUserActive(token: string, userId: string) {
 
   return body.data;
 }
+
+export async function createAdminUser(
+  token: string,
+  email: string,
+  password: string,
+  role: 'TEACHER' | 'STUDENT',
+  profile?: Partial<AdminUserProfile>
+) {
+  const response = await fetch(`${getApiBaseUrl()}/auth/register`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      role
+    })
+  });
+
+  const body = (await response.json()) as
+    | ApiSuccess<{
+        id: string;
+        email: string;
+        role: 'TEACHER' | 'STUDENT';
+        isActive: boolean;
+      }>
+    | ApiError;
+
+  if (!response.ok || !body.status) {
+    const message = body?.message || 'Failed to create user';
+    throw new Error(message);
+  }
+
+  if (!body.data) throw new Error('Create user response is missing data');
+
+  const userId = body.data.id;
+
+  if (
+    profile &&
+    Object.keys(profile).some(key => profile[key as keyof typeof profile])
+  ) {
+    try {
+      await updateUserProfile(token, userId, profile);
+    } catch (err) {
+      console.warn('Profile update failed after user creation:', err);
+    }
+  }
+
+  return body.data;
+}

@@ -14,6 +14,7 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllUsers, type AdminUser, toggleUserActive } from '@/services/admin/user-management'
 import { UpdatePasswordModal } from './_components/update-password-modal'
 import { UpdateProfileModal } from './_components/update-profile-modal'
+import { AddUserModal } from './_components/add-user-modal'
 import { getRoleLabel } from '@/lib/language-mappers/user-role-mapper'
 import { getRoleColor } from '@/lib/color-mappers/user-role-mapper'
 import { getActiveStatusLabel } from '@/lib/language-mappers/active-deactive-mapper'
@@ -63,6 +64,7 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false)
 
   const fetchUsers = useCallback(
     async (page: number, limit: number, showSkeleton = false) => {
@@ -158,8 +160,6 @@ export default function AdminUsersPage() {
     [apiUsers]
   )
 
-  console.log('Mapped table users:', tableUsers) // Debug log to check the mapped users
-
   const filteredUsers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
@@ -177,6 +177,15 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+      <AddUserModal
+        open={isAddUserModalOpen}
+        onOpenChange={setIsAddUserModalOpen}
+        token={accessToken}
+        onUserCreated={() => {
+          void fetchUsers(currentPage, pageSize, false)
+        }}
+      />
+
       <UpdatePasswordModal
         open={isPasswordModalOpen}
         onOpenChange={setIsPasswordModalOpen}
@@ -206,7 +215,7 @@ export default function AdminUsersPage() {
             {t.admin.userManagement.description}
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setIsAddUserModalOpen(true)}>
           <Plus className="w-4 h-4" />
           {t.admin.userManagement.buttons.addNewUser}
         </Button>
@@ -220,7 +229,7 @@ export default function AdminUsersPage() {
           <div className="space-y-4">
             {isLoading ? (
               <div className="py-10 text-center text-muted-foreground">
-                {t.common.loading}...
+                {t.common.loading}
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="py-10 text-center text-muted-foreground">
@@ -299,7 +308,7 @@ export default function AdminUsersPage() {
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
               <p className="text-sm text-muted-foreground">
-                Tổng số: {totalItems}
+                {t.common.pagination.total} {totalItems}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -308,7 +317,7 @@ export default function AdminUsersPage() {
                   disabled={!hasPrevPage || isPaging}
                   onClick={handlePrevPage}
                 >
-                  Trang trước
+                  {t.common.pagination.previous}
                 </Button>
                 <Button
                   variant="outline"
@@ -316,7 +325,7 @@ export default function AdminUsersPage() {
                   disabled={!hasNextPage || isPaging}
                   onClick={handleNextPage}
                 >
-                  Trang sau
+                  {t.common.pagination.next}
                 </Button>
               </div>
               <PageSizeSelect

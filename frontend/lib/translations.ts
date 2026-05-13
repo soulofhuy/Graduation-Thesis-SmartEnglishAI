@@ -192,6 +192,32 @@ export const translations = {
           newPasswordPlaceholder: 'Enter new password here',
           passwordConfirmation: 'Confirm new password',
           passwordConfirmationPlaceholder: 'Confirm new password here'
+        },
+        createNewUser: {
+          userInfo: {
+            title: 'Create new user',
+            fieldEmail: 'Email',
+            fieldEmailPlaceholder: 'Enter user email',
+            fieldPassword: 'Password',
+            fieldPasswordPlaceholder: 'Enter user password',
+            fieldRole: 'Role',
+            fieldRolePlaceholder: 'Select a role for the user',
+            fieldRoleTeacher: 'Teacher',
+            fieldRoleStudent: 'Student'
+          },
+          profile: {
+            title: 'User profile information (optional)',
+            fieldFirstName: 'First name',
+            fieldFirstNamePlaceholder: 'Enter user first name',
+            fieldLastName: 'Last name',
+            fieldLastNamePlaceholder: 'Enter user last name',
+            fieldAddress: 'Address',
+            fieldAddressPlaceholder: 'Enter user address',
+            fieldPhoneNumber: 'Phone number',
+            fieldPhoneNumberPlaceholder: 'Enter user phone number',
+            fieldDateOfBirth: 'Date of birth',
+            fieldDateOfBirthPlaceholder: 'Enter user date of birth'
+          }
         }
       }
     },
@@ -1175,6 +1201,32 @@ export const translations = {
           newPasswordPlaceholder: 'Nhập mật khẩu mới tại đây',
           passwordConfirmation: 'Xác nhận mật khẩu mới',
           passwordConfirmationPlaceholder: 'Xác nhận mật khẩu mới tại đây'
+        },
+        createNewUser: {
+          userInfo: {
+            title: 'Tạo người dùng mới',
+            fieldEmail: 'Email',
+            fieldEmailPlaceholder: 'Nhập email của người dùng',
+            fieldRole: 'Vai trò',
+            fieldPassword: 'Mật khẩu',
+            fieldPasswordPlaceholder: 'Nhập mật khẩu cho người dùng',
+            fieldRolePlaceholder: 'Chọn vai trò cho người dùng',
+            fieldRoleTeacher: 'Giáo viên',
+            fieldRoleStudent: 'Học sinh'
+          },
+          profile: {
+            title: 'Thông tin hồ sơ người dùng (tùy chọn)',
+            fieldFirstName: 'Tên',
+            fieldFirstNamePlaceholder: 'Nhập tên của người dùng',
+            fieldLastName: 'Họ',
+            fieldLastNamePlaceholder: 'Nhập họ của người dùng',
+            fieldAddress: 'Địa chỉ',
+            fieldAddressPlaceholder: 'Nhập địa chỉ của người dùng',
+            fieldPhoneNumber: 'Số điện thoại',
+            fieldPhoneNumberPlaceholder: 'Nhập số điện thoại của người dùng',
+            fieldDateOfBirth: 'Ngày sinh',
+            fieldDateOfBirthPlaceholder: 'Nhập ngày sinh của người dùng'
+          }
         }
       }
     },
