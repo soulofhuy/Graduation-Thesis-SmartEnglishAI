@@ -111,9 +111,6 @@ export function UpdateProfileModal({ open, onOpenChange, token, user, onUpdated 
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Cập nhật thông tin cá nhân</DialogTitle>
-                    <DialogDescription>
-                        Kiểm tra và cập nhật đầy đủ thông tin người dùng.
-                    </DialogDescription>
                 </DialogHeader>
 
                 {user ? (

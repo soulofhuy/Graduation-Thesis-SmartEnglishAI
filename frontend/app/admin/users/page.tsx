@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Plus, Search, Users, GraduationCap, UserRound } from 'lucide-react'
+import { Plus, Pencil, KeyRound, Ban, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAuth } from '@/components/auth-provider'
@@ -15,13 +14,18 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllUsers, type AdminUser, toggleUserActive } from '@/services/admin/user-management'
 import { UpdatePasswordModal } from './_components/update-password-modal'
 import { UpdateProfileModal } from './_components/update-profile-modal'
+import { getRoleLabel } from '@/lib/language-mappers/user-role-mapper'
+import { getRoleColor } from '@/lib/color-mappers/user-role-mapper'
+import { getActiveStatusLabel } from '@/lib/language-mappers/active-deactive-mapper'
+import { useLanguage } from '@/components/language-provider'
+import { getActiveStatusColor } from '@/lib/color-mappers/active-deactive-mapper'
 
 type TableUser = {
   id: string
   name: string
   email: string
-  role: 'TEACHER' | 'STUDENT'
-  status: 'active' | 'inactive'
+  role: string
+  isActive: boolean
   createdDate: string
 }
 
@@ -38,11 +42,12 @@ const mapUserToTableUser = (user: AdminUser): TableUser => ({
   name: getFullName(user),
   email: user.email,
   role: user.role,
-  status: user.isActive ? 'active' : 'inactive',
+  isActive: user.isActive,
   createdDate: user.createdAt ? dateFormat(user.createdAt) : '-'
 })
 
 export default function AdminUsersPage() {
+  const { t, language } = useLanguage()
   const { accessToken, isHydrated } = useAuth()
 
   const [apiUsers, setApiUsers] = useState<AdminUser[]>([])
@@ -125,15 +130,6 @@ export default function AdminUsersPage() {
     setPageSize(nextValue)
   }
 
-  const handleSearchSubmit = () => {
-    setSearchQuery(searchInput.trim())
-  }
-
-  const clearSearch = () => {
-    setSearchInput('')
-    setSearchQuery('')
-  }
-
   const openPasswordModal = (userId: string) => {
     setSelectedUser(apiUsers.find((item) => item.id === userId) ?? null)
     setIsPasswordModalOpen(true)
@@ -149,10 +145,10 @@ export default function AdminUsersPage() {
 
     try {
       await toggleUserActive(accessToken, userId)
-      toast.success('Cập nhật trạng thái người dùng thành công', { className: TOAST_COLORS.success })
+      toast.success(getToastMessage('updateSuccess', language), { className: TOAST_COLORS.success })
       void fetchUsers(currentPage, pageSize, false)
     } catch (err) {
-      const message = err instanceof Error ? err.message : getToastMessage('updateFailed', 'vi')
+      const message = err instanceof Error ? err.message : getToastMessage('updateFailed', language)
       toast.error(message, { className: TOAST_COLORS.error })
     }
   }
@@ -161,6 +157,8 @@ export default function AdminUsersPage() {
     () => apiUsers.map(mapUserToTableUser),
     [apiUsers]
   )
+
+  console.log('Mapped table users:', tableUsers) // Debug log to check the mapped users
 
   const filteredUsers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -176,28 +174,6 @@ export default function AdminUsersPage() {
       )
     })
   }, [searchQuery, tableUsers])
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'TEACHER':
-        return 'bg-primary/10 text-primary'
-      case 'STUDENT':
-        return 'bg-accent/10 text-accent'
-      default:
-        return 'bg-muted text-muted-foreground'
-    }
-  }
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'TEACHER':
-        return 'Giáo viên'
-      case 'STUDENT':
-        return 'Học sinh'
-      default:
-        return role
-    }
-  }
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
@@ -224,91 +200,94 @@ export default function AdminUsersPage() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Quản lí người dùng
+            {t.admin.userManagement.title}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Quản lý giáo viên và học sinh trong hệ thống
+            {t.admin.userManagement.description}
           </p>
         </div>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
-          Thêm người dùng
+          {t.admin.userManagement.buttons.addNewUser}
         </Button>
       </div>
 
       <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle>Danh sách người dùng</CardTitle>
-          <CardDescription>
-            Dữ liệu được lấy trực tiếp từ API, hỗ trợ phân trang theo page/limit
-          </CardDescription>
+        <CardHeader className="mb-3">
+          <CardTitle>{t.admin.userManagement.tableView.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {isLoading ? (
               <div className="py-10 text-center text-muted-foreground">
-                Đang tải dữ liệu...
+                {t.common.loading}...
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="py-10 text-center text-muted-foreground">
-                Không tìm thấy người dùng nào
+                {t.common.noData}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tên</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Vai trò</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Ngày tạo</TableHead>
-                      <TableHead>Hành động</TableHead>
+                      <TableHead className="text-center">{t.admin.userManagement.tableView.columnName}</TableHead>
+                      <TableHead className="text-center">{t.admin.userManagement.tableView.columnEmail}</TableHead>
+                      <TableHead className="text-center">{t.admin.userManagement.tableView.columnRole}</TableHead>
+                      <TableHead className="text-center">{t.admin.userManagement.tableView.columnStatus}</TableHead>
+                      <TableHead className="text-center">{t.admin.userManagement.tableView.columnCreatedDate}</TableHead>
+                      <TableHead className="text-center">{t.admin.userManagement.tableView.columnActions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="font-medium text-center">{user.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-center">
                           {user.email}
                         </TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(
-                              user.role
-                            )}`}
+                        <TableCell className="text-center">
+                          <span className={`inline-block rounded px-2 py-1 text-xs font-medium ${getRoleColor(user.role)}`}
                           >
-                            {getRoleLabel(user.role)}
+                            {getRoleLabel(user.role, language)}
                           </span>
                         </TableCell>
-                        <TableCell>
-                          <span
-                            className={`rounded px-2 py-1 text-xs font-medium ${user.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                              }`}
-                          >
-                            {user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                        <TableCell className="text-center">
+                          <span className={`rounded px-2 py-1 text-xs font-medium ${getActiveStatusColor(user.isActive)}`}>
+                            {getActiveStatusLabel(user.isActive, language)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-muted-foreground text-center">
                           {user.createdDate}
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => openProfileModal(user.id)}>
-                              Chỉnh sửa
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => openPasswordModal(user.id)}>
-                              Đổi mật khẩu
-                            </Button>
+                          <div className="flex justify-center gap-2">
                             <Button
-                              variant={user.status === 'active' ? 'destructive' : 'secondary'}
-                              size="sm"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openProfileModal(user.id)}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openPasswordModal(user.id)}
+                            >
+                              <KeyRound className="w-4 h-4" />
+                            </Button>
+
+                            <Button
+                              variant={user.isActive ? 'destructive' : 'secondary'}
+                              size="icon"
                               onClick={() => handleToggleActive(user.id)}
                             >
-                              {user.status === 'active' ? 'Vô hiệu' : 'Kích hoạt'}
+                              {user.isActive ? (
+                                <Ban className="w-4 h-4" />
+                              ) : (
+                                <CheckCircle className="w-4 h-4" />
+                              )}
                             </Button>
                           </div>
                         </TableCell>

@@ -152,6 +152,47 @@ export const translations = {
           totalSubmissionsInMonth: 'Total submissions in month',
           totalPassedAssignmentsInMonth: 'Total passed assignments in month'
         }
+      },
+      userManagement: {
+        title: 'User management',
+        description:
+          'View and manage all users in the system, including teachers and students',
+        buttons: {
+          addNewUser: 'Add new user'
+        },
+        tableView: {
+          title: 'List of users',
+          columnName: 'Full name',
+          columnEmail: 'Email',
+          columnRole: 'Role',
+          columnStatus: 'Status',
+          columnCreatedDate: 'Created date',
+          columnActions: 'Actions'
+        },
+        updateProfile: {
+          title: 'Update user profile',
+          fieldFirstName: 'First name',
+          fieldLastName: 'Last name',
+          fieldAddress: 'Address',
+          fieldPhoneNumber: 'Phone number',
+          fieldDateOfBirth: 'Date of birth'
+        },
+        changePassword: {
+          title: 'Change user password',
+          description: 'Enter a new password for this user',
+          userInfo: {
+            fieldFullName: 'Full name',
+            fieldEmail: 'Email',
+            fieldRole: 'Role',
+            fieldStatus: 'Status',
+            fieldCreatedDate: 'Created date',
+            fieldAddress: 'Address'
+          },
+          newPassword: 'New password',
+          newPasswordPlaceholder: 'Enter new password here',
+          passwordConfirmation: 'Confirm new password',
+          passwordConfirmationPlaceholder: 'Confirm new password here'
+        }
       }
     },
 
@@ -1093,6 +1134,47 @@ export const translations = {
           title: 'Theo dõi bài nộp theo tháng',
           totalSubmissionsInMonth: 'Tổng số bài nộp trong tháng',
           totalPassedAssignmentsInMonth: 'Tổng số bài đạt yêu cầu trong tháng'
+        }
+      },
+      userManagement: {
+        title: 'Quản lý người dùng',
+        description:
+          'Xem và quản lý tất cả người dùng trong hệ thống, bao gồm giáo viên và học sinh',
+        buttons: {
+          addNewUser: 'Thêm người dùng mới'
+        },
+        tableView: {
+          title: 'Danh sách người dùng',
+          columnName: 'Họ và tên',
+          columnEmail: 'Email',
+          columnRole: 'Vai trò',
+          columnStatus: 'Trạng thái',
+          columnCreatedDate: 'Ngày tạo',
+          columnActions: 'Thao tác'
+        },
+        updateProfile: {
+          title: 'Cập nhật hồ sơ người dùng',
+          fieldFirstName: 'Tên',
+          fieldLastName: 'Họ',
+          fieldAddress: 'Địa chỉ',
+          fieldPhoneNumber: 'Số điện thoại',
+          fieldDateOfBirth: 'Ngày sinh'
+        },
+        changePassword: {
+          title: 'Đổi mật khẩu người dùng',
+          description: 'Nhập mật khẩu mới cho người dùng này',
+          userInfo: {
+            fieldFullName: 'Họ và tên',
+            fieldEmail: 'Email',
+            fieldRole: 'Vai trò',
+            fieldStatus: 'Trạng thái',
+            fieldCreatedDate: 'Ngày tạo',
+            fieldAddress: 'Địa chỉ'
+          },
+          newPassword: 'Mật khẩu mới',
+          newPasswordPlaceholder: 'Nhập mật khẩu mới tại đây',
+          passwordConfirmation: 'Xác nhận mật khẩu mới',
+          passwordConfirmationPlaceholder: 'Xác nhận mật khẩu mới tại đây'
         }
       }
     },
