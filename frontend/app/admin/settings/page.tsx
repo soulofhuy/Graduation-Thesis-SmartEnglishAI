@@ -1,222 +1,189 @@
-'use client'
+"use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Switch } from '@/components/ui/switch'
+import { useEffect, useState } from 'react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useLanguage } from '@/components/language-provider'
+import { SettingsTab } from './_components/SettingsTab'
+import { ProfileTab } from './_components/ProfileTab'
+import { PasswordTab } from './_components/PasswordTab'
+import { useAuth } from '@/components/auth-provider'
+import { changePassword } from '@/services/auth'
+import { getMyProfile, updateMyProfile } from '@/services/profiles'
+import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
+import {
+  createChangePasswordSchema,
+  type ChangePasswordFormValues
+} from '@/lib/validators/change-password'
+import { createProfileSchema, type ProfileFormValues } from '@/lib/validators/profile'
+import { normalizeDateForApi } from '@/lib/format'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
 
-const settingsSchema = z.object({
-  siteName: z.string().min(1, 'Tên website là bắt buộc'),
-  siteDescription: z.string().optional(),
-  supportEmail: z.string().email('Email không hợp lệ'),
-  maintenanceMode: z.boolean(),
-  allowNewRegistrations: z.boolean(),
-  emailVerificationRequired: z.boolean(),
-})
-
-type SettingsFormValues = z.infer<typeof settingsSchema>
+const profileSchema = createProfileSchema()
 
 export default function AdminSettingsPage() {
-  const [isSaving, setIsSaving] = useState(false)
+  const { t, language } = useLanguage()
+  const { accessToken } = useAuth()
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isSavingPassword, setIsSavingPassword] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
 
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsSchema),
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
-      siteName: 'Langoer',
-      siteDescription: 'Nền tảng học tập tiếng Anh với công nghệ AI',
-      supportEmail: 'support@langoer.com',
-      maintenanceMode: false,
-      allowNewRegistrations: true,
-      emailVerificationRequired: true,
+      firstName: '',
+      lastName: '',
+      address: '',
+      phoneNumber: '',
+      dateOfBirth: '',
+      createdAt: '',
+      updatedAt: '',
     },
   })
 
-  async function onSubmit(values: SettingsFormValues) {
-    setIsSaving(true)
+  useEffect(() => {
+    if (!accessToken) {
+      return
+    }
+
+    const loadProfile = async () => {
+      try {
+        const result = await getMyProfile(accessToken)
+        const profile = result.profile
+        profileForm.reset({
+          firstName: profile.firstName ?? '',
+          lastName: profile.lastName ?? '',
+          address: profile.address ?? '',
+          phoneNumber: profile.phoneNumber ?? '',
+          dateOfBirth: profile.dateOfBirth ?? '',
+          createdAt: profile.createdAt ?? '',
+          updatedAt: profile.updatedAt ?? '',
+        })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
+        toast.error(message, { className: TOAST_COLORS.error })
+      }
+    }
+
+    loadProfile()
+  }, [accessToken, profileForm, language])
+
+  const passwordForm = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(createChangePasswordSchema(getAuthValidationMessages(language))),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }
+  })
+
+  async function handleProfileSubmit(values: ProfileFormValues) {
+    setIsSavingProfile(true)
+    if (!accessToken) {
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
+      setIsSavingProfile(false)
+      return
+    }
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast.success('Lưu cài đặt thành công!')
+      const normalizedDateOfBirth = normalizeDateForApi(values.dateOfBirth)
+      const payload = {
+        ...values,
+        dateOfBirth: normalizedDateOfBirth
+      }
+      const profileData = Object.fromEntries(
+        Object.entries(payload)
+          .filter(([key]) => key !== 'createdAt' && key !== 'updatedAt')
+          .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+      ) as Omit<ProfileFormValues, 'createdAt' | 'updatedAt'>
+      await updateMyProfile(accessToken, profileData)
+      toast.success(getToastMessage('saveSuccess', language), { className: TOAST_COLORS.success })
+      setIsEditingProfile(false)
     } catch (error) {
-      toast.error('Lỗi khi lưu cài đặt')
+      toast.error(getToastMessage('saveFailed', language), { className: TOAST_COLORS.error })
     } finally {
-      setIsSaving(false)
+      setIsSavingProfile(false)
     }
   }
 
+  async function handlePasswordSubmit(values: ChangePasswordFormValues) {
+    if (!accessToken) {
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
+      return
+    }
+
+    setIsSavingPassword(true)
+    try {
+      await changePassword(accessToken, values.currentPassword, values.newPassword)
+      toast.success(getToastMessage('changePasswordSuccess', language), { className: TOAST_COLORS.success })
+      passwordForm.reset({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : getToastMessage('changePasswordFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
+    } finally {
+      setIsSavingPassword(false)
+    }
+  }
+
+  if (!t || !t.admin) {
+    return null
+  }
+
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-2xl">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
-          Cài đặt hệ thống
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Quản lý cài đặt chung của hệ thống
-        </p>
+    <div className="md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
+      <div className="mx-auto w-full space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{t.student.settings.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.student.settings.description}</p>
+        </div>
+
+        <Tabs defaultValue="setting" className="space-y-6">
+          <TabsList className="flex flex-wrap justify-start gap-20 bg-transparent p-1">
+            <TabsTrigger
+              value="setting"
+              className="rounded-full px-10 py-4 text-base font-medium border border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              {t.student.settings.tabs.settingsTab.mainTitle}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="profile"
+              className="rounded-full px-10 py-4 text-base font-medium border border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              {t.student.settings.tabs.profileTab.mainTitle}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="password"
+              className="rounded-full px-10 py-4 text-base font-medium border border-border data-[state=active]:bg-muted data-[state=active]:text-foreground"
+            >
+              {t.student.settings.tabs.passwordTab.mainTitle}
+            </TabsTrigger>
+          </TabsList>
+
+          <SettingsTab />
+
+          <ProfileTab
+            form={profileForm}
+            isEditingProfile={isEditingProfile}
+            isSaving={isSavingProfile}
+            onToggleEdit={() => setIsEditingProfile((prev) => !prev)}
+            onSubmit={handleProfileSubmit}
+          />
+
+          <PasswordTab
+            form={passwordForm}
+            isSaving={isSavingPassword}
+            onSubmit={handlePasswordSubmit}
+          />
+        </Tabs>
       </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Basic Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Cài đặt cơ bản</CardTitle>
-              <CardDescription>
-                Thông tin cơ bản về website
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="siteName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tên website</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="siteDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mô tả website</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="supportEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email hỗ trợ</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Security Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Cài đặt bảo mật</CardTitle>
-              <CardDescription>
-                Quản lý cài đặt bảo mật của hệ thống
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="maintenanceMode"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Chế độ bảo trì
-                      </FormLabel>
-                      <FormDescription>
-                        Tạm dừng hệ thống để bảo trì
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Separator />
-
-              <FormField
-                control={form.control}
-                name="allowNewRegistrations"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Cho phép đăng ký mới
-                      </FormLabel>
-                      <FormDescription>
-                        Cho phép người dùng mới đăng ký tài khoản
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Separator />
-
-              <FormField
-                control={form.control}
-                name="emailVerificationRequired"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Xác minh email bắt buộc
-                      </FormLabel>
-                      <FormDescription>
-                        Yêu cầu xác minh email khi đăng ký
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Save Button */}
-          <Button type="submit" disabled={isSaving} className="w-full">
-            {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
-          </Button>
-        </form>
-      </Form>
     </div>
   )
 }
