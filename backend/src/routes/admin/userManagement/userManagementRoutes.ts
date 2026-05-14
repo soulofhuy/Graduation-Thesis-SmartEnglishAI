@@ -1,13 +1,16 @@
 import { Router } from 'express';
-import verifyJWT from '../../../middlewares/authMiddleware';
-import UserManagementController from '../../../controllers/admin/userManagement/userManagementController';
+import GetAllUsersRoutes from './getAllUsersRoutes';
+import UpdateUserPasswordRoutes from './updateUserPasswordRoutes';
+import GetUserProfileRoutes from './getUserProfileRoutes';
+import UpdateUserProfileRoutes from './updateUserProfileRoutes';
+import ToggleUserActiveRoutes from './toggleUserActiveRoutes';
 
 const router = Router();
 
-router.get(
-  '/admin/get-all-users',
-  verifyJWT,
-  UserManagementController.getAllUsers
-);
+router.use(GetAllUsersRoutes);
+router.use(UpdateUserPasswordRoutes);
+router.use(GetUserProfileRoutes);
+router.use(UpdateUserProfileRoutes);
+router.use(ToggleUserActiveRoutes);
 
 export default router;
