@@ -14,6 +14,7 @@ import { createAdminUser, type AdminUserProfile } from '@/services/admin/user-ma
 import { useLanguage } from '@/components/language-provider'
 import { getAuthValidationMessages } from '@/lib/validation-translators/auth'
 import { createAddUserSchema, type AddUserFormValues } from '@/lib/validators/admin-add-user'
+import { Badge } from '@/components/ui/badge'
 
 type AddUserModalProps = {
     open: boolean
@@ -120,22 +121,24 @@ export function AddUserModal({
                     </div>
 
                     <div>
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                            <label className="block text-sm font-medium">{t.admin.userManagement.createNewUser.userInfo.fieldPassword}</label>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
+                        <label className="mb-2 block text-sm font-medium">{t.admin.userManagement.createNewUser.userInfo.fieldPassword}</label>
+
+                        <div className="flex items-center gap-2">
+                            <Input
+                                {...form.register('password')}
+                                type="password"
+                                placeholder={t.admin.userManagement.createNewUser.userInfo.fieldPasswordPlaceholder}
+                            />
+
+                            <Badge
+                                variant="secondary"
+                                className="cursor-pointer select-none px-3 py-2 text-sm hover:opacity-80"
                                 onClick={() => form.setValue('password', '123456', { shouldValidate: true })}
                             >
-                                Dùng mật khẩu mặc định 123456
-                            </Button>
+                                {t.admin.userManagement.createNewUser.userInfo.defaultPasswordButton}
+                            </Badge>
                         </div>
-                        <Input
-                            {...form.register('password')}
-                            type="password"
-                            placeholder={t.admin.userManagement.createNewUser.userInfo.fieldPasswordPlaceholder}
-                        />
+
                         {form.formState.errors.password?.message ? (
                             <p className="mt-1 text-sm text-destructive">
                                 {String(form.formState.errors.password.message)}
