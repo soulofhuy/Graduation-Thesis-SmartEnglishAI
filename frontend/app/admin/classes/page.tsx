@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Plus, Loader2 } from 'lucide-react'
+import { Search, Plus, Loader2, Edit3, Power } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -15,8 +15,14 @@ import {
 } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/components/auth-provider'
-import { getAllClasses, Class, GetAllClassesResponse } from '@/services/admin/class-management'
+import {
+  getAllClasses,
+  toggleClassStatus,
+  type Class,
+  type GetAllClassesResponse,
+} from '@/services/admin/class-management'
 import { dateFormat } from '@/lib/format'
+import { UpdateClassModal } from './_components/update-class-modal'
 
 export default function AdminClassesPage() {
   const [isMounted, setIsMounted] = useState(false)
@@ -25,6 +31,9 @@ export default function AdminClassesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
   const [response, setResponse] = useState<GetAllClassesResponse | null>(null)
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null)
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [processingClassId, setProcessingClassId] = useState<string | null>(null)
 
   const { toast } = useToast()
   const { accessToken, isHydrated } = useAuth()
@@ -97,6 +106,87 @@ export default function AdminClassesPage() {
         Hoạt động
       </span>
     )
+  }
+
+  const handleOpenUpdateModal = (classItem: Class) => {
+    setSelectedClass(classItem)
+    setIsUpdateModalOpen(true)
+  }
+
+  const handleUpdateModalOpenChange = (open: boolean) => {
+    setIsUpdateModalOpen(open)
+
+    if (!open) {
+      setSelectedClass(null)
+    }
+  }
+
+  const handleClassUpdated = (updatedClass: Class) => {
+    setClasses((prevClasses) =>
+      prevClasses.map((classItem) =>
+        classItem.id === updatedClass.id ? updatedClass : classItem,
+      ),
+    )
+
+    setResponse((prevResponse) =>
+      prevResponse
+        ? {
+          ...prevResponse,
+          data: prevResponse.data.map((classItem) =>
+            classItem.id === updatedClass.id ? updatedClass : classItem,
+          ),
+        }
+        : prevResponse,
+    )
+  }
+
+  const handleToggleClassStatus = async (classItem: Class) => {
+    if (!accessToken) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không tìm thấy token đăng nhập',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      setProcessingClassId(classItem.id)
+      const result = await toggleClassStatus(accessToken, classItem.id)
+
+      setClasses((prevClasses) =>
+        prevClasses.map((item) =>
+          item.id === result.class.id ? result.class : item,
+        ),
+      )
+
+      setResponse((prevResponse) =>
+        prevResponse
+          ? {
+            ...prevResponse,
+            data: prevResponse.data.map((item) =>
+              item.id === result.class.id ? result.class : item,
+            ),
+          }
+          : prevResponse,
+      )
+
+      toast({
+        title: 'Thành công',
+        description: result.message,
+      })
+    } catch (error) {
+      toast({
+        title: 'Lỗi',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Không thể thay đổi trạng thái lớp học',
+        variant: 'destructive',
+      })
+    } finally {
+      setProcessingClassId(null)
+    }
   }
 
   return (
@@ -216,9 +306,27 @@ export default function AdminClassesPage() {
                       </TableCell>
 
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          Chi tiết
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenUpdateModal(classItem)}
+                            disabled={processingClassId === classItem.id || isLoading}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            Cập nhật
+                          </Button>
+
+                          <Button
+                            variant={classItem.isActive ? 'destructive' : 'secondary'}
+                            size="sm"
+                            onClick={() => void handleToggleClassStatus(classItem)}
+                            disabled={processingClassId === classItem.id || isLoading}
+                          >
+                            <Power className="h-4 w-4" />
+                            {classItem.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -228,6 +336,14 @@ export default function AdminClassesPage() {
           )}
         </CardContent>
       </Card>
+
+      <UpdateClassModal
+        isOpen={isUpdateModalOpen}
+        onOpenChange={handleUpdateModalOpenChange}
+        classItem={selectedClass}
+        accessToken={accessToken}
+        onSuccess={handleClassUpdated}
+      />
 
       {/* Pagination */}
       {response?.pagination && (
