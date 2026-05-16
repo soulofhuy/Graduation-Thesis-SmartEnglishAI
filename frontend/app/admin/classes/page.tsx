@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Input } from '@/components/ui/input'
@@ -43,6 +43,9 @@ export default function AdminClassesPage() {
   const [hasPrevPage, setHasPrevPage] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [sortField, setSortField] = useState<'name' | 'students' | 'assignments' | 'pending'>('name')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [response, setResponse] = useState<GetAllClassesResponse | null>(null)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
@@ -99,12 +102,55 @@ export default function AdminClassesPage() {
     void fetchClasses(currentPage, pageSize, true)
   }, [isMounted, currentPage, fetchClasses, isHydrated, pageSize])
 
-  const filteredClasses = classes.filter((classItem) =>
-    classItem.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    classItem.classCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    classItem.teacher?.profile?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    classItem.teacher?.profile?.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const visibleClasses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    const filtered = classes.filter((classItem) => {
+      if (!query) return true
+
+      const name = classItem.name?.toLowerCase() ?? ''
+      const classCode = classItem.classCode?.toLowerCase() ?? ''
+      const teacherFirst = classItem.teacher?.profile?.firstName?.toLowerCase() ?? ''
+      const teacherLast = classItem.teacher?.profile?.lastName?.toLowerCase() ?? ''
+
+      return (
+        name.includes(query) ||
+        classCode.includes(query) ||
+        teacherFirst.includes(query) ||
+        teacherLast.includes(query)
+      )
+    })
+
+    const directionFactor = sortDirection === 'asc' ? 1 : -1
+
+    return [...filtered].sort((left, right) => {
+      let comparison = 0
+
+      if (sortField === 'students') {
+        const leftCount = (left.approvedStudentCount ?? (left as any).approvedStudentsCount ?? 0)
+        const rightCount = (right.approvedStudentCount ?? (right as any).approvedStudentsCount ?? 0)
+        comparison = leftCount - rightCount
+      } else if (sortField === 'assignments') {
+        comparison = (left.assignmentCount ?? 0) - (right.assignmentCount ?? 0)
+      } else if (sortField === 'pending') {
+        const leftPending = ((left as any).pendingRequestCount ?? 0)
+        const rightPending = ((right as any).pendingRequestCount ?? 0)
+        comparison = leftPending - rightPending
+      } else {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base',
+        })
+      }
+
+      if (comparison === 0) {
+        comparison = (left.name ?? '').localeCompare(right.name ?? '', language === 'vi' ? 'vi' : 'en', {
+          sensitivity: 'base',
+        })
+      }
+
+      return comparison * directionFactor
+    })
+  }, [classes, language, searchQuery, sortDirection, sortField])
 
   const getTeacherName = (classItem: Class) => {
     const firstName = classItem.teacher?.profile?.firstName || ''
@@ -223,17 +269,129 @@ export default function AdminClassesPage() {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+      <Card className="border-border/60 bg-card/90 shadow-sm backdrop-blur-sm">
+        <CardContent>
+          <div className="grid gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] md:justify-items-center">
+            <div className="w-full max-w-md mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.search.title}
+                </label>
+              </div>
 
-        <Input
-          placeholder="Tìm kiếm lớp học, mã lớp hoặc giáo viên..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  setSearchQuery(searchInput.trim())
+                }}
+                className="flex flex-col items-center gap-3 md:max-w-md"
+              >
+                <div className="relative w-full max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder={t.teacher.classes.searchOrSortOrFilter.search.searchFieldPlaceholder}
+                    className="h-11 w-full rounded-full pl-10 pr-4"
+                  />
+                </div>
+
+                <div className="flex justify-center gap-2">
+                  <Button type="submit" className="rounded-full px-5">
+                    {t.teacher.classes.searchOrSortOrFilter.search.searchButton}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full px-5"
+                    onClick={() => {
+                      setSearchInput('')
+                      setSearchQuery('')
+                    }}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.search.resetButton}
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="w-full max-w-3xl mx-auto">
+              <div className="flex justify-center mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.title}
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant={sortField === 'name' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortField('name')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldClassName}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={sortField === 'students' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortField('students')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldStudentCount}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={sortField === 'assignments' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortField('assignments')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldAssignmentCount}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={sortField === 'pending' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortField('pending')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.sortItems.fieldPendingRequestCount}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-3 mb-3">
+                <label className="inline-block border-2 border-black dark:border-white rounded-md px-3 py-1 text-sm font-bold">
+                  {t.teacher.classes.searchOrSortOrFilter.sort.order.title}
+                </label>
+              </div>
+
+              <div className="space-y-2 text-center">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'asc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('asc')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.order.asc}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={sortDirection === 'desc' ? 'default' : 'outline'}
+                    className="rounded-full px-3 py-1"
+                    onClick={() => setSortDirection('desc')}
+                  >
+                    {t.teacher.classes.searchOrSortOrFilter.sort.order.desc}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Classes Table */}
       <Card>
@@ -246,7 +404,7 @@ export default function AdminClassesPage() {
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : filteredClasses.length === 0 ? (
+          ) : visibleClasses.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               {searchQuery
                 ? 'Không tìm thấy lớp học phù hợp'
@@ -269,7 +427,7 @@ export default function AdminClassesPage() {
                 </TableHeader>
 
                 <TableBody>
-                  {filteredClasses.map((classItem) => (
+                  {visibleClasses.map((classItem: Class) => (
                     <TableRow key={classItem.id}>
                       <TableCell className="font-medium text-center">
                         {classItem.name}
