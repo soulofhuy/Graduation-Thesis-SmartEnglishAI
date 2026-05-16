@@ -220,6 +220,41 @@ export const translations = {
             fieldDateOfBirthPlaceholder: 'Enter user date of birth'
           }
         }
+      },
+      classManagement: {
+        title: 'Class management',
+        description: 'View and manage all classes in the system',
+        buttons: {
+          addNewClass: 'Add new class'
+        },
+        createClass: {
+          title: 'Create new class',
+          description: 'Enter the class information and assign a teacher',
+          fieldTeacher: 'Assigned teacher',
+          fieldTeacherPlaceholder: 'Select a teacher',
+          fieldTeacherEmpty: 'No teachers available'
+        },
+        tableView: {
+          title: 'List of classes',
+          fieldClassName: 'Class name',
+          fieldClassCode: 'Class code',
+          fieldTeacherName: 'Teacher name',
+          fieldStudentCount: 'Number of students',
+          fieldNumberOfAssignments: 'Number of assignments',
+          fieldStatus: 'Status',
+          fieldDatedCreated: 'Created date',
+          fieldActions: 'Actions'
+        },
+        updateClass: {
+          title: 'Update class information',
+          description: 'Update class information and status of ',
+          fieldClassName: 'Class name',
+          fieldClassNamePlaceholder: 'Example: Class 9CB1',
+          fieldClassDescription: 'Class description',
+          fieldClassDescriptionPlaceholder: 'Example: Class for 9CB students',
+          fieldClassCode: 'Class code',
+          fieldNeedsTeacherApproval: 'Needs teacher approval to join?'
+        }
       }
     },
 
@@ -1229,6 +1264,41 @@ export const translations = {
             fieldDateOfBirth: 'Ngày sinh',
             fieldDateOfBirthPlaceholder: 'Nhập ngày sinh của người dùng'
           }
+        }
+      },
+      classManagement: {
+        title: 'Quản lý lớp học',
+        description: 'Xem và quản lý tất cả lớp học trong hệ thống',
+        buttons: {
+          addNewClass: 'Thêm lớp học mới'
+        },
+        createClass: {
+          title: 'Tạo lớp học mới',
+          description: 'Nhập thông tin lớp học và chọn giáo viên phụ trách',
+          fieldTeacher: 'Giáo viên phụ trách',
+          fieldTeacherPlaceholder: 'Chọn giáo viên',
+          fieldTeacherEmpty: 'Không có giáo viên khả dụng'
+        },
+        tableView: {
+          title: 'Danh sách lớp học',
+          fieldClassName: 'Tên lớp học',
+          fieldClassCode: 'Mã lớp',
+          fieldTeacherName: 'Tên giáo viên',
+          fieldStudentCount: 'Số lượng học sinh',
+          fieldNumberOfAssignments: 'Số lượng bài tập',
+          fieldStatus: 'Trạng thái',
+          fieldDatedCreated: 'Ngày tạo',
+          fieldActions: 'Thao tác'
+        },
+        updateClass: {
+          title: 'Cập nhật thông tin lớp học',
+          description: 'Cập nhật thông tin và trạng thái của',
+          fieldClassName: 'Tên lớp học',
+          fieldClassNamePlaceholder: 'Ví dụ: Lớp 9CB1',
+          fieldClassDescription: 'Mô tả lớp học',
+          fieldClassDescriptionPlaceholder: 'Ví dụ: Lớp dành cho học sinh 9CB',
+          fieldClassCode: 'Mã lớp',
+          fieldNeedsTeacherApproval: 'Cần giáo viên phê duyệt để tham gia?'
         }
       }
     },

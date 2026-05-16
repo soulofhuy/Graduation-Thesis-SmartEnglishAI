@@ -6,7 +6,7 @@ const EN_STATUS_LABELS = {
 } as const;
 
 const VI_STATUS_LABELS = {
-  true: 'Đang hoạt động',
+  true: 'Hoạt động',
   false: 'Vô hiệu'
 } as const;
 

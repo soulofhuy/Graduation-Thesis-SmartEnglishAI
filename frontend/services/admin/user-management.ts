@@ -34,6 +34,29 @@ export type AdminUsersResponse = {
   pagination: AdminUsersPagination;
 };
 
+export async function getAllTeachers(token: string) {
+  const response = await fetch(`${getApiBaseUrl()}/admin/get-all-teachers`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const payload = (await response.json()) as ApiSuccess<AdminUser[]> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to fetch teachers';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Teachers response is missing data');
+  }
+
+  return payload.data;
+}
+
 export type UpdateAdminUserPasswordResponse = {
   id: string;
   email: string;
