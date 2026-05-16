@@ -24,6 +24,7 @@ import {
 } from '@/services/admin/class-management'
 import { dateFormat } from '@/lib/format'
 import { UpdateClassModal } from './_components/update-class-modal'
+import { CreateClassModal } from './_components/create-class-modal'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
@@ -45,6 +46,7 @@ export default function AdminClassesPage() {
   const [response, setResponse] = useState<GetAllClassesResponse | null>(null)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [processingClassId, setProcessingClassId] = useState<string | null>(null)
 
   const { accessToken, isHydrated } = useAuth()
@@ -116,6 +118,10 @@ export default function AdminClassesPage() {
     setIsUpdateModalOpen(true)
   }
 
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true)
+  }
+
   const handleNextPage = () => {
     if (!hasNextPage || isPaging) return
     setCurrentPage((prev) => prev + 1)
@@ -140,6 +146,10 @@ export default function AdminClassesPage() {
     }
   }
 
+  const handleCreateModalOpenChange = (open: boolean) => {
+    setIsCreateModalOpen(open)
+  }
+
   const handleClassUpdated = (updatedClass: Class) => {
     setClasses((prevClasses) =>
       prevClasses.map((classItem) =>
@@ -157,6 +167,15 @@ export default function AdminClassesPage() {
         }
         : prevResponse,
     )
+  }
+
+  const handleClassCreated = (_createdClass: Class) => {
+    if (currentPage !== 1) {
+      setCurrentPage(1)
+      return
+    }
+
+    void fetchClasses(1, pageSize, true)
   }
 
   const handleToggleClassStatus = async (classItem: Class) => {
@@ -198,7 +217,7 @@ export default function AdminClassesPage() {
             {t.admin.classManagement.description}
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleOpenCreateModal}>
           <Plus className="w-4 h-4" />
           {t.admin.classManagement.buttons.addNewClass}
         </Button>
@@ -361,6 +380,13 @@ export default function AdminClassesPage() {
         classItem={selectedClass}
         accessToken={accessToken}
         onSuccess={handleClassUpdated}
+      />
+
+      <CreateClassModal
+        isOpen={isCreateModalOpen}
+        onOpenChange={handleCreateModalOpenChange}
+        accessToken={accessToken}
+        onSuccess={handleClassCreated}
       />
     </div>
   )

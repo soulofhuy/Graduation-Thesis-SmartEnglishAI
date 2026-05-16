@@ -227,6 +227,13 @@ export const translations = {
         buttons: {
           addNewClass: 'Add new class'
         },
+        createClass: {
+          title: 'Create new class',
+          description: 'Enter the class information and assign a teacher',
+          fieldTeacher: 'Assigned teacher',
+          fieldTeacherPlaceholder: 'Select a teacher',
+          fieldTeacherEmpty: 'No teachers available'
+        },
         tableView: {
           title: 'List of classes',
           fieldClassName: 'Class name',
@@ -1264,6 +1271,13 @@ export const translations = {
         description: 'Xem và quản lý tất cả lớp học trong hệ thống',
         buttons: {
           addNewClass: 'Thêm lớp học mới'
+        },
+        createClass: {
+          title: 'Tạo lớp học mới',
+          description: 'Nhập thông tin lớp học và chọn giáo viên phụ trách',
+          fieldTeacher: 'Giáo viên phụ trách',
+          fieldTeacherPlaceholder: 'Chọn giáo viên',
+          fieldTeacherEmpty: 'Không có giáo viên khả dụng'
         },
         tableView: {
           title: 'Danh sách lớp học',

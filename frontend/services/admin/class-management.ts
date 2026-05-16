@@ -40,6 +40,13 @@ export interface GetAllClassesResponse {
   pagination: PaginationMetadata;
 }
 
+export type CreateAdminClassPayload = {
+  name: string;
+  description?: string | null;
+  teacherId: string;
+  needsTeacherApproval: boolean;
+};
+
 export const getAllClasses = async (
   token: string,
   page: number = 1,
@@ -69,6 +76,33 @@ export const getAllClasses = async (
   console.log('API Response for getAllClasses:', data);
   return data.data;
 };
+
+export async function createAdminClass(
+  token: string,
+  classData: CreateAdminClassPayload
+) {
+  const response = await fetch(`${getApiBaseUrl()}/admin/create-class`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(classData)
+  });
+
+  const payload = (await response.json()) as ApiSuccess<Class> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Failed to create class';
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error('Create class response is missing data');
+  }
+
+  return { class: payload.data, message: payload.message };
+}
 
 export async function generateClassCode(token: string) {
   const response = await fetch(`${getApiBaseUrl()}/classes/generate-code`, {

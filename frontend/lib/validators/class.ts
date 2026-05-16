@@ -8,6 +8,11 @@ export const createClassSchema = () =>
     needsTeacherApproval: z.boolean().default(false)
   });
 
+export const createAdminClassSchema = () =>
+  createClassSchema().extend({
+    teacherId: z.string().min(1, 'Vui lòng chọn giáo viên phụ trách')
+  });
+
 export const updateClassSchema = () =>
   z.object({
     name: z
@@ -20,6 +25,9 @@ export const updateClassSchema = () =>
   });
 
 export type ClassFormValues = z.infer<ReturnType<typeof createClassSchema>>;
+export type AdminClassFormValues = z.infer<
+  ReturnType<typeof createAdminClassSchema>
+>;
 export type UpdateClassFormValues = z.infer<
   ReturnType<typeof updateClassSchema>
 >;
