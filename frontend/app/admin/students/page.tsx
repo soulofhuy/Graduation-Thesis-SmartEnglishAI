@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle } from 'lucide-react'
+import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle, Eye } from 'lucide-react'
+import { StudentsInClassModal } from './_components/students-in-class-modal'
 import {
     Table,
     TableBody,
@@ -45,6 +46,9 @@ export default function AdminClassesPage() {
     const [sortField, setSortField] = useState<'name' | 'students' | 'assignments' | 'pending'>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const [response, setResponse] = useState<GetAllClassesResponse | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedClassId, setSelectedClassId] = useState<string>('')
+    const [selectedClassName, setSelectedClassName] = useState<string>('')
 
     const { accessToken, isHydrated } = useAuth()
 
@@ -169,6 +173,18 @@ export default function AdminClassesPage() {
         setPageSize(nextValue)
     }
 
+    const handleOpenStudentsModal = (classItem: Class) => {
+        setSelectedClassId(classItem.id)
+        setSelectedClassName(classItem.name)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setSelectedClassId('')
+        setSelectedClassName('')
+    }
+
     return (
         <div className="space-y-8 p-4 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -245,27 +261,15 @@ export default function AdminClassesPage() {
 
                                             <TableCell className="text-center">
                                                 <div className="flex justify-center gap-2">
-                                                    {/* <Button
+                                                    <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => handleOpenUpdateModal(classItem)}
-                                                        disabled={processingClassId === classItem.id || isLoading}
+                                                        onClick={() => handleOpenStudentsModal(classItem)}
+                                                        disabled={isLoading}
+                                                        title="Xem danh sách học sinh"
                                                     >
-                                                        <Pencil className="h-4 w-4" />
+                                                        <Eye className="h-4 w-4" />
                                                     </Button>
-
-                                                    <Button
-                                                        variant={classItem.isActive ? 'destructive' : 'secondary'}
-                                                        size="sm"
-                                                        onClick={() => void handleToggleClassStatus(classItem)}
-                                                        disabled={processingClassId === classItem.id || isLoading}
-                                                    >
-                                                        {classItem.isActive ? (
-                                                            <Ban className="w-4 h-4" />
-                                                        ) : (
-                                                            <CheckCircle className="w-4 h-4" />
-                                                        )}
-                                                    </Button> */}
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -307,6 +311,17 @@ export default function AdminClassesPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Students in Class Modal */}
+            {accessToken && (
+                <StudentsInClassModal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    classId={selectedClassId}
+                    className={selectedClassName}
+                    accessToken={accessToken}
+                />
+            )}
         </div>
     )
 }
