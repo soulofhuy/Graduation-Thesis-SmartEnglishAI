@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Plus, Loader2, Edit3, Power } from 'lucide-react'
+import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
   getAllClasses,
@@ -24,8 +24,14 @@ import {
 } from '@/services/admin/class-management'
 import { dateFormat } from '@/lib/format'
 import { UpdateClassModal } from './_components/update-class-modal'
+import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { getActiveStatusLabel } from '@/lib/language-mappers/active-deactive-mapper'
+import { getActiveStatusColor } from '@/lib/color-mappers/active-deactive-mapper'
 
 export default function AdminClassesPage() {
+  const { t, language } = useLanguage()
   const [isMounted, setIsMounted] = useState(false)
   const [classes, setClasses] = useState<Class[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -41,10 +47,8 @@ export default function AdminClassesPage() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
   const [processingClassId, setProcessingClassId] = useState<string | null>(null)
 
-  const { toast } = useToast()
   const { accessToken, isHydrated } = useAuth()
 
-  // Hydration guard
   useEffect(() => {
     setIsMounted(true)
   }, [])
@@ -78,16 +82,7 @@ export default function AdminClassesPage() {
         setHasNextPage(Boolean(data.pagination?.hasNextPage))
         setHasPrevPage(Boolean(data.pagination?.hasPreviousPage))
       } catch (error) {
-        console.error('[AdminClassesPage] Error fetching classes:', error)
-        toast({
-          title: 'Lỗi',
-          description:
-            error instanceof Error
-              ? error.message
-              : 'Không thể tải danh sách lớp học',
-          variant: 'destructive',
-        })
-
+        toast.error(getToastMessage('loadFailed', language), { className: TOAST_COLORS.error })
         setClasses([])
       } finally {
         setIsLoading(false)
@@ -97,7 +92,6 @@ export default function AdminClassesPage() {
     [accessToken, toast],
   )
 
-  // Fetch classes
   useEffect(() => {
     if (!isMounted || !isHydrated) return
     void fetchClasses(currentPage, pageSize, true)
@@ -115,22 +109,6 @@ export default function AdminClassesPage() {
     const lastName = classItem.teacher?.profile?.lastName || ''
 
     return `${firstName} ${lastName}`.trim() || classItem.teacher?.email || 'N/A'
-  }
-
-  const getStatusBadge = (classItem: Class) => {
-    if (!classItem.isActive) {
-      return (
-        <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
-          Không hoạt động
-        </span>
-      )
-    }
-
-    return (
-      <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-        Hoạt động
-      </span>
-    )
   }
 
   const handleOpenUpdateModal = (classItem: Class) => {
@@ -183,27 +161,14 @@ export default function AdminClassesPage() {
 
   const handleToggleClassStatus = async (classItem: Class) => {
     if (!accessToken) {
-      toast({
-        title: 'Lỗi',
-        description: 'Không tìm thấy token đăng nhập',
-        variant: 'destructive',
-      })
+      toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
       return
     }
 
     try {
       setProcessingClassId(classItem.id)
       const result = await toggleClassStatus(accessToken, classItem.id)
-
-      // Only update the `isActive` flag in local state to avoid
-      // overwriting other fields (teacher, counts, etc.) that the
-      // backend response may omit.
-      setClasses((prevClasses) =>
-        prevClasses.map((item) =>
-          item.id === result.class.id ? { ...item, isActive: result.class.isActive } : item,
-        ),
-      )
-
+      setClasses((prevClasses) => prevClasses.map((item) => item.id === result.class.id ? { ...item, isActive: result.class.isActive } : item))
       setResponse((prevResponse) =>
         prevResponse
           ? {
@@ -214,20 +179,9 @@ export default function AdminClassesPage() {
           }
           : prevResponse,
       )
-
-      toast({
-        title: 'Thành công',
-        description: result.message,
-      })
+      toast.success(getToastMessage('updateSuccess', language), { className: TOAST_COLORS.success })
     } catch (error) {
-      toast({
-        title: 'Lỗi',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Không thể thay đổi trạng thái lớp học',
-        variant: 'destructive',
-      })
+      toast.error(getToastMessage('updateFailed', language), { className: TOAST_COLORS.error })
     } finally {
       setProcessingClassId(null)
     }
@@ -235,21 +189,18 @@ export default function AdminClassesPage() {
 
   return (
     <div className="space-y-8 p-4 md:p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Quản lí lớp học
+            {t.admin.userManagement.title}
           </h1>
-
-          <p className="mt-1 text-muted-foreground">
-            Quản lý tất cả lớp học trong hệ thống
+          <p className="text-muted-foreground mt-1">
+            {t.admin.userManagement.description}
           </p>
         </div>
-
         <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Thêm lớp học
+          <Plus className="w-4 h-4" />
+          {t.admin.userManagement.buttons.addNewUser}
         </Button>
       </div>
 
@@ -267,18 +218,8 @@ export default function AdminClassesPage() {
 
       {/* Classes Table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="mb-3">
           <CardTitle>Danh sách lớp học</CardTitle>
-
-          <CardDescription>
-            Danh sách tất cả lớp học trong hệ thống
-
-            {response?.pagination && (
-              <span className="ml-2">
-                ({response.pagination.totalItems} lớp)
-              </span>
-            )}
-          </CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -297,35 +238,33 @@ export default function AdminClassesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Tên lớp</TableHead>
-                    <TableHead>Mã lớp</TableHead>
-                    <TableHead>Giáo viên</TableHead>
-                    <TableHead>Học sinh</TableHead>
-                    <TableHead>Bài tập</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead>Ngày tạo</TableHead>
-                    <TableHead className="text-right">
-                      Thao tác
-                    </TableHead>
+                    <TableHead className="text-center">Tên lớp</TableHead>
+                    <TableHead className="text-center">Mã lớp</TableHead>
+                    <TableHead className="text-center">Giáo viên</TableHead>
+                    <TableHead className="text-center">Học sinh</TableHead>
+                    <TableHead className="text-center">Bài tập</TableHead>
+                    <TableHead className="text-center">Trạng thái</TableHead>
+                    <TableHead className="text-center">Ngày tạo</TableHead>
+                    <TableHead className="text-center">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
 
                 <TableBody>
                   {filteredClasses.map((classItem) => (
                     <TableRow key={classItem.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-center">
                         {classItem.name}
                       </TableCell>
 
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground text-center">
                         {classItem.classCode}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="text-center">
                         {getTeacherName(classItem)}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="text-center">
                         <div className="text-sm">
                           <div>
                             ✓ {classItem.approvedStudentCount}
@@ -337,28 +276,29 @@ export default function AdminClassesPage() {
                         </div>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="text-center">
                         {classItem.assignmentCount}
                       </TableCell>
 
-                      <TableCell>
-                        {getStatusBadge(classItem)}
+                      <TableCell className="text-center">
+                        <span className={`rounded px-2 py-1 text-xs font-medium ${getActiveStatusColor(classItem.isActive)}`}>
+                          {getActiveStatusLabel(classItem.isActive, language)}
+                        </span>
                       </TableCell>
 
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground text-center">
                         {dateFormat(classItem.createdAt)}
                       </TableCell>
 
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleOpenUpdateModal(classItem)}
                             disabled={processingClassId === classItem.id || isLoading}
                           >
-                            <Edit3 className="h-4 w-4" />
-                            Cập nhật
+                            <Pencil className="h-4 w-4" />
                           </Button>
 
                           <Button
@@ -367,8 +307,11 @@ export default function AdminClassesPage() {
                             onClick={() => void handleToggleClassStatus(classItem)}
                             disabled={processingClassId === classItem.id || isLoading}
                           >
-                            <Power className="h-4 w-4" />
-                            {classItem.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                            {classItem.isActive ? (
+                              <Ban className="w-4 h-4" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>

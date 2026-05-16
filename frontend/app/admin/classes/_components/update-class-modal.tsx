@@ -7,6 +7,9 @@ import { Loader2, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Button } from '@/components/ui/button'
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { useLanguage } from '@/components/language-provider'
+import { getToastMessage } from '@/lib/toast/message'
 import {
     Form,
     FormControl,
@@ -47,39 +50,39 @@ export function UpdateClassModal({
 }: UpdateClassModalProps) {
     const [isUpdating, setIsUpdating] = React.useState(false)
     const [isGeneratingCode, setIsGeneratingCode] = React.useState(false)
+    const { language } = useLanguage()
 
     const form = useForm<UpdateClassFormValues>({
         resolver: zodResolver(classSchema),
         defaultValues: {
-            name: '',
-            description: '',
-            classCode: '',
-            needsTeacherApproval: false,
+            name: classItem?.name || '',
+            description: classItem?.description || '',
+            classCode: classItem?.classCode || '',
+            needsTeacherApproval: classItem?.needsTeacherApproval || false,
         },
     })
 
     React.useEffect(() => {
-        if (!isOpen || !classItem) {
+        if (classItem) {
+            form.reset({
+                name: classItem.name || '',
+                description: classItem.description || '',
+                classCode: classItem.classCode || '',
+                needsTeacherApproval: classItem.needsTeacherApproval || false,
+            })
+        } else {
             form.reset({
                 name: '',
                 description: '',
                 classCode: '',
                 needsTeacherApproval: false,
             })
-            return
         }
-
-        form.reset({
-            name: classItem.name || '',
-            description: classItem.description || '',
-            classCode: classItem.classCode || '',
-            needsTeacherApproval: classItem.needsTeacherApproval || false,
-        })
-    }, [classItem, form, isOpen])
+    }, [classItem, form])
 
     const handleGenerateClassCode = async () => {
         if (!accessToken) {
-            toast.error('Không tìm thấy token đăng nhập')
+            toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
             return
         }
 
@@ -90,8 +93,8 @@ export function UpdateClassModal({
                 form.setValue('classCode', result.classCode, { shouldDirty: true })
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Không thể tạo mã lớp mới'
-            toast.error(message)
+            const message = error instanceof Error ? error.message : getToastMessage('saveFailed', language)
+            toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setIsGeneratingCode(false)
         }
@@ -99,7 +102,7 @@ export function UpdateClassModal({
 
     const onSubmit = async (values: UpdateClassFormValues) => {
         if (!accessToken || !classItem?.id) {
-            toast.error('Không tìm thấy token đăng nhập')
+            toast.error(getToastMessage('invalidToken', language), { className: TOAST_COLORS.error })
             return
         }
 
@@ -113,11 +116,12 @@ export function UpdateClassModal({
             })
 
             onSuccess(result.class)
+            form.reset()
             onOpenChange(false)
-            toast.success(result.message || 'Cập nhật lớp học thành công')
+            toast.success(result.message || getToastMessage('updateSuccess', language), { className: TOAST_COLORS.success })
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Không thể cập nhật lớp học'
-            toast.error(message)
+            const message = error instanceof Error ? error.message : getToastMessage('saveFailed', language)
+            toast.error(message, { className: TOAST_COLORS.error })
         } finally {
             setIsUpdating(false)
         }
@@ -205,13 +209,8 @@ export function UpdateClassModal({
                         control={form.control}
                         name="needsTeacherApproval"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                    <FormLabel>Yêu cầu giáo viên duyệt học sinh</FormLabel>
-                                    <p className="text-sm text-muted-foreground">
-                                        Khi bật, học sinh cần được duyệt trước khi tham gia lớp.
-                                    </p>
-                                </div>
+                            <FormItem className="flex flex-row items-center space-x-2">
+                                <FormLabel>Yêu cầu giáo viên duyệt học sinh</FormLabel>
                                 <FormControl>
                                     <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
                                 </FormControl>
