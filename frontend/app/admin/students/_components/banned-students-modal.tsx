@@ -1,27 +1,30 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { RotateCcw, Search, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Button } from '@/components/ui/button'
-import { Search, Loader2, X } from 'lucide-react'
 import {
-    Table, TableBody, TableCell,
-    TableHead, TableHeader, TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table'
-import { toast } from 'sonner'
 import { useLanguage } from '@/components/language-provider'
 import { dateFormat } from '@/lib/format'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
-import { getAllStudentsByClassId } from '@/services/classes'
+import { getAllBannedStudentsByClassId, toggleBanStudentInClass } from '@/services/teacher/students'
 import { ClassMember } from '@/lib/types'
 import { getStudentBannedStatusColor } from '@/lib/color-mappers/student-banned-status-mapper'
 import { getStudentBannedStatusLabel } from '@/lib/language-mappers/student-banned-status-mapper'
-import { toggleBanStudentInClass } from '@/services/teacher/students'
 
-interface StudentsInClassModalProps {
+interface BannedStudentsModalProps {
     isOpen: boolean
     onClose: () => void
     classId: string
@@ -29,13 +32,13 @@ interface StudentsInClassModalProps {
     accessToken: string
 }
 
-export function StudentsInClassModal({
+export function BannedStudentsModal({
     isOpen,
     onClose,
     classId,
     className,
     accessToken,
-}: StudentsInClassModalProps) {
+}: BannedStudentsModalProps) {
     const { t, language } = useLanguage()
     const [students, setStudents] = useState<ClassMember[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -57,8 +60,7 @@ export function StudentsInClassModal({
         setIsLoading(true)
         setIsPaging(true)
         try {
-            const resp = await getAllStudentsByClassId(accessToken, classId, currentPage, pageSize)
-            console.log('Fetched students response:', resp)
+            const resp = await getAllBannedStudentsByClassId(accessToken, classId, currentPage, pageSize)
 
             setTotalItems((resp as any)?.pagination?.totalItems ?? 0)
             setHasNextPage(Boolean((resp as any)?.pagination?.hasNextPage))
@@ -75,22 +77,22 @@ export function StudentsInClassModal({
             setIsLoading(false)
             setIsPaging(false)
         }
-    }, [accessToken, classId, language, currentPage, pageSize])
+    }, [accessToken, classId, currentPage, language, pageSize])
 
     useEffect(() => {
         if (isOpen && classId) {
             void fetchStudents()
         }
-    }, [isOpen, classId, fetchStudents, currentPage, pageSize])
+    }, [isOpen, classId, fetchStudents])
 
     const handleNextPage = () => {
         if (!hasNextPage || isPaging) return
-        setCurrentPage((p) => p + 1)
+        setCurrentPage((page) => page + 1)
     }
 
     const handlePrevPage = () => {
         if (!hasPrevPage || isPaging) return
-        setCurrentPage((p) => Math.max(1, p - 1))
+        setCurrentPage((page) => Math.max(1, page - 1))
     }
 
     const handlePageSizeChange = (nextValue: number) => {
@@ -106,12 +108,7 @@ export function StudentsInClassModal({
 
         try {
             await toggleBanStudentInClass(accessToken, classId, student.student.id)
-            toast.success(
-                student.isBanned
-                    ? 'Đã mở khóa học sinh khỏi lớp học này'
-                    : 'Đã khóa học sinh khỏi lớp học này',
-                { className: TOAST_COLORS.success }
-            )
+            toast.success('Đã mở khóa học sinh khỏi lớp học này', { className: TOAST_COLORS.success })
             await fetchStudents()
         } catch (error) {
             toast.error(getToastMessage('updateFailed', language), { className: TOAST_COLORS.error })
@@ -126,7 +123,7 @@ export function StudentsInClassModal({
 
     const handleSort = (field: 'name' | 'email' | 'phone' | 'status' | 'date') => {
         if (sortField === field) {
-            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+            setSortDirection((direction) => (direction === 'asc' ? 'desc' : 'asc'))
         } else {
             setSortField(field)
             setSortDirection('asc')
@@ -139,20 +136,20 @@ export function StudentsInClassModal({
             onOpenChange={(open) => {
                 if (!open) onClose()
             }}
-            title={t.admin.classManagement?.tableView?.title || 'Danh sách học sinh'}
-            description={`${className ? `Lớp: ${className} • ` : ''}${students.length} học sinh trong lớp`}
+            title="Danh sách học sinh bị cấm"
+            description={`${className ? `Lớp: ${className} • ` : ''}${students.length} học sinh bị cấm`}
             contentClassName="w-[98vw] sm:max-w-4xl"
         >
             <div className="space-y-4">
                 <div className="flex gap-2">
-                    <div className="flex-1 relative">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Tìm kiếm theo tên, email, số điện thoại..."
                             value={searchInput}
-                            onChange={(e) => {
-                                setSearchInput(e.target.value)
-                                setSearchQuery(e.target.value)
+                            onChange={(event) => {
+                                setSearchInput(event.target.value)
+                                setSearchQuery(event.target.value)
                             }}
                             className="pl-9"
                         />
@@ -169,39 +166,22 @@ export function StudentsInClassModal({
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead
-                                            className="text-center cursor-pointer hover:bg-muted"
-                                            onClick={() => handleSort('name')}
-                                        >
+                                        <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('name')}>
                                             Họ tên {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
-                                        <TableHead
-                                            className="text-center cursor-pointer hover:bg-muted"
-                                            onClick={() => handleSort('email')}
-                                        >
+                                        <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('email')}>
                                             Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
-                                        <TableHead
-                                            className="text-center cursor-pointer hover:bg-muted"
-                                            onClick={() => handleSort('phone')}
-                                        >
+                                        <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('phone')}>
                                             Số điện thoại {sortField === 'phone' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
-                                        <TableHead
-                                            className="text-center cursor-pointer hover:bg-muted"
-                                            onClick={() => handleSort('status')}
-                                        >
+                                        <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('status')}>
                                             Trạng thái {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
-                                        <TableHead
-                                            className="text-center cursor-pointer hover:bg-muted"
-                                            onClick={() => handleSort('date')}
-                                        >
+                                        <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('date')}>
                                             Ngày tạo {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
-                                        <TableHead className="text-center">
-                                            Thao tác
-                                        </TableHead>
+                                        <TableHead className="text-center">Thao tác</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -210,7 +190,7 @@ export function StudentsInClassModal({
                                             <TableCell className="font-medium text-center">
                                                 {student.student?.profile?.firstName} {student.student?.profile?.lastName}
                                             </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground text-center">
+                                            <TableCell className="text-center text-sm text-muted-foreground">
                                                 {student.student?.email}
                                             </TableCell>
                                             <TableCell className="text-center">
@@ -221,20 +201,22 @@ export function StudentsInClassModal({
                                                     {getStudentBannedStatusLabel(student.isBanned, language)}
                                                 </span>
                                             </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground text-center">
+                                            <TableCell className="text-center text-sm text-muted-foreground">
                                                 {dateFormat(student.joinedAt || '')}
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Button
-                                                    variant={student.isBanned ? 'outline' : 'destructive'}
+                                                    variant="outline"
                                                     size="sm"
                                                     onClick={() => void handleToggleBanStudent(student)}
                                                     disabled={Boolean(updatingStudentIds[student.id])}
                                                 >
                                                     {updatingStudentIds[student.id] ? (
                                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    ) : null}
-                                                    {student.isBanned ? 'Mở khóa' : 'Khóa'}
+                                                    ) : (
+                                                        <RotateCcw className="mr-2 h-4 w-4" />
+                                                    )}
+                                                    Mở khóa
                                                 </Button>
                                             </TableCell>
                                         </TableRow>

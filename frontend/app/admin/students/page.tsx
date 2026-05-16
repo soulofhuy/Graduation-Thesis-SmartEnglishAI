@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle, Eye } from 'lucide-react'
 import { StudentsInClassModal } from './_components/students-in-class-modal'
+import { BannedStudentsModal } from './_components/banned-students-modal'
 import {
     Table,
     TableBody,
@@ -49,6 +50,7 @@ export default function AdminClassesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedClassId, setSelectedClassId] = useState<string>('')
     const [selectedClassName, setSelectedClassName] = useState<string>('')
+    const [isBannedModalOpen, setIsBannedModalOpen] = useState(false)
 
     const { accessToken, isHydrated } = useAuth()
 
@@ -179,8 +181,20 @@ export default function AdminClassesPage() {
         setIsModalOpen(true)
     }
 
+    const handleOpenBannedStudentsModal = (classItem: Class) => {
+        setSelectedClassId(classItem.id)
+        setSelectedClassName(classItem.name)
+        setIsBannedModalOpen(true)
+    }
+
     const handleCloseModal = () => {
         setIsModalOpen(false)
+        setSelectedClassId('')
+        setSelectedClassName('')
+    }
+
+    const handleCloseBannedModal = () => {
+        setIsBannedModalOpen(false)
         setSelectedClassId('')
         setSelectedClassName('')
     }
@@ -270,6 +284,16 @@ export default function AdminClassesPage() {
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
+
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleOpenBannedStudentsModal(classItem)}
+                                                        disabled={isLoading}
+                                                        title="Xem danh sách học sinh bị cấm"
+                                                    >
+                                                        <Ban className="h-4 w-4" />
+                                                    </Button>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -317,6 +341,16 @@ export default function AdminClassesPage() {
                 <StudentsInClassModal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
+                    classId={selectedClassId}
+                    className={selectedClassName}
+                    accessToken={accessToken}
+                />
+            )}
+
+            {accessToken && (
+                <BannedStudentsModal
+                    isOpen={isBannedModalOpen}
+                    onClose={handleCloseBannedModal}
                     classId={selectedClassId}
                     className={selectedClassName}
                     accessToken={accessToken}
