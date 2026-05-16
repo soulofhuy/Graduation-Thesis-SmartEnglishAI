@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageSizeSelect } from '@/components/page-size-select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Plus, Loader2, Edit3, Power } from 'lucide-react'
@@ -28,6 +29,11 @@ export default function AdminClassesPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [classes, setClasses] = useState<Class[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isPaging, setIsPaging] = useState(false)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [hasPrevPage, setHasPrevPage] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
   const [response, setResponse] = useState<GetAllClassesResponse | null>(null)
@@ -43,21 +49,34 @@ export default function AdminClassesPage() {
     setIsMounted(true)
   }, [])
 
-  // Fetch classes
-  useEffect(() => {
-    if (!isMounted || !isHydrated || !accessToken) return
+  const fetchClasses = useCallback(
+    async (page: number, limit: number, showSkeleton = false) => {
+      if (!accessToken) {
+        setClasses([])
+        setResponse(null)
+        setTotalItems(0)
+        setHasNextPage(false)
+        setHasPrevPage(false)
+        setIsLoading(false)
+        setIsPaging(false)
+        return
+      }
 
-    console.log('[AdminClassesPage] Fetching classes for page:', currentPage)
-    const fetchClasses = async () => {
-      try {
+      if (showSkeleton) {
         setIsLoading(true)
+      } else {
+        setIsPaging(true)
+      }
 
-        const data = await getAllClasses(accessToken, currentPage, 10)
-
-        console.log('[AdminClassesPage] Fetched classes:', data)
+      try {
+        const data = await getAllClasses(accessToken, page, limit)
 
         setResponse(data)
-        setClasses(data.data)
+        setClasses(data.data ?? [])
+        setCurrentPage(data.pagination?.currentPage ?? page)
+        setTotalItems(data.pagination?.totalItems ?? 0)
+        setHasNextPage(Boolean(data.pagination?.hasNextPage))
+        setHasPrevPage(Boolean(data.pagination?.hasPreviousPage))
       } catch (error) {
         console.error('[AdminClassesPage] Error fetching classes:', error)
         toast({
@@ -72,11 +91,17 @@ export default function AdminClassesPage() {
         setClasses([])
       } finally {
         setIsLoading(false)
+        setIsPaging(false)
       }
-    }
+    },
+    [accessToken, toast],
+  )
 
-    fetchClasses()
-  }, [isMounted, currentPage, toast, accessToken, isHydrated])
+  // Fetch classes
+  useEffect(() => {
+    if (!isMounted || !isHydrated) return
+    void fetchClasses(currentPage, pageSize, true)
+  }, [isMounted, currentPage, fetchClasses, isHydrated, pageSize])
 
   const filteredClasses = classes.filter((classItem) =>
     classItem.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -111,6 +136,22 @@ export default function AdminClassesPage() {
   const handleOpenUpdateModal = (classItem: Class) => {
     setSelectedClass(classItem)
     setIsUpdateModalOpen(true)
+  }
+
+  const handleNextPage = () => {
+    if (!hasNextPage || isPaging) return
+    setCurrentPage((prev) => prev + 1)
+  }
+
+  const handlePrevPage = () => {
+    if (!hasPrevPage || isPaging) return
+    setCurrentPage((prev) => Math.max(1, prev - 1))
+  }
+
+  const handlePageSizeChange = (nextValue: number) => {
+    if (nextValue === pageSize) return
+    setCurrentPage(1)
+    setPageSize(nextValue)
   }
 
   const handleUpdateModalOpenChange = (open: boolean) => {
@@ -154,9 +195,12 @@ export default function AdminClassesPage() {
       setProcessingClassId(classItem.id)
       const result = await toggleClassStatus(accessToken, classItem.id)
 
+      // Only update the `isActive` flag in local state to avoid
+      // overwriting other fields (teacher, counts, etc.) that the
+      // backend response may omit.
       setClasses((prevClasses) =>
         prevClasses.map((item) =>
-          item.id === result.class.id ? result.class : item,
+          item.id === result.class.id ? { ...item, isActive: result.class.isActive } : item,
         ),
       )
 
@@ -165,7 +209,7 @@ export default function AdminClassesPage() {
           ? {
             ...prevResponse,
             data: prevResponse.data.map((item) =>
-              item.id === result.class.id ? result.class : item,
+              item.id === result.class.id ? { ...item, isActive: result.class.isActive } : item,
             ),
           }
           : prevResponse,
@@ -334,6 +378,37 @@ export default function AdminClassesPage() {
               </Table>
             </div>
           )}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+            <p className="text-sm text-muted-foreground">
+              Tổng {totalItems} lớp
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasPrevPage || isPaging}
+                onClick={handlePrevPage}
+              >
+                Trước
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasNextPage || isPaging}
+                onClick={handleNextPage}
+              >
+                Tiếp
+              </Button>
+            </div>
+
+            <PageSizeSelect
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              options={[10, 20, 25, 50]}
+              disabled={isPaging}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -344,35 +419,6 @@ export default function AdminClassesPage() {
         accessToken={accessToken}
         onSuccess={handleClassUpdated}
       />
-
-      {/* Pagination */}
-      {response?.pagination && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Trang {response.pagination.currentPage} / {response.pagination.totalPages}
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={!response.pagination.hasPreviousPage || isLoading}
-            >
-              Trước
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => p + 1)}
-              disabled={!response.pagination.hasNextPage || isLoading}
-            >
-              Tiếp
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
