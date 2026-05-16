@@ -50,7 +50,7 @@ export function UpdateClassModal({
 }: UpdateClassModalProps) {
     const [isUpdating, setIsUpdating] = React.useState(false)
     const [isGeneratingCode, setIsGeneratingCode] = React.useState(false)
-    const { language } = useLanguage()
+    const { t, language } = useLanguage()
 
     const form = useForm<UpdateClassFormValues>({
         resolver: zodResolver(classSchema),
@@ -131,16 +131,16 @@ export function UpdateClassModal({
         <ModalWrapper
             isOpen={isOpen}
             onOpenChange={onOpenChange}
-            title="Cập nhật lớp học"
-            description={classItem ? `Chỉnh sửa thông tin của ${classItem.name}` : 'Chỉnh sửa thông tin lớp học'}
+            title={t.admin.classManagement.updateClass.title}
+            description={classItem ? `${t.admin.classManagement.updateClass.description} ${classItem.name}` : t.admin.classManagement.updateClass.description}
             contentClassName="max-w-2xl"
             footer={
                 <div className="flex gap-3">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
-                        Hủy
+                        {t.common.cancel}
                     </Button>
                     <Button onClick={form.handleSubmit(onSubmit)} disabled={isUpdating || !classItem}>
-                        {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
+                        {isUpdating ? t.common.isSaving : t.common.save}
                     </Button>
                 </div>
             }
@@ -152,9 +152,9 @@ export function UpdateClassModal({
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Tên lớp</FormLabel>
+                                <FormLabel>{t.admin.classManagement.updateClass.fieldClassName}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Nhập tên lớp" {...field} />
+                                    <Input placeholder={t.admin.classManagement.updateClass.fieldClassNamePlaceholder} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -166,9 +166,9 @@ export function UpdateClassModal({
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Mô tả</FormLabel>
+                                <FormLabel>{t.admin.classManagement.updateClass.fieldClassDescription}</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Mô tả ngắn về lớp học" {...field} />
+                                    <Textarea placeholder={t.admin.classManagement.updateClass.fieldClassDescriptionPlaceholder} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -180,7 +180,7 @@ export function UpdateClassModal({
                         name="classCode"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Mã lớp</FormLabel>
+                                <FormLabel>{t.admin.classManagement.updateClass.fieldClassCode}</FormLabel>
                                 <div className="flex gap-2">
                                     <FormControl className="flex-1">
                                         <Input readOnly {...field} />
@@ -210,7 +210,7 @@ export function UpdateClassModal({
                         name="needsTeacherApproval"
                         render={({ field }) => (
                             <FormItem className="flex flex-row items-center space-x-2">
-                                <FormLabel>Yêu cầu giáo viên duyệt học sinh</FormLabel>
+                                <FormLabel>{t.admin.classManagement.updateClass.fieldNeedsTeacherApproval}</FormLabel>
                                 <FormControl>
                                     <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
                                 </FormControl>

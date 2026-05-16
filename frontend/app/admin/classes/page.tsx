@@ -192,15 +192,15 @@ export default function AdminClassesPage() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            {t.admin.userManagement.title}
+            {t.admin.classManagement.title}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {t.admin.userManagement.description}
+            {t.admin.classManagement.description}
           </p>
         </div>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
-          {t.admin.userManagement.buttons.addNewUser}
+          {t.admin.classManagement.buttons.addNewClass}
         </Button>
       </div>
 
@@ -219,7 +219,7 @@ export default function AdminClassesPage() {
       {/* Classes Table */}
       <Card>
         <CardHeader className="mb-3">
-          <CardTitle>Danh sách lớp học</CardTitle>
+          <CardTitle>{t.admin.classManagement.tableView.title}</CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -238,14 +238,14 @@ export default function AdminClassesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">Tên lớp</TableHead>
-                    <TableHead className="text-center">Mã lớp</TableHead>
-                    <TableHead className="text-center">Giáo viên</TableHead>
-                    <TableHead className="text-center">Học sinh</TableHead>
-                    <TableHead className="text-center">Bài tập</TableHead>
-                    <TableHead className="text-center">Trạng thái</TableHead>
-                    <TableHead className="text-center">Ngày tạo</TableHead>
-                    <TableHead className="text-center">Thao tác</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldClassName}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldClassCode}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldTeacherName}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldStudentCount}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldNumberOfAssignments}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldStatus}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldDatedCreated}</TableHead>
+                    <TableHead className="text-center">{t.admin.classManagement.tableView.fieldActions}</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -323,7 +323,7 @@ export default function AdminClassesPage() {
           )}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
             <p className="text-sm text-muted-foreground">
-              Tổng {totalItems} lớp
+              {t.common.pagination.total} {totalItems}
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -332,7 +332,7 @@ export default function AdminClassesPage() {
                 disabled={!hasPrevPage || isPaging}
                 onClick={handlePrevPage}
               >
-                Trước
+                {t.common.pagination.previous}
               </Button>
 
               <Button
@@ -341,7 +341,7 @@ export default function AdminClassesPage() {
                 disabled={!hasNextPage || isPaging}
                 onClick={handleNextPage}
               >
-                Tiếp
+                {t.common.pagination.next}
               </Button>
             </div>
 
