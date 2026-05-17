@@ -19,6 +19,7 @@ import GetAllClassesRouter from './src/routes/admin/classManagement/getAllClasse
 import CreateNewClassesRouter from './src/routes/admin/classManagement/createNewClassesRoutes';
 import AIGenerateAssignmentRouter from './src/routes/ai/generate-assignment/aiGenerateAssignmentRoutes';
 import AIChatSessionRouter from './src/routes/ai/chat-session/aiChatSessionRoutes';
+import GetAllAssignmentsRouter from './src/routes/admin/assignmentManagement/getAllAssignmentRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/api', AdminOverviewRouter);
 app.use('/api', UserManagementRouter);
 app.use('/api', GetAllClassesRouter);
 app.use('/api', CreateNewClassesRouter);
+app.use('/api', GetAllAssignmentsRouter);
 app.use('/api', AIGenerateAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
 const PORT = process.env.PORT || 5000;
