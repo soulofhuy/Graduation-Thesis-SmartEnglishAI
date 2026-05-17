@@ -5,7 +5,7 @@ import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Button } from '@/components/ui/button'
-import { Search, Loader2 } from 'lucide-react'
+import { Search, Loader2, LockOpen, Lock } from 'lucide-react'
 import {
     Table, TableBody, TableCell,
     TableHead, TableHeader, TableRow,
@@ -280,14 +280,17 @@ export function StudentsInClassModal({
                                             <TableCell className="text-center">
                                                 <Button
                                                     variant={student.isBanned ? 'outline' : 'destructive'}
-                                                    size="sm"
+                                                    size="icon"
                                                     onClick={() => void handleToggleBanStudent(student)}
                                                     disabled={Boolean(updatingStudentIds[student.id])}
                                                 >
                                                     {updatingStudentIds[student.id] ? (
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    ) : null}
-                                                    {student.isBanned ? 'Mở khóa' : 'Khóa'}
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : student.isBanned ? (
+                                                        <LockOpen className="h-4 w-4" />
+                                                    ) : (
+                                                        <Lock className="h-4 w-4" />
+                                                    )}
                                                 </Button>
                                             </TableCell>
                                         </TableRow>

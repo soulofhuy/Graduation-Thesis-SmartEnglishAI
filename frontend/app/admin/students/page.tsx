@@ -1,11 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageSizeSelect } from '@/components/page-size-select'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle, Eye, UserPlus } from 'lucide-react'
+import { Loader2, UserX, Clock, User } from 'lucide-react'
 import { StudentsInClassModal } from './_components/students-in-class-modal'
 import { BannedStudentsModal } from './_components/banned-students-modal'
 import { PendingRequestsModal } from './_components/pending-requests-modal'
@@ -21,7 +20,6 @@ import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import {
     getAllClasses,
-    toggleClassStatus,
     type Class,
     type GetAllClassesResponse,
 } from '@/services/admin/class-management'
@@ -305,16 +303,7 @@ export default function AdminClassesPage() {
                                                         onClick={() => handleOpenStudentsModal(classItem)}
                                                         disabled={isLoading}
                                                     >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => handleOpenPendingRequestsModal(classItem)}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <UserPlus className="h-4 w-4" />
+                                                        <User className="h-4 w-4" />
                                                     </Button>
 
                                                     <Button
@@ -323,7 +312,16 @@ export default function AdminClassesPage() {
                                                         onClick={() => handleOpenBannedStudentsModal(classItem)}
                                                         disabled={isLoading}
                                                     >
-                                                        <Ban className="h-4 w-4" />
+                                                        <UserX className="h-4 w-4" />
+                                                    </Button>
+
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleOpenPendingRequestsModal(classItem)}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <Clock className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </TableCell>

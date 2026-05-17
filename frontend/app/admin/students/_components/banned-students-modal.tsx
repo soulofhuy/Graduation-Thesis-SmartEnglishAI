@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { RotateCcw, Search, Loader2 } from 'lucide-react'
+import { RotateCcw, Search, Loader2, LockOpen, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
@@ -282,15 +282,17 @@ export function BannedStudentsModal({
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Button
-                                                    variant="outline"
-                                                    size="sm"
+                                                    variant={student.isBanned ? 'outline' : 'destructive'}
+                                                    size="icon"
                                                     onClick={() => void handleToggleBanStudent(student)}
                                                     disabled={Boolean(updatingStudentIds[student.id])}
                                                 >
                                                     {updatingStudentIds[student.id] ? (
                                                         <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : student.isBanned ? (
+                                                        <LockOpen className="h-4 w-4" />
                                                     ) : (
-                                                        <RotateCcw className="h-4 w-4" />
+                                                        <Lock className="h-4 w-4" />
                                                     )}
                                                 </Button>
                                             </TableCell>
