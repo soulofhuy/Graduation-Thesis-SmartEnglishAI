@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Eye } from 'lucide-react'
+import { PencilLine, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
@@ -10,7 +11,6 @@ import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import { Search } from 'lucide-react'
 import { dateFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
@@ -410,12 +410,10 @@ export default function AdminQuizzesPage() {
 
                       <TableCell>
                         <div className="flex justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled
-                          >
-                            <Eye className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link href={`/teacher/quizzes/edit/${assignment.id}`}>
+                              <PencilLine className="h-4 w-4" />
+                            </Link>
                           </Button>
                         </div>
                       </TableCell>
