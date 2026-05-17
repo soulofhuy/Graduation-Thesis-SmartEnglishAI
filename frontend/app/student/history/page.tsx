@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
-import { PageSizeSelect } from '@/components/page-size-select'
+import { TablePagination } from '@/components/pagination'
 import { dateTimeFormat } from '@/lib/format'
 import {
   getAssignmentsHistoryOfStudent,
@@ -363,39 +363,19 @@ export default function StudentHistoryPage() {
                 </Table>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                <p className="text-sm text-muted-foreground">
-                  {t.common.pagination.total} {totalItems}
-                </p>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === 1 || isLoadingHistory}
-                    onClick={handlePrevPage}
-                  >
-                    {t.common.pagination.previous}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === totalPages || isLoadingHistory}
-                    onClick={handleNextPage}
-                  >
-                    {t.common.pagination.next}
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <PageSizeSelect
-                    value={pageSize}
-                    onChange={handlePageSizeChange}
-                    options={[10, 20, 25, 50]}
-                    disabled={isLoadingHistory}
-                  />
-                </div>
-              </div>
+              <TablePagination
+                totalItems={totalItems}
+                hasPrevPage={currentPage > 1}
+                hasNextPage={currentPage < totalPages}
+                isPaging={isLoadingHistory}
+                pageSize={pageSize}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+                onPageSizeChange={handlePageSizeChange}
+                totalLabel={t.common.pagination.total}
+                previousLabel={t.common.pagination.previous}
+                nextLabel={t.common.pagination.next}
+              />
             </div>
           )}
         </CardContent>
