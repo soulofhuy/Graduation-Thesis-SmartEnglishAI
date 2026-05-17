@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { PageSizeSelect } from '@/components/page-size-select'
+import { TablePagination } from '@/components/pagination'
 import {
     Table,
     TableBody,
@@ -200,40 +200,19 @@ export function StudentListTable({
                 </Table>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                <p className="text-sm text-muted-foreground">
-                    {t.common.pagination.total} {totalItems}
-                </p>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={!hasPrevPage || isPaging}
-                        onClick={onPrevPage}
-                    >
-                        {t.common.pagination.previous}
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={!hasNextPage || isPaging}
-                        onClick={onNextPage}
-                    >
-                        {t.common.pagination.next}
-                    </Button>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <div>
-                        <PageSizeSelect
-                            value={pageSize}
-                            onChange={onPageSizeChange}
-                            options={[10, 20, 25, 50]}
-                            disabled={isPaging}
-                        />
-                    </div>
-                </div>
-            </div>
+            <TablePagination
+                totalItems={totalItems}
+                hasPrevPage={hasPrevPage}
+                hasNextPage={hasNextPage}
+                isPaging={isPaging}
+                pageSize={pageSize}
+                onPrevPage={onPrevPage}
+                onNextPage={onNextPage}
+                onPageSizeChange={onPageSizeChange}
+                totalLabel={t.common.pagination.total}
+                previousLabel={t.common.pagination.previous}
+                nextLabel={t.common.pagination.next}
+            />
 
             <AlertDialog open={Boolean(memberToRemove)} onOpenChange={(open) => !open && setMemberToRemove(null)}>
                 <AlertDialogContent>

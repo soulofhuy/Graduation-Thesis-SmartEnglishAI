@@ -9,7 +9,7 @@ import { BookOpen, Check, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { getAssignmentsAssignedToMyClasses } from '@/services/student/assignments'
-import { PageSizeSelect } from '@/components/page-size-select'
+import { TablePagination } from '@/components/pagination'
 import {
   Table,
   TableBody,
@@ -396,39 +396,19 @@ export default function StudentQuizPage() {
                 </TableBody>
               </Table>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                <p className="text-sm text-muted-foreground">
-                  {t.common.pagination.total} {totalItems}
-                </p>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === 1 || isLoadingAssignments}
-                    onClick={handlePrevPage}
-                  >
-                    {t.common.pagination.previous}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === totalPages || isLoadingAssignments}
-                    onClick={handleNextPage}
-                  >
-                    {t.common.pagination.next}
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <PageSizeSelect
-                    value={pageSize}
-                    onChange={handlePageSizeChange}
-                    options={[10, 20, 25, 50]}
-                    disabled={isLoadingAssignments}
-                  />
-                </div>
-              </div>
+              <TablePagination
+                totalItems={totalItems}
+                hasPrevPage={currentPage > 1}
+                hasNextPage={currentPage < totalPages}
+                isPaging={isLoadingAssignments}
+                pageSize={pageSize}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+                onPageSizeChange={handlePageSizeChange}
+                totalLabel={t.common.pagination.total}
+                previousLabel={t.common.pagination.previous}
+                nextLabel={t.common.pagination.next}
+              />
             </div>
           ) : (
             <div className="text-center py-12">

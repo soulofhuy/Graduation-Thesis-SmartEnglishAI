@@ -294,6 +294,45 @@ export const translations = {
             fieldActions: 'Actions'
           }
         }
+      },
+      assignmentManagement: {
+        title: 'Assignment management',
+        description: 'View and manage all assignments in the system',
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search',
+            searchFieldPlaceholder: 'Search by title, teacher, or class',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldTitle: 'Title',
+              fieldTeacherName: 'Teacher name',
+              fieldClassName: 'Class name',
+              fieldAssignmentStatus: 'Status',
+              fieldCreatedDate: 'Created date'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
+        },
+        tableView: {
+          title: 'List of assignments',
+          fieldTitle: 'Title',
+          fieldClassName: 'Class name',
+          fieldTeacherName: 'Teacher name',
+          fieldCreatedDate: 'Created date',
+          fieldAssignmentStatus: 'Status',
+          fieldActions: 'Actions'
+        },
+        deleteAssignment: {
+          title: 'Delete assignment'
+        }
       }
     },
 
@@ -1073,6 +1112,8 @@ export const translations = {
       success: 'Success',
       viewPort: 'Choose your viewport',
       close: 'Close',
+      deleteConfirmation:
+        'This action cannot be undone. Are you sure you want to continue?',
       pagination: {
         label: 'Number of results / page',
         previous: 'Previous page',
@@ -1377,6 +1418,45 @@ export const translations = {
             fieldBannedDate: 'Ngày bị cấm',
             fieldActions: 'Hành động'
           }
+        }
+      },
+      assignmentManagement: {
+        title: 'Quản lý bài tập',
+        description: 'Xem và quản lý tất cả bài tập trong hệ thống',
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm',
+            searchFieldPlaceholder: 'Tìm theo tiêu đề, giáo viên hoặc lớp',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldTitle: 'Tiêu đề',
+              fieldTeacherName: 'Tên giáo viên',
+              fieldClassName: 'Tên lớp',
+              fieldAssignmentStatus: 'Trạng thái',
+              fieldCreatedDate: 'Ngày tạo'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
+        },
+        tableView: {
+          title: 'Danh sách bài tập',
+          fieldTitle: 'Tiêu đề',
+          fieldClassName: 'Tên lớp học',
+          fieldTeacherName: 'Giáo viên',
+          fieldCreatedDate: 'Ngày tạo',
+          fieldAssignmentStatus: 'Trạng thái',
+          fieldActions: 'Thao tác'
+        },
+        deleteAssignment: {
+          title: 'Xóa bài tập'
         }
       }
     },
@@ -2168,6 +2248,8 @@ export const translations = {
         next: 'Trang sau',
         total: 'Tổng số lượng:'
       },
+      deleteConfirmation:
+        'Hành động xóa này không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?',
       yes: 'Có',
       no: 'Không',
       confirm: 'Xác nhận',

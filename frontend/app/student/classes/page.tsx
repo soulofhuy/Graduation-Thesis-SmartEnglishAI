@@ -26,7 +26,7 @@ import { ClassMembersModal } from './_components/class-members-modal'
 import { BannedClassesModal } from './_components/banned-classes-modal'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { Input } from '@/components/ui/input'
-import { PageSizeSelect } from '@/components/page-size-select'
+import { TablePagination } from '@/components/pagination'
 
 const SORT_FIELDS = ['name', 'students', 'teacher', 'classCode'] as const
 const SORT_DIRECTIONS = ['asc', 'desc'] as const
@@ -515,39 +515,19 @@ export default function StudentClassesPage() {
               </Table>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-              <p className="text-sm text-muted-foreground">
-                {t.common.pagination.total} {totalItems}
-              </p>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!hasPrevPage || isPaging}
-                  onClick={handlePrevPage}
-                >
-                  {t.common.pagination.previous}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!hasNextPage || isPaging}
-                  onClick={handleNextPage}
-                >
-                  {t.common.pagination.next}
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <PageSizeSelect
-                  value={pageSize}
-                  onChange={handlePageSizeChange}
-                  options={[10, 20, 25, 50]}
-                  disabled={isPaging}
-                />
-              </div>
-            </div>
+            <TablePagination
+              totalItems={totalItems}
+              hasPrevPage={hasPrevPage}
+              hasNextPage={hasNextPage}
+              isPaging={isPaging}
+              pageSize={pageSize}
+              onPrevPage={handlePrevPage}
+              onNextPage={handleNextPage}
+              onPageSizeChange={handlePageSizeChange}
+              totalLabel={t.common.pagination.total}
+              previousLabel={t.common.pagination.previous}
+              nextLabel={t.common.pagination.next}
+            />
           </div>
         </CardContent>
       </Card>

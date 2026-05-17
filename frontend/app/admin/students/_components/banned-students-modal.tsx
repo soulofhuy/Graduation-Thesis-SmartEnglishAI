@@ -5,7 +5,6 @@ import { RotateCcw, Search, Loader2, LockOpen, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { ModalWrapper } from '@/components/modal-wrapper'
 import { Input } from '@/components/ui/input'
-import { PageSizeSelect } from '@/components/page-size-select'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -24,6 +23,7 @@ import { getAllBannedStudentsByClassId, toggleBanStudentInClass } from '@/servic
 import { ClassMember } from '@/lib/types'
 import { getStudentBannedStatusColor } from '@/lib/color-mappers/student-banned-status-mapper'
 import { getStudentBannedStatusLabel } from '@/lib/language-mappers/student-banned-status-mapper'
+import { TablePagination } from '@/components/pagination'
 
 type StudentSortValue = 'name-asc' | 'name-desc' | 'email-asc' | 'email-desc' | 'phone-asc' | 'phone-desc' | 'status-asc' | 'status-desc' | 'date-asc' | 'date-desc'
 
@@ -302,23 +302,19 @@ export function BannedStudentsModal({
                             </Table>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                            <p className="text-sm text-muted-foreground">
-                                {t.common.pagination.total} {totalItems}
-                            </p>
-
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" disabled={!hasPrevPage || isPaging} onClick={handlePrevPage}>
-                                    {t.common.pagination.previous}
-                                </Button>
-
-                                <Button variant="outline" size="sm" disabled={!hasNextPage || isPaging} onClick={handleNextPage}>
-                                    {t.common.pagination.next}
-                                </Button>
-                            </div>
-
-                            <PageSizeSelect value={pageSize} onChange={handlePageSizeChange} options={[10, 20, 25, 50]} disabled={isPaging} />
-                        </div>
+                        <TablePagination
+                            totalItems={totalItems}
+                            hasPrevPage={hasPrevPage}
+                            hasNextPage={hasNextPage}
+                            isPaging={isPaging}
+                            pageSize={pageSize}
+                            onPrevPage={handlePrevPage}
+                            onNextPage={handleNextPage}
+                            onPageSizeChange={handlePageSizeChange}
+                            totalLabel={t.common.pagination.total}
+                            previousLabel={t.common.pagination.previous}
+                            nextLabel={t.common.pagination.next}
+                        />
                     </>
                 )}
             </div>
