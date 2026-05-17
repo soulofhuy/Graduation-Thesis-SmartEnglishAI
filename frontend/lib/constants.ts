@@ -117,6 +117,11 @@ export const adminNavItems = [
     icon: Users
   },
   {
+    label: 'Quản lí học viên',
+    href: '/admin/students',
+    icon: UserRound
+  },
+  {
     label: 'Quản lí lớp học',
     href: '/admin/classes',
     icon: GraduationCap
