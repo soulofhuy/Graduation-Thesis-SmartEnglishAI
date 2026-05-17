@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PageSizeSelect } from '@/components/page-size-select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle } from 'lucide-react'
@@ -28,6 +27,7 @@ import { CreateClassModal } from './_components/create-class-modal'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
+import { TablePagination } from '@/components/pagination'
 import { getActiveStatusLabel } from '@/lib/language-mappers/active-deactive-mapper'
 import { getActiveStatusColor } from '@/lib/color-mappers/active-deactive-mapper'
 
@@ -498,37 +498,19 @@ export default function AdminClassesPage() {
               </Table>
             </div>
           )}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-            <p className="text-sm text-muted-foreground">
-              {t.common.pagination.total} {totalItems}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasPrevPage || isPaging}
-                onClick={handlePrevPage}
-              >
-                {t.common.pagination.previous}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasNextPage || isPaging}
-                onClick={handleNextPage}
-              >
-                {t.common.pagination.next}
-              </Button>
-            </div>
-
-            <PageSizeSelect
-              value={pageSize}
-              onChange={handlePageSizeChange}
-              options={[10, 20, 25, 50]}
-              disabled={isPaging}
-            />
-          </div>
+          <TablePagination
+            totalItems={totalItems}
+            hasPrevPage={hasPrevPage}
+            hasNextPage={hasNextPage}
+            isPaging={isPaging}
+            pageSize={pageSize}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onPageSizeChange={handlePageSizeChange}
+            totalLabel={t.common.pagination.total}
+            previousLabel={t.common.pagination.previous}
+            nextLabel={t.common.pagination.next}
+          />
         </CardContent>
       </Card>
 

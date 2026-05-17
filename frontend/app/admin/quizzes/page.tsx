@@ -15,13 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { PageSizeSelect } from '@/components/page-size-select'
 import { dateFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllAssignments, type AdminAssignmentRow } from '@/services/admin/assignments'
 import { Badge } from '@/components/ui/badge'
+import { TablePagination } from '@/components/pagination'
 
 interface TableAssignment {
   id: string
@@ -170,41 +170,6 @@ export default function AdminQuizzesPage() {
   const activeCount = assignments.filter((assignment) => assignment.isActive).length
   const inactiveCount = assignments.length - activeCount
   const visibleCount = filteredAssignments.length
-
-  // const renderPagination = () => (
-  //   <div className="mt-5 flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-  //     <div className="space-y-1 text-sm text-muted-foreground">
-  //       <p>
-  //         Đang hiển thị {visibleCount} / {assignments.length} bài tập trên trang hiện tại
-  //       </p>
-  //       <p>Tổng số bài tập trong hệ thống: {totalItems}</p>
-  //     </div>
-  //     <div className="flex flex-wrap items-center gap-2">
-  //       <Button
-  //         variant="outline"
-  //         size="sm"
-  //         disabled={!hasPrevPage || isPaging}
-  //         onClick={handlePrevPage}
-  //       >
-  //         {t.common.pagination.previous}
-  //       </Button>
-  //       <Button
-  //         variant="outline"
-  //         size="sm"
-  //         disabled={!hasNextPage || isPaging}
-  //         onClick={handleNextPage}
-  //       >
-  //         {t.common.pagination.next}
-  //       </Button>
-  //       <PageSizeSelect
-  //         value={pageSize}
-  //         onChange={handlePageSizeChange}
-  //         options={[10, 20, 25, 50]}
-  //         disabled={isPaging}
-  //       />
-  //     </div>
-  //   </div>
-  // )
 
   return (
     <div className="space-y-8 p-4 md:p-8">
@@ -394,38 +359,19 @@ export default function AdminQuizzesPage() {
             </Table>
           </div>
 
-          {/* {renderPagination()} */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-            <p className="text-sm text-muted-foreground">
-              {t.common.pagination.total} {totalItems}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasPrevPage || isPaging}
-                onClick={handlePrevPage}
-              >
-                {t.common.pagination.previous}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasNextPage || isPaging}
-                onClick={handleNextPage}
-              >
-                {t.common.pagination.next}
-              </Button>
-            </div>
-
-            <PageSizeSelect
-              value={pageSize}
-              onChange={handlePageSizeChange}
-              options={[10, 20, 25, 50]}
-              disabled={isPaging}
-            />
-          </div>
+          <TablePagination
+            totalItems={totalItems}
+            hasPrevPage={hasPrevPage}
+            hasNextPage={hasNextPage}
+            isPaging={isPaging}
+            pageSize={pageSize}
+            onPrevPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onPageSizeChange={handlePageSizeChange}
+            totalLabel={t.common.pagination.total}
+            previousLabel={t.common.pagination.previous}
+            nextLabel={t.common.pagination.next}
+          />
         </CardContent>
       </Card>
     </div>
