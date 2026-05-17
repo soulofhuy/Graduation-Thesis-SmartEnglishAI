@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle, Eye } from 'lucide-react'
+import { Search, Plus, Loader2, Edit3, Power, Pencil, Ban, CheckCircle, Eye, UserPlus } from 'lucide-react'
 import { StudentsInClassModal } from './_components/students-in-class-modal'
 import { BannedStudentsModal } from './_components/banned-students-modal'
+import { PendingRequestsModal } from './_components/pending-requests-modal'
 import {
     Table,
     TableBody,
@@ -32,6 +33,13 @@ import { getActiveStatusLabel } from '@/lib/language-mappers/active-deactive-map
 import { getActiveStatusColor } from '@/lib/color-mappers/active-deactive-mapper'
 
 export default function AdminClassesPage() {
+    type PendingRequestsClass = {
+        id: string
+        teacherId: string
+        name?: string | null
+        classCode?: string | null
+    }
+
     const { t, language } = useLanguage()
     const [isMounted, setIsMounted] = useState(false)
     const [classes, setClasses] = useState<Class[]>([])
@@ -51,6 +59,8 @@ export default function AdminClassesPage() {
     const [selectedClassId, setSelectedClassId] = useState<string>('')
     const [selectedClassName, setSelectedClassName] = useState<string>('')
     const [isBannedModalOpen, setIsBannedModalOpen] = useState(false)
+    const [isPendingModalOpen, setIsPendingModalOpen] = useState(false)
+    const [selectedPendingClass, setSelectedPendingClass] = useState<PendingRequestsClass | null>(null)
 
     const { accessToken, isHydrated } = useAuth()
 
@@ -187,6 +197,16 @@ export default function AdminClassesPage() {
         setIsBannedModalOpen(true)
     }
 
+    const handleOpenPendingRequestsModal = (classItem: Class) => {
+        setSelectedPendingClass({
+            id: classItem.id,
+            teacherId: classItem.teacherId,
+            name: classItem.name,
+            classCode: classItem.classCode,
+        })
+        setIsPendingModalOpen(true)
+    }
+
     const handleCloseModal = () => {
         setIsModalOpen(false)
         setSelectedClassId('')
@@ -197,6 +217,11 @@ export default function AdminClassesPage() {
         setIsBannedModalOpen(false)
         setSelectedClassId('')
         setSelectedClassName('')
+    }
+
+    const handleClosePendingModal = () => {
+        setIsPendingModalOpen(false)
+        setSelectedPendingClass(null)
     }
 
     return (
@@ -286,6 +311,15 @@ export default function AdminClassesPage() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
+                                                        onClick={() => handleOpenPendingRequestsModal(classItem)}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <UserPlus className="h-4 w-4" />
+                                                    </Button>
+
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
                                                         onClick={() => handleOpenBannedStudentsModal(classItem)}
                                                         disabled={isLoading}
                                                     >
@@ -350,6 +384,20 @@ export default function AdminClassesPage() {
                     classId={selectedClassId}
                     className={selectedClassName}
                     accessToken={accessToken}
+                />
+            )}
+
+            {accessToken && (
+                <PendingRequestsModal
+                    isOpen={isPendingModalOpen}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            handleClosePendingModal()
+                        }
+                    }}
+                    classItem={selectedPendingClass as any}
+                    accessToken={accessToken}
+                    onActionSuccess={() => void fetchClasses(currentPage, pageSize, false)}
                 />
             )}
         </div>
