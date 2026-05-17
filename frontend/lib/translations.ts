@@ -298,6 +298,29 @@ export const translations = {
       assignmentManagement: {
         title: 'Assignment management',
         description: 'View and manage all assignments in the system',
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Search',
+            searchFieldPlaceholder: 'Search by title, teacher, or class',
+            searchButton: 'Search',
+            resetButton: 'Reset'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sort by',
+              fieldTitle: 'Title',
+              fieldTeacherName: 'Teacher name',
+              fieldClassName: 'Class name',
+              fieldAssignmentStatus: 'Status',
+              fieldCreatedDate: 'Created date'
+            },
+            order: {
+              title: 'Order',
+              asc: 'Ascending',
+              desc: 'Descending'
+            }
+          }
+        },
         tableView: {
           title: 'List of assignments',
           fieldTitle: 'Title',
@@ -1395,6 +1418,29 @@ export const translations = {
       assignmentManagement: {
         title: 'Quản lý bài tập',
         description: 'Xem và quản lý tất cả bài tập trong hệ thống',
+        searchOrSortOrFilter: {
+          search: {
+            title: 'Tìm kiếm',
+            searchFieldPlaceholder: 'Tìm theo tiêu đề, giáo viên hoặc lớp',
+            searchButton: 'Tìm kiếm',
+            resetButton: 'Đặt lại'
+          },
+          sort: {
+            sortItems: {
+              title: 'Sắp xếp theo',
+              fieldTitle: 'Tiêu đề',
+              fieldTeacherName: 'Tên giáo viên',
+              fieldClassName: 'Tên lớp',
+              fieldAssignmentStatus: 'Trạng thái',
+              fieldCreatedDate: 'Ngày tạo'
+            },
+            order: {
+              title: 'Thứ tự',
+              asc: 'Tăng dần',
+              desc: 'Giảm dần'
+            }
+          }
+        },
         tableView: {
           title: 'Danh sách bài tập',
           fieldTitle: 'Tiêu đề',
