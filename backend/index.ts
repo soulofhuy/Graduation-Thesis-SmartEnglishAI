@@ -20,6 +20,7 @@ import CreateNewClassesRouter from './src/routes/admin/classManagement/createNew
 import AIGenerateAssignmentRouter from './src/routes/ai/generate-assignment/aiGenerateAssignmentRoutes';
 import AIChatSessionRouter from './src/routes/ai/chat-session/aiChatSessionRoutes';
 import GetAllAssignmentsRouter from './src/routes/admin/assignmentManagement/getAllAssignmentRoutes';
+import DeleteAssignmentRouter from './src/routes/admin/assignmentManagement/deleteAssignmentRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api', UserManagementRouter);
 app.use('/api', GetAllClassesRouter);
 app.use('/api', CreateNewClassesRouter);
 app.use('/api', GetAllAssignmentsRouter);
+app.use('/api', DeleteAssignmentRouter);
 app.use('/api', AIGenerateAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
 const PORT = process.env.PORT || 5000;

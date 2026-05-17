@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { PencilLine, Search } from 'lucide-react'
+import { PencilLine, Search, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
@@ -15,8 +15,8 @@ import { dateFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
-import { getAllAssignments, type AdminAssignmentRow } from '@/services/admin/assignments'
-import { Badge } from '@/components/ui/badge'
+import { deleteAssignment, getAllAssignments, type AdminAssignmentRow } from '@/services/admin/assignments'
+import ConfirmDialog from '@/components/confirm-dialog'
 import { TablePagination } from '@/components/pagination'
 import { getAssignmentActiveStatusLabel } from '@/lib/language-mappers/assignment-active-status-mapper'
 import { getAssignmentActiveStatusColor } from '@/lib/color-mappers/assignment-active-status-mapper'
@@ -74,6 +74,7 @@ export default function AdminQuizzesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<'title' | 'teacherName' | 'className' | 'status' | 'createdDate'>('title')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [assignmentToDelete, setAssignmentToDelete] = useState<TableAssignment | null>(null)
 
   const fetchAssignments = useCallback(
     async (page: number, limit: number, showSkeleton = false) => {
@@ -200,6 +201,24 @@ export default function AdminQuizzesPage() {
   const clearSearch = () => {
     setSearchInput('')
     setSearchQuery('')
+  }
+
+  const handleDeleteAssignment = async () => {
+    if (!accessToken || !assignmentToDelete) {
+      return
+    }
+
+    try {
+      const response = await deleteAssignment(accessToken, assignmentToDelete.id)
+      setAssignments((prev) => prev.filter((assignment) => assignment.id !== assignmentToDelete.id))
+      setTotalItems((prev) => Math.max(0, prev - 1))
+      toast.success(response.message, { className: TOAST_COLORS.success })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : getToastMessage('deleteFailed', language)
+      toast.error(message, { className: TOAST_COLORS.error })
+    } finally {
+      setAssignmentToDelete(null)
+    }
   }
 
   return (
@@ -415,6 +434,13 @@ export default function AdminQuizzesPage() {
                               <PencilLine className="h-4 w-4" />
                             </Link>
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setAssignmentToDelete(assignment)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -439,6 +465,16 @@ export default function AdminQuizzesPage() {
           />
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={Boolean(assignmentToDelete)}
+        onOpenChange={(open) => !open && setAssignmentToDelete(null)}
+        title={t.admin.assignmentManagement.deleteAssignment.title}
+        description={t.common.deleteConfirmation}
+        onConfirm={() => void handleDeleteAssignment()}
+        confirmLabel={t.common.yes}
+        cancelLabel={t.common.no}
+      />
     </div>
   )
 }

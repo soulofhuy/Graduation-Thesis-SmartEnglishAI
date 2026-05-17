@@ -70,3 +70,25 @@ export async function getAllAssignments(
 
   return payload.data;
 }
+
+export async function deleteAssignment(token: string, assignmentId: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/admin/delete-assignment/${encodeURIComponent(assignmentId)}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<unknown> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message = payload?.message || 'Delete assignment failed';
+    throw new Error(message);
+  }
+
+  return { message: payload.message };
+}

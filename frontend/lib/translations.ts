@@ -329,6 +329,9 @@ export const translations = {
           fieldCreatedDate: 'Created date',
           fieldAssignmentStatus: 'Status',
           fieldActions: 'Actions'
+        },
+        deleteAssignment: {
+          title: 'Delete assignment'
         }
       }
     },
@@ -1109,6 +1112,8 @@ export const translations = {
       success: 'Success',
       viewPort: 'Choose your viewport',
       close: 'Close',
+      deleteConfirmation:
+        'This action cannot be undone. Are you sure you want to continue?',
       pagination: {
         label: 'Number of results / page',
         previous: 'Previous page',
@@ -1449,6 +1454,9 @@ export const translations = {
           fieldCreatedDate: 'Ngày tạo',
           fieldAssignmentStatus: 'Trạng thái',
           fieldActions: 'Thao tác'
+        },
+        deleteAssignment: {
+          title: 'Xóa bài tập'
         }
       }
     },
@@ -2240,6 +2248,8 @@ export const translations = {
         next: 'Trang sau',
         total: 'Tổng số lượng:'
       },
+      deleteConfirmation:
+        'Hành động xóa này không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?',
       yes: 'Có',
       no: 'Không',
       confirm: 'Xác nhận',
