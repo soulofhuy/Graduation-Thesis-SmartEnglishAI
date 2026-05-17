@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Search, BookOpen, Users, CheckCircle2, XCircle, Eye } from 'lucide-react'
+import { Search, Eye, BookOpen, Users, CheckCircle2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
@@ -17,11 +17,11 @@ import {
 } from '@/components/ui/table'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { dateFormat } from '@/lib/format'
-import type { Assignment } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllAssignments, type AdminAssignmentRow } from '@/services/admin/assignments'
+import { Badge } from '@/components/ui/badge'
 
 interface TableAssignment {
   id: string
@@ -169,173 +169,263 @@ export default function AdminQuizzesPage() {
 
   const activeCount = assignments.filter((assignment) => assignment.isActive).length
   const inactiveCount = assignments.length - activeCount
+  const visibleCount = filteredAssignments.length
 
-  const renderPagination = () => (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-      <p className="text-sm text-muted-foreground">
-        {t.common.pagination.total} {totalItems}
-      </p>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={!hasPrevPage || isPaging}
-          onClick={handlePrevPage}
-        >
-          {t.common.pagination.previous}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={!hasNextPage || isPaging}
-          onClick={handleNextPage}
-        >
-          {t.common.pagination.next}
-        </Button>
-      </div>
-      <PageSizeSelect
-        value={pageSize}
-        onChange={handlePageSizeChange}
-        options={[10, 20, 25, 50]}
-        disabled={isPaging}
-      />
-    </div>
-  )
+  // const renderPagination = () => (
+  //   <div className="mt-5 flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+  //     <div className="space-y-1 text-sm text-muted-foreground">
+  //       <p>
+  //         Đang hiển thị {visibleCount} / {assignments.length} bài tập trên trang hiện tại
+  //       </p>
+  //       <p>Tổng số bài tập trong hệ thống: {totalItems}</p>
+  //     </div>
+  //     <div className="flex flex-wrap items-center gap-2">
+  //       <Button
+  //         variant="outline"
+  //         size="sm"
+  //         disabled={!hasPrevPage || isPaging}
+  //         onClick={handlePrevPage}
+  //       >
+  //         {t.common.pagination.previous}
+  //       </Button>
+  //       <Button
+  //         variant="outline"
+  //         size="sm"
+  //         disabled={!hasNextPage || isPaging}
+  //         onClick={handleNextPage}
+  //       >
+  //         {t.common.pagination.next}
+  //       </Button>
+  //       <PageSizeSelect
+  //         value={pageSize}
+  //         onChange={handlePageSizeChange}
+  //         options={[10, 20, 25, 50]}
+  //         disabled={isPaging}
+  //       />
+  //     </div>
+  //   </div>
+  // )
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-gradient-to-br from-background via-background to-muted/10">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div className="space-y-8 p-4 md:p-8">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-foreground">Quản lí bài tập</h1>
-          <p className="text-muted-foreground">
-            Danh sách toàn bộ bài tập của tất cả giáo viên trong hệ thống.
+          <h1 className="text-3xl font-bold text-foreground">Quản lý bài tập</h1>
+          <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
+            Danh sách toàn bộ bài tập trong hệ thống, xem nhanh giáo viên, lớp học, số task và trạng thái.
           </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Card className="border-dashed bg-background/80">
-            <CardContent className="flex items-center gap-3 p-4">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-xs text-muted-foreground">Tổng bài tập</p>
-                <p className="text-lg font-semibold">{totalItems}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-dashed bg-background/80">
-            <CardContent className="flex items-center gap-3 p-4">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              <div>
-                <p className="text-xs text-muted-foreground">Đang hoạt động</p>
-                <p className="text-lg font-semibold">{activeCount}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-dashed bg-background/80">
-            <CardContent className="flex items-center gap-3 p-4">
-              <XCircle className="h-5 w-5 text-rose-600" />
-              <div>
-                <p className="text-xs text-muted-foreground">Tạm ngưng</p>
-                <p className="text-lg font-semibold">{inactiveCount}</p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
-      <Card className="overflow-hidden border-border/60 shadow-sm">
-        <CardHeader className="space-y-4">
-          <div>
-            <CardTitle>Danh sách bài tập</CardTitle>
-            <CardDescription>
-              Quản lý tập trung toàn bộ bài tập, tác giả, lớp học và trạng thái.
-            </CardDescription>
-          </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-full bg-primary/10 p-3 text-primary">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Tổng bài tập</p>
+              <p className="text-2xl font-bold">{totalItems}</p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    handleSearchSubmit()
-                  }
-                }}
-                placeholder="Tìm kiếm theo tiêu đề, giáo viên, lớp học..."
-                className="pl-9"
-              />
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-full bg-emerald-500/10 p-3 text-emerald-600">
+              <CheckCircle2 className="h-5 w-5" />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleSearchSubmit}>
-                Tìm kiếm
-              </Button>
-              <Button variant="ghost" onClick={clearSearch}>
-                Xóa lọc
-              </Button>
+            <div>
+              <p className="text-sm text-muted-foreground">Đang hoạt động</p>
+              <p className="text-2xl font-bold">{activeCount}</p>
             </div>
-          </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-full bg-rose-500/10 p-3 text-rose-600">
+              <XCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Tạm ngưng</p>
+              <p className="text-2xl font-bold">{inactiveCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-full bg-sky-500/10 p-3 text-sky-600">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Đang hiển thị</p>
+              <p className="text-2xl font-bold">{visibleCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="mb-3">
+          <CardTitle>Danh sách bài tập</CardTitle>
+          <CardDescription>
+            Giao diện quản lý tập trung, dễ scan, dễ lọc và không bị nhồi thông tin vào một cột.
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <div className="overflow-x-auto rounded-lg border">
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tiêu đề</TableHead>
-                  <TableHead>Giáo viên</TableHead>
-                  <TableHead>Lớp học</TableHead>
-                  <TableHead>Số task</TableHead>
-                  <TableHead>Lượt làm</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày tạo</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
+                  <TableHead className="text-center min-w-[220px]">Tiêu đề</TableHead>
+                  <TableHead className="text-center min-w-[220px]">Giáo viên</TableHead>
+                  <TableHead className="text-center min-w-[220px]">Lớp học</TableHead>
+                  <TableHead className="text-center">Task</TableHead>
+                  <TableHead className="text-center">Lượt làm</TableHead>
+                  <TableHead className="text-center">Trạng thái</TableHead>
+                  <TableHead className="text-center min-w-[140px]">Ngày tạo</TableHead>
+                  <TableHead className="text-center">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
-                {filteredAssignments.map((assignment) => (
-                  <TableRow key={assignment.id}>
-                    <TableCell className="max-w-xs font-medium truncate">
-                      {assignment.title}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="font-medium">{assignment.creatorName}</p>
-                        <p className="text-xs text-muted-foreground">{assignment.creatorEmail}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="font-medium">{assignment.className}</p>
-                        <p className="text-xs text-muted-foreground">{assignment.classCode}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{assignment.taskCount}</TableCell>
-                    <TableCell>{assignment.attemptCount}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${assignment.isActive
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
-                            : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300'
-                          }`}
-                      >
-                        {assignment.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}
-                      </span>
-                    </TableCell>
-                    <TableCell>{assignment.createdDate}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" disabled>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Chi tiết
-                      </Button>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      className="py-10 text-center text-muted-foreground"
+                    >
+                      Đang tải dữ liệu...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredAssignments.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      className="py-10 text-center text-muted-foreground"
+                    >
+                      Không tìm thấy bài tập phù hợp.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredAssignments.map((assignment) => (
+                    <TableRow key={assignment.id} className="text-center">
+                      <TableCell className="font-medium max-w-[260px]">
+                        <div className="space-y-1">
+                          <p className="truncate font-medium">
+                            {assignment.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            ID: {assignment.id}
+                          </p>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-medium">
+                            {assignment.creatorName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {assignment.creatorEmail || 'Chưa có email'}
+                          </p>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-medium">
+                            {assignment.className}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {assignment.classCode}
+                          </p>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {assignment.taskCount}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge variant="outline">
+                          {assignment.attemptCount}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge
+                          variant={
+                            assignment.isActive
+                              ? 'default'
+                              : 'destructive'
+                          }
+                        >
+                          {assignment.isActive
+                            ? 'Đang hoạt động'
+                            : 'Tạm ngưng'}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="text-sm text-muted-foreground">
+                        {assignment.createdDate}
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
 
-          {renderPagination()}
+          {/* {renderPagination()} */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+            <p className="text-sm text-muted-foreground">
+              {t.common.pagination.total} {totalItems}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasPrevPage || isPaging}
+                onClick={handlePrevPage}
+              >
+                {t.common.pagination.previous}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasNextPage || isPaging}
+                onClick={handleNextPage}
+              >
+                {t.common.pagination.next}
+              </Button>
+            </div>
+
+            <PageSizeSelect
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              options={[10, 20, 25, 50]}
+              disabled={isPaging}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
