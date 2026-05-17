@@ -17,7 +17,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { PageSizeSelect } from '@/components/page-size-select'
+import { TablePagination } from '@/components/pagination'
 import { dateTimeFormat } from '@/lib/format'
 import type { ClassMember } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
@@ -123,37 +123,19 @@ export function DeactivatedStudentsModal({
                 )}
 
                 {!isLoading && members.length > 0 ? (
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                        <p className="text-sm text-muted-foreground">
-                            {t.common.pagination.total} {totalItems}
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={!hasPrevPage || isPaging}
-                                onClick={onPrevPage}
-                            >
-                                {t.common.pagination.previous}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={!hasNextPage || isPaging}
-                                onClick={onNextPage}
-                            >
-                                {t.common.pagination.next}
-                            </Button>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <PageSizeSelect
-                                value={pageSize}
-                                onChange={onPageSizeChange}
-                                options={[10, 20, 25, 50]}
-                                disabled={isPaging}
-                            />
-                        </div>
-                    </div>
+                    <TablePagination
+                        totalItems={totalItems}
+                        hasPrevPage={hasPrevPage}
+                        hasNextPage={hasNextPage}
+                        isPaging={isPaging}
+                        pageSize={pageSize}
+                        onPrevPage={onPrevPage}
+                        onNextPage={onNextPage}
+                        onPageSizeChange={onPageSizeChange}
+                        totalLabel={t.common.pagination.total}
+                        previousLabel={t.common.pagination.previous}
+                        nextLabel={t.common.pagination.next}
+                    />
                 ) : null}
             </DialogContent>
         </Dialog>
