@@ -108,10 +108,10 @@ export function BannedStudentsModal({
 
         try {
             await toggleBanStudentInClass(accessToken, classId, student.student.id)
-            toast.success('Đã mở khóa học sinh khỏi lớp học này', { className: TOAST_COLORS.success })
+            toast.success(getToastMessage('removeStudentSuccess', language), { className: TOAST_COLORS.success })
             await fetchStudents()
         } catch (error) {
-            toast.error(getToastMessage('updateFailed', language), { className: TOAST_COLORS.error })
+            toast.error(getToastMessage('removeStudentFailed', language), { className: TOAST_COLORS.error })
         } finally {
             setUpdatingStudentIds((prev) => {
                 const next = { ...prev }
@@ -133,11 +133,9 @@ export function BannedStudentsModal({
     return (
         <ModalWrapper
             isOpen={isOpen}
-            onOpenChange={(open) => {
-                if (!open) onClose()
-            }}
-            title="Danh sách học sinh bị cấm"
-            description={`${className ? `Lớp: ${className} • ` : ''}${students.length} học sinh bị cấm`}
+            onOpenChange={(open) => { if (!open) onClose() }}
+            title={t.admin.studentManagement.bannedStudentList.title}
+            description={t.admin.studentManagement.bannedStudentList.description + className}
             contentClassName="w-[98vw] sm:max-w-4xl"
         >
             <div className="space-y-4">
@@ -167,21 +165,28 @@ export function BannedStudentsModal({
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('name')}>
-                                            Họ tên {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.bannedStudentList.tableView.fieldFullName}
+                                            {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('email')}>
-                                            Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.bannedStudentList.tableView.fieldEmail}
+                                            {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('phone')}>
-                                            Số điện thoại {sortField === 'phone' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.bannedStudentList.tableView.fieldPhoneNumber}
+                                            {sortField === 'phone' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('status')}>
-                                            Trạng thái {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.bannedStudentList.tableView.fieldBannedStatus}
+                                            {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead className="text-center cursor-pointer hover:bg-muted" onClick={() => handleSort('date')}>
-                                            Ngày tạo {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.bannedStudentList.tableView.fieldBannedDate}
+                                            {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
-                                        <TableHead className="text-center">Thao tác</TableHead>
+                                        <TableHead className="text-center">
+                                            {t.admin.studentManagement.bannedStudentList.tableView.fieldActions}
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -202,7 +207,7 @@ export function BannedStudentsModal({
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-center text-sm text-muted-foreground">
-                                                {dateFormat(student.joinedAt || '')}
+                                                {dateFormat(student.bannedAt || '')}
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Button
@@ -212,11 +217,10 @@ export function BannedStudentsModal({
                                                     disabled={Boolean(updatingStudentIds[student.id])}
                                                 >
                                                     {updatingStudentIds[student.id] ? (
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
                                                     ) : (
-                                                        <RotateCcw className="mr-2 h-4 w-4" />
+                                                        <RotateCcw className="h-4 w-4" />
                                                     )}
-                                                    Mở khóa
                                                 </Button>
                                             </TableCell>
                                         </TableRow>

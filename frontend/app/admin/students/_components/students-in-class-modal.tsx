@@ -58,7 +58,6 @@ export function StudentsInClassModal({
         setIsPaging(true)
         try {
             const resp = await getAllStudentsByClassId(accessToken, classId, currentPage, pageSize)
-            console.log('Fetched students response:', resp)
 
             setTotalItems((resp as any)?.pagination?.totalItems ?? 0)
             setHasNextPage(Boolean((resp as any)?.pagination?.hasNextPage))
@@ -106,15 +105,10 @@ export function StudentsInClassModal({
 
         try {
             await toggleBanStudentInClass(accessToken, classId, student.student.id)
-            toast.success(
-                student.isBanned
-                    ? 'Đã mở khóa học sinh khỏi lớp học này'
-                    : 'Đã khóa học sinh khỏi lớp học này',
-                { className: TOAST_COLORS.success }
-            )
+            toast.success(getToastMessage('removeStudentSuccess', language), { className: TOAST_COLORS.success })
             await fetchStudents()
         } catch (error) {
-            toast.error(getToastMessage('updateFailed', language), { className: TOAST_COLORS.error })
+            toast.error(getToastMessage('removeStudentFailed', language), { className: TOAST_COLORS.error })
         } finally {
             setUpdatingStudentIds((prev) => {
                 const next = { ...prev }
@@ -139,8 +133,8 @@ export function StudentsInClassModal({
             onOpenChange={(open) => {
                 if (!open) onClose()
             }}
-            title={t.admin.classManagement?.tableView?.title || 'Danh sách học sinh'}
-            description={`${className ? `Lớp: ${className} • ` : ''}${students.length} học sinh trong lớp`}
+            title={t.admin.studentManagement.activeStudentList.title}
+            description={t.admin.studentManagement.activeStudentList.description + className}
             contentClassName="w-[98vw] sm:max-w-4xl"
         >
             <div className="space-y-4">
@@ -173,34 +167,39 @@ export function StudentsInClassModal({
                                             className="text-center cursor-pointer hover:bg-muted"
                                             onClick={() => handleSort('name')}
                                         >
-                                            Họ tên {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.activeStudentList.tableView.fieldFullName}
+                                            {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead
                                             className="text-center cursor-pointer hover:bg-muted"
                                             onClick={() => handleSort('email')}
                                         >
-                                            Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.activeStudentList.tableView.fieldEmail}
+                                            {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead
                                             className="text-center cursor-pointer hover:bg-muted"
                                             onClick={() => handleSort('phone')}
                                         >
-                                            Số điện thoại {sortField === 'phone' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.activeStudentList.tableView.fieldPhoneNumber}
+                                            {sortField === 'phone' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead
                                             className="text-center cursor-pointer hover:bg-muted"
                                             onClick={() => handleSort('status')}
                                         >
-                                            Trạng thái {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.activeStudentList.tableView.fieldBannedStatus}
+                                            {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead
                                             className="text-center cursor-pointer hover:bg-muted"
                                             onClick={() => handleSort('date')}
                                         >
-                                            Ngày tạo {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                            {t.admin.studentManagement.activeStudentList.tableView.fieldJoinedDate}
+                                            {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
                                         </TableHead>
                                         <TableHead className="text-center">
-                                            Thao tác
+                                            {t.admin.studentManagement.activeStudentList.tableView.fieldActions}
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>

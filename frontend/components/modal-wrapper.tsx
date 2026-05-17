@@ -40,7 +40,7 @@ export function ModalWrapper({
           <DialogTitle className="bg-gradient-text text-2xl">{title}</DialogTitle>
           {description && <DialogDescription className="text-muted-foreground">{description}</DialogDescription>}
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-1">
           {children}
         </div>
         {footer && <DialogFooter>{footer}</DialogFooter>}

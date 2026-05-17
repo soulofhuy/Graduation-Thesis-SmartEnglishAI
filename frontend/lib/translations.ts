@@ -255,6 +255,45 @@ export const translations = {
           fieldClassCode: 'Class code',
           fieldNeedsTeacherApproval: 'Needs teacher approval to join?'
         }
+      },
+      studentManagement: {
+        title: 'Student management',
+        description:
+          'View and manage all students in the system based on their classes',
+        tableView: {
+          title: 'List of classes',
+          fieldClassName: 'Class name',
+          fieldClassCode: 'Class code',
+          fieldTeacherName: 'Teacher name',
+          fieldStudentCount: 'Number of students',
+          fieldStatus: 'Status',
+          fieldDatedCreated: 'Created date',
+          fieldActions: 'Actions'
+        },
+        activeStudentList: {
+          title: 'List of students in class',
+          description: 'Class: ',
+          tableView: {
+            fieldFullName: 'Full name',
+            fieldEmail: 'Email',
+            fieldPhoneNumber: 'Phone number',
+            fieldBannedStatus: 'Banned status',
+            fieldJoinedDate: 'Joined date',
+            fieldActions: 'Actions'
+          }
+        },
+        bannedStudentList: {
+          title: 'List of banned students in class',
+          description: 'Class: ',
+          tableView: {
+            fieldFullName: 'Full name',
+            fieldEmail: 'Email',
+            fieldPhoneNumber: 'Phone number',
+            fieldBannedStatus: 'Banned status',
+            fieldBannedDate: 'Banned date',
+            fieldActions: 'Actions'
+          }
+        }
       }
     },
 
@@ -1299,6 +1338,45 @@ export const translations = {
           fieldClassDescriptionPlaceholder: 'Ví dụ: Lớp dành cho học sinh 9CB',
           fieldClassCode: 'Mã lớp',
           fieldNeedsTeacherApproval: 'Cần giáo viên phê duyệt để tham gia?'
+        }
+      },
+      studentManagement: {
+        title: 'Quản lý học sinh',
+        description:
+          'Xem và quản lý tất cả học sinh trong hệ thống theo từng lớp học',
+        tableView: {
+          title: 'Danh sách lớp học',
+          fieldClassName: 'Tên lớp',
+          fieldClassCode: 'Mã lớp',
+          fieldTeacherName: 'Tên giáo viên',
+          fieldStudentCount: 'Số lượng học sinh',
+          fieldStatus: 'Trạng thái',
+          fieldDatedCreated: 'Ngày tạo',
+          fieldActions: 'Hành động'
+        },
+        activeStudentList: {
+          title: 'Danh sách học sinh trong lớp',
+          description: 'Lớp: ',
+          tableView: {
+            fieldFullName: 'Họ và tên',
+            fieldEmail: 'Email',
+            fieldPhoneNumber: 'Số điện thoại',
+            fieldBannedStatus: 'Trạng thái cấm',
+            fieldJoinedDate: 'Ngày tham gia',
+            fieldActions: 'Hành động'
+          }
+        },
+        bannedStudentList: {
+          title: 'Danh sách học sinh bị cấm tham gia trong lớp',
+          description: 'Lớp: ',
+          tableView: {
+            fieldFullName: 'Họ và tên',
+            fieldEmail: 'Email',
+            fieldPhoneNumber: 'Số điện thoại',
+            fieldBannedStatus: 'Trạng thái cấm',
+            fieldBannedDate: 'Ngày bị cấm',
+            fieldActions: 'Hành động'
+          }
         }
       }
     },

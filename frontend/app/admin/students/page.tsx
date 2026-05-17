@@ -204,18 +204,17 @@ export default function AdminClassesPage() {
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-foreground">
-                        Quản lý danh sách học sinh
+                        {t.admin.studentManagement.title}
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        ....
+                        {t.admin.studentManagement.description}
                     </p>
                 </div>
             </div>
 
-            {/* Classes Table */}
             <Card>
                 <CardHeader className="mb-3">
-                    <CardTitle>{t.admin.classManagement.tableView.title}</CardTitle>
+                    <CardTitle>{t.admin.studentManagement.tableView.title}</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -234,13 +233,13 @@ export default function AdminClassesPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldClassName}</TableHead>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldClassCode}</TableHead>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldTeacherName}</TableHead>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldStudentCount}</TableHead>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldStatus}</TableHead>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldDatedCreated}</TableHead>
-                                        <TableHead className="text-center">{t.admin.classManagement.tableView.fieldActions}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldClassName}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldClassCode}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldTeacherName}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldStudentCount}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldStatus}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldDatedCreated}</TableHead>
+                                        <TableHead className="text-center">{t.admin.studentManagement.tableView.fieldActions}</TableHead>
                                     </TableRow>
                                 </TableHeader>
 
@@ -280,7 +279,6 @@ export default function AdminClassesPage() {
                                                         size="sm"
                                                         onClick={() => handleOpenStudentsModal(classItem)}
                                                         disabled={isLoading}
-                                                        title="Xem danh sách học sinh"
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
@@ -290,7 +288,6 @@ export default function AdminClassesPage() {
                                                         size="sm"
                                                         onClick={() => handleOpenBannedStudentsModal(classItem)}
                                                         disabled={isLoading}
-                                                        title="Xem danh sách học sinh bị cấm"
                                                     >
                                                         <Ban className="h-4 w-4" />
                                                     </Button>
@@ -336,7 +333,6 @@ export default function AdminClassesPage() {
                 </CardContent>
             </Card>
 
-            {/* Students in Class Modal */}
             {accessToken && (
                 <StudentsInClassModal
                     isOpen={isModalOpen}
