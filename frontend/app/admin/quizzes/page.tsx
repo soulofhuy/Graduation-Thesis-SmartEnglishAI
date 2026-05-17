@@ -1,19 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Search, Eye, BookOpen, Users, CheckCircle2, XCircle } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell,
+  TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { dateFormat } from '@/lib/format'
 import { useLanguage } from '@/components/language-provider'
@@ -22,9 +17,12 @@ import { TOAST_COLORS } from '@/lib/toast/color'
 import { getAllAssignments, type AdminAssignmentRow } from '@/services/admin/assignments'
 import { Badge } from '@/components/ui/badge'
 import { TablePagination } from '@/components/pagination'
+import { getAssignmentActiveStatusLabel } from '@/lib/language-mappers/assignment-active-status-mapper'
+import { getAssignmentActiveStatusColor } from '@/lib/color-mappers/assignment-active-status-mapper'
 
 interface TableAssignment {
   id: string
+  description?: string
   title: string
   creatorName: string
   creatorEmail: string
@@ -45,6 +43,7 @@ const mapAssignmentToTableAssignment = (assignment: AdminAssignmentRow): TableAs
   return {
     id: assignment.id,
     title: assignment.title ?? '',
+    description: assignment.description ?? '',
     creatorName,
     creatorEmail: assignment.teacher?.email ?? '',
     className: assignment.classInfo?.name?.trim() ?? assignment.class?.name?.trim() ?? 'Chưa có tên lớp',
@@ -138,15 +137,6 @@ export default function AdminQuizzesPage() {
     setPageSize(nextValue)
   }
 
-  const handleSearchSubmit = () => {
-    setSearchQuery(searchInput.trim())
-  }
-
-  const clearSearch = () => {
-    setSearchInput('')
-    setSearchQuery('')
-  }
-
   const filteredAssignments = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) {
@@ -167,77 +157,22 @@ export default function AdminQuizzesPage() {
     })
   }, [assignments, searchQuery])
 
-  const activeCount = assignments.filter((assignment) => assignment.isActive).length
-  const inactiveCount = assignments.length - activeCount
-  const visibleCount = filteredAssignments.length
-
   return (
     <div className="space-y-8 p-4 md:p-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-foreground">Quản lý bài tập</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-            Danh sách toàn bộ bài tập trong hệ thống, xem nhanh giáo viên, lớp học, số task và trạng thái.
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t.admin.assignmentManagement.title}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {t.admin.assignmentManagement.description}
           </p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-full bg-primary/10 p-3 text-primary">
-              <BookOpen className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Tổng bài tập</p>
-              <p className="text-2xl font-bold">{totalItems}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-full bg-emerald-500/10 p-3 text-emerald-600">
-              <CheckCircle2 className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Đang hoạt động</p>
-              <p className="text-2xl font-bold">{activeCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-full bg-rose-500/10 p-3 text-rose-600">
-              <XCircle className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Tạm ngưng</p>
-              <p className="text-2xl font-bold">{inactiveCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-full bg-sky-500/10 p-3 text-sky-600">
-              <Users className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Đang hiển thị</p>
-              <p className="text-2xl font-bold">{visibleCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       <Card>
         <CardHeader className="mb-3">
-          <CardTitle>Danh sách bài tập</CardTitle>
-          <CardDescription>
-            Giao diện quản lý tập trung, dễ scan, dễ lọc và không bị nhồi thông tin vào một cột.
-          </CardDescription>
+          <CardTitle>{t.admin.assignmentManagement.tableView.title}</CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -245,25 +180,20 @@ export default function AdminQuizzesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center min-w-[220px]">Tiêu đề</TableHead>
-                  <TableHead className="text-center min-w-[220px]">Giáo viên</TableHead>
-                  <TableHead className="text-center min-w-[220px]">Lớp học</TableHead>
-                  <TableHead className="text-center">Task</TableHead>
-                  <TableHead className="text-center">Lượt làm</TableHead>
-                  <TableHead className="text-center">Trạng thái</TableHead>
-                  <TableHead className="text-center min-w-[140px]">Ngày tạo</TableHead>
-                  <TableHead className="text-center">Thao tác</TableHead>
+                  <TableHead className="text-center min-w-[250px]">{t.admin.assignmentManagement.tableView.fieldTitle}</TableHead>
+                  <TableHead className="text-center min-w-[220px]">{t.admin.assignmentManagement.tableView.fieldTeacherName}</TableHead>
+                  <TableHead className="text-center min-w-[220px]">{t.admin.assignmentManagement.tableView.fieldClassName}</TableHead>
+                  <TableHead className="text-center">{t.admin.assignmentManagement.tableView.fieldAssignmentStatus}</TableHead>
+                  <TableHead className="text-center min-w-[140px]">{t.admin.assignmentManagement.tableView.fieldCreatedDate}</TableHead>
+                  <TableHead className="text-center">{t.admin.assignmentManagement.tableView.fieldActions}</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={8}
-                      className="py-10 text-center text-muted-foreground"
-                    >
-                      Đang tải dữ liệu...
+                    <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                      {t.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : filteredAssignments.length === 0 ? (
@@ -272,7 +202,7 @@ export default function AdminQuizzesPage() {
                       colSpan={8}
                       className="py-10 text-center text-muted-foreground"
                     >
-                      Không tìm thấy bài tập phù hợp.
+                      {t.common.noData}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -284,57 +214,23 @@ export default function AdminQuizzesPage() {
                             {assignment.title}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            ID: {assignment.id}
+                            {assignment.description}
                           </p>
                         </div>
                       </TableCell>
 
                       <TableCell>
-                        <div className="space-y-1">
-                          <p className="font-medium">
-                            {assignment.creatorName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {assignment.creatorEmail || 'Chưa có email'}
-                          </p>
-                        </div>
+                        {assignment.creatorName}
                       </TableCell>
 
                       <TableCell>
-                        <div className="space-y-1">
-                          <p className="font-medium">
-                            {assignment.className}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {assignment.classCode}
-                          </p>
-                        </div>
+                        {assignment.className}
                       </TableCell>
 
                       <TableCell>
-                        <Badge variant="secondary">
-                          {assignment.taskCount}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge variant="outline">
-                          {assignment.attemptCount}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge
-                          variant={
-                            assignment.isActive
-                              ? 'default'
-                              : 'destructive'
-                          }
-                        >
-                          {assignment.isActive
-                            ? 'Đang hoạt động'
-                            : 'Tạm ngưng'}
-                        </Badge>
+                        <span className={`rounded px-2 py-1 text-xs font-medium ${getAssignmentActiveStatusColor(assignment.isActive)}`}>
+                          {getAssignmentActiveStatusLabel(assignment.isActive, language)}
+                        </span>
                       </TableCell>
 
                       <TableCell className="text-sm text-muted-foreground">

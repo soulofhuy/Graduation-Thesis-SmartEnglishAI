@@ -294,6 +294,19 @@ export const translations = {
             fieldActions: 'Actions'
           }
         }
+      },
+      assignmentManagement: {
+        title: 'Assignment management',
+        description: 'View and manage all assignments in the system',
+        tableView: {
+          title: 'List of assignments',
+          fieldTitle: 'Title',
+          fieldClassName: 'Class name',
+          fieldTeacherName: 'Teacher name',
+          fieldCreatedDate: 'Created date',
+          fieldAssignmentStatus: 'Status',
+          fieldActions: 'Actions'
+        }
       }
     },
 
@@ -1377,6 +1390,19 @@ export const translations = {
             fieldBannedDate: 'Ngày bị cấm',
             fieldActions: 'Hành động'
           }
+        }
+      },
+      assignmentManagement: {
+        title: 'Quản lý bài tập',
+        description: 'Xem và quản lý tất cả bài tập trong hệ thống',
+        tableView: {
+          title: 'Danh sách bài tập',
+          fieldTitle: 'Tiêu đề',
+          fieldClassName: 'Tên lớp học',
+          fieldTeacherName: 'Giáo viên',
+          fieldCreatedDate: 'Ngày tạo',
+          fieldAssignmentStatus: 'Trạng thái',
+          fieldActions: 'Thao tác'
         }
       }
     },
