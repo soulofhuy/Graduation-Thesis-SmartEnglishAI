@@ -1,5 +1,6 @@
 'use client'
 
+import { useLanguage } from '@/components/language-provider'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { StudentSummary } from '@/services/admin/results'
@@ -10,17 +11,18 @@ type Props = {
 }
 
 export default function StudentTable({ students, onView }: Props) {
+    const { t, language } = useLanguage()
     return (
         <div className="p-4">
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead>#</TableHead>
-                        <TableHead>Tên</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Số lần</TableHead>
-                        <TableHead>Điểm cao nhất</TableHead>
-                        <TableHead>Hành động</TableHead>
+                        <TableHead>{t.admin.resultManagement.resultTable.fieldName}</TableHead>
+                        <TableHead>{t.admin.resultManagement.resultTable.fieldEmail}</TableHead>
+                        <TableHead>{t.admin.resultManagement.resultTable.fieldNumberOfSubmissions}</TableHead>
+                        <TableHead>{t.admin.resultManagement.resultTable.fieldHighestResult}</TableHead>
+                        <TableHead>{t.admin.resultManagement.resultTable.fieldActions}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>

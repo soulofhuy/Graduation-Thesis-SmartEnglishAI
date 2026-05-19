@@ -333,6 +333,29 @@ export const translations = {
         deleteAssignment: {
           title: 'Delete assignment'
         }
+      },
+      resultManagement: {
+        title: "Students' assignment results",
+        description: 'Manage and review students assignment results in details',
+        filters: {
+          title: 'Filters',
+          description: 'Choose assignment and class to filter results',
+          assignment: {
+            title: 'Choose assignment',
+            default: 'Choose an assignment'
+          },
+          class: {
+            title: 'Choose class',
+            default: 'Choose a class'
+          }
+        },
+        resultTable: {
+          fieldName: 'Name',
+          fieldEmail: 'Email',
+          fieldNumberOfSubmissions: 'Number of submissions',
+          fieldHighestResult: 'Best result',
+          fieldActions: 'Actions'
+        }
       }
     },
 

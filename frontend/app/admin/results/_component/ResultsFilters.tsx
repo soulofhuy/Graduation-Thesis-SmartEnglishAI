@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useLanguage } from '@/components/language-provider'
 
 type AssignmentOption = { id: string; title: string; className?: string; classId?: string }
 
@@ -13,6 +14,7 @@ type Props = {
 }
 
 export default function ResultsFilters({ assignments, onApply }: Props) {
+    const { t, language } = useLanguage()
     const [assignmentId, setAssignmentId] = useState<string | null>(null)
     const [classId, setClassId] = useState<string | null>(null)
     const [search, setSearch] = useState('')
@@ -31,13 +33,12 @@ export default function ResultsFilters({ assignments, onApply }: Props) {
     return (
         <div className="space-y-4 p-4">
             <div>
-                <label className="block text-sm font-medium">Assignment</label>
+                <label className="block text-sm font-medium">{t.admin.resultManagement.filters.assignment.title}</label>
                 <Select onValueChange={(v) => setAssignmentId(v === 'all' ? null : v)} value={assignmentId ?? ''}>
                     <SelectTrigger className="w-full mt-2">
-                        <SelectValue placeholder="Chọn bài tập" />
+                        <SelectValue placeholder={t.admin.resultManagement.filters.assignment.default} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
                         {assignments.map((a) => (
                             <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
                         ))}
@@ -46,13 +47,12 @@ export default function ResultsFilters({ assignments, onApply }: Props) {
             </div>
 
             <div>
-                <label className="block text-sm font-medium">Class</label>
+                <label className="block text-sm font-medium">{t.admin.resultManagement.filters.class.title}</label>
                 <Select onValueChange={(v) => setClassId(v === 'all' ? null : v)} value={classId ?? ''}>
                     <SelectTrigger className="w-full mt-2">
-                        <SelectValue placeholder="Chọn lớp" />
+                        <SelectValue placeholder={t.admin.resultManagement.filters.class.default} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
                         {classesForAssignment.map((c) => (
                             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
@@ -60,10 +60,10 @@ export default function ResultsFilters({ assignments, onApply }: Props) {
                 </Select>
             </div>
 
-            <div>
+            {/* <div>
                 <label className="block text-sm font-medium">Search</label>
                 <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tên hoặc email" className="mt-2" />
-            </div>
+            </div> */}
 
             <div className="flex gap-2">
                 <Button onClick={() => onApply(assignmentId, classId, search)}>Apply</Button>
