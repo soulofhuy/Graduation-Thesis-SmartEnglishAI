@@ -30,7 +30,13 @@ export default function StudentTable({ students, onView }: Props) {
                             <TableCell>{s.name}</TableCell>
                             <TableCell>{s.email ?? '-'}</TableCell>
                             <TableCell>{s.attemptsCount ?? 0}</TableCell>
-                            <TableCell>{s.bestScore ?? '-'}{typeof s.bestScore === 'number' ? '%' : ''}</TableCell>
+                            <TableCell>
+                                {typeof s.bestCorrectCount === 'number' && typeof s.totalQuestions === 'number'
+                                    ? `${s.bestCorrectCount} / ${s.totalQuestions}`
+                                    : s.bestCorrectCount != null
+                                        ? String(s.bestCorrectCount)
+                                        : '-'}
+                            </TableCell>
                             <TableCell>
                                 <div className="flex gap-2">
                                     <Button size="sm" onClick={() => onView(s.id)}>View</Button>

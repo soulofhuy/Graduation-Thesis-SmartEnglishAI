@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-type AssignmentOption = { id: string; title: string; className?: string; classCode?: string }
+type AssignmentOption = { id: string; title: string; className?: string; classId?: string }
 
 type Props = {
     assignments: AssignmentOption[]
@@ -20,7 +20,8 @@ export default function ResultsFilters({ assignments, onApply }: Props) {
     const classesForAssignment = assignmentId
         ? assignments
             .filter((a) => a.id === assignmentId)
-            .map((a) => ({ id: a.classCode ?? '-', name: a.className }))
+            .map((a) => ({ id: a.classId ?? '', name: a.className ?? 'Chưa có tên lớp' }))
+            .filter((c) => Boolean(c.id))
         : []
 
     useEffect(() => {

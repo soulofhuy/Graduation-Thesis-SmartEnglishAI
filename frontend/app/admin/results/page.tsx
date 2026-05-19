@@ -33,6 +33,7 @@ interface TableAssignment {
   creatorName: string
   creatorEmail: string
   className: string
+  classId: string
   classCode: string
   taskCount: number
   attemptCount: number
@@ -53,6 +54,7 @@ const mapAssignmentToTableAssignment = (assignment: AdminAssignmentRow): TableAs
     creatorName,
     creatorEmail: assignment.teacher?.email ?? '',
     className: assignment.classInfo?.name?.trim() ?? assignment.class?.name?.trim() ?? 'Chưa có tên lớp',
+    classId: assignment.classInfo?.id ?? assignment.class?.id ?? '',
     classCode: assignment.classInfo?.classCode ?? assignment.class?.classCode ?? '-',
     taskCount: assignment.taskCount ?? (assignment.tasks?.length ?? 0),
     attemptCount: assignment.attemptCount ?? 0,
@@ -171,6 +173,7 @@ export default function AdminResultPage() {
         assignment.creatorName,
         assignment.creatorEmail,
         assignment.className,
+        assignment.classId,
         assignment.classCode
       ]
         .join(' ')
@@ -270,8 +273,7 @@ export default function AdminResultPage() {
     setIsLoadingStudentHistory(true)
     try {
       const resp = await getStudentResults(accessToken, selectedAssignmentId, studentId)
-      // assume resp.data.history or similar; adapt as API returns
-      setStudentHistory(resp.data?.history ?? resp.data ?? [])
+      setStudentHistory(resp.attempts ?? [])
       const found = students.find((s) => s.id === studentId) ?? null
       setSelectedStudent(found)
       setDetailOpen(true)
