@@ -17,9 +17,9 @@ import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { deleteAssignment, getAllAssignments, type AdminAssignmentRow } from '@/services/admin/assignments'
 import ConfirmDialog from '@/components/confirm-dialog'
-import ResultsFilters from '@/components/results/ResultsFilters'
-import StudentTable from '@/components/results/StudentTable'
-import StudentDetailDrawer from '@/components/results/StudentDetailDrawer'
+import ResultsFilters from './_component/ResultsFilters'
+import StudentTable from './_component/StudentTable'
+import StudentDetailDrawer from './_component/StudentDetailDrawer'
 import { getStudentsByAssignmentClass, getStudentResults, type StudentSummary } from '@/services/admin/results'
 import { useRouter } from 'next/navigation'
 import { TablePagination } from '@/components/pagination'
@@ -315,7 +315,7 @@ export default function AdminResultPage() {
 
       <StudentDetailDrawer
         open={detailOpen}
-        onOpenChange={(open) => setDetailOpen(open)}
+        onOpenChange={(open: boolean) => setDetailOpen(open)}
         assignmentTitle={assignments.find((a) => a.id === selectedAssignmentId)?.title}
         student={selectedStudent}
         loading={isLoadingStudentHistory}

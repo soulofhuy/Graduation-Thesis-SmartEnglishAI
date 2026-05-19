@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer'
 import { AttemptHistoryDetailView } from '@/components/attempt-history-detail-view'
 import type { StudentSummary } from '@/services/admin/results'
