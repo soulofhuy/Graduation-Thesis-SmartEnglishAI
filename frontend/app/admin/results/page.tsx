@@ -21,6 +21,7 @@ import ResultsFilters from '@/components/results/ResultsFilters'
 import StudentTable from '@/components/results/StudentTable'
 import StudentDetailDrawer from '@/components/results/StudentDetailDrawer'
 import { getStudentsByAssignmentClass, getStudentResults, type StudentSummary } from '@/services/admin/results'
+import { useRouter } from 'next/navigation'
 import { TablePagination } from '@/components/pagination'
 import { getAssignmentActiveStatusLabel } from '@/lib/language-mappers/assignment-active-status-mapper'
 import { getAssignmentActiveStatusColor } from '@/lib/color-mappers/assignment-active-status-mapper'
@@ -268,21 +269,11 @@ export default function AdminResultPage() {
     void loadStudents(assignmentId, classId, search)
   }
 
-  const handleViewStudent = async (studentId: string) => {
-    if (!accessToken || !selectedAssignmentId) return
-    setIsLoadingStudentHistory(true)
-    try {
-      const resp = await getStudentResults(accessToken, selectedAssignmentId, studentId)
-      setStudentHistory(resp.attempts ?? [])
-      const found = students.find((s) => s.id === studentId) ?? null
-      setSelectedStudent(found)
-      setDetailOpen(true)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load student results'
-      toast.error(message, { className: TOAST_COLORS.error })
-    } finally {
-      setIsLoadingStudentHistory(false)
-    }
+  const router = useRouter()
+
+  const handleViewStudent = (studentId: string) => {
+    if (!selectedAssignmentId) return
+    router.push(`/admin/results/${selectedAssignmentId}?studentId=${studentId}`)
   }
 
   return (
