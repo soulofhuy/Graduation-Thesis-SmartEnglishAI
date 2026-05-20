@@ -162,6 +162,7 @@ export default function AdminResultPage() {
     setPageSize(nextValue)
   }
 
+
   const loadStudents = async (assignmentId: string | null, classId: string | null, search = '') => {
     if (!accessToken || !assignmentId || !classId) {
       setStudents([])
