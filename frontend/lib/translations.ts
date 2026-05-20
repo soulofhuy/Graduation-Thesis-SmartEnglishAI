@@ -333,6 +333,56 @@ export const translations = {
         deleteAssignment: {
           title: 'Delete assignment'
         }
+      },
+      resultManagement: {
+        title: "Students' assignment results",
+        description: 'Manage and review students assignment results in details',
+        filters: {
+          title: 'Filters',
+          description: 'Choose assignment and class to filter results',
+          assignment: {
+            title: 'Choose assignment',
+            default: 'Choose an assignment'
+          },
+          class: {
+            title: 'Choose class',
+            default: 'Choose a class'
+          }
+        },
+        resultTable: {
+          title: "List of students with assignment's results",
+          fieldName: 'Name',
+          fieldEmail: 'Email',
+          fieldNumberOfSubmissions: 'Number of submissions',
+          fieldHighestResult: 'Best result',
+          fieldActions: 'Actions'
+        },
+        viewResultDetails: {
+          summaryCards: {
+            title: 'Summary of this assignment',
+            fieldClass: 'Class',
+            fieldClassCode: 'Class code',
+            fieldStudentName: 'Student name',
+            fieldEmail: 'Email',
+            fieldDueDate: 'Due date',
+            fieldSubmissionCount: 'Number of submissions'
+          },
+          historyOfSubissionsSummary: {
+            title: 'History of submissions',
+            fieldStatus: 'Status',
+            fieldStartTime: 'Started at',
+            fieldSubmittedTime: 'Submitted at',
+            fieldTotalTime: 'Total time',
+            fieldWrongAnswerCount: 'Wrong answers',
+            fieldResult: 'Result'
+          },
+          submissionDetails: {
+            title: 'Submission details no. ',
+            fieldResult: 'Result',
+            fieldSubmittedAt: 'Submitted at',
+            fieldQuestion: 'Question no.'
+          }
+        }
       }
     },
 
@@ -1457,6 +1507,57 @@ export const translations = {
         },
         deleteAssignment: {
           title: 'Xóa bài tập'
+        }
+      },
+      resultManagement: {
+        title: 'Kết quả bài tập của học sinh',
+        description:
+          'Xem và quản lý kết quả bài tập của học sinh một cách chi tiết',
+        filters: {
+          title: 'Lọc kết quả',
+          description: 'Chọn lớp học và bài tập để xem kết quả của học sinh',
+          assignment: {
+            title: 'Chọn bài tập',
+            default: 'Hãy chọn một bài tập'
+          },
+          class: {
+            title: 'Chọn lớp học',
+            default: 'Hãy chọn một lớp học'
+          }
+        },
+        resultTable: {
+          title: 'Danh sách học sinh cùng kết quả bài làm',
+          fieldName: 'Tên học sinh',
+          fieldEmail: 'Email',
+          fieldNumberOfSubmissions: 'Số lần nộp bài',
+          fieldHighestResult: 'Kết quả tốt nhất',
+          fieldActions: 'Thao tác'
+        },
+        viewResultDetails: {
+          summaryCards: {
+            title: 'Tóm tắt bài tập này',
+            fieldClass: 'Lớp học',
+            fieldClassCode: 'Mã lớp',
+            fieldStudentName: 'Tên học sinh',
+            fieldEmail: 'Email',
+            fieldDueDate: 'Hạn nộp',
+            fieldSubmissionCount: 'Số lần nộp bài'
+          },
+          historyOfSubissionsSummary: {
+            title: 'Lịch sử nộp bài',
+            fieldStatus: 'Trạng thái',
+            fieldStartTime: 'Bắt đầu lúc',
+            fieldSubmittedTime: 'Nộp lúc',
+            fieldTotalTime: 'Tổng thời gian',
+            fieldWrongAnswerCount: 'Số câu sai',
+            fieldResult: 'Kết quả'
+          },
+          submissionDetails: {
+            title: 'Chi tiết lần nộp số ',
+            fieldResult: 'Kết quả',
+            fieldSubmittedAt: 'Nộp lúc',
+            fieldQuestion: 'Câu hỏi số'
+          }
         }
       }
     },

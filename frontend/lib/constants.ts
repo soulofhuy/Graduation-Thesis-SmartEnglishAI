@@ -132,6 +132,11 @@ export const adminNavItems = [
     icon: BookOpen
   },
   {
+    label: 'Quản lí kết quả',
+    href: '/admin/results',
+    icon: BarChart3
+  },
+  {
     label: 'Cài đặt',
     href: '/admin/settings',
     icon: Settings

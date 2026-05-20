@@ -21,6 +21,8 @@ import AIGenerateAssignmentRouter from './src/routes/ai/generate-assignment/aiGe
 import AIChatSessionRouter from './src/routes/ai/chat-session/aiChatSessionRoutes';
 import GetAllAssignmentsRouter from './src/routes/admin/assignmentManagement/getAllAssignmentRoutes';
 import DeleteAssignmentRouter from './src/routes/admin/assignmentManagement/deleteAssignmentRoutes';
+import GetListOfResultsRouter from './src/routes/admin/resultManagement/getListOfResultsRoutes';
+import GetResultDetailsRouter from './src/routes/admin/resultManagement/getResultDetailsRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -52,6 +54,8 @@ app.use('/api', GetAllClassesRouter);
 app.use('/api', CreateNewClassesRouter);
 app.use('/api', GetAllAssignmentsRouter);
 app.use('/api', DeleteAssignmentRouter);
+app.use('/api', GetListOfResultsRouter);
+app.use('/api', GetResultDetailsRouter);
 app.use('/api', AIGenerateAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
 const PORT = process.env.PORT || 5000;
