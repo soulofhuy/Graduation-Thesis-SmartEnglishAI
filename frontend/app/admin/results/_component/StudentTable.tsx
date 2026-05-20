@@ -11,36 +11,36 @@ type Props = {
 }
 
 export default function StudentTable({ students, onView }: Props) {
-    const { t, language } = useLanguage()
+    const { t } = useLanguage()
     return (
         <div className="p-4">
             <Table>
                 <TableHeader>
-                    <TableRow>
-                        <TableHead>#</TableHead>
-                        <TableHead>{t.admin.resultManagement.resultTable.fieldName}</TableHead>
-                        <TableHead>{t.admin.resultManagement.resultTable.fieldEmail}</TableHead>
-                        <TableHead>{t.admin.resultManagement.resultTable.fieldNumberOfSubmissions}</TableHead>
-                        <TableHead>{t.admin.resultManagement.resultTable.fieldHighestResult}</TableHead>
-                        <TableHead>{t.admin.resultManagement.resultTable.fieldActions}</TableHead>
+                    <TableRow >
+                        <TableHead className="text-center">#</TableHead>
+                        <TableHead className="text-center">{t.admin.resultManagement.resultTable.fieldName}</TableHead>
+                        <TableHead className="text-center">{t.admin.resultManagement.resultTable.fieldEmail}</TableHead>
+                        <TableHead className="text-center">{t.admin.resultManagement.resultTable.fieldNumberOfSubmissions}</TableHead>
+                        <TableHead className="text-center">{t.admin.resultManagement.resultTable.fieldHighestResult}</TableHead>
+                        <TableHead className="text-center">{t.admin.resultManagement.resultTable.fieldActions}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {students.map((s, idx) => (
                         <TableRow key={s.id}>
-                            <TableCell className="font-medium">{idx + 1}</TableCell>
-                            <TableCell>{s.name}</TableCell>
-                            <TableCell>{s.email ?? '-'}</TableCell>
-                            <TableCell>{s.attemptsCount ?? 0}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-center font-medium">{idx + 1}</TableCell>
+                            <TableCell className="text-center">{s.name}</TableCell>
+                            <TableCell className="text-center">{s.email ?? '-'}</TableCell>
+                            <TableCell className="text-center">{s.attemptsCount ?? 0}</TableCell>
+                            <TableCell className="text-center">
                                 {typeof s.bestCorrectCount === 'number' && typeof s.totalQuestions === 'number'
                                     ? `${s.bestCorrectCount} / ${s.totalQuestions}`
                                     : s.bestCorrectCount != null
                                         ? String(s.bestCorrectCount)
                                         : '-'}
                             </TableCell>
-                            <TableCell>
-                                <div className="flex gap-2">
+                            <TableCell className="text-center">
+                                <div className="flex justify-center gap-2">
                                     <Button size="sm" onClick={() => onView(s.id)}>View</Button>
                                 </div>
                             </TableCell>
