@@ -80,27 +80,27 @@ export default function AdminResultDetailPage() {
 
     const summaryCards = [
         {
-            label: 'Lớp',
+            label: t.admin.resultManagement.viewResultDetails.summaryCards.fieldClass,
             value: detail?.class.name ?? '-',
         },
         {
-            label: 'Mã lớp',
+            label: t.admin.resultManagement.viewResultDetails.summaryCards.fieldClassCode,
             value: detail?.class.classCode ?? '-',
         },
         {
-            label: 'Học sinh',
+            label: t.admin.resultManagement.viewResultDetails.summaryCards.fieldStudentName,
             value: detail?.student.profile ? `${detail.student.profile.firstName ?? ''} ${detail.student.profile.lastName ?? ''}`.trim() || detail?.student.email : detail?.student.email ?? '-',
         },
         {
-            label: 'Email',
+            label: t.admin.resultManagement.viewResultDetails.summaryCards.fieldEmail,
             value: detail?.student.email ?? '-',
         },
         {
-            label: 'Ngày hết hạn',
+            label: t.admin.resultManagement.viewResultDetails.summaryCards.fieldDueDate,
             value: dateTimeFormat(detail?.assignment.dueDate ?? ''),
         },
         {
-            label: 'Số lần nộp',
+            label: t.admin.resultManagement.viewResultDetails.summaryCards.fieldSubmissionCount,
             value: history.length,
         },
     ]
@@ -108,23 +108,23 @@ export default function AdminResultDetailPage() {
     return (
         <AttemptHistoryDetailView
             backHref="/admin/results"
-            backLabel="Quay lại kết quả"
+            backLabel={t.common.back}
             assignmentTitle={detail?.assignment.title ?? 'Assignment'}
             canViewResult={true}
             summaryCards={summaryCards}
-            historyTitle="Lịch sử làm"
+            historyTitle={t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.title}
             history={history}
             tableLabels={{
                 attempt: '#',
-                status: 'Trạng thái',
-                startedAt: 'Bắt đầu',
-                submittedAt: 'Nộp',
-                totalTime: 'Thời gian',
-                totalQuestions: 'Số câu',
-                result: 'Kết quả'
+                status: t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.fieldStatus,
+                startedAt: t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.fieldStartTime,
+                submittedAt: t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.fieldSubmittedTime,
+                totalTime: t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.fieldTotalTime,
+                totalQuestions: t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.fieldWrongAnswerCount,
+                result: t.admin.resultManagement.viewResultDetails.historyOfSubissionsSummary.fieldResult
             }}
             statusLabels={{ submitted: 'Nộp', inProgress: 'Đang làm', noResult: 'Không có điểm' }}
-            detailLabels={{ reviewTitlePrefix: 'Bài làm', result: 'Kết quả', submittedAt: 'Nộp lúc', question: 'Câu', noQuestionAnswers: 'Không có dữ liệu', noDetailPermission: 'Không có quyền' }}
+            detailLabels={{ reviewTitlePrefix: t.admin.resultManagement.viewResultDetails.submissionDetails.title, result: t.admin.resultManagement.viewResultDetails.submissionDetails.fieldResult, submittedAt: t.admin.resultManagement.viewResultDetails.submissionDetails.fieldSubmittedAt, question: t.admin.resultManagement.viewResultDetails.submissionDetails.fieldQuestion, noQuestionAnswers: t.admin.resultManagement.viewResultDetails.submissionDetails.noQuestionAnswers, noDetailPermission: t.admin.resultManagement.viewResultDetails.submissionDetails.noDetailPermission }}
             emptyLabels={{ noHistory: 'Chưa có lịch sử' }}
         />
     )

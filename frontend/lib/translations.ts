@@ -356,6 +356,32 @@ export const translations = {
           fieldNumberOfSubmissions: 'Number of submissions',
           fieldHighestResult: 'Best result',
           fieldActions: 'Actions'
+        },
+        viewResultDetails: {
+          summaryCards: {
+            title: 'Summary of this assignment',
+            fieldClass: 'Class',
+            fieldClassCode: 'Class code',
+            fieldStudentName: 'Student name',
+            fieldEmail: 'Email',
+            fieldDueDate: 'Due date',
+            fieldSubmissionCount: 'Number of submissions'
+          },
+          historyOfSubissionsSummary: {
+            title: 'History of submissions',
+            fieldStatus: 'Status',
+            fieldStartTime: 'Started at',
+            fieldSubmittedTime: 'Submitted at',
+            fieldTotalTime: 'Total time',
+            fieldWrongAnswerCount: 'Wrong answers',
+            fieldResult: 'Result'
+          },
+          submissionDetails: {
+            title: 'Submission details no. ',
+            fieldResult: 'Result',
+            fieldSubmittedAt: 'Submitted at',
+            fieldQuestion: 'Question no.'
+          }
         }
       }
     },
@@ -1506,6 +1532,32 @@ export const translations = {
           fieldNumberOfSubmissions: 'Số lần nộp bài',
           fieldHighestResult: 'Kết quả tốt nhất',
           fieldActions: 'Thao tác'
+        },
+        viewResultDetails: {
+          summaryCards: {
+            title: 'Tóm tắt bài tập này',
+            fieldClass: 'Lớp học',
+            fieldClassCode: 'Mã lớp',
+            fieldStudentName: 'Tên học sinh',
+            fieldEmail: 'Email',
+            fieldDueDate: 'Hạn nộp',
+            fieldSubmissionCount: 'Số lần nộp bài'
+          },
+          historyOfSubissionsSummary: {
+            title: 'Lịch sử nộp bài',
+            fieldStatus: 'Trạng thái',
+            fieldStartTime: 'Bắt đầu lúc',
+            fieldSubmittedTime: 'Nộp lúc',
+            fieldTotalTime: 'Tổng thời gian',
+            fieldWrongAnswerCount: 'Số câu sai',
+            fieldResult: 'Kết quả'
+          },
+          submissionDetails: {
+            title: 'Chi tiết lần nộp số ',
+            fieldResult: 'Kết quả',
+            fieldSubmittedAt: 'Nộp lúc',
+            fieldQuestion: 'Câu hỏi số'
+          }
         }
       }
     },
