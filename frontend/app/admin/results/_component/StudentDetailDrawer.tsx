@@ -4,6 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@
 import { AttemptHistoryDetailView } from '@/components/attempt-history-detail-view'
 import type { StudentSummary } from '@/services/admin/results'
 import type { StudentAttemptHistoryItem } from '@/services/student/assignments'
+import { useLanguage } from '@/components/language-provider'
 
 type Props = {
     open: boolean
@@ -15,20 +16,21 @@ type Props = {
 }
 
 export default function StudentDetailDrawer({ open, onOpenChange, assignmentTitle, student, loading, history }: Props) {
+    const { t } = useLanguage()
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
             <DrawerContent>
                 <DrawerHeader>
                     <div className="flex items-center justify-between">
                         <DrawerTitle>{student ? student.name : 'Student'}</DrawerTitle>
-                        <DrawerClose className="ml-2">Close</DrawerClose>
+                        <DrawerClose className="ml-2">{t.common.close}</DrawerClose>
                     </div>
                 </DrawerHeader>
 
                 <div className="p-4">
                     <AttemptHistoryDetailView
                         backHref="#"
-                        backLabel="Back"
+                        backLabel={t.common.back}
                         assignmentTitle={assignmentTitle ?? 'Assignment'}
                         canViewResult={true}
                         summaryCards={[]}

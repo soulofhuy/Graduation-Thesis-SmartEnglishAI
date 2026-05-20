@@ -350,6 +350,7 @@ export const translations = {
           }
         },
         resultTable: {
+          title: "List of students with assignment's results",
           fieldName: 'Name',
           fieldEmail: 'Email',
           fieldNumberOfSubmissions: 'Number of submissions',
@@ -1480,6 +1481,31 @@ export const translations = {
         },
         deleteAssignment: {
           title: 'Xóa bài tập'
+        }
+      },
+      resultManagement: {
+        title: 'Kết quả bài tập của học sinh',
+        description:
+          'Xem và quản lý kết quả bài tập của học sinh một cách chi tiết',
+        filters: {
+          title: 'Lọc kết quả',
+          description: 'Chọn lớp học và bài tập để xem kết quả của học sinh',
+          assignment: {
+            title: 'Chọn bài tập',
+            default: 'Hãy chọn một bài tập'
+          },
+          class: {
+            title: 'Chọn lớp học',
+            default: 'Hãy chọn một lớp học'
+          }
+        },
+        resultTable: {
+          title: 'Danh sách học sinh cùng kết quả bài làm',
+          fieldName: 'Tên học sinh',
+          fieldEmail: 'Email',
+          fieldNumberOfSubmissions: 'Số lần nộp bài',
+          fieldHighestResult: 'Kết quả tốt nhất',
+          fieldActions: 'Thao tác'
         }
       }
     },

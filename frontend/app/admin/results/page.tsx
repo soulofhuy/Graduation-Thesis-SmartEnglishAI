@@ -162,87 +162,6 @@ export default function AdminResultPage() {
     setPageSize(nextValue)
   }
 
-  const filteredAssignments = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    const filtered = assignments.filter((assignment) => {
-      if (!query) {
-        return true
-      }
-
-      return [
-        assignment.title,
-        assignment.creatorName,
-        assignment.creatorEmail,
-        assignment.className,
-        assignment.classId,
-        assignment.classCode
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(query)
-    })
-
-    const directionFactor = sortDirection === 'asc' ? 1 : -1
-
-    return [...filtered].sort((left, right) => {
-      let comparison = 0
-
-      if (sortField === 'teacherName') {
-        comparison = left.creatorName.localeCompare(right.creatorName, language === 'vi' ? 'vi' : 'en', {
-          sensitivity: 'base'
-        })
-      } else if (sortField === 'className') {
-        comparison = left.className.localeCompare(right.className, language === 'vi' ? 'vi' : 'en', {
-          sensitivity: 'base'
-        })
-      } else if (sortField === 'status') {
-        comparison = Number(left.isActive) - Number(right.isActive)
-      } else if (sortField === 'createdDate') {
-        comparison = new Date(left.createdDate).getTime() - new Date(right.createdDate).getTime()
-      } else {
-        comparison = (left.title ?? '').localeCompare(right.title ?? '', language === 'vi' ? 'vi' : 'en', {
-          sensitivity: 'base'
-        })
-      }
-
-      if (comparison === 0) {
-        comparison = (left.title ?? '').localeCompare(right.title ?? '', language === 'vi' ? 'vi' : 'en', {
-          sensitivity: 'base'
-        })
-      }
-
-      return comparison * directionFactor
-    })
-  }, [assignments, language, searchQuery, sortDirection, sortField])
-
-  const handleSearchSubmit = () => {
-    setSearchQuery(searchInput.trim())
-  }
-
-  const clearSearch = () => {
-    setSearchInput('')
-    setSearchQuery('')
-  }
-
-  const handleDeleteAssignment = async () => {
-    if (!accessToken || !assignmentToDelete) {
-      return
-    }
-
-    try {
-      const response = await deleteAssignment(accessToken, assignmentToDelete.id)
-      setAssignments((prev) => prev.filter((assignment) => assignment.id !== assignmentToDelete.id))
-      setTotalItems((prev) => Math.max(0, prev - 1))
-      toast.success(response.message, { className: TOAST_COLORS.success })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : getToastMessage('deleteFailed', language)
-      toast.error(message, { className: TOAST_COLORS.error })
-    } finally {
-      setAssignmentToDelete(null)
-    }
-  }
-
-  // Handler to load students for selected assignment/class
   const loadStudents = async (assignmentId: string | null, classId: string | null, search = '') => {
     if (!accessToken || !assignmentId || !classId) {
       setStudents([])
@@ -289,8 +208,8 @@ export default function AdminResultPage() {
         <div className="col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle>Filters</CardTitle>
-              <CardDescription>Chọn lớp và bài tập để xem danh sách học sinh</CardDescription>
+              <CardTitle>{t.admin.resultManagement.filters.title}</CardTitle>
+              <CardDescription>{t.admin.resultManagement.filters.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResultsFilters
@@ -304,7 +223,7 @@ export default function AdminResultPage() {
         <div className="col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Students</CardTitle>
+              <CardTitle>{t.admin.resultManagement.resultTable.title}</CardTitle>
             </CardHeader>
             <CardContent>
               <StudentTable students={students} onView={handleViewStudent} />
