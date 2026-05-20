@@ -91,6 +91,7 @@ export default function AdminResultPage() {
   const [studentsTotal, setStudentsTotal] = useState(0)
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null)
+  const [selectedSearch, setSelectedSearch] = useState('')
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [studentHistory, setStudentHistory] = useState<any[]>([])
@@ -140,30 +141,7 @@ export default function AdminResultPage() {
     void fetchAssignments(currentPage, pageSize, true)
   }, [currentPage, fetchAssignments, isHydrated, pageSize])
 
-  const handleNextPage = () => {
-    if (!hasNextPage || isPaging) {
-      return
-    }
-    setCurrentPage((prev) => prev + 1)
-  }
-
-  const handlePrevPage = () => {
-    if (!hasPrevPage || isPaging) {
-      return
-    }
-    setCurrentPage((prev) => Math.max(1, prev - 1))
-  }
-
-  const handlePageSizeChange = (nextValue: number) => {
-    if (nextValue === pageSize) {
-      return
-    }
-    setCurrentPage(1)
-    setPageSize(nextValue)
-  }
-
-
-  const loadStudents = async (assignmentId: string | null, classId: string | null, search = '') => {
+  const loadStudents = async (assignmentId: string | null, classId: string | null, page: number, limit: number, search = '') => {
     if (!accessToken || !assignmentId || !classId) {
       setStudents([])
       setStudentsTotal(0)
@@ -172,11 +150,9 @@ export default function AdminResultPage() {
 
     setStudentsLoading(true)
     try {
-      const resp = await getStudentsByAssignmentClass(accessToken, assignmentId, classId, studentsPage, studentsPageSize, search)
+      const resp = await getStudentsByAssignmentClass(accessToken, assignmentId, classId, page, limit, search)
       setStudents(resp.data ?? [])
       setStudentsTotal(resp.pagination?.totalItems ?? 0)
-      setSelectedAssignmentId(assignmentId)
-      setSelectedClassId(classId)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load students'
       toast.error(message, { className: TOAST_COLORS.error })
@@ -186,8 +162,25 @@ export default function AdminResultPage() {
   }
 
   const handleApplyFilters = (assignmentId: string | null, classId: string | null, search: string) => {
-    void loadStudents(assignmentId, classId, search)
+    setSelectedAssignmentId(assignmentId)
+    setSelectedClassId(classId)
+    setSelectedSearch(search)
+    setStudentsPage(1)
   }
+
+  useEffect(() => {
+    if (!isHydrated || !accessToken) {
+      return
+    }
+
+    if (!selectedAssignmentId || !selectedClassId) {
+      setStudents([])
+      setStudentsTotal(0)
+      return
+    }
+
+    void loadStudents(selectedAssignmentId, selectedClassId, studentsPage, studentsPageSize, selectedSearch)
+  }, [accessToken, isHydrated, selectedAssignmentId, selectedClassId, selectedSearch, studentsPage, studentsPageSize])
 
   const router = useRouter()
 
@@ -228,6 +221,22 @@ export default function AdminResultPage() {
             </CardHeader>
             <CardContent>
               <StudentTable students={students} onView={handleViewStudent} />
+              <TablePagination
+                totalItems={studentsTotal}
+                hasPrevPage={studentsPage > 1}
+                hasNextPage={studentsPage * studentsPageSize < studentsTotal}
+                isPaging={studentsLoading}
+                pageSize={studentsPageSize}
+                onPrevPage={() => setStudentsPage((prev) => Math.max(1, prev - 1))}
+                onNextPage={() => setStudentsPage((prev) => prev + 1)}
+                onPageSizeChange={(nextValue) => {
+                  setStudentsPage(1)
+                  setStudentsPageSize(nextValue)
+                }}
+                totalLabel={t.common.pagination.total}
+                previousLabel={t.common.pagination.previous}
+                nextLabel={t.common.pagination.next}
+              />
             </CardContent>
           </Card>
         </div>
