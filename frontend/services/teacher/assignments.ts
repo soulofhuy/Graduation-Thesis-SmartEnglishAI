@@ -17,6 +17,44 @@ export type TeacherAssignmentsResponse = {
   pagination: AssignmentsPagination;
 };
 
+export type TeacherChatResponse = {
+  assignmentId: string;
+  chatSessions: Array<{
+    id: string;
+    assignmentId: string | null;
+    userId: string;
+    title: string;
+    updatedAt: string;
+    createdAt: string;
+    deletedAt: string | null;
+    user: {
+      id: string;
+      email: string;
+      profile: {
+        firstName: string | null;
+        lastName: string | null;
+      } | null;
+    };
+    prompts: Array<{
+      id: string;
+      userId: string;
+      chatSessionId: string;
+      parentPromptId: string | null;
+      prompt: string;
+      effectivePrompt: string | null;
+      version: number;
+      type: string;
+      createdAt: string;
+      response: {
+        id: string;
+        promptId: string;
+        response: string;
+        createdAt: string;
+      } | null;
+    }>;
+  }>;
+};
+
 export async function createAssignment(
   token: string,
   assignmentData: CreateAssignmentInput
@@ -100,6 +138,41 @@ export async function getAssignmentById(token: string, assignmentId: string) {
 
   if (!payload.status || !payload.data) {
     throw new Error(payload.message || 'Failed to fetch assignment detail');
+  }
+
+  return payload.data;
+}
+
+export async function getAssignmentChatMessagesById(
+  token: string,
+  assignmentId: string,
+  studentId?: string
+) {
+  const searchParams = new URLSearchParams(
+    studentId?.trim() ? { studentId: studentId.trim() } : {}
+  );
+
+  const url = `${getApiBaseUrl()}/assignments-for-teacher/${encodeURIComponent(assignmentId)}/chat-messages${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    const errorData: ApiError = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch chat messages');
+  }
+
+  const payload = (await response.json()) as
+    | ApiSuccess<TeacherChatResponse>
+    | ApiError;
+
+  if (!payload.status || !payload.data) {
+    throw new Error(payload.message || 'Failed to fetch chat messages');
   }
 
   return payload.data;

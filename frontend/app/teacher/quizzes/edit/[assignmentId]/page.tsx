@@ -22,7 +22,12 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table'
-import { getAssignmentById, updateAssignmentFullById } from '@/services/teacher/assignments'
+import {
+    getAssignmentById,
+    getAssignmentChatMessagesById,
+    updateAssignmentFullById,
+    type TeacherChatResponse,
+} from '@/services/teacher/assignments'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
@@ -41,7 +46,7 @@ import type { Assignment, Choice, Class, Question, Task, TaskType } from '@/lib/
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
 
-type ActiveTab = 'basic' | 'questions' | 'preview' | 'results'
+type ActiveTab = 'basic' | 'questions' | 'preview' | 'results' | 'aiMessages'
 
 type StudentResult = {
     studentName: string
@@ -141,6 +146,8 @@ export default function EditQuizPage() {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isClassesLoading, setIsClassesLoading] = useState(true)
     const [teacherClasses, setTeacherClasses] = useState<Array<{ id: string; name: string }>>([])
+    const [chatMessagesData, setChatMessagesData] = useState<TeacherChatResponse | null>(null)
+    const [isChatMessagesLoading, setIsChatMessagesLoading] = useState(false)
     const [formData, setFormData] = useState<AssignmentFormData>({
         title: '',
         description: '',
@@ -224,6 +231,27 @@ export default function EditQuizPage() {
 
         void fetchAssignment()
     }, [accessToken, assignmentId])
+
+    useEffect(() => {
+        const fetchChatMessages = async () => {
+            if (!accessToken || !assignmentId || activeTab !== 'aiMessages') {
+                return
+            }
+
+            setIsChatMessagesLoading(true)
+            try {
+                const response = await getAssignmentChatMessagesById(accessToken, assignmentId)
+                setChatMessagesData(response)
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Khong the tai lich su AI messages'
+                toast.error(message)
+            } finally {
+                setIsChatMessagesLoading(false)
+            }
+        }
+
+        void fetchChatMessages()
+    }, [accessToken, assignmentId, activeTab])
 
     useEffect(() => {
         if (!tasks.find((task) => task.id === selectedTaskId) && tasks[0]) {
@@ -363,7 +391,8 @@ export default function EditQuizPage() {
         { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
         { key: 'questions', label: t.teacher.assignments.editAssignment.tabEdit.title },
         { key: 'preview', label: t.teacher.assignments.editAssignment.tableViewPreview.title },
-        { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title }
+        { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title },
+        { key: 'aiMessages', label: 'AI message' }
     ] as const
 
     const handleGoBack = () => {
@@ -650,6 +679,101 @@ export default function EditQuizPage() {
                                         ))}
                                     </TableBody>
                                 </Table>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'aiMessages' && (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 text-lg font-semibold">
+                                <BarChart3 className="h-5 w-5" />
+                                AI message history
+                            </div>
+
+                            {isChatMessagesLoading ? (
+                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                                    Dang tai lich su chat...
+                                </div>
+                            ) : (chatMessagesData?.chatSessions ?? []).length === 0 ? (
+                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                                    Chua co AI message nao cho assignment nay.
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {chatMessagesData?.chatSessions.map((session) => {
+                                        const studentName = [
+                                            session.user.profile?.firstName,
+                                            session.user.profile?.lastName,
+                                        ]
+                                            .filter((value) => Boolean(value?.trim()))
+                                            .join(' ')
+
+                                        const studentLabel = studentName.trim() || session.user.email
+
+                                        return (
+                                            <Card key={session.id} className="overflow-hidden">
+                                                <div className="border-b px-4 py-3">
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <div>
+                                                            <div className="text-sm font-semibold">
+                                                                {session.title}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                {studentLabel} · {session.user.email}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {session.prompts.length} messages
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="p-4">
+                                                    {session.prompts.length === 0 ? (
+                                                        <div className="text-sm text-muted-foreground">
+                                                            Chua co tin nhan nao trong session nay.
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col gap-4">
+                                                            {session.prompts.map((prompt) => {
+                                                                const userMsg = prompt.prompt
+                                                                const assistantMsg = prompt.response?.response
+
+                                                                return (
+                                                                    <div key={prompt.id} className="space-y-2">
+                                                                        <div className="flex justify-end">
+                                                                            <div className="max-w-[70%] bg-primary text-primary-foreground p-3 rounded-xl rounded-br-none">
+                                                                                <div className="text-xs text-muted-foreground mb-1">
+                                                                                    Version {prompt.version} · {new Date(prompt.createdAt).toLocaleString()}
+                                                                                </div>
+                                                                                <div className="whitespace-pre-wrap text-sm">
+                                                                                    {userMsg}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {assistantMsg ? (
+                                                                            <div className="flex justify-start">
+                                                                                <div className="max-w-[70%] bg-background border rounded-xl rounded-tl-none p-3">
+                                                                                    <div className="text-xs text-muted-foreground mb-1">
+                                                                                        {new Date(prompt.response?.createdAt ?? prompt.createdAt).toLocaleString()}
+                                                                                    </div>
+                                                                                    <div className="whitespace-pre-wrap text-sm">
+                                                                                        {assistantMsg}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : null}
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </Card>
+                                        )
+                                    })}
+                                </div>
                             )}
                         </div>
                     )}
