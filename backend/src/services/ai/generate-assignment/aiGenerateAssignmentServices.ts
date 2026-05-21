@@ -1,6 +1,16 @@
 import { getAI } from '@/utils/ai/ai-initialization';
 import { sampleAssignmentPayload } from '../../../../postman/create-assignment-sample';
 
+export type AIConversationTurn = {
+  prompt: string;
+  response?: string | null;
+};
+
+export type GenerateAssignmentContentInput = {
+  topic: string;
+  conversationHistory?: AIConversationTurn[];
+};
+
 const extractJsonPayload = (rawText: string): string | null => {
   const trimmed = rawText.trim();
   if (!trimmed) return null;
@@ -66,14 +76,50 @@ export type GenerateAssignmentResult = {
 };
 
 class AIGenerateAssignmentServices {
+  static buildPrompt(topic: string, conversationHistory: AIConversationTurn[]) {
+    const historyBlock = conversationHistory.length
+      ? conversationHistory
+          .map((turn, index) => {
+            const parts = [
+              `Turn ${index + 1}`,
+              `User prompt: ${turn.prompt.trim()}`
+            ];
+
+            if (turn.response?.trim()) {
+              parts.push(`AI response: ${turn.response.trim()}`);
+            }
+
+            return parts.join('\n');
+          })
+          .join('\n\n')
+      : 'No previous conversation in this chat session.';
+
+    return `
+You are continuing an existing chat session for generating an English exam.
+
+Previous conversation history:
+${historyBlock}
+
+Current user request:
+${topic}
+
+Return only the final exam payload that best follows the latest user request and the prior conversation context.
+
+Format: ${JSON.stringify(sampleAssignmentPayload)}
+    `.trim();
+  }
+
   static generateAssignmentContent = async (
-    topic: string
+    input: string | GenerateAssignmentContentInput
   ): Promise<GenerateAssignmentResult> => {
     try {
-      const prompt = `
-                    Prompt: ${topic}
-                    Format: ${JSON.stringify(sampleAssignmentPayload)}
-                `;
+      const topic = typeof input === 'string' ? input : input.topic;
+      const conversationHistory =
+        typeof input === 'string' ? [] : (input.conversationHistory ?? []);
+      const prompt = AIGenerateAssignmentServices.buildPrompt(
+        topic,
+        conversationHistory
+      );
       const ai = await getAI();
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',

@@ -38,6 +38,7 @@ class AIChatSessionController {
   static sendMessage = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     const prompt = normalizeStringInput(req.body?.prompt);
+    const clientPrompt = normalizeStringInput(req.body?.clientPrompt);
     const assignmentTitle = normalizeStringInput(req.body?.assignmentTitle);
     const assignmentDescription = normalizeStringInput(
       req.body?.assignmentDescription
@@ -56,6 +57,7 @@ class AIChatSessionController {
         : undefined;
     const assignmentId = normalizeStringInput(req.body?.assignmentId);
     const chatSessionId = normalizeStringInput(req.body?.chatSessionId);
+    const basePromptId = normalizeStringInput(req.body?.basePromptId);
     const chatSessionTitle = normalizeStringInput(req.body?.chatSessionTitle);
     const type = normalizePromptType(req.body?.type);
 
@@ -75,6 +77,7 @@ class AIChatSessionController {
       const result = await AIChatSessionServices.sendMessage({
         userId,
         prompt,
+        ...(clientPrompt ? { clientPrompt } : {}),
         ...(assignmentTitle ? { assignmentTitle } : {}),
         ...(assignmentDescription ? { assignmentDescription } : {}),
         ...(classId ? { classId } : {}),
@@ -84,6 +87,7 @@ class AIChatSessionController {
         ...(typeof canViewResult === 'boolean' ? { canViewResult } : {}),
         ...(assignmentId ? { assignmentId } : {}),
         ...(chatSessionId ? { chatSessionId } : {}),
+        ...(basePromptId ? { basePromptId } : {}),
         ...(chatSessionTitle ? { chatSessionTitle } : {}),
         ...(type ? { type } : {})
       });

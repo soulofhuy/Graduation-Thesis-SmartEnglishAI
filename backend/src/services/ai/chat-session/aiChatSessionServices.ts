@@ -1,15 +1,20 @@
 import { randomUUID } from 'crypto';
 import prisma from '@/utils/prisma';
-import AIGenerateAssignmentServices from '@/services/ai/generate-assignment/aiGenerateAssignmentServices';
+import AIGenerateAssignmentServices, {
+  type AIConversationTurn
+} from '@/services/ai/generate-assignment/aiGenerateAssignmentServices';
 import { AIPromptType } from '@/generated/prisma/client';
 
 type ChatSessionRecord = Awaited<ReturnType<typeof prisma.chatSession.create>>;
+type PromptRecord = Awaited<ReturnType<typeof prisma.aIPrompt.create>>;
 
 export type SendChatMessageInput = {
   userId: string;
   prompt: string;
+  clientPrompt?: string;
   assignmentId?: string;
   chatSessionId?: string;
+  basePromptId?: string;
   type?: AIPromptType;
 };
 
@@ -135,6 +140,7 @@ class AIChatSessionServices {
       include: {
         prompts: {
           include: {
+            parentPrompt: true,
             response: true
           },
           orderBy: {
@@ -203,6 +209,7 @@ class AIChatSessionServices {
             createdAt: 'asc'
           },
           include: {
+            parentPrompt: true,
             response: true
           }
         }
@@ -214,6 +221,18 @@ class AIChatSessionServices {
     return AIChatSessionServices.findSessionForUser(chatSessionId, userId);
   }
 
+  static buildConversationHistory(
+    prompts: Array<{
+      prompt: string;
+      response?: { response: string } | null;
+    }>
+  ): AIConversationTurn[] {
+    return prompts.map(item => ({
+      prompt: item.prompt,
+      response: item.response?.response ?? null
+    }));
+  }
+
   static async sendMessage(input: SendChatMessageInput) {
     const promptText = input.prompt.trim();
 
@@ -221,8 +240,34 @@ class AIChatSessionServices {
       throw new Error('Prompt is required');
     }
 
+    const existingSession = await prisma.chatSession.findFirst({
+      where: {
+        ...(input.chatSessionId ? { id: input.chatSessionId } : {}),
+        ...(input.assignmentId ? { assignmentId: input.assignmentId } : {}),
+        userId: input.userId,
+        deletedAt: null
+      },
+      include: {
+        prompts: {
+          orderBy: {
+            createdAt: 'asc'
+          },
+          include: {
+            response: true
+          }
+        }
+      }
+    });
+
     const { rawText, assignment } =
-      await AIGenerateAssignmentServices.generateAssignmentContent(promptText);
+      await AIGenerateAssignmentServices.generateAssignmentContent({
+        topic: promptText,
+        conversationHistory: existingSession
+          ? AIChatSessionServices.buildConversationHistory(
+              existingSession.prompts
+            )
+          : []
+      });
 
     const exchange = await AIChatSessionServices.recordPromptAndResponse({
       ...input,
@@ -240,6 +285,7 @@ class AIChatSessionServices {
 
   static async recordPromptAndResponse(input: PersistChatExchangeInput) {
     const promptText = input.prompt.trim();
+    const clientPrompt = input.clientPrompt?.trim() || promptText;
     const session = await AIChatSessionServices.resolveSession({
       userId: input.userId,
       ...(input.assignmentId ? { assignmentId: input.assignmentId } : {}),
@@ -247,14 +293,37 @@ class AIChatSessionServices {
       prompt: promptText
     });
 
-    const promptRecord = await prisma.aIPrompt.create({
+    const parentPrompt = input.basePromptId
+      ? await prisma.aIPrompt.findFirst({
+          where: {
+            id: input.basePromptId,
+            userId: input.userId,
+            chatSessionId: session.id
+          }
+        })
+      : await prisma.aIPrompt.findFirst({
+          where: {
+            chatSessionId: session.id,
+            userId: input.userId
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        });
+
+    const promptVersion = parentPrompt ? parentPrompt.version + 1 : 1;
+
+    const promptRecord = (await prisma.aIPrompt.create({
       data: {
         userId: input.userId,
         chatSessionId: session.id,
-        prompt: promptText,
+        parentPromptId: parentPrompt?.id ?? null,
+        prompt: clientPrompt,
+        effectivePrompt: promptText,
+        version: promptVersion,
         type: input.type ?? AIPromptType.ASSIGMMENT_CREATION
       }
-    });
+    })) as PromptRecord;
 
     const responseRecord = await prisma.aIResponse.create({
       data: {
@@ -273,6 +342,7 @@ class AIChatSessionServices {
             createdAt: 'asc'
           },
           include: {
+            parentPrompt: true,
             response: true
           }
         }

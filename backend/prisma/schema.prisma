@@ -161,16 +161,22 @@ model AIPrompt {
   id                    String            @id @default(uuid())
   userId                String            @map("user_id")
   chatSessionId         String            @map("chat_session_id")
+  parentPromptId        String?           @map("parent_prompt_id")
   prompt                String            @db.Text
+  effectivePrompt       String?           @map("effective_prompt") @db.Text
+  version               Int               @default(1)
   type                  AIPromptType
   createdAt             DateTime          @default(now()) @map("created_at")
 
   user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   chatSession           ChatSession       @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  parentPrompt          AIPrompt?         @relation("AIPromptVersionChain", fields: [parentPromptId], references: [id], onDelete: SetNull)
+  childPrompts          AIPrompt[]        @relation("AIPromptVersionChain")
   response              AIResponse?
 
   @@index([userId])
   @@index([chatSessionId])
+  @@index([parentPromptId])
   @@map("AIPrompts")
 }
 
