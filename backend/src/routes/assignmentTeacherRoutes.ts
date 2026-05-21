@@ -50,6 +50,12 @@ router.get(
 );
 
 router.get(
+  '/assignments-for-teacher/:assignmentId/chat-messages',
+  verifyJWT,
+  AssignmentController.getChatMessagesByAssignmentId
+);
+
+router.get(
   '/classes/:classId/assignments',
   verifyJWT,
   AssignmentController.getAssignmentsByClassId

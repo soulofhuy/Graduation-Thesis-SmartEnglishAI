@@ -382,6 +382,110 @@ class AssignmentService {
     });
   };
 
+  static getChatMessagesByAssignmentId = async (
+    teacherId: string,
+    assignmentId: string,
+    studentId?: string
+  ) => {
+    if (!teacherId?.trim()) {
+      throw new Error('Teacher ID is required');
+    }
+
+    if (!assignmentId?.trim()) {
+      throw new Error('Assignment ID is required');
+    }
+
+    const [teacher, assignment] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: teacherId },
+        select: {
+          id: true,
+          role: true,
+          isActive: true
+        }
+      }),
+      prisma.assignment.findUnique({
+        where: { id: assignmentId },
+        select: {
+          id: true,
+          createdBy: true,
+          class: {
+            select: {
+              id: true,
+              teacherId: true,
+              isActive: true
+            }
+          }
+        }
+      })
+    ]);
+
+    if (!teacher) {
+      throw new Error('Teacher not found');
+    }
+
+    if (!teacher.isActive) {
+      throw new Error('Teacher account is inactive');
+    }
+
+    if (!assignment) {
+      throw new Error('Assignment not found');
+    }
+
+    if (!assignment.class.isActive) {
+      throw new Error('Cannot view chat messages of an inactive class');
+    }
+
+    const isAdmin = teacher.role === Role.ADMIN;
+    const isClassTeacher = assignment.class.teacherId === teacherId;
+    const isCreator = assignment.createdBy === teacherId;
+
+    if (!isAdmin && !isClassTeacher && !isCreator) {
+      throw new Error(
+        'Only assignment creator, class owner or admin can view chat messages'
+      );
+    }
+
+    const chatSessions = await prisma.chatSession.findMany({
+      where: {
+        assignmentId,
+        deletedAt: null,
+        ...(studentId?.trim() ? { userId: studentId.trim() } : {})
+      },
+      orderBy: {
+        createdAt: 'asc'
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            }
+          }
+        },
+        prompts: {
+          orderBy: {
+            createdAt: 'asc'
+          },
+          include: {
+            parentPrompt: true,
+            response: true
+          }
+        }
+      }
+    });
+
+    return {
+      assignmentId,
+      chatSessions
+    };
+  };
+
   static getAssignmentsByClassId = async (classId: string) => {
     if (!classId?.trim()) {
       throw new Error('Class ID is required');

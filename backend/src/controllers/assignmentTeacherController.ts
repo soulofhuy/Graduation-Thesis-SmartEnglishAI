@@ -71,6 +71,49 @@ class AssignmentController {
     }
   };
 
+  static getChatMessagesByAssignmentId = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const teacherId = req.userId;
+    const assignmentId = req.params.assignmentId || req.body.assignmentId;
+    const studentId = req.query.studentId;
+
+    if (!teacherId) {
+      return res
+        .status(401)
+        .json(
+          Responses.errorResponse(new Error('Unauthorized - User ID not found'))
+        );
+    }
+
+    if (!assignmentId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Assignment ID is required')));
+    }
+
+    try {
+      const chatMessages =
+        await AssignmentService.getChatMessagesByAssignmentId(
+          teacherId,
+          assignmentId,
+          typeof studentId === 'string' ? studentId : undefined
+        );
+
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Assignment chat messages fetched successfully',
+            chatMessages
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
   static getAssignmentsByClassId = async (
     req: AuthenticatedRequest,
     res: Response
