@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, BarChart3 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -25,6 +25,7 @@ import {
 import {
     getAssignmentById,
     getAssignmentChatMessagesById,
+    getOlderChatMessagesForSession,
     updateAssignmentFullById,
     type TeacherChatResponse,
 } from '@/services/teacher/assignments'
@@ -240,7 +241,7 @@ export default function EditQuizPage() {
 
             setIsChatMessagesLoading(true)
             try {
-                const response = await getAssignmentChatMessagesById(accessToken, assignmentId)
+                const response = await getAssignmentChatMessagesById(accessToken, assignmentId, undefined, 3)
                 setChatMessagesData(response)
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'Khong the tai lich su AI messages'
@@ -536,6 +537,161 @@ export default function EditQuizPage() {
         }))
     }
 
+    function ChatSessionView({ session }: { session: any }) {
+        const containerRef = useRef<HTMLDivElement | null>(null)
+        const INITIAL_VISIBLE = 3
+        const LOAD_MORE = 10
+        const [visibleCount, setVisibleCount] = useState<number>(INITIAL_VISIBLE)
+        const prevScrollHeightRef = useRef<number>(0)
+
+        // flatten prompts into individual messages
+        const [allMessages, setAllMessages] = useState<any[]>(() => {
+            const arr: Array<any> = []
+                ; (session.prompts ?? []).forEach((prompt: any) => {
+                    arr.push({
+                        id: `${prompt.id}-user`,
+                        role: 'user',
+                        text: prompt.prompt,
+                        createdAt: prompt.createdAt,
+                        version: prompt.version
+                    })
+
+                    if (prompt.response?.response) {
+                        arr.push({
+                            id: `${prompt.id}-assistant`,
+                            role: 'assistant',
+                            text: prompt.response.response,
+                            createdAt: prompt.response.createdAt ?? prompt.createdAt
+                        })
+                    }
+                })
+
+            return arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        })
+
+        const messages = allMessages
+        const [hasMoreOlder, setHasMoreOlder] = useState<boolean>(true)
+        const [isLoadingOlder, setIsLoadingOlder] = useState<boolean>(false)
+
+        // reset visible when session changes
+        useEffect(() => {
+            setVisibleCount(INITIAL_VISIBLE)
+        }, [session.id])
+
+        // scroll handling: when user scrolls to top, load older messages
+        const onScroll = () => {
+            const el = containerRef.current
+            if (!el) return
+            if (el.scrollTop <= 8) {
+                if (visibleCount < messages.length) {
+                    // load more from already-fetched messages
+                    prevScrollHeightRef.current = el.scrollHeight
+                    setVisibleCount((v) => Math.min(messages.length, v + LOAD_MORE))
+                    return
+                }
+
+                // need to fetch older from backend if available
+                if (!hasMoreOlder || isLoadingOlder) return
+
+                void (async () => {
+                    setIsLoadingOlder(true)
+                    try {
+                        const earliest = messages[0]?.createdAt
+                        const params = new URLSearchParams()
+                        params.set('limit', String(LOAD_MORE))
+                        if (earliest) params.set('before', new Date(earliest).toISOString())
+
+                        const older: any[] | null = await getOlderChatMessagesForSession(
+                            accessToken as string,
+                            assignmentId,
+                            session.id,
+                            params.get('before') ?? undefined,
+                            Number(params.get('limit') ?? LOAD_MORE)
+                        )
+                        if (!Array.isArray(older) || older.length === 0) {
+                            setHasMoreOlder(false)
+                            return
+                        }
+
+                        // transform prompts into messages
+                        const transformed: any[] = []
+                        older.forEach((prompt: any) => {
+                            transformed.push({ id: `${prompt.id}-user`, role: 'user', text: prompt.prompt, createdAt: prompt.createdAt, version: prompt.version })
+                            if (prompt.response?.response) transformed.push({ id: `${prompt.id}-assistant`, role: 'assistant', text: prompt.response.response, createdAt: prompt.response.createdAt ?? prompt.createdAt })
+                        })
+
+                        // prepend and sort
+                        setAllMessages((prev) => {
+                            const next = [...transformed, ...prev]
+                            return next.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                        })
+                        // increase visible count by number of items fetched
+                        prevScrollHeightRef.current = el.scrollHeight
+                        setVisibleCount((v) => v + transformed.length)
+                    } catch (err) {
+                        // swallow - optional: show toast
+                    } finally {
+                        setIsLoadingOlder(false)
+                    }
+                })()
+            }
+        }
+
+        // after visibleCount change (loading older), adjust scroll to keep position
+        useEffect(() => {
+            const el = containerRef.current
+            if (!el) return
+
+            // on initial mount or when increasing visibleCount, maintain view at bottom for first render
+            requestAnimationFrame(() => {
+                if (prevScrollHeightRef.current > 0) {
+                    const newScroll = el.scrollHeight - prevScrollHeightRef.current
+                    el.scrollTop = newScroll
+                    prevScrollHeightRef.current = 0
+                } else {
+                    // initial load: scroll to bottom
+                    el.scrollTop = el.scrollHeight
+                }
+            })
+        }, [visibleCount, messages.length])
+
+        const shown = messages.slice(Math.max(0, messages.length - visibleCount))
+
+        return (
+            <div className="p-2">
+                <div
+                    ref={containerRef}
+                    onScroll={onScroll}
+                    className="h-80 max-h-[520px] overflow-auto p-4 flex flex-col gap-4 bg-muted/10 rounded-md"
+                >
+                    {shown.length === 0 ? (
+                        <div className="text-sm text-muted-foreground">Chua co tin nhan nao trong session nay.</div>
+                    ) : (
+                        shown.map((msg: any) => (
+                            <div key={msg.id} className="space-y-1">
+                                {msg.role === 'user' ? (
+                                    <div className="flex justify-end">
+                                        <div className="max-w-[70%] bg-primary text-primary-foreground p-3 rounded-xl rounded-br-none">
+                                            <div className="whitespace-pre-wrap text-sm">{msg.text}</div>
+                                            <div className="text-xs text-muted-foreground mt-2">{msg.version ? `Version ${msg.version} · ` : ''}{new Date(msg.createdAt).toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex justify-start">
+                                        <div className="max-w-[70%] bg-background border rounded-xl rounded-tl-none p-3">
+                                            <div className="whitespace-pre-wrap text-sm">{msg.text}</div>
+                                            <div className="text-xs text-muted-foreground mt-2">{new Date(msg.createdAt).toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        )
+    }
+
     if (isLoading) {
         return <div className="p-8 text-center text-muted-foreground">{t.common.loading}</div>
     }
@@ -700,7 +856,7 @@ export default function EditQuizPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {chatMessagesData?.chatSessions.map((session) => {
+                                    {(chatMessagesData?.chatSessions ?? []).map((session) => {
                                         const studentName = [
                                             session.user.profile?.firstName,
                                             session.user.profile?.lastName,
@@ -728,48 +884,7 @@ export default function EditQuizPage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="p-4">
-                                                    {session.prompts.length === 0 ? (
-                                                        <div className="text-sm text-muted-foreground">
-                                                            Chua co tin nhan nao trong session nay.
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex flex-col gap-4">
-                                                            {session.prompts.map((prompt) => {
-                                                                const userMsg = prompt.prompt
-                                                                const assistantMsg = prompt.response?.response
-
-                                                                return (
-                                                                    <div key={prompt.id} className="space-y-2">
-                                                                        <div className="flex justify-end">
-                                                                            <div className="max-w-[70%] bg-primary text-primary-foreground p-3 rounded-xl rounded-br-none">
-                                                                                <div className="text-xs text-muted-foreground mb-1">
-                                                                                    Version {prompt.version} · {new Date(prompt.createdAt).toLocaleString()}
-                                                                                </div>
-                                                                                <div className="whitespace-pre-wrap text-sm">
-                                                                                    {userMsg}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {assistantMsg ? (
-                                                                            <div className="flex justify-start">
-                                                                                <div className="max-w-[70%] bg-background border rounded-xl rounded-tl-none p-3">
-                                                                                    <div className="text-xs text-muted-foreground mb-1">
-                                                                                        {new Date(prompt.response?.createdAt ?? prompt.createdAt).toLocaleString()}
-                                                                                    </div>
-                                                                                    <div className="whitespace-pre-wrap text-sm">
-                                                                                        {assistantMsg}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        ) : null}
-                                                                    </div>
-                                                                )
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <ChatSessionView session={session} />
                                             </Card>
                                         )
                                     })}

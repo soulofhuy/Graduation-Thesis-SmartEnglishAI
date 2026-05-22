@@ -78,6 +78,7 @@ class AssignmentController {
     const teacherId = req.userId;
     const assignmentId = req.params.assignmentId || req.body.assignmentId;
     const studentId = req.query.studentId;
+    const latest = Number(req.query.latest ?? 3);
 
     if (!teacherId) {
       return res
@@ -98,7 +99,8 @@ class AssignmentController {
         await AssignmentService.getChatMessagesByAssignmentId(
           teacherId,
           assignmentId,
-          typeof studentId === 'string' ? studentId : undefined
+          typeof studentId === 'string' ? studentId : undefined,
+          latest
         );
 
       return res
@@ -137,6 +139,45 @@ class AssignmentController {
             assignments
           )
         );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
+  static getOlderChatMessagesBySessionId = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const teacherId = req.userId;
+    const sessionId = req.params.sessionId || req.body.sessionId;
+    const before = req.query.before as string | undefined;
+    const limit = Number(req.query.limit ?? 20);
+
+    if (!teacherId) {
+      return res
+        .status(401)
+        .json(
+          Responses.errorResponse(new Error('Unauthorized - User ID not found'))
+        );
+    }
+
+    if (!sessionId) {
+      return res
+        .status(400)
+        .json(Responses.errorResponse(new Error('Session ID is required')));
+    }
+
+    try {
+      const messages = await AssignmentService.getOlderPromptsBySessionId(
+        teacherId,
+        sessionId,
+        before,
+        limit
+      );
+
+      return res
+        .status(200)
+        .json(Responses.successResponse('Older prompts fetched', messages));
     } catch (error) {
       return res.status(400).json(Responses.errorResponse(error));
     }

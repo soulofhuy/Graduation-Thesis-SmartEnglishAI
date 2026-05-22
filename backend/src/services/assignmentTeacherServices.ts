@@ -385,7 +385,8 @@ class AssignmentService {
   static getChatMessagesByAssignmentId = async (
     teacherId: string,
     assignmentId: string,
-    studentId?: string
+    studentId?: string,
+    latest = 3
   ) => {
     if (!teacherId?.trim()) {
       throw new Error('Teacher ID is required');
@@ -468,22 +469,125 @@ class AssignmentService {
             }
           }
         },
-        prompts: {
-          orderBy: {
-            createdAt: 'asc'
-          },
-          include: {
-            parentPrompt: true,
-            response: true
+        prompts:
+          latest > 0
+            ? {
+                orderBy: { createdAt: 'desc' },
+                take: latest,
+                include: {
+                  parentPrompt: true,
+                  response: true
+                }
+              }
+            : {
+                orderBy: { createdAt: 'asc' },
+                include: {
+                  parentPrompt: true,
+                  response: true
+                }
+              }
+      }
+    });
+
+    // if we fetched only last N prompts per session (desc), reverse each prompts array to ascending order
+    const normalized = chatSessions.map(s => ({
+      ...s,
+      prompts: (s.prompts ?? []).slice().reverse()
+    }));
+
+    return {
+      assignmentId,
+      chatSessions: normalized
+    };
+  };
+
+  static getOlderPromptsBySessionId = async (
+    teacherId: string,
+    sessionId: string,
+    before?: string,
+    limit = 20
+  ) => {
+    if (!teacherId?.trim()) {
+      throw new Error('Teacher ID is required');
+    }
+
+    if (!sessionId?.trim()) {
+      throw new Error('Session ID is required');
+    }
+
+    if (!Number.isInteger(limit) || limit < 1) {
+      throw new Error('Limit must be a positive integer');
+    }
+
+    // validate session exists and teacher has access
+    const session = await prisma.chatSession.findUnique({
+      where: { id: sessionId },
+      include: {
+        assignment: {
+          select: {
+            id: true,
+            createdBy: true,
+            class: { select: { teacherId: true } }
           }
         }
       }
     });
 
-    return {
-      assignmentId,
-      chatSessions
-    };
+    if (!session) {
+      throw new Error('Chat session not found');
+    }
+
+    const assignmentId = session.assignment.id;
+
+    // reuse permission checks: find teacher role and assignment info
+    const [teacher, assignment] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: teacherId },
+        select: { id: true, role: true, isActive: true }
+      }),
+      prisma.assignment.findUnique({
+        where: { id: assignmentId },
+        select: {
+          id: true,
+          createdBy: true,
+          class: { select: { teacherId: true, isActive: true } }
+        }
+      })
+    ]);
+
+    if (!teacher) throw new Error('Teacher not found');
+    if (!teacher.isActive) throw new Error('Teacher account is inactive');
+    if (!assignment) throw new Error('Assignment not found');
+    if (!assignment.class.isActive)
+      throw new Error('Cannot view chat messages of an inactive class');
+
+    const isAdmin = teacher.role === Role.ADMIN;
+    const isClassTeacher = assignment.class.teacherId === teacherId;
+    const isCreator = assignment.createdBy === teacherId;
+
+    if (!isAdmin && !isClassTeacher && !isCreator) {
+      throw new Error(
+        'Only assignment creator, class owner or admin can view chat messages'
+      );
+    }
+
+    const where: any = { chatSessionId: sessionId };
+    if (before) {
+      const beforeDate = new Date(before);
+      if (!Number.isNaN(beforeDate.getTime())) {
+        where.createdAt = { lt: beforeDate };
+      }
+    }
+
+    const prompts = await prisma.prompt.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: { parentPrompt: true, response: true }
+    });
+
+    // return in ascending order
+    return prompts.slice().reverse();
   };
 
   static getAssignmentsByClassId = async (classId: string) => {

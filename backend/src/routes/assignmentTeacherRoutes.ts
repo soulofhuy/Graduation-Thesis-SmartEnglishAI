@@ -56,6 +56,12 @@ router.get(
 );
 
 router.get(
+  '/assignments-for-teacher/:assignmentId/chat-messages/:sessionId/older',
+  verifyJWT,
+  AssignmentController.getOlderChatMessagesBySessionId
+);
+
+router.get(
   '/classes/:classId/assignments',
   verifyJWT,
   AssignmentController.getAssignmentsByClassId
