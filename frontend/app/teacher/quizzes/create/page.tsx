@@ -279,6 +279,7 @@ export default function CreateQuizPage() {
             // Persist prompt/response via chat-session API so sessions and prompts are saved
             const result = await sendAIChatMessage(accessToken, {
                 prompt: combinedTopic,
+                clientPrompt: trimmedPrompt,
                 assignmentTitle: formData.title || undefined,
                 assignmentDescription: formData.description || undefined,
                 classId: formData.classId || undefined,

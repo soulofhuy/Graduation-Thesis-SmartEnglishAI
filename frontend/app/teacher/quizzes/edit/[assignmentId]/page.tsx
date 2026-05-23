@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, BarChart3 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -22,7 +22,13 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table'
-import { getAssignmentById, updateAssignmentFullById } from '@/services/teacher/assignments'
+import {
+    getAssignmentById,
+    getAssignmentChatMessagesById,
+    getOlderChatMessagesForSession,
+    updateAssignmentFullById,
+    type TeacherChatResponse,
+} from '@/services/teacher/assignments'
 import {
     QuizBasicInfoSection,
     QuizQuestionsSection,
@@ -33,6 +39,7 @@ import {
     createId,
     createQuestion,
     createTask,
+    ChatSessionView,
     type AssignmentFormData,
     type QuestionDraft,
     type TaskDraft
@@ -41,7 +48,7 @@ import type { Assignment, Choice, Class, Question, Task, TaskType } from '@/lib/
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
 
-type ActiveTab = 'basic' | 'questions' | 'preview' | 'results'
+type ActiveTab = 'basic' | 'questions' | 'preview' | 'results' | 'aiMessages'
 
 type StudentResult = {
     studentName: string
@@ -141,6 +148,8 @@ export default function EditQuizPage() {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isClassesLoading, setIsClassesLoading] = useState(true)
     const [teacherClasses, setTeacherClasses] = useState<Array<{ id: string; name: string }>>([])
+    const [chatMessagesData, setChatMessagesData] = useState<TeacherChatResponse | null>(null)
+    const [isChatMessagesLoading, setIsChatMessagesLoading] = useState(false)
     const [formData, setFormData] = useState<AssignmentFormData>({
         title: '',
         description: '',
@@ -224,6 +233,27 @@ export default function EditQuizPage() {
 
         void fetchAssignment()
     }, [accessToken, assignmentId])
+
+    useEffect(() => {
+        const fetchChatMessages = async () => {
+            if (!accessToken || !assignmentId || activeTab !== 'aiMessages') {
+                return
+            }
+
+            setIsChatMessagesLoading(true)
+            try {
+                const response = await getAssignmentChatMessagesById(accessToken, assignmentId, undefined, 3)
+                setChatMessagesData(response)
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Khong the tai lich su AI messages'
+                toast.error(message)
+            } finally {
+                setIsChatMessagesLoading(false)
+            }
+        }
+
+        void fetchChatMessages()
+    }, [accessToken, assignmentId, activeTab])
 
     useEffect(() => {
         if (!tasks.find((task) => task.id === selectedTaskId) && tasks[0]) {
@@ -362,8 +392,9 @@ export default function EditQuizPage() {
     const topTabs = [
         { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
         { key: 'questions', label: t.teacher.assignments.editAssignment.tabEdit.title },
+        { key: 'aiMessages', label: t.teacher.assignments.editAssignment.tabChatWithAI.title },
         { key: 'preview', label: t.teacher.assignments.editAssignment.tableViewPreview.title },
-        { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title }
+        // { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title }
     ] as const
 
     const handleGoBack = () => {
@@ -616,7 +647,7 @@ export default function EditQuizPage() {
 
                     {activeTab === 'preview' && <QuizPreviewContent payload={payloadPreview} />}
 
-                    {activeTab === 'results' && (
+                    {/* {activeTab === 'results' && (
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 text-lg font-semibold">
                                 <BarChart3 className="h-5 w-5" />
@@ -625,7 +656,7 @@ export default function EditQuizPage() {
 
                             {emptyResults.length === 0 ? (
                                 <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    Chua co ket qua nop bai cua hoc sinh cho assignment nay.
+                                    {t.common.noData}
                                 </div>
                             ) : (
                                 <Table>
@@ -650,6 +681,31 @@ export default function EditQuizPage() {
                                         ))}
                                     </TableBody>
                                 </Table>
+                            )}
+                        </div>
+                    )} */}
+
+                    {activeTab === 'aiMessages' && (
+                        <div className="space-y-4">
+                            {isChatMessagesLoading ? (
+                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                                    {t.common.loading}
+                                </div>
+                            ) : (chatMessagesData?.chatSessions ?? []).length === 0 ? (
+                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                                    {t.common.noData}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {(chatMessagesData?.chatSessions ?? []).map((session) => (
+                                        <ChatSessionView
+                                            key={session.id}
+                                            session={session}
+                                            accessToken={accessToken as string}
+                                            assignmentId={assignmentId as string}
+                                        />
+                                    ))}
+                                </div>
                             )}
                         </div>
                     )}

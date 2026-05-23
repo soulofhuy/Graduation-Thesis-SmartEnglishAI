@@ -15,7 +15,10 @@ export type AIPromptModel = {
   id: string;
   userId: string;
   chatSessionId: string;
+  parentPromptId: string | null;
   prompt: string;
+  effectivePrompt: string | null;
+  version: number;
   type: AIPromptType;
   createdAt: string;
   response: AIResponseModel | null;
@@ -34,6 +37,7 @@ export type ChatSessionModel = {
 
 export type SendChatMessageRequest = {
   prompt: string;
+  clientPrompt?: string;
   assignmentTitle?: string;
   assignmentDescription?: string;
   classId?: string;
@@ -43,6 +47,7 @@ export type SendChatMessageRequest = {
   canViewResult?: boolean;
   assignmentId?: string;
   chatSessionId?: string;
+  basePromptId?: string;
   chatSessionTitle?: string;
   type?: AIPromptType;
 };
