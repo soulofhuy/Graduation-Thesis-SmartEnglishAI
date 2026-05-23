@@ -662,6 +662,9 @@ export const translations = {
           },
           tabStudentResults: {
             title: 'Student results'
+          },
+          tabChatWithAI: {
+            title: 'AI conversation history'
           }
         },
         createQuestionsAndTasks: {
@@ -1787,6 +1790,9 @@ export const translations = {
           },
           tabStudentResults: {
             title: 'Kết quả học sinh'
+          },
+          tabChatWithAI: {
+            title: 'Lịch sử trò chuyện với AI'
           }
         },
         createAssignment: {

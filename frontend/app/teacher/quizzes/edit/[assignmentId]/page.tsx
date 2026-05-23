@@ -392,9 +392,9 @@ export default function EditQuizPage() {
     const topTabs = [
         { key: 'basic', label: t.teacher.assignments.createAssignment.tabAssignmentInfo.title },
         { key: 'questions', label: t.teacher.assignments.editAssignment.tabEdit.title },
+        { key: 'aiMessages', label: t.teacher.assignments.editAssignment.tabChatWithAI.title },
         { key: 'preview', label: t.teacher.assignments.editAssignment.tableViewPreview.title },
-        { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title },
-        { key: 'aiMessages', label: 'AI message' }
+        // { key: 'results', label: t.teacher.assignments.editAssignment.tabStudentResults.title }
     ] as const
 
     const handleGoBack = () => {
@@ -647,7 +647,7 @@ export default function EditQuizPage() {
 
                     {activeTab === 'preview' && <QuizPreviewContent payload={payloadPreview} />}
 
-                    {activeTab === 'results' && (
+                    {/* {activeTab === 'results' && (
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 text-lg font-semibold">
                                 <BarChart3 className="h-5 w-5" />
@@ -656,7 +656,7 @@ export default function EditQuizPage() {
 
                             {emptyResults.length === 0 ? (
                                 <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    Chua co ket qua nop bai cua hoc sinh cho assignment nay.
+                                    {t.common.noData}
                                 </div>
                             ) : (
                                 <Table>
@@ -683,17 +683,17 @@ export default function EditQuizPage() {
                                 </Table>
                             )}
                         </div>
-                    )}
+                    )} */}
 
                     {activeTab === 'aiMessages' && (
                         <div className="space-y-4">
                             {isChatMessagesLoading ? (
                                 <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    Dang tai lich su chat...
+                                    {t.common.loading}
                                 </div>
                             ) : (chatMessagesData?.chatSessions ?? []).length === 0 ? (
                                 <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    Chua co AI message nao cho assignment nay.
+                                    {t.common.noData}
                                 </div>
                             ) : (
                                 <div className="space-y-4">
