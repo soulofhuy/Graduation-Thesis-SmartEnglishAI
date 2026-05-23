@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { getOlderChatMessagesForSession } from '@/services/teacher/assignments'
+import { ChatMessageContent } from './chat-message-content'
 
 type ChatSessionViewProps = {
     session: any
@@ -147,8 +148,8 @@ export function ChatSessionView({ session, accessToken, assignmentId }: ChatSess
                             ) : (
                                 shown.map((msg: any) => (
                                     <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[60%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${msg.role === 'user' ? 'rounded-br-sm bg-orange-100 text-orange-950 dark:bg-orange-500/20 dark:text-orange-100' : 'rounded-bl-sm border bg-muted/40 text-foreground'}`}>
-                                            <div className="whitespace-pre-wrap">{msg.text}</div>
+                                        <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'rounded-br-sm bg-orange-100 text-orange-950 dark:bg-orange-500/20 dark:text-orange-100' : 'rounded-bl-sm border bg-muted/40 text-foreground'}`}>
+                                            <ChatMessageContent content={msg.text} />
                                             <div className="text-xs opacity-70 mt-2">{msg.version && msg.role === 'user' ? `Version ${msg.version} · ` : ''}{new Date(msg.createdAt).toLocaleString()}</div>
                                         </div>
                                     </div>

@@ -5,3 +5,4 @@ export * from './quiz-questions-section';
 export * from './quiz-preview-modal';
 export * from './quiz-preview-content';
 export * from './chat-session-view';
+export * from './chat-message-content';
