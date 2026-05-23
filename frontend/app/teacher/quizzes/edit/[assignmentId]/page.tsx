@@ -658,35 +658,33 @@ export default function EditQuizPage() {
         const shown = messages.slice(Math.max(0, messages.length - visibleCount))
 
         return (
-            <div className="p-2">
-                <div
-                    ref={containerRef}
-                    onScroll={onScroll}
-                    className="h-80 max-h-[520px] overflow-auto p-4 flex flex-col gap-4 bg-muted/10 rounded-md"
-                >
-                    {shown.length === 0 ? (
-                        <div className="text-sm text-muted-foreground">Chua co tin nhan nao trong session nay.</div>
-                    ) : (
-                        shown.map((msg: any) => (
-                            <div key={msg.id} className="space-y-1">
-                                {msg.role === 'user' ? (
-                                    <div className="flex justify-end">
-                                        <div className="max-w-[70%] bg-primary text-primary-foreground p-3 rounded-xl rounded-br-none">
-                                            <div className="whitespace-pre-wrap text-sm">{msg.text}</div>
-                                            <div className="text-xs text-muted-foreground mt-2">{msg.version ? `Version ${msg.version} · ` : ''}{new Date(msg.createdAt).toLocaleString()}</div>
-                                        </div>
-                                    </div>
+            <div className="p-4">
+                <div className="relative z-10 flex h-[610px] flex-col gap-4 rounded-xl border border-border/60 bg-card/70 p-4 shadow-sm">
+                    <div className="hidden lg:block absolute inset-0 rounded-xl bg-gradient-to-br from-background via-background to-background" />
+                    <div className="absolute -right-24 top-1/2 h-[560px] w-[560px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_30%_30%,#f3f4f6_0%,#e6e7e9_40%,#d9dade_100%)] blur-[70px] opacity-50 dark:opacity-30 pointer-events-none" />
+
+                    <div className="relative z-10 flex flex-1 flex-col overflow-hidden rounded-xl border border-muted/40 bg-background/70">
+                        <div
+                            ref={containerRef}
+                            onScroll={onScroll}
+                            className="flex-1 overflow-y-auto px-4 py-4"
+                        >
+                            <div className="space-y-4">
+                                {shown.length === 0 ? (
+                                    <div className="text-sm text-muted-foreground text-center py-4">Chua co tin nhan nao trong session nay.</div>
                                 ) : (
-                                    <div className="flex justify-start">
-                                        <div className="max-w-[70%] bg-background border rounded-xl rounded-tl-none p-3">
-                                            <div className="whitespace-pre-wrap text-sm">{msg.text}</div>
-                                            <div className="text-xs text-muted-foreground mt-2">{new Date(msg.createdAt).toLocaleString()}</div>
+                                    shown.map((msg: any) => (
+                                        <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[60%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${msg.role === 'user' ? 'rounded-br-sm bg-orange-100 text-orange-950 dark:bg-orange-500/20 dark:text-orange-100' : 'rounded-bl-sm border bg-muted/40 text-foreground'}`}>
+                                                <div className="whitespace-pre-wrap">{msg.text}</div>
+                                                <div className="text-xs opacity-70 mt-2">{msg.version && msg.role === 'user' ? `Version ${msg.version} · ` : ''}{new Date(msg.createdAt).toLocaleString()}</div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ))
                                 )}
                             </div>
-                        ))
-                    )}
+                        </div>
+                    </div>
                 </div>
             </div>
         )
@@ -841,11 +839,6 @@ export default function EditQuizPage() {
 
                     {activeTab === 'aiMessages' && (
                         <div className="space-y-4">
-                            <div className="flex items-center gap-2 text-lg font-semibold">
-                                <BarChart3 className="h-5 w-5" />
-                                AI message history
-                            </div>
-
                             {isChatMessagesLoading ? (
                                 <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
                                     Dang tai lich su chat...
@@ -856,38 +849,9 @@ export default function EditQuizPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {(chatMessagesData?.chatSessions ?? []).map((session) => {
-                                        const studentName = [
-                                            session.user.profile?.firstName,
-                                            session.user.profile?.lastName,
-                                        ]
-                                            .filter((value) => Boolean(value?.trim()))
-                                            .join(' ')
-
-                                        const studentLabel = studentName.trim() || session.user.email
-
-                                        return (
-                                            <Card key={session.id} className="overflow-hidden">
-                                                <div className="border-b px-4 py-3">
-                                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                                        <div>
-                                                            <div className="text-sm font-semibold">
-                                                                {session.title}
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground">
-                                                                {studentLabel} · {session.user.email}
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-xs text-muted-foreground">
-                                                            {session.prompts.length} messages
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <ChatSessionView session={session} />
-                                            </Card>
-                                        )
-                                    })}
+                                    {(chatMessagesData?.chatSessions ?? []).map((session) => (
+                                        <ChatSessionView key={session.id} session={session} />
+                                    ))}
                                 </div>
                             )}
                         </div>
