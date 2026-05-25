@@ -1,20 +1,33 @@
-from dotenv import load_dotenv
+from __future__ import annotations
+
+import logging
 import os
 import re
 
+from dotenv import load_dotenv
 import google.generativeai as genai
+
+from src.prompts.analysis_prompt import build_analysis_prompt
+from src.prompts.sql_prompt import build_sql_prompt
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GOOGLEAPI"))
+MODEL_NAME = "gemini-3-flash-preview"
+
+logger = logging.getLogger(__name__)
 
 
-def _read_schema() -> str:
-    schema_path = os.getenv("SCHEMA_PATH", "schema.prisma")
-    if os.path.isfile(schema_path):
-        with open(schema_path, "r", encoding="utf-8") as schema_file:
-            return schema_file.read()
-    return ""
+def _get_api_key() -> str:
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY is not set.")
+    return api_key
+
+
+def _get_model() -> genai.GenerativeModel:
+    logger.debug("Initializing Gemini model: %s", MODEL_NAME)
+    genai.configure(api_key=_get_api_key())
+    return genai.GenerativeModel(MODEL_NAME)
 
 
 def _clean_sql(sql: str) -> str:
@@ -25,29 +38,18 @@ def _clean_sql(sql: str) -> str:
     return cleaned.strip()
 
 
-def generate_sql(user_question: str) -> str:
-    schema = _read_schema()
-    prompt = (
-        "You are a PostgreSQL expert. Based on the schema below, return ONLY a SELECT SQL query. "
-        "No markdown, no explanation.\n"
-        f"Schema:\n{schema}\n\n"
-        f"Question: {user_question}"
-    )
-
-    model = genai.GenerativeModel("gemini-1.5-flash")
+def generate_sql(question: str, schema: str) -> str:
+    logger.info("Generating SQL with Gemini")
+    logger.debug("Question length: %d, schema length: %d", len(question), len(schema))
+    prompt = build_sql_prompt(schema=schema, question=question)
+    model = _get_model()
     result = model.generate_content(prompt)
     return _clean_sql(result.text or "")
 
 
-def generate_answer(user_question: str, data) -> str:
-    prompt = (
-        "Based on the query result below, answer the user's question in a friendly and concise way. "
-        "If data is empty, say no matching results were found. "
-        "Respond in the SAME language as the user's question.\n"
-        f"Question: {user_question}\n"
-        f"Data: {data}"
-    )
-
-    model = genai.GenerativeModel("gemini-1.5-flash")
+def generate_analysis(question: str, sql: str, result_payload: str) -> str:
+    logger.info("Generating analysis with Gemini")
+    prompt = build_analysis_prompt(question=question, sql=sql, result=result_payload)
+    model = _get_model()
     result = model.generate_content(prompt)
     return result.text or ""

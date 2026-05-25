@@ -9,15 +9,22 @@ backend_text_to_sql/
   .env.example
   src/
     config/
-      db.py
+      database.py
     controllers/
       chat_controller.py
     routes/
-      chat_route.py
+      chat_routes.py
     services/
+      analysis_service.py
       chat_service.py
       database_service.py
       gemini_service.py
+      schema_service.py
+    prompts/
+      analysis_prompt.py
+      sql_prompt.py
+    utils/
+      sql_validator.py
 ```
 
 ## Setup (Conda)
@@ -38,14 +45,9 @@ pip install -r requirements.txt
 Copy `.env.example` to `.env` and fill values:
 
 ```
-GOOGLEAPI=your_gemini_key
-DB_HOST=your_host
-DB_PORT=5432
-DB_NAME=your_db
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_SSLMODE=prefer
-SCHEMA_PATH=schema.prisma
+DATABASE_URL=postgresql://username:password@host:5432/postgres
+GOOGLE_API_KEY=your_gemini_key
+SCHEMA_PATH=../backend/prisma/schema.prisma
 PORT=5000
 ```
 
@@ -57,6 +59,6 @@ python app.py
 
 ## API
 
-- POST `/api/chat/ask`
+- POST `/api/chat`
   - Body: `{ "message": "your question" }`
-  - Response: `{ "answer": "...", "sql": "...", "data": [...] }`
+  - Response: `{ "success": true, "question": "...", "sql": "...", "columns": [...], "rows": [...], "analysis": "..." }`
