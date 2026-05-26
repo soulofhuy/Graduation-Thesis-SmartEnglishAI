@@ -7,57 +7,34 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { Send, Sparkles } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
-const chatThreads = [
-    {
-        id: 'thread-1',
-        title: 'Lớp 8CB1 - Bài tập 1',
-        subtitle: 'Tổng hợp điểm số',
-    },
-    {
-        id: 'thread-2',
-        title: 'Lớp 9CB1 - Bài tập 2',
-        subtitle: 'Phân tích kỹ năng',
-    },
-    {
-        id: 'thread-3',
-        title: 'Học sinh chưa nộp bài',
-        subtitle: 'Gợi ý nhắc nhở',
-    },
-]
+type ChatThread = {
+    id: string
+    title: string
+    subtitle: string
+}
 
-const chatMessages = [
-    {
-        id: 'msg-1',
-        role: 'ai',
-        name: 'SmartEnglish AI',
-        message:
-            'Bạn muốn tổng hợp kết quả hay cần gợi ý nhận xét theo từng học sinh?',
-        time: '10:15',
-    },
-    {
-        id: 'msg-2',
-        role: 'teacher',
-        name: 'Bạn',
-        message:
-            'Tổng hợp nhanh kết quả bài tập này và đề xuất 2 học sinh cần hỗ trợ thêm.',
-        time: '10:16',
-    },
-    {
-        id: 'msg-3',
-        role: 'ai',
-        name: 'SmartEnglish AI',
-        message:
-            'Đã rõ. Tôi sẽ tạo báo cáo ngắn gọn, kèm gợi ý hỗ trợ và thông điệp nhắc nhở mẫu.',
-        time: '10:17',
-    },
-]
+type ChatMessage = {
+    id: string
+    role: 'ai' | 'teacher'
+    name: string
+    message: string
+    time: string
+}
 
 type ResultsChatPanelProps = {
     className?: string
+    chatMessages: ChatMessage[]
+    chatThreads: ChatThread[]
 }
 
-export function ResultsChatPanel({ className }: ResultsChatPanelProps) {
+export function ResultsChatPanel({
+    className,
+    chatMessages = [],
+    chatThreads = [],
+}: ResultsChatPanelProps) {
+    const { t, language } = useLanguage()
     return (
         <Card className={cn('shadow-sm', className)}>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -67,7 +44,7 @@ export function ResultsChatPanel({ className }: ResultsChatPanelProps) {
                         <AvatarFallback>AI</AvatarFallback>
                     </Avatar>
                     <div>
-                        <CardTitle className="text-lg">Chat với AI</CardTitle>
+                        <CardTitle className="text-lg">{t.teacher.results.chatWithAI.title}</CardTitle>
                     </div>
                 </div>
             </CardHeader>
@@ -75,7 +52,7 @@ export function ResultsChatPanel({ className }: ResultsChatPanelProps) {
                 <div className="grid gap-4 lg:grid-cols-[220px_1fr] flex-grow">
                     <div className="space-y-3">
                         <div className="text-xs text-center font-semibold tracking-wide text-muted-foreground">
-                            Cuộc trò chuyện gần đây
+                            {t.teacher.results.chatWithAI.recentChats}
                         </div>
                         <div className="space-y-2">
                             {chatThreads.map((thread) => (
@@ -127,8 +104,8 @@ export function ResultsChatPanel({ className }: ResultsChatPanelProps) {
                         </ScrollArea>
                         <div className="border-t p-3">
                             <div className="flex items-center gap-2">
-                                <Input placeholder="Nhập tin nhắn cho AI..." />
-                                <Button size="icon" aria-label="Gửi tin nhắn">
+                                <Input placeholder={t.teacher.results.chatWithAI.textInputPlaceholder} />
+                                <Button size="icon">
                                     <Send className="size-4" />
                                 </Button>
                             </div>
