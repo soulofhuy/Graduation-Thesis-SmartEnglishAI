@@ -9,7 +9,7 @@ const router = Router();
 
 router.post('/result-analysis/chat', verifyJWT, handleResultAnalysisChat);
 router.get(
-  '/result-analysis/chat/history/:userId',
+  '/result-analysis/chat/history',
   verifyJWT,
   handleGetAnalysisChatHistory
 );

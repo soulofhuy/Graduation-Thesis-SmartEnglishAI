@@ -1,12 +1,16 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import {
   saveResultAnalysisChat,
   getAnalysisChatHistory
 } from '@/services/ai/result-analysis/resultAnalysisServices';
+import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 
-export const handleResultAnalysisChat = async (req: Request, res: Response) => {
-  const { userId, chatSessionId, prompt, response, assignmentId, classId } =
-    req.body;
+export const handleResultAnalysisChat = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { chatSessionId, prompt, response, assignmentId, classId } = req.body;
+  const userId = req.userId;
 
   if (!userId || !prompt || !response) {
     return res.status(400).json({
@@ -33,15 +37,13 @@ export const handleResultAnalysisChat = async (req: Request, res: Response) => {
 };
 
 export const handleGetAnalysisChatHistory = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
-  const { userId: rawUserId } = req.params;
-
-  const userId = Array.isArray(rawUserId) ? rawUserId[0] : rawUserId;
+  const userId = req.userId;
 
   if (!userId) {
-    return res.status(400).json({ error: 'Missing required field: userId.' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
