@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -24,6 +25,7 @@ import { toast } from 'sonner'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { dateTimeFormat } from '@/lib/format'
+import { ResultsChatPanel } from './_components/results-chat-panel'
 
 interface StudentResultTable {
   id: string
@@ -57,6 +59,7 @@ export default function TeacherResultsPage() {
   const [isLoadingResults, setIsLoadingResults] = useState(false)
   const [resultsError, setResultsError] = useState<string | null>(null)
   const [results, setResults] = useState<StudentResultTable[]>([])
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   useEffect(() => {
     const loadClasses = async () => {
@@ -182,13 +185,21 @@ export default function TeacherResultsPage() {
   return (
     <div className="p-4 md:p-8 space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
-          {t.teacher.results.title}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {t.teacher.results.description}
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t.teacher.results.title}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {t.teacher.results.description}
+          </p>
+        </div>
+        <Button
+          className="self-start"
+          onClick={() => setIsChatOpen((prev) => !prev)}
+        >
+          Chat với AI
+        </Button>
       </div>
 
       {/* Stats */}
@@ -324,6 +335,12 @@ export default function TeacherResultsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="sm:max-w-5xl p-0 h-[80vh] flex flex-col">
+          <ResultsChatPanel className="border-0 shadow-none flex-grow" />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
