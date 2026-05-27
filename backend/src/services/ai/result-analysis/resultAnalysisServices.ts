@@ -5,9 +5,7 @@ export const saveResultAnalysisChat = async (
   userId: string,
   chatSessionId: string | null,
   prompt: string,
-  response: string,
-  assignmentId?: string,
-  classId?: string
+  response: string
 ) => {
   let session;
 
@@ -24,28 +22,10 @@ export const saveResultAnalysisChat = async (
   }
 
   if (!session) {
-    let title = 'Result Analysis Chat';
-    if (assignmentId) {
-      const assignment = await prisma.assignment.findUnique({
-        where: { id: assignmentId }
-      });
-      if (assignment) {
-        title = `Analysis for ${assignment.title}`;
-      }
-    } else if (classId) {
-      const classInfo = await prisma.class.findUnique({
-        where: { id: classId }
-      });
-      if (classInfo) {
-        title = `Analysis for class ${classInfo.name}`;
-      }
-    }
-
     session = await prisma.chatSession.create({
       data: {
         userId,
-        title,
-        assignmentId: assignmentId || null
+        title: 'Result Analysis Chat'
       }
     });
   }

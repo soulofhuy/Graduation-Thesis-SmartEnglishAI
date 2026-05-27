@@ -338,7 +338,11 @@ export default function TeacherResultsPage() {
 
       <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
         <DialogContent className="sm:max-w-5xl p-0 h-[80vh] flex flex-col">
-          <ResultsChatPanel className="border-0 shadow-none flex-grow" />
+          <ResultsChatPanel
+            className="border-0 shadow-none flex-grow"
+            classId={selectedClass}
+            assignmentId={selectedAssignment}
+          />
         </DialogContent>
       </Dialog>
     </div>

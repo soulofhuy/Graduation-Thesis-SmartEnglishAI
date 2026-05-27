@@ -9,7 +9,7 @@ export const handleResultAnalysisChat = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
-  const { chatSessionId, prompt, response, assignmentId, classId } = req.body;
+  const { chatSessionId, prompt, response } = req.body;
   const userId = req.userId;
 
   if (!userId || !prompt || !response) {
@@ -23,9 +23,7 @@ export const handleResultAnalysisChat = async (
       userId,
       chatSessionId,
       prompt,
-      response,
-      assignmentId,
-      classId
+      response
     );
     res.status(201).json(chatData);
   } catch (error) {

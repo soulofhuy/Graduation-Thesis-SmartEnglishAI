@@ -1,13 +1,21 @@
 'use client'
 
+import { DialogTitle, DialogDescription } from '@radix-ui/react-dialog'
+import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Send, Sparkles } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { useLanguage } from '@/components/language-provider'
+import { useAuth } from '@/components/auth-provider'
+import { aiResultAnalysisService } from '@/services/teacher/ai-result-analysis'
+import { toast } from 'sonner'
+import { getToastMessage } from '@/lib/toast/message'
+import { TOAST_COLORS } from '@/lib/toast/color'
+import { dateTimeFormat } from '@/lib/format'
 
 type ChatThread = {
     id: string
@@ -25,16 +33,101 @@ type ChatMessage = {
 
 type ResultsChatPanelProps = {
     className?: string
-    chatMessages: ChatMessage[]
-    chatThreads: ChatThread[]
+    classId: string
+    assignmentId: string
 }
 
 export function ResultsChatPanel({
     className,
-    chatMessages = [],
-    chatThreads = [],
+    classId,
+    assignmentId,
 }: ResultsChatPanelProps) {
     const { t, language } = useLanguage()
+    const { user, accessToken } = useAuth()
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+    const [chatThreads, setChatThreads] = useState<ChatThread[]>([])
+    const [inputValue, setInputValue] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+    const scrollToBottom = () => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTo({
+                top: scrollAreaRef.current.scrollHeight,
+                behavior: 'smooth',
+            })
+        }
+    }
+
+    useEffect(() => {
+        const loadHistory = async () => {
+            if (!classId || !assignmentId || !accessToken) return
+            try {
+                setIsLoading(true)
+                const history = await aiResultAnalysisService.getAnalysisChatHistory();
+                const formattedMessages: ChatMessage[] = history.map((item: any) => ({
+                    id: item.id,
+                    role: item.role === 'USER' ? 'teacher' : 'ai',
+                    name: item.role === 'USER' ? user?.name : 'AI Assistant',
+                    message: item.content,
+                    time: dateTimeFormat(item.createdAt),
+                }))
+                setChatMessages(formattedMessages)
+            } catch (error) {
+                toast.error(getToastMessage('loadFailed', language), {
+                    className: TOAST_COLORS.error,
+                })
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadHistory()
+    }, [classId, assignmentId, accessToken, user, language])
+
+    useEffect(() => {
+        scrollToBottom()
+    }, [chatMessages])
+
+    const handleSendMessage = async () => {
+        if (!inputValue.trim() || !accessToken || !user) return
+
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: 'teacher',
+            name: user.name,
+            message: inputValue,
+            time: dateTimeFormat(new Date().toISOString()),
+        }
+
+        setChatMessages((prev) => [...prev, userMessage])
+        setInputValue('')
+        setIsLoading(true)
+
+        try {
+            console.log('Sending message to AI:', inputValue)
+            const aiResponse = await aiResultAnalysisService.sendAnalysisChat({
+                accessToken,
+                userId: user.id,
+                prompt: inputValue,
+            })
+            const aiMessage: ChatMessage = {
+                id: aiResponse.id,
+                role: 'ai',
+                name: 'AI Assistant',
+                message: aiResponse.content,
+                time: dateTimeFormat(aiResponse.createdAt),
+            }
+            setChatMessages((prev) => [...prev, aiMessage])
+        } catch (error) {
+            toast.error(getToastMessage('aiResponseFailed', language), {
+                className: TOAST_COLORS.error,
+            })
+            setChatMessages((prev) => prev.slice(0, -1)) // Remove user message on error
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <Card className={cn('shadow-sm', className)}>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -44,7 +137,9 @@ export function ResultsChatPanel({
                         <AvatarFallback>AI</AvatarFallback>
                     </Avatar>
                     <div>
-                        <CardTitle className="text-lg">{t.teacher.results.chatWithAI.title}</CardTitle>
+                        <DialogTitle asChild>
+                            <CardTitle className="text-lg">{t.teacher.results.chatWithAI.title}</CardTitle>
+                        </DialogTitle>
                     </div>
                 </div>
             </CardHeader>
@@ -55,7 +150,7 @@ export function ResultsChatPanel({
                             {t.teacher.results.chatWithAI.recentChats}
                         </div>
                         <div className="space-y-2">
-                            {chatThreads.map((thread) => (
+                            {/* {chatThreads.map((thread) => (
                                 <button
                                     key={thread.id}
                                     className="w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
@@ -63,49 +158,70 @@ export function ResultsChatPanel({
                                     <div className="font-semibold text-foreground">{thread.title}</div>
                                     <div className="text-xs text-muted-foreground">{thread.subtitle}</div>
                                 </button>
-                            ))}
+                            ))} */}
                         </div>
                     </div>
 
                     <div className="flex h-full flex-col rounded-lg border bg-background">
-                        <ScrollArea className="flex-grow">
+                        <ScrollArea className="flex-grow" ref={scrollAreaRef}>
                             <div className="space-y-4 px-4 py-3">
-                                {chatMessages.map((message) => (
-                                    <div
-                                        key={message.id}
-                                        className={cn(
-                                            'flex gap-3',
-                                            message.role === 'teacher' ? 'justify-end' : 'justify-start'
-                                        )}
-                                    >
-                                        {message.role === 'ai' && (
-                                            <Avatar className="size-8">
-                                                <AvatarImage src="/logo/logo.png" alt="AI" />
-                                                <AvatarFallback>AI</AvatarFallback>
-                                            </Avatar>
-                                        )}
+                                {isLoading && chatMessages.length === 0 ? (
+                                    <div className="text-center text-muted-foreground">Loading chat...</div>
+                                ) : (
+                                    chatMessages.map((message) => (
                                         <div
+                                            key={message.id}
                                             className={cn(
-                                                'max-w-[75%] rounded-2xl px-4 py-2 text-sm',
-                                                message.role === 'teacher'
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'bg-muted text-foreground'
+                                                'flex gap-3',
+                                                message.role === 'teacher' ? 'justify-end' : 'justify-start'
                                             )}
                                         >
-                                            <div className="text-xs font-semibold opacity-80">
-                                                {message.name}
+                                            {message.role === 'ai' && (
+                                                <Avatar className="size-8">
+                                                    <AvatarImage src="/logo/logo.png" alt="AI" />
+                                                    <AvatarFallback>AI</AvatarFallback>
+                                                </Avatar>
+                                            )}
+                                            <div
+                                                className={cn(
+                                                    'max-w-[75%] rounded-2xl px-4 py-2 text-sm',
+                                                    message.role === 'teacher'
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : 'bg-muted text-foreground'
+                                                )}
+                                            >
+                                                <div className="text-xs font-semibold opacity-80">
+                                                    {message.name}
+                                                </div>
+                                                <div className="mt-1 leading-relaxed">{message.message}</div>
+                                                <div className="mt-2 text-[11px] opacity-70">{message.time}</div>
                                             </div>
-                                            <div className="mt-1 leading-relaxed">{message.message}</div>
-                                            <div className="mt-2 text-[11px] opacity-70">{message.time}</div>
+                                        </div>
+                                    ))
+                                )}
+                                {isLoading && chatMessages.length > 0 && (
+                                    <div className="flex justify-start">
+                                        <Avatar className="size-8">
+                                            <AvatarImage src="/logo/logo.png" alt="AI" />
+                                            <AvatarFallback>AI</AvatarFallback>
+                                        </Avatar>
+                                        <div className="ml-3 max-w-[75%] rounded-2xl px-4 py-2 text-sm bg-muted text-foreground">
+                                            Typing...
                                         </div>
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </ScrollArea>
                         <div className="border-t p-3">
                             <div className="flex items-center gap-2">
-                                <Input placeholder={t.teacher.results.chatWithAI.textInputPlaceholder} />
-                                <Button size="icon">
+                                <Input
+                                    placeholder={t.teacher.results.chatWithAI.textInputPlaceholder}
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                    disabled={isLoading}
+                                />
+                                <Button size="icon" onClick={handleSendMessage} disabled={isLoading || !inputValue.trim()}>
                                     <Send className="size-4" />
                                 </Button>
                             </div>

@@ -4,13 +4,13 @@ import {
 } from '@/lib/api-base-url/get-api-base-url';
 
 type SendAnalysisChatPayload = {
+  accessToken: string;
+  userId: string;
   chatSessionId?: string | null;
   prompt: string;
-  assignmentId?: string;
-  classId?: string;
 };
 
-// 1. Call Python backend to get AI response
+// chỗ này là API được gọi từ backend để có thể lấy data từ AI
 const getAIAnalysisResponse = async (prompt: string) => {
   const response = await fetch(`${getTextToSqlApiBaseUrl()}/chat`, {
     method: 'POST',
@@ -28,30 +28,26 @@ const getAIAnalysisResponse = async (prompt: string) => {
   }
 
   const data = await response.json();
-  return data.response; // Assuming the python API returns { "response": "..." }
+  return data.response;
 };
 
-// 2. Save chat exchange to Node.js backend and get history
 export const aiResultAnalysisService = {
   sendAnalysisChat: async (payload: SendAnalysisChatPayload) => {
     try {
-      // Step 1: Get response from Python AI service
       const aiResponse = await getAIAnalysisResponse(payload.prompt);
-
-      // Step 2: Save the entire exchange to our Node.js backend
       const saveData = {
         ...payload,
         response: aiResponse
       };
-
+      // return saveData;
       const { data } = await fetch(`${getApiBaseUrl()}/result-analysis/chat`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${payload.accessToken}`
         },
         body: JSON.stringify(saveData)
       }).then(res => res.json());
-
       return data;
     } catch (error) {
       console.error('Error in sendAnalysisChat:', error);
@@ -59,14 +55,15 @@ export const aiResultAnalysisService = {
     }
   },
 
-  getAnalysisChatHistory: async () => {
+  getAnalysisChatHistory: async (accessToken: string) => {
     try {
       const { data } = await fetch(
         `${getApiBaseUrl()}/result-analysis/chat/history`,
         {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
           }
         }
       ).then(res => res.json());
