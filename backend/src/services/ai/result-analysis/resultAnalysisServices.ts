@@ -1,6 +1,20 @@
 import prisma from '@/utils/prisma';
 import { AIPromptType } from '@/generated/prisma/client';
 
+type ResultAnalysisHistoryMessage = {
+  id: string;
+  role: 'USER' | 'AI';
+  content: string;
+  createdAt: Date;
+};
+
+type ResultAnalysisHistorySession = {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export const saveResultAnalysisChat = async (
   userId: string,
   chatSessionId: string | null,
@@ -106,5 +120,10 @@ export const getAnalysisChatHistory = async (userId: string) => {
     }
   });
 
-  return sessions;
+  return sessions.map(session => ({
+    id: session.id,
+    title: session.title,
+    createdAt: session.createdAt ?? new Date(),
+    updatedAt: session.updatedAt
+  })) satisfies ResultAnalysisHistorySession[];
 };
