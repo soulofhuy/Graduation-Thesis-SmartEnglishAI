@@ -39,16 +39,27 @@ export const aiResultAnalysisService = {
         ...payload,
         response: aiResponse
       };
-      // return saveData;
-      const { data } = await fetch(`${getApiBaseUrl()}/result-analysis/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${payload.accessToken}`
-        },
-        body: JSON.stringify(saveData)
-      }).then(res => res.json());
-      return data;
+      const savedResponse = await fetch(
+        `${getApiBaseUrl()}/result-analysis/chat`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${payload.accessToken}`
+          },
+          body: JSON.stringify(saveData)
+        }
+      );
+
+      const savedResponseData = await savedResponse.json();
+
+      if (!savedResponse.ok) {
+        throw new Error(
+          savedResponseData.error || 'Failed to save analysis chat'
+        );
+      }
+
+      return savedResponseData.data?.aiResponse;
     } catch (error) {
       console.error('Error in sendAnalysisChat:', error);
       throw error;
@@ -57,7 +68,7 @@ export const aiResultAnalysisService = {
 
   getAnalysisChatHistory: async (accessToken: string) => {
     try {
-      const { data } = await fetch(
+      const response = await fetch(
         `${getApiBaseUrl()}/result-analysis/chat/history`,
         {
           method: 'GET',
@@ -66,9 +77,39 @@ export const aiResultAnalysisService = {
             Authorization: `Bearer ${accessToken}`
           }
         }
-      ).then(res => res.json());
+      );
 
-      return data;
+      const { data, error } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(error || 'Failed to load analysis chat history');
+      }
+
+      return (data ?? []).flatMap((session: any) =>
+        (session.prompts ?? []).flatMap((prompt: any) => {
+          const messages = [
+            {
+              id: prompt.id,
+              role: 'USER',
+              content: prompt.prompt,
+              createdAt: prompt.createdAt,
+              chatSessionId: session.id
+            }
+          ];
+
+          if (prompt.response) {
+            messages.push({
+              id: prompt.response.id,
+              role: 'AI',
+              content: prompt.response.response,
+              createdAt: prompt.response.createdAt,
+              chatSessionId: session.id
+            });
+          }
+
+          return messages;
+        })
+      );
     } catch (error) {
       console.error('Error getting analysis chat history:', error);
       throw error;

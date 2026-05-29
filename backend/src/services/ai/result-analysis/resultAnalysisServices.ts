@@ -7,52 +7,81 @@ export const saveResultAnalysisChat = async (
   prompt: string,
   response: string
 ) => {
-  let session;
+  return prisma.$transaction(async tx => {
+    let session = null;
 
-  if (chatSessionId) {
-    session = await prisma.chatSession.findUnique({
-      where: { id: chatSessionId }
-    });
-    if (session) {
-      session = await prisma.chatSession.update({
-        where: { id: chatSessionId },
-        data: { updatedAt: new Date() }
+    if (chatSessionId) {
+      session = await tx.chatSession.findFirst({
+        where: {
+          id: chatSessionId,
+          userId,
+          deletedAt: null
+        }
+      });
+
+      if (!session) {
+        throw new Error('Chat session not found');
+      }
+    } else {
+      session = await tx.chatSession.findFirst({
+        where: {
+          userId,
+          deletedAt: null,
+          prompts: {
+            some: {
+              type: AIPromptType.RESULT_ANALYSIS
+            }
+          }
+        },
+        orderBy: {
+          updatedAt: 'desc'
+        }
       });
     }
-  }
 
-  if (!session) {
-    session = await prisma.chatSession.create({
+    if (!session) {
+      session = await tx.chatSession.create({
+        data: {
+          userId,
+          title: 'Result Analysis Chat'
+        }
+      });
+    }
+
+    await tx.chatSession.update({
+      where: {
+        id: session.id
+      },
       data: {
-        userId,
-        title: 'Result Analysis Chat'
+        updatedAt: new Date()
       }
     });
-  }
 
-  const userPrompt = await prisma.aIPrompt.create({
-    data: {
-      userId,
-      chatSessionId: session.id,
-      prompt,
-      type: AIPromptType.RESULT_ANALYSIS
-    }
+    const userPrompt = await tx.aIPrompt.create({
+      data: {
+        userId,
+        chatSessionId: session.id,
+        prompt,
+        type: AIPromptType.RESULT_ANALYSIS
+      }
+    });
+
+    const aiResponse = await tx.aIResponse.create({
+      data: {
+        promptId: userPrompt.id,
+        response
+      }
+    });
+
+    return { session, userPrompt, aiResponse };
   });
-
-  const aiResponse = await prisma.aIResponse.create({
-    data: {
-      promptId: userPrompt.id,
-      response
-    }
-  });
-
-  return { session, userPrompt, aiResponse };
 };
 
 export const getAnalysisChatHistory = async (userId: string) => {
   const sessions = await prisma.chatSession.findMany({
     where: {
       userId,
+      deletedAt: null,
       prompts: {
         some: {
           type: AIPromptType.RESULT_ANALYSIS
@@ -61,6 +90,9 @@ export const getAnalysisChatHistory = async (userId: string) => {
     },
     include: {
       prompts: {
+        where: {
+          type: AIPromptType.RESULT_ANALYSIS
+        },
         include: {
           response: true
         },

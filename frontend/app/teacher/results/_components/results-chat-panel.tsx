@@ -47,6 +47,7 @@ export function ResultsChatPanel({
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
     const [chatThreads, setChatThreads] = useState<ChatThread[]>([])
     const [inputValue, setInputValue] = useState('')
+    const [chatSessionId, setChatSessionId] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
 
@@ -64,7 +65,7 @@ export function ResultsChatPanel({
             if (!classId || !assignmentId || !accessToken) return
             try {
                 setIsLoading(true)
-                const history = await aiResultAnalysisService.getAnalysisChatHistory();
+                const history = await aiResultAnalysisService.getAnalysisChatHistory(accessToken)
                 const formattedMessages: ChatMessage[] = history.map((item: any) => ({
                     id: item.id,
                     role: item.role === 'USER' ? 'teacher' : 'ai',
@@ -73,6 +74,8 @@ export function ResultsChatPanel({
                     time: dateTimeFormat(item.createdAt),
                 }))
                 setChatMessages(formattedMessages)
+                const lastSessionId = history.at(-1)?.chatSessionId ?? null
+                setChatSessionId(lastSessionId)
             } catch (error) {
                 toast.error(getToastMessage('loadFailed', language), {
                     className: TOAST_COLORS.error,
@@ -108,8 +111,12 @@ export function ResultsChatPanel({
             const aiResponse = await aiResultAnalysisService.sendAnalysisChat({
                 accessToken,
                 userId: user.id,
+                chatSessionId,
                 prompt: inputValue,
             })
+            if (aiResponse?.chatSessionId) {
+                setChatSessionId(aiResponse.chatSessionId)
+            }
             const aiMessage: ChatMessage = {
                 id: aiResponse.id,
                 role: 'ai',

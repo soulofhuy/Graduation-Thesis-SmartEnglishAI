@@ -4,6 +4,7 @@ import {
   getAnalysisChatHistory
 } from '@/services/ai/result-analysis/resultAnalysisServices';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
+import Responses from '@/utils/responses';
 
 export const handleResultAnalysisChat = async (
   req: AuthenticatedRequest,
@@ -14,7 +15,7 @@ export const handleResultAnalysisChat = async (
 
   if (!userId || !prompt || !response) {
     return res.status(400).json({
-      error: 'Missing required fields: userId, prompt, and response.'
+      error: 'Missing required fields: prompt and response.'
     });
   }
 
@@ -25,10 +26,21 @@ export const handleResultAnalysisChat = async (
       prompt,
       response
     );
-    res.status(201).json(chatData);
+
+    return res.status(201).json(
+      Responses.successResponse('Result analysis chat saved successfully', {
+        session: chatData.session,
+        aiResponse: {
+          id: chatData.aiResponse.id,
+          chatSessionId: chatData.session.id,
+          content: chatData.aiResponse.response,
+          createdAt: chatData.aiResponse.createdAt
+        }
+      })
+    );
   } catch (error) {
     console.error('Error saving result analysis chat:', error);
-    res
+    return res
       .status(500)
       .json({ error: 'An error occurred while saving the chat session.' });
   }
@@ -46,10 +58,18 @@ export const handleGetAnalysisChatHistory = async (
 
   try {
     const history = await getAnalysisChatHistory(userId);
-    res.status(200).json(history);
+
+    return res
+      .status(200)
+      .json(
+        Responses.successResponse(
+          'Result analysis chat history fetched',
+          history
+        )
+      );
   } catch (error) {
     console.error('Error getting result analysis chat history:', error);
-    res
+    return res
       .status(500)
       .json({ error: 'An error occurred while getting the chat history.' });
   }
