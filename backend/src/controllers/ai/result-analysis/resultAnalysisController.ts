@@ -1,10 +1,23 @@
 import { Response } from 'express';
 import {
   saveResultAnalysisChat,
-  getAnalysisChatHistory
+  getAnalysisChatHistory,
+  getAnalysisChatSessionDetail
 } from '@/services/ai/result-analysis/resultAnalysisServices';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 import Responses from '@/utils/responses';
+
+const normalizeStringInput = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (Array.isArray(value) && typeof value[0] === 'string') {
+    return value[0];
+  }
+
+  return undefined;
+};
 
 export const handleResultAnalysisChat = async (
   req: AuthenticatedRequest,
@@ -72,5 +85,46 @@ export const handleGetAnalysisChatHistory = async (
     return res
       .status(500)
       .json({ error: 'An error occurred while getting the chat history.' });
+  }
+};
+
+export const handleGetAnalysisChatSessionDetail = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const userId = req.userId;
+  const chatSessionId = normalizeStringInput(req.params.chatSessionId);
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  if (!chatSessionId) {
+    return res.status(400).json({ error: 'Chat session ID is required' });
+  }
+
+  try {
+    const sessionDetail = await getAnalysisChatSessionDetail(
+      userId,
+      chatSessionId
+    );
+
+    if (!sessionDetail) {
+      return res.status(404).json({ error: 'Chat session not found' });
+    }
+
+    return res
+      .status(200)
+      .json(
+        Responses.successResponse(
+          'Result analysis chat session detail fetched',
+          sessionDetail
+        )
+      );
+  } catch (error) {
+    console.error('Error getting result analysis chat session detail:', error);
+    return res.status(500).json({
+      error: 'An error occurred while getting the chat session detail.'
+    });
   }
 };

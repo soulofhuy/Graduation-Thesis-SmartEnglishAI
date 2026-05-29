@@ -8,6 +8,21 @@ import { AIPromptType } from '@/generated/prisma/client';
 type ChatSessionRecord = Awaited<ReturnType<typeof prisma.chatSession.create>>;
 type PromptRecord = Awaited<ReturnType<typeof prisma.aIPrompt.create>>;
 
+type ChatSessionMessage = {
+  id: string;
+  role: 'USER' | 'AI';
+  content: string;
+  createdAt: Date;
+};
+
+type ChatSessionDetail = {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messages: ChatSessionMessage[];
+};
+
 export type SendChatMessageInput = {
   userId: string;
   prompt: string;
@@ -219,6 +234,65 @@ class AIChatSessionServices {
 
   static async getChatSessionById(chatSessionId: string, userId: string) {
     return AIChatSessionServices.findSessionForUser(chatSessionId, userId);
+  }
+
+  static async getChatSessionMessagesById(
+    chatSessionId: string,
+    userId: string
+  ) {
+    const session = await prisma.chatSession.findFirst({
+      where: {
+        id: chatSessionId,
+        userId,
+        deletedAt: null
+      },
+      include: {
+        prompts: {
+          include: {
+            response: true
+          },
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
+      }
+    });
+
+    if (!session) {
+      return null;
+    }
+
+    const messages = session.prompts.flatMap(prompt => {
+      const promptCreatedAt = prompt.createdAt ?? session.createdAt ?? new Date();
+      const aiCreatedAt = prompt.response?.createdAt ?? promptCreatedAt;
+
+      return [
+        {
+          id: prompt.id,
+          role: 'USER' as const,
+          content: prompt.prompt,
+          createdAt: promptCreatedAt
+        },
+        ...(prompt.response
+          ? [
+              {
+                id: prompt.response.id,
+                role: 'AI' as const,
+                content: prompt.response.response,
+                createdAt: aiCreatedAt
+              }
+            ]
+          : [])
+      ];
+    });
+
+    return {
+      id: session.id,
+      title: session.title,
+      createdAt: session.createdAt ?? new Date(),
+      updatedAt: session.updatedAt,
+      messages
+    } satisfies ChatSessionDetail;
   }
 
   static buildConversationHistory(

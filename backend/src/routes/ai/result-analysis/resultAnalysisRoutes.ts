@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import {
   handleResultAnalysisChat,
-  handleGetAnalysisChatHistory
+  handleGetAnalysisChatHistory,
+  handleGetAnalysisChatSessionDetail
 } from '@/controllers/ai/result-analysis/resultAnalysisController';
 import verifyJWT from '@/middlewares/authMiddleware';
 
@@ -12,6 +13,11 @@ router.get(
   '/result-analysis/chat/history',
   verifyJWT,
   handleGetAnalysisChatHistory
+);
+router.get(
+  '/result-analysis/chat/:chatSessionId',
+  verifyJWT,
+  handleGetAnalysisChatSessionDetail
 );
 
 export default router;

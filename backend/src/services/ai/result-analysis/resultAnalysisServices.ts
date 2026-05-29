@@ -15,6 +15,21 @@ type ResultAnalysisHistorySession = {
   updatedAt: Date;
 };
 
+type ResultAnalysisSessionMessage = {
+  id: string;
+  role: 'USER' | 'AI';
+  content: string;
+  createdAt: Date;
+};
+
+type ResultAnalysisSessionDetail = {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messages: ResultAnalysisSessionMessage[];
+};
+
 export const saveResultAnalysisChat = async (
   userId: string,
   chatSessionId: string | null,
@@ -126,4 +141,71 @@ export const getAnalysisChatHistory = async (userId: string) => {
     createdAt: session.createdAt ?? new Date(),
     updatedAt: session.updatedAt
   })) satisfies ResultAnalysisHistorySession[];
+};
+
+export const getAnalysisChatSessionDetail = async (
+  userId: string,
+  chatSessionId: string
+) => {
+  const session = await prisma.chatSession.findFirst({
+    where: {
+      id: chatSessionId,
+      userId,
+      deletedAt: null,
+      prompts: {
+        some: {
+          type: AIPromptType.RESULT_ANALYSIS
+        }
+      }
+    },
+    include: {
+      prompts: {
+        where: {
+          type: AIPromptType.RESULT_ANALYSIS
+        },
+        include: {
+          response: true
+        },
+        orderBy: {
+          createdAt: 'asc'
+        }
+      }
+    }
+  });
+
+  if (!session) {
+    return null;
+  }
+
+  const messages = session.prompts.flatMap(prompt => {
+    const promptCreatedAt = prompt.createdAt ?? session.createdAt ?? new Date();
+    const aiCreatedAt = prompt.response?.createdAt ?? promptCreatedAt;
+
+    return [
+      {
+        id: prompt.id,
+        role: 'USER' as const,
+        content: prompt.prompt,
+        createdAt: promptCreatedAt
+      },
+      ...(prompt.response
+        ? [
+            {
+              id: prompt.response.id,
+              role: 'AI' as const,
+              content: prompt.response.response,
+              createdAt: aiCreatedAt
+            }
+          ]
+        : [])
+    ];
+  });
+
+  return {
+    id: session.id,
+    title: session.title,
+    createdAt: session.createdAt ?? new Date(),
+    updatedAt: session.updatedAt,
+    messages
+  } satisfies ResultAnalysisSessionDetail;
 };
