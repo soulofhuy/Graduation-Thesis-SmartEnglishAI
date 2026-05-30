@@ -151,6 +151,53 @@ class AIChatSessionController {
     }
   };
 
+  static getChatSessionMessagesById = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    const userId = req.userId;
+    const chatSessionId = normalizeStringInput(req.params.chatSessionId);
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json(Responses.errorResponse(new Error('Unauthorized')));
+    }
+
+    if (!chatSessionId) {
+      return res
+        .status(400)
+        .json(
+          Responses.errorResponse(new Error('Chat session ID is required'))
+        );
+    }
+
+    try {
+      const chatSession =
+        await AIChatSessionServices.getChatSessionMessagesById(
+          chatSessionId,
+          userId
+        );
+
+      if (!chatSession) {
+        return res
+          .status(404)
+          .json(Responses.errorResponse(new Error('Chat session not found')));
+      }
+
+      return res
+        .status(200)
+        .json(
+          Responses.successResponse(
+            'Chat session messages fetched successfully',
+            chatSession
+          )
+        );
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
   static getChatSessionsByAssignmentId = async (
     req: AuthenticatedRequest,
     res: Response

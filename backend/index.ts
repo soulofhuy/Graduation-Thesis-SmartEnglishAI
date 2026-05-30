@@ -19,6 +19,7 @@ import GetAllClassesRouter from './src/routes/admin/classManagement/getAllClasse
 import CreateNewClassesRouter from './src/routes/admin/classManagement/createNewClassesRoutes';
 import AIGenerateAssignmentRouter from './src/routes/ai/generate-assignment/aiGenerateAssignmentRoutes';
 import AIChatSessionRouter from './src/routes/ai/chat-session/aiChatSessionRoutes';
+import AIResultAnalysisRouter from './src/routes/ai/result-analysis/resultAnalysisRoutes';
 import GetAllAssignmentsRouter from './src/routes/admin/assignmentManagement/getAllAssignmentRoutes';
 import DeleteAssignmentRouter from './src/routes/admin/assignmentManagement/deleteAssignmentRoutes';
 import GetListOfResultsRouter from './src/routes/admin/resultManagement/getListOfResultsRoutes';
@@ -58,6 +59,7 @@ app.use('/api', GetListOfResultsRouter);
 app.use('/api', GetResultDetailsRouter);
 app.use('/api', AIGenerateAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
+app.use('/api', AIResultAnalysisRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 

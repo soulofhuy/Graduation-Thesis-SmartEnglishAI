@@ -28,7 +28,9 @@ export const toastMessages = {
     removeStudentSuccess: 'Student removed successfully',
     removeStudentFailed: 'Failed to remove student',
     updateSuccess: 'Update successful',
-    updateFailed: 'Update failed'
+    updateFailed: 'Update failed',
+    aiSendFailed: 'Failed to send message to AI',
+    aiResponseFailed: 'Failed to get response from AI'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',
@@ -57,7 +59,9 @@ export const toastMessages = {
     removeStudentSuccess: 'Xóa học sinh thành công',
     removeStudentFailed: 'Xóa học sinh thất bại',
     updateSuccess: 'Cập nhật thành công',
-    updateFailed: 'Cập nhật thất bại'
+    updateFailed: 'Cập nhật thất bại',
+    aiSendFailed: 'Gửi tin nhắn đến AI thất bại',
+    aiResponseFailed: 'Lấy phản hồi từ AI thất bại'
   }
 } as const;
 

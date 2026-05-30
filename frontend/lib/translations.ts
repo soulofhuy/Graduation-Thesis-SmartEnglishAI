@@ -760,6 +760,12 @@ export const translations = {
             labelDueDate: 'Due date',
             labelSubmissionCount: 'Number of submissions'
           }
+        },
+        chatWithAI: {
+          title: 'Chat with AI about the results or system',
+          recentChats: 'Your recent chats',
+          textInputPlaceholder: 'Type your message here to chat with AI',
+          newChatSessionButton: 'Start new chat session'
         }
       },
       trashBin: {
@@ -1944,6 +1950,12 @@ export const translations = {
             labelDueDate: 'Hạn nộp',
             labelSubmissionCount: 'Số lần nộp bài'
           }
+        },
+        chatWithAI: {
+          title: 'Trò chuyện với AI về kết quả làm bài, hoặc hệ thống',
+          recentChats: 'Các cuộc trò chuyện gần đây',
+          textInputPlaceholder: 'Nhắn tin cho AI về kết quả làm bài hoặc hệ thống',
+          newChatSessionButton: 'Tạo phiên trò chuyện mới'
         }
       },
       trashBin: {

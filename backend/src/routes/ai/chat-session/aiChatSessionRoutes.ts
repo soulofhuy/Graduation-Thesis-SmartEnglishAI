@@ -19,6 +19,11 @@ router.get(
   verifyJWT,
   AIChatSessionController.getChatSessionById
 );
+router.get(
+  '/ai/chat-session/:chatSessionId/messages',
+  verifyJWT,
+  AIChatSessionController.getChatSessionMessagesById
+);
 router.patch(
   '/ai/chat-session/:chatSessionId/assignment',
   verifyJWT,
