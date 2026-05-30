@@ -6,6 +6,8 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { useLanguage } from '@/components/language-provider'
+import { getStudentRequestJoinStatusColor } from '@/lib/color-mappers/student-request-join-status-mapper'
+import { getStudentRequestJoinStatusLabel } from '@/lib/language-mappers/student-request-join-status-mapper'
 
 export interface JoinRequestItem {
     id: string
@@ -27,22 +29,7 @@ export function JoinRequestsModal({
     requests,
     isLoading,
 }: JoinRequestsModalProps) {
-    const { t } = useLanguage();
-    const getRequestStatusLabel = (status: JoinRequestItem['status']) => {
-        if (status === 'approved') return 'Đã duyệt'
-        if (status === 'rejected') return 'Từ chối'
-        return 'Chờ duyệt'
-    }
-
-    const getRequestStatusClassName = (status: JoinRequestItem['status']) => {
-        if (status === 'approved') {
-            return 'bg-emerald-100 text-emerald-800'
-        }
-        if (status === 'rejected') {
-            return 'bg-rose-100 text-rose-800'
-        }
-        return 'bg-amber-100 text-amber-800'
-    }
+    const { t, language } = useLanguage();
 
     return (
         <ModalWrapper
@@ -71,7 +58,7 @@ export function JoinRequestsModal({
                     {isLoading ? (
                         <TableRow>
                             <TableCell colSpan={3} className="text-center text-muted-foreground">
-                                {t.common.loading}...
+                                {t.common.loading}
                             </TableCell>
                         </TableRow>
                     ) : requests.length === 0 ? (
@@ -86,10 +73,8 @@ export function JoinRequestsModal({
                                 <TableCell className="font-semibold text-center">{request.classCode}</TableCell>
                                 <TableCell className="text-center">{new Date(request.requestedAt).toLocaleString('vi-VN')}</TableCell>
                                 <TableCell className="text-center">
-                                    <span
-                                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getRequestStatusClassName(request.status)}`}
-                                    >
-                                        {getRequestStatusLabel(request.status)}
+                                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getStudentRequestJoinStatusColor(request.status)}`}>
+                                        {getStudentRequestJoinStatusLabel(request.status, language)}
                                     </span>
                                 </TableCell>
                             </TableRow>

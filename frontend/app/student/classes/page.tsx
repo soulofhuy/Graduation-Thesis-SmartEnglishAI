@@ -473,7 +473,7 @@ export default function StudentClassesPage() {
                   {isLoadingClasses ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-muted-foreground">
-                        {t.common.loading}...
+                        {t.common.loading}
                       </TableCell>
                     </TableRow>
                   ) : visibleClasses.length === 0 ? (
