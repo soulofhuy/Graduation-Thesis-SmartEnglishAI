@@ -51,28 +51,13 @@ export const saveResultAnalysisChat = async (
       if (!session) {
         throw new Error('Chat session not found');
       }
-    } else {
-      session = await tx.chatSession.findFirst({
-        where: {
-          userId,
-          deletedAt: null,
-          prompts: {
-            some: {
-              type: AIPromptType.RESULT_ANALYSIS
-            }
-          }
-        },
-        orderBy: {
-          updatedAt: 'desc'
-        }
-      });
     }
 
     if (!session) {
       session = await tx.chatSession.create({
         data: {
           userId,
-          title: 'Result Analysis Chat'
+          title: prompt.slice(0, 10).trim() || 'Result Analysis Chat'
         }
       });
     }
