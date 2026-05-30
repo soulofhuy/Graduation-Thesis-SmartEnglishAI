@@ -1,5 +1,3 @@
-import { table, time } from 'console';
-
 export type Language = 'en' | 'vi';
 
 export const translations = {
@@ -460,8 +458,8 @@ export const translations = {
           fieldNeedsTeacherApproval: 'Needs your approval to join?'
         },
         editClass: {
-          title: 'Edit Class',
-          description: 'Update Class information',
+          title: 'Edit class',
+          description: 'Update class information',
           fieldName: 'Class name',
           fieldNamePlaceholder: 'Example: Class 9CB1',
           fieldDescription: 'Class description',
@@ -524,10 +522,10 @@ export const translations = {
           title: 'List of students',
           description: 'Class:',
           columnNo: 'No.',
-          columnName: 'Full Name',
+          columnName: 'Full name',
           columnEmail: 'Email',
           columnStatus: 'Status',
-          columnDateJoined: 'Joining Date',
+          columnDateJoined: 'Joining date',
           columnActions: 'Actions',
           noData: 'No students to display',
           requestToChooseClass:
@@ -543,9 +541,9 @@ export const translations = {
           title: 'List of locked students',
           description: 'Teachers can unlock students',
           columnNo: 'No.',
-          columnName: 'Full Name',
+          columnName: 'Full name',
           columnEmail: 'Email',
-          columnDateJoined: 'Joining Date',
+          columnDateJoined: 'Joining date',
           columnActions: 'Actions',
           noData: 'No students are locked',
           unbanButton: 'Unlock'
@@ -1954,7 +1952,8 @@ export const translations = {
         chatWithAI: {
           title: 'Trò chuyện với AI về kết quả làm bài, hoặc hệ thống',
           recentChats: 'Các cuộc trò chuyện gần đây',
-          textInputPlaceholder: 'Nhắn tin cho AI về kết quả làm bài hoặc hệ thống',
+          textInputPlaceholder:
+            'Nhắn tin cho AI về kết quả làm bài hoặc hệ thống',
           newChatSessionButton: 'Tạo phiên trò chuyện mới'
         }
       },

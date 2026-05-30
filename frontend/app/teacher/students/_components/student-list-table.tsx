@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { UserX, CheckCircle2, XCircle, Clock3, UserX2 } from 'lucide-react'
+import { UserX2 } from 'lucide-react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -27,6 +27,8 @@ import { useLanguage } from '@/components/language-provider'
 import { toast } from 'sonner'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
+import { getStudentBannedStatusLabel } from '@/lib/language-mappers/student-banned-status-mapper'
+import { getStudentBannedStatusColor } from '@/lib/color-mappers/student-banned-status-mapper'
 
 type StudentListTableProps = {
     members: ClassMember[]
@@ -51,38 +53,6 @@ function getStudentName(member: ClassMember) {
     const lastName = member.student?.profile?.lastName ?? ''
     const fullName = `${lastName} ${firstName}`.trim()
     return fullName || member.student?.email || ''
-}
-
-function getMemberStatus(member: ClassMember) {
-    if (member.isBanned) {
-        return {
-            label: 'Da chan',
-            className: 'bg-destructive/10 text-destructive border-destructive/30',
-            icon: <UserX className="h-3.5 w-3.5" />,
-        }
-    }
-
-    if (member.isApproved) {
-        return {
-            label: 'Dang hoc',
-            className: 'bg-emerald-500/10 text-emerald-700 border-emerald-400/40',
-            icon: <CheckCircle2 className="h-3.5 w-3.5" />,
-        }
-    }
-
-    if (member.isRejected) {
-        return {
-            label: 'Da tu choi',
-            className: 'bg-orange-500/10 text-orange-700 border-orange-400/40',
-            icon: <XCircle className="h-3.5 w-3.5" />,
-        }
-    }
-
-    return {
-        label: 'Cho duyet',
-        className: 'bg-blue-500/10 text-blue-700 border-blue-400/40',
-        icon: <Clock3 className="h-3.5 w-3.5" />,
-    }
 }
 
 export function StudentListTable({
@@ -167,17 +137,14 @@ export function StudentListTable({
                     </TableHeader>
                     <TableBody>
                         {filteredMembers.map((member, index) => {
-                            const status = getMemberStatus(member)
-
                             return (
                                 <TableRow key={member.id}>
                                     <TableCell className="text-center">{index + 1}</TableCell>
                                     <TableCell className="text-center font-medium">{getStudentName(member)}</TableCell>
                                     <TableCell className="text-center">{member.student?.email || '-'}</TableCell>
                                     <TableCell className="text-center">
-                                        <Badge variant="outline" className={`gap-1.5 ${status.className}`}>
-                                            {status.icon}
-                                            {status.label}
+                                        <Badge variant="outline" className={`gap-1.5 ${getStudentBannedStatusColor(member.isBanned)}`}>
+                                            {getStudentBannedStatusLabel(member.isBanned, language)}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-center">{member.joinedAt ? dateTimeFormat(member.joinedAt) : '-'}</TableCell>
