@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { UserProfile } from './user-profile'
 import { ThemeToggle } from './theme-toggle'
 import Image from 'next/image'
+import { useLanguage } from './language-provider'
 
 export interface NavItem {
   label: string
@@ -34,6 +35,7 @@ export function SidebarLayout({
   userName,
   onLogout,
 }: SidebarLayoutProps) {
+  const { t } = useLanguage()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -94,7 +96,7 @@ export function SidebarLayout({
               }}
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Đăng xuất
+              {t.nav.signOut}
             </Button>
           )}
         </div>

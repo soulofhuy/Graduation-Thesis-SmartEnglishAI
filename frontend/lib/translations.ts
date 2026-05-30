@@ -1,5 +1,3 @@
-import { table, time } from 'console';
-
 export type Language = 'en' | 'vi';
 
 export const translations = {
