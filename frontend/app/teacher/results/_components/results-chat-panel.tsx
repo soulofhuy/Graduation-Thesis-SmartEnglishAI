@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Send } from 'lucide-react'
+import { Plus, Send } from 'lucide-react'
 import { useLanguage } from '@/components/language-provider'
 import { useAuth } from '@/components/auth-provider'
 import { aiResultAnalysisService } from '@/services/teacher/ai-result-analysis'
@@ -50,6 +50,37 @@ export function ResultsChatPanel({
     const [chatSessionId, setChatSessionId] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
+
+    const formatChatMessages = (messages: any[]): ChatMessage[] => {
+        return messages.map((item) => ({
+            id: item.id,
+            role: item.role === 'USER' ? 'teacher' : 'ai',
+            name: item.role === 'USER' ? user?.name || 'Teacher' : 'AI Assistant',
+            message: item.content,
+            time: dateTimeFormat(item.createdAt),
+        }))
+    }
+
+    const loadSessionDetail = async (sessionId: string) => {
+        if (!accessToken) return
+
+        const sessionDetail = await aiResultAnalysisService.getAnalysisChatSessionDetail(
+            accessToken,
+            sessionId
+        )
+
+        setChatMessages(formatChatMessages(sessionDetail.messages ?? []))
+        setChatSessionId(sessionDetail.id)
+        setActiveThreadId(sessionDetail.id)
+    }
+
+    const handleStartNewChat = () => {
+        setChatMessages([])
+        setChatSessionId(null)
+        setActiveThreadId(null)
+        setInputValue('')
+    }
 
     const scrollToBottom = () => {
         if (scrollAreaRef.current) {
@@ -66,16 +97,21 @@ export function ResultsChatPanel({
             try {
                 setIsLoading(true)
                 const history = await aiResultAnalysisService.getAnalysisChatHistory(accessToken)
-                const formattedMessages: ChatMessage[] = history.map((item: any) => ({
-                    id: item.id,
-                    role: item.role === 'USER' ? 'teacher' : 'ai',
-                    name: item.role === 'USER' ? user?.name : 'AI Assistant',
-                    message: item.content,
-                    time: dateTimeFormat(item.createdAt),
+                const formattedThreads: ChatThread[] = history.map((session: any) => ({
+                    id: session.id,
+                    title: session.title || t.teacher.results.chatWithAI.title,
+                    subtitle: dateTimeFormat(session.updatedAt),
                 }))
-                setChatMessages(formattedMessages)
-                const lastSessionId = history.at(-1)?.chatSessionId ?? null
-                setChatSessionId(lastSessionId)
+                setChatThreads(formattedThreads)
+
+                const lastSessionId = history.at(0)?.id ?? null
+                if (lastSessionId) {
+                    await loadSessionDetail(lastSessionId)
+                } else {
+                    setChatMessages([])
+                    setChatSessionId(null)
+                    setActiveThreadId(null)
+                }
             } catch (error) {
                 toast.error(getToastMessage('loadFailed', language), {
                     className: TOAST_COLORS.error,
@@ -116,6 +152,21 @@ export function ResultsChatPanel({
             })
             if (aiResponse?.chatSessionId) {
                 setChatSessionId(aiResponse.chatSessionId)
+                setActiveThreadId(aiResponse.chatSessionId)
+                setChatThreads((prev) => {
+                    if (prev.some((thread) => thread.id === aiResponse.chatSessionId)) {
+                        return prev
+                    }
+
+                    return [
+                        {
+                            id: aiResponse.chatSessionId,
+                            title: t.teacher.results.chatWithAI.title,
+                            subtitle: dateTimeFormat(aiResponse.createdAt),
+                        },
+                        ...prev,
+                    ]
+                })
             }
             const aiMessage: ChatMessage = {
                 id: aiResponse.id,
@@ -136,7 +187,7 @@ export function ResultsChatPanel({
     }
 
     return (
-        <Card className={cn('shadow-sm', className)}>
+        <Card className={cn('max-h-[80vh] h-[80vh] shadow-sm', className)}>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3 mb-3">
                     <Avatar className="size-10">
@@ -150,27 +201,41 @@ export function ResultsChatPanel({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col">
-                <div className="grid gap-4 lg:grid-cols-[220px_1fr] flex-grow">
+            <CardContent className="flex flex-1 min-h-0 flex-col">
+                <div className="grid flex-1 min-h-0 gap-4 lg:grid-cols-[220px_1fr]">
                     <div className="space-y-3">
                         <div className="text-xs text-center font-semibold tracking-wide text-muted-foreground">
                             {t.teacher.results.chatWithAI.recentChats}
                         </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full justify-start gap-2 rounded-full border-dashed"
+                            onClick={handleStartNewChat}
+                        >
+                            <Plus className="size-4" />
+                            Tạo cuộc trò chuyện mới
+                        </Button>
                         <div className="space-y-2">
-                            {/* {chatThreads.map((thread) => (
+                            {chatThreads.map((thread) => (
                                 <button
                                     key={thread.id}
-                                    className="w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+                                    type="button"
+                                    onClick={() => loadSessionDetail(thread.id)}
+                                    className={cn(
+                                        'w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-primary/5',
+                                        activeThreadId === thread.id && 'border-primary/40 bg-primary/5'
+                                    )}
                                 >
                                     <div className="font-semibold text-foreground">{thread.title}</div>
                                     <div className="text-xs text-muted-foreground">{thread.subtitle}</div>
                                 </button>
-                            ))} */}
+                            ))}
                         </div>
                     </div>
 
-                    <div className="flex h-full flex-col rounded-lg border bg-background">
-                        <ScrollArea className="flex-grow" ref={scrollAreaRef}>
+                    <div className="flex min-h-0 flex-1 flex-col rounded-lg border bg-background">
+                        <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
                             <div className="space-y-4 px-4 py-3">
                                 {isLoading && chatMessages.length === 0 ? (
                                     <div className="text-center text-muted-foreground">Loading chat...</div>

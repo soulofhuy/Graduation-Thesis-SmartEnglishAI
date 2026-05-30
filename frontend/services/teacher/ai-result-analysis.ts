@@ -10,6 +10,25 @@ type SendAnalysisChatPayload = {
   prompt: string;
 };
 
+type AnalysisChatSession = {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type AnalysisChatMessage = {
+  id: string;
+  role: 'USER' | 'AI';
+  content: string;
+  createdAt: string;
+  chatSessionId: string;
+};
+
+type AnalysisChatSessionDetail = AnalysisChatSession & {
+  messages: AnalysisChatMessage[];
+};
+
 // chỗ này là API được gọi từ backend để có thể lấy data từ AI
 const getAIAnalysisResponse = async (prompt: string) => {
   const response = await fetch(`${getTextToSqlApiBaseUrl()}/chat`, {
@@ -34,7 +53,9 @@ const getAIAnalysisResponse = async (prompt: string) => {
 export const aiResultAnalysisService = {
   sendAnalysisChat: async (payload: SendAnalysisChatPayload) => {
     try {
-      const aiResponse = await getAIAnalysisResponse(payload.prompt);
+      // const aiResponse = await getAIAnalysisResponse(payload.prompt);
+      const aiResponse =
+        'Đây là phản hồi giả định từ AI cho prompt: ' + payload.prompt;
       const saveData = {
         ...payload,
         response: aiResponse
@@ -85,33 +106,38 @@ export const aiResultAnalysisService = {
         throw new Error(error || 'Failed to load analysis chat history');
       }
 
-      return (data ?? []).flatMap((session: any) =>
-        (session.prompts ?? []).flatMap((prompt: any) => {
-          const messages = [
-            {
-              id: prompt.id,
-              role: 'USER',
-              content: prompt.prompt,
-              createdAt: prompt.createdAt,
-              chatSessionId: session.id
-            }
-          ];
-
-          if (prompt.response) {
-            messages.push({
-              id: prompt.response.id,
-              role: 'AI',
-              content: prompt.response.response,
-              createdAt: prompt.response.createdAt,
-              chatSessionId: session.id
-            });
-          }
-
-          return messages;
-        })
-      );
+      return (data ?? []) as AnalysisChatSession[];
     } catch (error) {
       console.error('Error getting analysis chat history:', error);
+      throw error;
+    }
+  },
+
+  getAnalysisChatSessionDetail: async (
+    accessToken: string,
+    chatSessionId: string
+  ) => {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/result-analysis/chat/${chatSessionId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      const { data, error } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(error || 'Failed to load analysis chat session detail');
+      }
+
+      return data as AnalysisChatSessionDetail;
+    } catch (error) {
+      console.error('Error getting analysis chat session detail:', error);
       throw error;
     }
   }
