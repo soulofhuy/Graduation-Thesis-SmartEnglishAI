@@ -51,12 +51,16 @@ export function ResultsChatPanel({
     const [isLoading, setIsLoading] = useState(false)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
+    const teacherDisplayName =
+        `${user?.profile?.lastName ?? ''} ${user?.profile?.firstName ?? ''}`.trim() ||
+        user?.email ||
+        'Teacher'
 
     const formatChatMessages = (messages: any[]): ChatMessage[] => {
         return messages.map((item) => ({
             id: item.id,
             role: item.role === 'USER' ? 'teacher' : 'ai',
-            name: item.role === 'USER' ? user?.name || 'Teacher' : 'AI Assistant',
+            name: item.role === 'USER' ? teacherDisplayName : 'AI Assistant',
             message: item.content,
             time: dateTimeFormat(item.createdAt),
         }))
@@ -130,11 +134,13 @@ export function ResultsChatPanel({
     const handleSendMessage = async () => {
         if (!inputValue.trim() || !accessToken || !user) return
 
+        const promptText = inputValue
+
         const userMessage: ChatMessage = {
             id: Date.now().toString(),
             role: 'teacher',
-            name: user.name,
-            message: inputValue,
+            name: teacherDisplayName,
+            message: promptText,
             time: dateTimeFormat(new Date().toISOString()),
         }
 
@@ -158,10 +164,12 @@ export function ResultsChatPanel({
                         return prev
                     }
 
+                    const threadTitle = promptText.slice(0, 10).trim() || t.teacher.results.chatWithAI.title
+
                     return [
                         {
                             id: aiResponse.chatSessionId,
-                            title: t.teacher.results.chatWithAI.title,
+                            title: threadTitle,
                             subtitle: dateTimeFormat(aiResponse.createdAt),
                         },
                         ...prev,
@@ -187,7 +195,7 @@ export function ResultsChatPanel({
     }
 
     return (
-        <Card className={cn('max-h-[80vh] h-[80vh] shadow-sm', className)}>
+        <Card className={cn('max-h-[80vh] h-[80vh] overflow-hidden shadow-sm', className)}>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3 mb-3">
                     <Avatar className="size-10">
@@ -201,9 +209,9 @@ export function ResultsChatPanel({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="flex flex-1 min-h-0 flex-col">
-                <div className="grid flex-1 min-h-0 gap-4 lg:grid-cols-[220px_1fr]">
-                    <div className="space-y-3">
+            <CardContent className="flex flex-1 min-h-0 flex-col overflow-hidden">
+                <div className="grid flex-1 min-h-0 gap-4 overflow-hidden lg:grid-cols-[220px_1fr]">
+                    <div className="flex min-h-0 flex-col space-y-3 overflow-hidden">
                         <div className="text-xs text-center font-semibold tracking-wide text-muted-foreground">
                             {t.teacher.results.chatWithAI.recentChats}
                         </div>
@@ -216,7 +224,7 @@ export function ResultsChatPanel({
                             <Plus className="size-4" />
                             Tạo cuộc trò chuyện mới
                         </Button>
-                        <div className="space-y-2">
+                        <div className="min-h-0 space-y-2 overflow-y-auto pr-1">
                             {chatThreads.map((thread) => (
                                 <button
                                     key={thread.id}
@@ -227,15 +235,15 @@ export function ResultsChatPanel({
                                         activeThreadId === thread.id && 'border-primary/40 bg-primary/5'
                                     )}
                                 >
-                                    <div className="font-semibold text-foreground">{thread.title}</div>
+                                    <div className="font-semibold text-foreground">{thread.title.slice(0, 10)}</div>
                                     <div className="text-xs text-muted-foreground">{thread.subtitle}</div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="flex min-h-0 flex-1 flex-col rounded-lg border bg-background">
-                        <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-background">
+                        <ScrollArea className="h-full min-h-0 flex-1" ref={scrollAreaRef}>
                             <div className="space-y-4 px-4 py-3">
                                 {isLoading && chatMessages.length === 0 ? (
                                     <div className="text-center text-muted-foreground">Loading chat...</div>
