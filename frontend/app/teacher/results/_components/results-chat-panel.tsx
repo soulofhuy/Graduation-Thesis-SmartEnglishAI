@@ -222,7 +222,7 @@ export function ResultsChatPanel({
                             onClick={handleStartNewChat}
                         >
                             <Plus className="size-4" />
-                            Tạo cuộc trò chuyện mới
+                            {t.teacher.results.chatWithAI.newChatSessionButton}
                         </Button>
                         <div className="min-h-0 space-y-2 overflow-y-auto pr-1">
                             {chatThreads.map((thread) => (
