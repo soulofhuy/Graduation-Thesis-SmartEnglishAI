@@ -374,7 +374,7 @@ export default function StudentQuizPage() {
                         </TableCell>
                         <TableCell>{getAttemptStatusBadge(assignment)}</TableCell>
                         <TableCell>{getAttemptResult(assignment)}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-center">
                           <Link
                             href={`/student/quiz/${encodeURIComponent(assignment.id)}/take`}
                             aria-disabled={!assignment.id || isSubmittedSingleAttempt}
