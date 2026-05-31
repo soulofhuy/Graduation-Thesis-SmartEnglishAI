@@ -98,20 +98,20 @@ export default function StudentHistoryDetailPage() {
                 result: t.student.assignments.viewHistoryDetails.assginmentHistory.tableView.columnResult,
             }}
             statusLabels={{
-                submitted: 'Đã nộp',
-                inProgress: 'Đang làm',
-                noResult: 'Chưa có',
+                submitted: t.common.submissionStatus.submitted,
+                inProgress: t.common.submissionStatus.inProgress,
+                noResult: t.common.submissionStatus.noResult
             }}
             detailLabels={{
                 reviewTitlePrefix: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.title,
                 result: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.result,
                 submittedAt: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.submittedAt,
                 question: t.student.assignments.viewHistoryDetails.assignmentHistoryDetails.question,
-                noQuestionAnswers: 'Không có dữ liệu câu trả lời cho lần làm này.',
-                noDetailPermission: 'Bạn vẫn xem được lịch sử nộp bài nhưng không xem được chi tiết từng câu.',
+                noQuestionAnswers: t.common.noData,
+                noDetailPermission: t.common.noData
             }}
             emptyLabels={{
-                noHistory: 'Chưa có dữ liệu lịch sử làm bài',
+                noHistory: t.common.noData,
             }}
         />
     )

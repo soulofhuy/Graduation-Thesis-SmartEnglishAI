@@ -345,7 +345,7 @@ export default function StudentHistoryPage() {
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                              Đã nộp
+                              {t.common.submissionStatus.submitted}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">

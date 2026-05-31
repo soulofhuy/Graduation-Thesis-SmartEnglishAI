@@ -1182,7 +1182,12 @@ export const translations = {
       no: 'No',
       confirm: 'Confirm',
       back: 'Back',
-      understandLabel: 'Got it'
+      understandLabel: 'Got it',
+      submissionStatus: {
+        submitted: 'Submitted',
+        inProgress: 'In progress',
+        noResult: 'No result'
+      }
     }
   },
 
@@ -2374,7 +2379,12 @@ export const translations = {
       no: 'Không',
       confirm: 'Xác nhận',
       back: 'Quay lại',
-      understandLabel: 'Tôi đã hiểu'
+      understandLabel: 'Tôi đã hiểu',
+      submissionStatus: {
+        submitted: 'Đã nộp',
+        inProgress: 'Đang làm',
+        noResult: 'Chưa có'
+      }
     }
   }
 };
