@@ -158,7 +158,7 @@ export function ClassMembersModal({
                             {isLoading ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center text-muted-foreground">
-                                        {t.common.loading}...
+                                        {t.common.loading}
                                     </TableCell>
                                 </TableRow>
                             ) : filteredMembers.length === 0 ? (

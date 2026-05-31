@@ -27,6 +27,7 @@ import { BannedClassesModal } from './_components/banned-classes-modal'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { Input } from '@/components/ui/input'
 import { TablePagination } from '@/components/pagination'
+import { getStudentBannedStatusLabel } from '@/lib/language-mappers/student-banned-status-mapper'
 
 const SORT_FIELDS = ['name', 'students', 'teacher', 'classCode'] as const
 const SORT_DIRECTIONS = ['asc', 'desc'] as const
@@ -473,7 +474,7 @@ export default function StudentClassesPage() {
                   {isLoadingClasses ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-muted-foreground">
-                        {t.common.loading}...
+                        {t.common.loading}
                       </TableCell>
                     </TableRow>
                   ) : visibleClasses.length === 0 ? (
@@ -490,7 +491,7 @@ export default function StudentClassesPage() {
                         <TableCell className="text-center">{getStudentCount(classItem)}</TableCell>
                         <TableCell className="text-center">
                           <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                            Đang học
+                            {getStudentBannedStatusLabel(false, language)}
                           </span>
                         </TableCell>
                         <TableCell className="font-mono text-sm font-semibold text-center">

@@ -59,7 +59,7 @@ export function BannedClassesModal({
                     {isLoading ? (
                         <TableRow>
                             <TableCell colSpan={10} className="text-center text-muted-foreground">
-                                {t.common.loading}...
+                                {t.common.loading}
                             </TableCell>
                         </TableRow>
                     ) : classes.length === 0 ? (

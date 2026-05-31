@@ -374,7 +374,7 @@ export default function StudentQuizPage() {
                         </TableCell>
                         <TableCell>{getAttemptStatusBadge(assignment)}</TableCell>
                         <TableCell>{getAttemptResult(assignment)}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-center">
                           <Link
                             href={`/student/quiz/${encodeURIComponent(assignment.id)}/take`}
                             aria-disabled={!assignment.id || isSubmittedSingleAttempt}
@@ -382,10 +382,10 @@ export default function StudentQuizPage() {
                           >
                             <Button
                               size="sm"
-                              className="gap-2"
-                              disabled={!assignment.id}
+                              className={`gap-2 ${isSubmittedSingleAttempt ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                              disabled={!assignment.id || isSubmittedSingleAttempt}
                             >
-                              <BookOpen className="h-4 w-4" />
+                              {isSubmittedSingleAttempt ? <Check className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
                               {actionLabel}
                             </Button>
                           </Link>
