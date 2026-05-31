@@ -27,6 +27,15 @@ export type TeacherNavLabelKey =
   | 'trashBin'
   | 'settings';
 
+export type AdminNavLabelKey =
+  | 'overview'
+  | 'users'
+  | 'students'
+  | 'classes'
+  | 'quizzes'
+  | 'results'
+  | 'settings';
+
 export const teacherNavItems = [
   {
     label: 'Tổng quan',
@@ -108,36 +117,43 @@ export const studentNavItems = [
 export const adminNavItems = [
   {
     label: 'Tổng quan hệ thống',
+    labelKey: 'overview' as AdminNavLabelKey,
     href: '/admin/overview',
     icon: LayoutDashboard
   },
   {
     label: 'Quản lí người dùng',
+    labelKey: 'users' as AdminNavLabelKey,
     href: '/admin/users',
     icon: Users
   },
   {
     label: 'Quản lí học viên',
+    labelKey: 'students' as AdminNavLabelKey,
     href: '/admin/students',
     icon: UserRound
   },
   {
     label: 'Quản lí lớp học',
+    labelKey: 'classes' as AdminNavLabelKey,
     href: '/admin/classes',
     icon: GraduationCap
   },
   {
     label: 'Quản lí bài tập',
+    labelKey: 'quizzes' as AdminNavLabelKey,
     href: '/admin/quizzes',
     icon: BookOpen
   },
   {
     label: 'Quản lí kết quả',
+    labelKey: 'results' as AdminNavLabelKey,
     href: '/admin/results',
     icon: BarChart3
   },
   {
     label: 'Cài đặt',
+    labelKey: 'settings' as AdminNavLabelKey,
     href: '/admin/settings',
     icon: Settings
   }
