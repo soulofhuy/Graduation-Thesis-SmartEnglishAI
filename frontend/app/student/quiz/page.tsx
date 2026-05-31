@@ -382,10 +382,10 @@ export default function StudentQuizPage() {
                           >
                             <Button
                               size="sm"
-                              className="gap-2"
-                              disabled={!assignment.id}
+                              className={`gap-2 ${isSubmittedSingleAttempt ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                              disabled={!assignment.id || isSubmittedSingleAttempt}
                             >
-                              <BookOpen className="h-4 w-4" />
+                              {isSubmittedSingleAttempt ? <Check className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
                               {actionLabel}
                             </Button>
                           </Link>
