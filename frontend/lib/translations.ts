@@ -1021,6 +1021,7 @@ export const translations = {
             'Review your past assignments and results to track your learning progress',
           searchPlaceholder: 'Search by assignment title...',
           tableView: {
+            title: 'List of your past assignment attempts',
             columnAssignmentTitle: 'Assignment title',
             columnClass: 'Class',
             columnIsSingleAttempt: 'Single attempt',
@@ -2212,6 +2213,7 @@ export const translations = {
             'Xem lại các bài tập đã làm và kết quả để theo dõi tiến trình học tập của bạn',
           searchPlaceholder: 'Tìm kiếm theo tiêu đề của bài tập...',
           tableView: {
+            title: 'Danh sách bài tập đã làm',
             columnAssignmentTitle: 'Tiêu đề của bài tập',
             columnClass: 'Lớp',
             columnIsSingleAttempt: 'Chỉ được làm một lần',

@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, Eye, Check, X } from 'lucide-react'
+import { Search, Eye, Check, X, History } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
@@ -284,6 +284,14 @@ export default function StudentHistoryPage() {
       </Card>
 
       <Card>
+        <CardHeader className="space-y-3">
+          <div className="flex items-start justify-between gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              {t.student.assignments.viewHistory.tableView.title}
+            </CardTitle>
+          </div>
+        </CardHeader>
         <CardContent>
           {isLoadingHistory ? (
             <div className="text-center py-12">
