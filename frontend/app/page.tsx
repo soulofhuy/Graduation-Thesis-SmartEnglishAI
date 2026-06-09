@@ -427,62 +427,23 @@ export default function LandingPage() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="gap-2 transition-smooth hover:bg-primary/5">
-              <Globe className="w-4 h-4" />
-              {t.landing.outro.button[1]}
-            </Button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-1 flex items-center justify-center">
-              <div className="flex items-center justify-center gap-2">
-                <Image
-                  src="/logo/langoer-logo.png"
-                  alt="Langoer Logo"
-                  width={150}
-                  height={150}
-                />
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-3">{t.landing.footer.product}</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.features}</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.pricing}</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.security}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-3">{t.landing.footer.company}</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.about}</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.blog}</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.contact}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-3">{t.landing.footer.legal}</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.terms}</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.policy}</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">{t.landing.footer.cookies}</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground text-center md:text-left">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <Image
+              src="/logo/langoer-logo.png"
+              alt="Langoer Logo"
+              width={150}
+              height={150}
+            />
+            <p className="text-sm text-muted-foreground text-center md:text-right">
               {t.landing.footer.copyright}
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Facebook</a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Twitter</a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">LinkedIn</a>
-            </div>
           </div>
         </div>
       </footer>

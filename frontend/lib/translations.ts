@@ -71,23 +71,11 @@ export const translations = {
         title: 'Ready to start learning?',
         description:
           'Join thousands of students improving their English skills with Langoer today.',
-        button: ['Log in now', 'Learn more']
+        button: ['Log in now']
       },
 
       footer: {
-        copyright: '© 2026 Langoer. All rights reserved.',
-        product: 'Product',
-        company: 'Company',
-        legal: 'Legal',
-        features: 'Features',
-        pricing: 'Pricing',
-        security: 'Security',
-        about: 'About Us',
-        blog: 'Blog',
-        contact: 'Contact',
-        terms: 'Terms',
-        policy: 'Policy',
-        cookies: 'Cookies'
+        copyright: '© 2026 Langoer. All rights reserved.'
       }
     },
 
@@ -1270,23 +1258,11 @@ export const translations = {
         title: 'Sẵn sàng bắt đầu học tập?',
         description:
           'Tham gia hàng nghìn học sinh đang nâng cao kỹ năng tiếng Anh của mình với Langoer ngay hôm nay.',
-        button: ['Đăng nhập ngay', 'Tìm hiểu thêm']
+        button: ['Đăng nhập ngay']
       },
 
       footer: {
-        copyright: '© 2026 Langoer. Bảo lưu mọi quyền.',
-        product: 'Sản phẩm',
-        company: 'Công ty',
-        legal: 'Pháp lý',
-        features: 'Tính năng',
-        pricing: 'Giá',
-        security: 'Bảo mật',
-        about: 'Về chúng tôi',
-        blog: 'Blog',
-        contact: 'Liên hệ',
-        terms: 'Điều khoản',
-        policy: 'Chính sách',
-        cookies: 'Cookies'
+        copyright: '© 2026 Langoer. Bảo lưu mọi quyền.'
       }
     },
 
