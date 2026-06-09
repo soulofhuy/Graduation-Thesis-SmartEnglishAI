@@ -24,6 +24,7 @@ import GetAllAssignmentsRouter from './src/routes/admin/assignmentManagement/get
 import DeleteAssignmentRouter from './src/routes/admin/assignmentManagement/deleteAssignmentRoutes';
 import GetListOfResultsRouter from './src/routes/admin/resultManagement/getListOfResultsRoutes';
 import GetResultDetailsRouter from './src/routes/admin/resultManagement/getResultDetailsRoutes';
+import AdminTrashBinRouter from './src/routes/admin/trashBin/adminTrashBinRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api', GetResultDetailsRouter);
 app.use('/api', AIGenerateAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
 app.use('/api', AIResultAnalysisRouter);
+app.use('/api', AdminTrashBinRouter);
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 
