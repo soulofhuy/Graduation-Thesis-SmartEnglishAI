@@ -201,7 +201,7 @@ export default function AdminResultPage() {
           <p className="text-muted-foreground mt-1">{t.admin.assignmentManagement.description}</p>
         </div>
         <Button className="self-start" onClick={() => setIsChatOpen((prev) => !prev)}>
-          Chat với AI
+          {t.teacher.results.chatWithAI.shortTitle}
         </Button>
       </div>
 

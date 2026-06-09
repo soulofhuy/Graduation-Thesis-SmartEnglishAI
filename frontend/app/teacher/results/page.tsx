@@ -201,7 +201,7 @@ export default function TeacherResultsPage() {
           className="self-start"
           onClick={() => setIsChatOpen((prev) => !prev)}
         >
-          Chat với AI
+          {t.teacher.results.chatWithAI.shortTitle}
         </Button> */}
       </div>
 

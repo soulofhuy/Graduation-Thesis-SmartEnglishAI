@@ -751,7 +751,8 @@ export const translations = {
           title: 'Chat with AI about the results or system',
           recentChats: 'Your recent chats',
           textInputPlaceholder: 'Type your message here to chat with AI',
-          newChatSessionButton: 'Start new chat session'
+          newChatSessionButton: 'Start new chat session',
+          shortTitle: 'Chat with AI'
         }
       },
       trashBin: {
@@ -1945,7 +1946,8 @@ export const translations = {
           recentChats: 'Các cuộc trò chuyện gần đây',
           textInputPlaceholder:
             'Nhắn tin cho AI về kết quả làm bài hoặc hệ thống',
-          newChatSessionButton: 'Tạo phiên trò chuyện mới'
+          newChatSessionButton: 'Tạo phiên trò chuyện mới',
+          shortTitle: 'Trò chuyện với AI',
         }
       },
       trashBin: {
