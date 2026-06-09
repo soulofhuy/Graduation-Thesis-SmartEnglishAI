@@ -56,6 +56,7 @@ export function ResultsChatPanel({
         user?.email ||
         'Teacher'
 
+    // Convert the service payload into the timeline shape used by the panel.
     const formatChatMessages = (messages: any[]): ChatMessage[] => {
         return messages.map((item) => ({
             id: item.id,
@@ -66,6 +67,7 @@ export function ResultsChatPanel({
         }))
     }
 
+    // Re-open a prior session so the teacher can continue or review analysis.
     const loadSessionDetail = async (sessionId: string) => {
         if (!accessToken) return
 
@@ -79,6 +81,7 @@ export function ResultsChatPanel({
         setActiveThreadId(sessionDetail.id)
     }
 
+    // Reset only the chat thread while preserving the selected class and assignment.
     const handleStartNewChat = () => {
         setChatMessages([])
         setChatSessionId(null)
@@ -96,6 +99,7 @@ export function ResultsChatPanel({
     }
 
     useEffect(() => {
+        // History is scoped by the authenticated user; the latest thread becomes the active one.
         const loadHistory = async () => {
             if (!classId || !assignmentId || !accessToken) return
             try {
@@ -131,6 +135,7 @@ export function ResultsChatPanel({
         scrollToBottom()
     }, [chatMessages])
 
+    // Send the current teacher prompt and append the returned AI message to the active thread.
     const handleSendMessage = async () => {
         if (!inputValue.trim() || !accessToken || !user) return
 
