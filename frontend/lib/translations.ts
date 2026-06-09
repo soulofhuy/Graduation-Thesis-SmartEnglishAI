@@ -1147,6 +1147,15 @@ export const translations = {
         results: 'Learning results',
         trashBin: 'Trash bin',
         settings: 'Account settings'
+      },
+      admin: {
+        overview: 'Overview',
+        users: 'User management',
+        students: 'Student management',
+        classes: 'Class management',
+        quizzes: 'Assignment management',
+        results: 'Learning results',
+        settings: 'Account settings'
       }
     },
 
@@ -2343,6 +2352,15 @@ export const translations = {
         assignments: 'Quản lí câu hỏi',
         results: 'Kết quả học tập',
         trashBin: 'Thùng rác',
+        settings: 'Cài đặt tài khoản'
+      },
+      admin: {
+        overview: 'Tổng quan',
+        users: 'Quản lý người dùng',
+        students: 'Quản lý học viên',
+        classes: 'Quản lý lớp học',
+        quizzes: 'Quản lý bài tập',
+        results: 'Kết quả học tập',
         settings: 'Cài đặt tài khoản'
       }
     },

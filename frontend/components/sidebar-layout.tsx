@@ -20,7 +20,7 @@ export interface NavItem {
 
 interface SidebarLayoutProps {
   children: React.ReactNode
-  title: string
+  title?: string
   navItems: NavItem[]
   userRole: 'admin' | 'teacher' | 'student'
   userName: string
@@ -51,7 +51,7 @@ export function SidebarLayout({
             height={120}
           />
           <div>
-            <p className="text-xs text-muted-foreground">{title}</p>
+            {title && <p className="text-xs text-muted-foreground">{title}</p>}
           </div>
         </div>
       </div>
