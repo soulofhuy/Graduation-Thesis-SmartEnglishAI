@@ -113,6 +113,28 @@ export const translations = {
       signIn: 'Sign In'
     },
 
+    forgotPassword: {
+      title: 'Forgot your password?',
+      subtitle: "Don't worry! Enter your email address and we'll send you a verification code to reset it.",
+      email: 'Email',
+      emailPlaceholder: 'Enter your email',
+      sendOTPButton: 'Send OTP',
+      verifyOTPTitle: 'Verify your email',
+      verifyOTPSubtitle: 'Enter the 6-digit verification code sent to your email',
+      otp: 'OTP',
+      otpPlaceholder: 'Enter OTP',
+      verifyOTPButton: 'Verify OTP',
+      resetPasswordTitle: 'Reset your password',
+      resetPasswordSubtitle: 'Enter your new password',
+      newPassword: 'New Password',
+      newPasswordPlaceholder: 'Enter new password here',
+      confirmPassword: 'Confirm New Password',
+      confirmPasswordPlaceholder: 'Confirm new password here',
+      resetPasswordButton: 'Reset Password',
+      backToLogin: 'Back to login',
+      success: 'Password reset successful!'
+    },
+
     // Admin Dashboard
     admin: {
       overview: {
@@ -1299,6 +1321,28 @@ export const translations = {
       or: 'Hoặc tiếp tục với',
       description: 'Bạn đã có tài khoản? ',
       signIn: 'Đăng nhập'
+    },
+
+    forgotPassword: {
+      title: 'Quên mật khẩu?',
+      subtitle: "Đừng lo! Nhập email của bạn và chúng tôi sẽ gửi mã xác minh để đặt lại mật khẩu.",
+      email: 'Email',
+      emailPlaceholder: 'Nhập email của bạn',
+      sendOTPButton: 'Gửi mã OTP',
+      verifyOTPTitle: 'Xác minh email',
+      verifyOTPSubtitle: 'Nhập mã xác minh 6 chữ số đã gửi đến email của bạn',
+      otp: 'Mã OTP',
+      otpPlaceholder: 'Nhập mã OTP',
+      verifyOTPButton: 'Xác minh mã OTP',
+      resetPasswordTitle: 'Đặt lại mật khẩu',
+      resetPasswordSubtitle: 'Nhập mật khẩu mới',
+      newPassword: 'Mật khẩu mới',
+      newPasswordPlaceholder: 'Nhập mật khẩu mới tại đây',
+      confirmPassword: 'Xác nhận mật khẩu mới',
+      confirmPasswordPlaceholder: 'Xác nhận mật khẩu mới tại đây',
+      resetPasswordButton: 'Đặt lại mật khẩu',
+      backToLogin: 'Quay lại đăng nhập',
+      success: 'Đặt lại mật khẩu thành công!'
     },
 
     // Admin Dashboard

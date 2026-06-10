@@ -18,7 +18,7 @@ import { getToastMessage } from '@/lib/toast/message'
 type Step = 'email' | 'otp' | 'password'
 
 export default function ForgotPasswordPage() {
-    const { language } = useLanguage()
+    const { t, language } = useLanguage()
 
     const [isLoaded, setIsLoaded] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -113,11 +113,11 @@ export default function ForgotPasswordPage() {
                         <div className={`w-full transition-all duration-700 ${isLoaded ? 'animate-scale-in' : 'opacity-0'}`}>
                             <div className="space-y-2">
                                 <h1 className="text-lg font-semibold tracking-tight sm:text-4xl">
-                                    Forgot Password
+                                    {t.forgotPassword.title}
                                 </h1>
 
                                 <p className="text-sm text-muted-foreground">
-                                    Reset your account password
+                                    {t.forgotPassword.subtitle}
                                 </p>
                             </div>
 
@@ -128,13 +128,13 @@ export default function ForgotPasswordPage() {
 
                                         <Input
                                             type="email"
-                                            placeholder="Enter your email"
+                                            placeholder={t.forgotPassword.emailPlaceholder}
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                         />
 
                                         <Button className="w-full" disabled={isLoading} onClick={handleSendOTP}>
-                                            {isLoading ? 'Sending...' : 'Send OTP'}
+                                            {isLoading ? t.common.loading : t.forgotPassword.sendOTPButton}
                                         </Button>
 
                                     </div>
@@ -144,13 +144,13 @@ export default function ForgotPasswordPage() {
                                     <div className="space-y-5">
 
                                         <Input
-                                            placeholder="Enter OTP"
+                                            placeholder={t.forgotPassword.otpPlaceholder}
                                             value={otp}
                                             onChange={(e) => setOtp(e.target.value)}
                                         />
 
                                         <Button className="w-full" disabled={isLoading} onClick={handleVerifyOTP}>
-                                            {isLoading ? 'Verifying...' : 'Verify OTP'}
+                                            {isLoading ? t.common.loading : t.forgotPassword.verifyOTPButton}
                                         </Button>
 
                                     </div>
@@ -161,13 +161,13 @@ export default function ForgotPasswordPage() {
 
                                         <Input
                                             type="password"
-                                            placeholder="New Password"
+                                            placeholder={t.forgotPassword.newPasswordPlaceholder}
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
                                         />
 
                                         <Button className="w-full" disabled={isLoading} onClick={handleResetPassword}>
-                                            {isLoading ? 'Updating...' : 'Reset Password'}
+                                            {isLoading ? t.common.loading : t.forgotPassword.resetPasswordButton}
                                         </Button>
 
                                     </div>
