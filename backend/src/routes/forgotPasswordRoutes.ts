@@ -3,8 +3,8 @@ import { requestPasswordReset, verifyPasswordResetOTP, resetPassword } from '../
 
 const router = express.Router();
 
-router.post('/forgot-password', requestPasswordReset);
-router.post('/verify-otp', verifyPasswordResetOTP);
-router.post('/reset-password', resetPassword);
+router.post('/auth/forgot-password', requestPasswordReset);
+router.post('/auth/verify-otp', verifyPasswordResetOTP);
+router.post('/auth/reset-password', resetPassword);
 
 export default router;
