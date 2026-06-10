@@ -25,6 +25,7 @@ import DeleteAssignmentRouter from './src/routes/admin/assignmentManagement/dele
 import GetListOfResultsRouter from './src/routes/admin/resultManagement/getListOfResultsRoutes';
 import GetResultDetailsRouter from './src/routes/admin/resultManagement/getResultDetailsRoutes';
 import AdminTrashBinRouter from './src/routes/admin/trashBin/adminTrashBinRoutes';
+import ForgotPasswordRouter from './src/routes/forgotPasswordRoutes';
 import Responses from './src/utils/responses';
 
 const app = express();
@@ -62,6 +63,8 @@ app.use('/api', AIGenerateAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
 app.use('/api', AIResultAnalysisRouter);
 app.use('/api', AdminTrashBinRouter);
+app.use('/api', ForgotPasswordRouter);
+
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST;
 
