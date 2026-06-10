@@ -134,3 +134,93 @@ export async function changePassword(
 
   return { message: payload.message };
 }
+
+export async function requestPasswordReset(email: string) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/auth/forgot-password`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email })
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<null> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message =
+      payload?.message || 'Failed to send password reset OTP';
+
+    throw new Error(message);
+  }
+
+  return {
+    message: payload.message
+  };
+}
+
+export async function verifyPasswordResetOTP(
+  email: string,
+  otp: string
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/auth/verify-otp`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        otp
+      })
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<null> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message =
+      payload?.message || 'OTP verification failed';
+
+    throw new Error(message);
+  }
+
+  return {
+    message: payload.message
+  };
+}
+
+export async function resetPassword(
+  email: string,
+  newPassword: string
+) {
+  const response = await fetch(
+    `${getApiBaseUrl()}/auth/reset-password`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        newPassword
+      })
+    }
+  );
+
+  const payload = (await response.json()) as ApiSuccess<null> | ApiError;
+
+  if (!response.ok || !payload.status) {
+    const message =
+      payload?.message || 'Password reset failed';
+
+    throw new Error(message);
+  }
+
+  return {
+    message: payload.message
+  };
+}

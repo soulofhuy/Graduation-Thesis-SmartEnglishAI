@@ -136,7 +136,10 @@ export default function LoginPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[15px]">{t.login.password}</FormLabel>
+                          <FormLabel className="text-[15px]">
+                            {t.login.password}
+                          </FormLabel>
+
                           <FormControl>
                             <Input
                               placeholder="••••••"
@@ -146,10 +149,20 @@ export default function LoginPage() {
                               className="h-11 bg-muted/50 border-border focus-visible:ring-transparent"
                             />
                           </FormControl>
+
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    <div className="flex justify-end">
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Forgot Password?
+                      </Link>
+                    </div>
 
                     <Button
                       type="submit"
