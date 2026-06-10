@@ -71,23 +71,11 @@ export const translations = {
         title: 'Ready to start learning?',
         description:
           'Join thousands of students improving their English skills with Langoer today.',
-        button: ['Log in now', 'Learn more']
+        button: ['Log in now']
       },
 
       footer: {
-        copyright: '© 2026 Langoer. All rights reserved.',
-        product: 'Product',
-        company: 'Company',
-        legal: 'Legal',
-        features: 'Features',
-        pricing: 'Pricing',
-        security: 'Security',
-        about: 'About Us',
-        blog: 'Blog',
-        contact: 'Contact',
-        terms: 'Terms',
-        policy: 'Policy',
-        cookies: 'Cookies'
+        copyright: '© 2026 Langoer. All rights reserved.'
       }
     },
 
@@ -123,6 +111,28 @@ export const translations = {
       or: 'Or continue with',
       description: 'Already have an account? ',
       signIn: 'Sign In'
+    },
+
+    forgotPassword: {
+      title: 'Forgot your password?',
+      subtitle: "Don't worry! Enter your email address and we'll send you a verification code to reset it.",
+      email: 'Email',
+      emailPlaceholder: 'Enter your email',
+      sendOTPButton: 'Send OTP',
+      verifyOTPTitle: 'Verify your email',
+      verifyOTPSubtitle: 'Enter the 6-digit verification code sent to your email',
+      otp: 'OTP',
+      otpPlaceholder: 'Enter OTP',
+      verifyOTPButton: 'Verify OTP',
+      resetPasswordTitle: 'Reset your password',
+      resetPasswordSubtitle: 'Enter your new password',
+      newPassword: 'New Password',
+      newPasswordPlaceholder: 'Enter new password here',
+      confirmPassword: 'Confirm New Password',
+      confirmPasswordPlaceholder: 'Confirm new password here',
+      resetPasswordButton: 'Reset Password',
+      backToLogin: 'Back to login',
+      success: 'Password reset successful!'
     },
 
     // Admin Dashboard
@@ -763,7 +773,8 @@ export const translations = {
           title: 'Chat with AI about the results or system',
           recentChats: 'Your recent chats',
           textInputPlaceholder: 'Type your message here to chat with AI',
-          newChatSessionButton: 'Start new chat session'
+          newChatSessionButton: 'Start new chat session',
+          shortTitle: 'Chat with AI'
         }
       },
       trashBin: {
@@ -1270,23 +1281,11 @@ export const translations = {
         title: 'Sẵn sàng bắt đầu học tập?',
         description:
           'Tham gia hàng nghìn học sinh đang nâng cao kỹ năng tiếng Anh của mình với Langoer ngay hôm nay.',
-        button: ['Đăng nhập ngay', 'Tìm hiểu thêm']
+        button: ['Đăng nhập ngay']
       },
 
       footer: {
-        copyright: '© 2026 Langoer. Bảo lưu mọi quyền.',
-        product: 'Sản phẩm',
-        company: 'Công ty',
-        legal: 'Pháp lý',
-        features: 'Tính năng',
-        pricing: 'Giá',
-        security: 'Bảo mật',
-        about: 'Về chúng tôi',
-        blog: 'Blog',
-        contact: 'Liên hệ',
-        terms: 'Điều khoản',
-        policy: 'Chính sách',
-        cookies: 'Cookies'
+        copyright: '© 2026 Langoer. Bảo lưu mọi quyền.'
       }
     },
 
@@ -1322,6 +1321,28 @@ export const translations = {
       or: 'Hoặc tiếp tục với',
       description: 'Bạn đã có tài khoản? ',
       signIn: 'Đăng nhập'
+    },
+
+    forgotPassword: {
+      title: 'Quên mật khẩu?',
+      subtitle: "Đừng lo! Nhập email của bạn và chúng tôi sẽ gửi mã xác minh để đặt lại mật khẩu.",
+      email: 'Email',
+      emailPlaceholder: 'Nhập email của bạn',
+      sendOTPButton: 'Gửi mã OTP',
+      verifyOTPTitle: 'Xác minh email',
+      verifyOTPSubtitle: 'Nhập mã xác minh 6 chữ số đã gửi đến email của bạn',
+      otp: 'Mã OTP',
+      otpPlaceholder: 'Nhập mã OTP',
+      verifyOTPButton: 'Xác minh mã OTP',
+      resetPasswordTitle: 'Đặt lại mật khẩu',
+      resetPasswordSubtitle: 'Nhập mật khẩu mới',
+      newPassword: 'Mật khẩu mới',
+      newPasswordPlaceholder: 'Nhập mật khẩu mới tại đây',
+      confirmPassword: 'Xác nhận mật khẩu mới',
+      confirmPasswordPlaceholder: 'Xác nhận mật khẩu mới tại đây',
+      resetPasswordButton: 'Đặt lại mật khẩu',
+      backToLogin: 'Quay lại đăng nhập',
+      success: 'Đặt lại mật khẩu thành công!'
     },
 
     // Admin Dashboard
@@ -1969,7 +1990,8 @@ export const translations = {
           recentChats: 'Các cuộc trò chuyện gần đây',
           textInputPlaceholder:
             'Nhắn tin cho AI về kết quả làm bài hoặc hệ thống',
-          newChatSessionButton: 'Tạo phiên trò chuyện mới'
+          newChatSessionButton: 'Tạo phiên trò chuyện mới',
+          shortTitle: 'Trò chuyện với AI',
         }
       },
       trashBin: {

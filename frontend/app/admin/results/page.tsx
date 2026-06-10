@@ -26,6 +26,8 @@ import { TablePagination } from '@/components/pagination'
 import { getAssignmentActiveStatusLabel } from '@/lib/language-mappers/assignment-active-status-mapper'
 import { getAssignmentActiveStatusColor } from '@/lib/color-mappers/assignment-active-status-mapper'
 import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { ResultsChatPanel } from '../../teacher/results/_components/results-chat-panel'
 
 interface TableAssignment {
   id: string
@@ -96,6 +98,7 @@ export default function AdminResultPage() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [studentHistory, setStudentHistory] = useState<any[]>([])
   const [isLoadingStudentHistory, setIsLoadingStudentHistory] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const fetchAssignments = useCallback(
     async (page: number, limit: number, showSkeleton = false) => {
@@ -191,11 +194,15 @@ export default function AdminResultPage() {
 
   return (
     <div className="space-y-8 p-4 md:p-8">
+      {/* Admin keeps the same result-analysis workflow and exposes the AI panel on the same page. */}
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t.admin.assignmentManagement.title}</h1>
           <p className="text-muted-foreground mt-1">{t.admin.assignmentManagement.description}</p>
         </div>
+        <Button className="self-start" onClick={() => setIsChatOpen((prev) => !prev)}>
+          {t.teacher.results.chatWithAI.shortTitle}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -250,6 +257,16 @@ export default function AdminResultPage() {
         loading={isLoadingStudentHistory}
         history={studentHistory}
       />
+
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="sm:max-w-5xl p-0 h-[80vh] flex flex-col">
+          <ResultsChatPanel
+            className="border-0 shadow-none flex-grow"
+            classId={selectedClassId ?? ''}
+            assignmentId={selectedAssignmentId ?? ''}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

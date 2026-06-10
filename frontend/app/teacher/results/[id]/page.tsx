@@ -26,6 +26,7 @@ export default function TeacherResultDetailPage() {
     const [detail, setDetail] = useState<StudentAssignmentDetail | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
+    // Load only after auth is ready and both path params are available.
     useEffect(() => {
         if (!isHydrated || !accessToken || !assignmentId || !studentId) {
             return
@@ -52,6 +53,7 @@ export default function TeacherResultDetailPage() {
         void fetchDetail()
     }, [accessToken, assignmentId, isHydrated, language, studentId])
 
+    // Keep the attempt history normalized so the detail view can render a stable timeline.
     const history = useMemo(() => {
         if (!detail) {
             return []
@@ -84,6 +86,7 @@ export default function TeacherResultDetailPage() {
         )
     }
 
+    // These cards mirror the list view context but focus on one student + one assignment.
     const summaryCards = [
         {
             label: t.teacher.results.viewAssignmentResultDetails.statistic.labelClass,

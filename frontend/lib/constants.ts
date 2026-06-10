@@ -34,6 +34,7 @@ export type AdminNavLabelKey =
   | 'classes'
   | 'quizzes'
   | 'results'
+  | 'trashBin'
   | 'settings';
 
 export const teacherNavItems = [
@@ -150,6 +151,12 @@ export const adminNavItems = [
     labelKey: 'results' as AdminNavLabelKey,
     href: '/admin/results',
     icon: BarChart3
+  },
+  {
+    label: 'Thùng rác',
+    labelKey: 'trashBin' as AdminNavLabelKey,
+    href: '/admin/trash',
+    icon: Trash2
   },
   {
     label: 'Cài đặt',

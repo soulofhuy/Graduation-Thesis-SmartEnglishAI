@@ -61,6 +61,7 @@ export default function TeacherResultsPage() {
   const [results, setResults] = useState<StudentResultTable[]>([])
   const [isChatOpen, setIsChatOpen] = useState(false)
 
+  // Load the teacher's classes first so the assignment filter can be chained from the selected class.
   useEffect(() => {
     const loadClasses = async () => {
       if (!user?.id || !accessToken) {
@@ -85,6 +86,7 @@ export default function TeacherResultsPage() {
     loadClasses()
   }, [user?.id, accessToken])
 
+  // Switching class resets the assignment list and primes the first assignment in that class.
   useEffect(() => {
     const loadAssignments = async () => {
       if (!selectedClass || !accessToken) {
@@ -112,6 +114,7 @@ export default function TeacherResultsPage() {
     loadAssignments()
   }, [selectedClass, accessToken])
 
+  // The current class + assignment pair drives the stats, table, and AI chat context.
   useEffect(() => {
     const loadResults = async () => {
       if (!selectedClass || !selectedAssignment || !accessToken) {
@@ -184,7 +187,7 @@ export default function TeacherResultsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8">
-      {/* Header */}
+      {/* Page header and the AI entry point for result analysis. */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
@@ -194,22 +197,22 @@ export default function TeacherResultsPage() {
             {t.teacher.results.description}
           </p>
         </div>
-        <Button
+        {/* <Button
           className="self-start"
           onClick={() => setIsChatOpen((prev) => !prev)}
         >
-          Chat với AI
-        </Button>
+          {t.teacher.results.chatWithAI.shortTitle}
+        </Button> */}
       </div>
 
-      {/* Stats */}
+      {/* Summary cards reflect the currently selected assignment. */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <StatsCard key={idx} {...stat} />
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Two-step filter flow: class first, then assignment. */}
       <Card>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -267,7 +270,7 @@ export default function TeacherResultsPage() {
         </CardContent>
       </Card>
 
-      {/* Results Table */}
+      {/* Results table plus the drill-down action for each student attempt history. */}
       <Card>
         <CardHeader>
           <CardTitle className="mb-3">{t.teacher.results.tableView.title}</CardTitle>
@@ -336,6 +339,7 @@ export default function TeacherResultsPage() {
         </CardContent>
       </Card>
 
+      {/* Chat stays in a dialog so the teacher can analyze results without leaving this page. */}
       <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
         <DialogContent className="sm:max-w-5xl p-0 h-[80vh] flex flex-col">
           <ResultsChatPanel

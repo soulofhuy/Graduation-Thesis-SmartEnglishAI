@@ -30,7 +30,8 @@ export const toastMessages = {
     updateSuccess: 'Update successful',
     updateFailed: 'Update failed',
     aiSendFailed: 'Failed to send message to AI',
-    aiResponseFailed: 'Failed to get response from AI'
+    aiResponseFailed: 'Failed to get response from AI',
+    error: 'Something went wrong'
   },
   vi: {
     invalidToken: 'Hãy đăng nhập lại để tiếp tục',
@@ -61,7 +62,8 @@ export const toastMessages = {
     updateSuccess: 'Cập nhật thành công',
     updateFailed: 'Cập nhật thất bại',
     aiSendFailed: 'Gửi tin nhắn đến AI thất bại',
-    aiResponseFailed: 'Lấy phản hồi từ AI thất bại'
+    aiResponseFailed: 'Lấy phản hồi từ AI thất bại',
+    error: 'Có lỗi xảy ra',
   }
 } as const;
 
