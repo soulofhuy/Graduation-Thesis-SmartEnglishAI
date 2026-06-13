@@ -12,12 +12,9 @@ _SCHEMA_CONTENT: str = ""
 
 
 def _resolve_schema_path() -> Path:
-    raw_path = os.getenv("SCHEMA_PATH", "schema.prisma")
-    path = Path(raw_path)
-    if not path.is_absolute():
-        project_root = Path(__file__).resolve().parents[2]
-        path = (project_root / path).resolve()
-    return path
+    project_root = Path(__file__).resolve().parents[2]
+
+    return (project_root / "prisma" / "schema.prisma").resolve()
 
 
 def get_schema() -> str:

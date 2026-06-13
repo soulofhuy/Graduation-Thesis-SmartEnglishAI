@@ -1,0 +1,319 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum TaskType {
+  PRONUNCIATION
+  WORD_STRESS
+  SITUATIONAL_DIALOG
+  MULTIPLE_CHOICE
+  CLOZE_PASSAGE
+  READING_COMPREHENSION
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  CANCELLED
+  EXPIRED
+}
+
+enum AIPromptType {
+  ASSIGMMENT_CREATION
+  RESULT_ANALYSIS
+}
+
+model User {
+  id                    String            @id @default(uuid())
+  email                 String            @unique
+  password              String
+  role                  Role              @default(STUDENT)
+  profile               Profile?
+  createdAt             DateTime?         @default(now())
+  updatedAt             DateTime?         @updatedAt
+  isActive              Boolean           @default(true)
+  deactivatedAt         DateTime?
+  taughtClasses         Class[]           @relation("ClassTeacher")
+  studentClasses        ClassMember[]     @relation("ClassMemberStudent")
+  approvedClasses       ClassMember[]     @relation("ClassMemberApprover")
+  rejectedClasses       ClassMember[]     @relation("ClassMemberRejector")
+  createdAssignments    Assignment[]      @relation("AssignmentCreator")
+  createdQuestions      Question[]        @relation("QuestionCreator")
+  createdPassages       Passage[]         @relation("PassageCreator")
+  attempts              Attempt[]         @relation("AttemptStudent")
+  results               Result[]          @relation("ResultStudent")
+  aiChatSessions        ChatSession[]
+  aiPrompts             AIPrompt[]
+}
+
+model Profile {
+  id                    String            @id @default(uuid())
+  userId                String            @unique
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName             String?
+  lastName              String?
+  address               String?
+  phoneNumber           String?
+  dateOfBirth           DateTime?
+  createdAt             DateTime?         @default(now())
+  updatedAt             DateTime?         @updatedAt
+}
+
+model Class {
+  id                    String            @id @default(uuid())
+  name                  String?
+  description           String?
+  teacherId             String
+  classCode             String            @unique
+  teacher               User              @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  classMembers          ClassMember[]
+  createdAt             DateTime?         @default(now())
+  updatedAt             DateTime?         @updatedAt
+  needsTeacherApproval  Boolean           @default(false)
+  isActive              Boolean           @default(true)
+  deactivatedAt         DateTime?
+  assignments           Assignment[]
+}
+
+model ClassMember {
+  id                    String            @id @default(uuid())
+  classId               String
+  studentId             String
+  approverId            String?
+  rejectorId            String?
+  class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student               User              @relation("ClassMemberStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  approver              User?             @relation("ClassMemberApprover", fields: [approverId], references: [id], onDelete: Cascade)
+  rejector              User?             @relation("ClassMemberRejector", fields: [rejectorId], references: [id], onDelete: Cascade)
+  joinedAt              DateTime          @default(now())
+  isBanned              Boolean           @default(false)
+  bannedAt              DateTime?
+  isApproved            Boolean           @default(false)
+  approvedAt            DateTime?
+  isRejected            Boolean           @default(false)
+  rejectedAt            DateTime?
+
+  @@unique([classId, studentId])
+  @@index([studentId])
+  @@index([approverId])
+}
+
+model Assignment {
+  id                    String            @id @default(uuid())
+  title                 String
+  description           String?
+  createdBy             String
+  classId               String
+  isPublic              Boolean           @default(false)
+  dueDate               DateTime?
+  isSingleAttempt       Boolean           @default(false)
+  canViewResult         Boolean           @default(true)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  isActive              Boolean           @default(true)
+  deactivatedAt         DateTime?
+
+  creator               User              @relation("AssignmentCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  tasks                 Task[]
+  attempts              Attempt[]
+  aiChatSessions        ChatSession[]
+
+  @@index([classId])
+  @@index([createdBy])
+}
+
+model ChatSession {
+  id                    String            @id @default(uuid())
+  assignmentId          String?           @map("assignment_id")
+  userId                String            @map("user_id")
+  title                 String
+  updatedAt             DateTime          @updatedAt @map("updated_at")
+  createdAt             DateTime          @default(now()) @map("created_at")
+  deletedAt             DateTime?         @map("deleted_at")
+
+  assignment            Assignment?       @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompts               AIPrompt[]
+
+  @@index([assignmentId])
+  @@index([userId])
+  @@map("ChatSessions")
+}
+
+model AIPrompt {
+  id                    String            @id @default(uuid())
+  userId                String            @map("user_id")
+  chatSessionId         String            @map("chat_session_id")
+  parentPromptId        String?           @map("parent_prompt_id")
+  prompt                String            @db.Text
+  effectivePrompt       String?           @map("effective_prompt") @db.Text
+  version               Int               @default(1)
+  type                  AIPromptType
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatSession           ChatSession       @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  parentPrompt          AIPrompt?         @relation("AIPromptVersionChain", fields: [parentPromptId], references: [id], onDelete: SetNull)
+  childPrompts          AIPrompt[]        @relation("AIPromptVersionChain")
+  response              AIResponse?
+
+  @@index([userId])
+  @@index([chatSessionId])
+  @@index([parentPromptId])
+  @@map("AIPrompts")
+}
+
+model AIResponse {
+  id                    String            @id @default(uuid())
+  promptId              String            @unique @map("prompt_id")
+  response              String            @db.Text
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  prompt                AIPrompt          @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@map("AIResponse")
+}
+
+model Attempt {
+  id                    String            @id @default(uuid())
+  studentId             String            @map("student_id")
+  assignmentId          String            @map("assignment_id")
+  status                AttemptStatus     @default(IN_PROGRESS)
+  submittedAt           DateTime?         @map("submitted_at")
+  startedAt             DateTime          @default(now()) @map("started_at")
+  draftAnswer           Json?             @map("draft_answer")
+
+  student               User              @relation("AttemptStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  answers               Answer[]
+  result                Result?
+
+  @@index([studentId])
+  @@index([assignmentId])
+  @@map("Attempt")
+}
+
+model Result {
+  id                    String            @id @default(uuid())
+  attemptId             String            @unique @map("attempt_id")
+  studentId             String            @map("student_id")
+  score                 Float
+  correctCount          Int               @map("correct_count")
+  totalCount            Int               @map("total_count")
+  questionAnswers       Json              @map("question_answers")
+  createdAt             DateTime          @default(now()) @map("created_at")
+
+  attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  student               User              @relation("ResultStudent", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("Result")
+}
+
+model Task {
+  id                    String            @id @default(uuid())
+  assignmentId          String
+  taskContent           String
+  taskType              TaskType          @default(MULTIPLE_CHOICE)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  questions             Question[]
+  passages              Passage[]
+  choices               Choice[]          @relation("TaskChoices")
+
+  @@index([assignmentId])
+}
+
+model Question {
+  id                    String            @id @default(uuid())
+  questionContent       String            @db.Text
+  createdBy             String?
+  taskId                String
+  passageId             String?
+  correctChoiceId       String?           @unique
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  creator               User?             @relation("QuestionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  passage               Passage?          @relation(fields: [passageId], references: [id], onDelete: SetNull)
+  choices               Choice[]          @relation("QuestionChoices")
+  correctChoice         Choice?           @relation("QuestionCorrectChoice", fields: [correctChoiceId], references: [id], onDelete: SetNull)
+  answers               Answer[]
+
+  @@index([taskId])
+  @@index([passageId])
+  @@index([createdBy])
+}
+
+model Choice {
+  id                    String            @id @default(uuid())
+  questionId            String?
+  taskId                String?
+  passageId             String?
+  choiceContent         String            @db.Text
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  question              Question?         @relation("QuestionChoices", fields: [questionId], references: [id], onDelete: Cascade)
+  task                  Task?             @relation("TaskChoices", fields: [taskId], references: [id], onDelete: Cascade)
+  passage               Passage?          @relation("PassageChoices", fields: [passageId], references: [id], onDelete: Cascade)
+  correctFor            Question?         @relation("QuestionCorrectChoice")
+  selectedInAnswers     Answer[]          @relation("AnswerSelectedChoice")
+
+  @@index([questionId])
+  @@index([taskId])
+  @@index([passageId])
+}
+
+model Answer {
+  id                    String            @id @default(uuid())
+  attemptId             String            @map("attempt_id")
+  questionId            String            @map("question_id")
+  selectedChoiceId      String            @map("selected_choice_id")
+
+  attempt               Attempt           @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question              Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedChoice        Choice            @relation("AnswerSelectedChoice", fields: [selectedChoiceId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([selectedChoiceId])
+  @@map("Answer")
+}
+
+model Passage {
+  id                    String            @id @default(uuid())
+  passageContent        String            @db.Text
+  createdBy             String?
+  taskId                String
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  task                  Task              @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  creator               User?             @relation("PassageCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  questions             Question[]
+  choices               Choice[]          @relation("PassageChoices")
+
+  @@index([taskId])
+  @@index([createdBy])
+}
