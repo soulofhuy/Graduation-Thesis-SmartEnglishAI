@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageToggle } from '@/components/language-toggle'
@@ -28,6 +28,7 @@ export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('')
     const [otp, setOtp] = useState('')
     const [newPassword, setNewPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
 
     useEffect(() => {
         setIsLoaded(true)
@@ -159,12 +160,27 @@ export default function ForgotPasswordPage() {
                                 {step === 'password' && (
                                     <div className="space-y-5">
 
-                                        <Input
-                                            type="password"
-                                            placeholder={t.forgotPassword.newPasswordPlaceholder}
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword ? 'text' : 'password'}
+                                                placeholder={t.forgotPassword.newPasswordPlaceholder}
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="pr-10"
+                                            />
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                            </button>
+                                        </div>
 
                                         <Button className="w-full" disabled={isLoading} onClick={handleResetPassword}>
                                             {isLoading ? t.common.loading : t.forgotPassword.resetPasswordButton}
