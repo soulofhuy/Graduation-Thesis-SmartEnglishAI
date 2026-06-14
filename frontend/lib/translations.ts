@@ -115,12 +115,14 @@ export const translations = {
 
     forgotPassword: {
       title: 'Forgot your password?',
-      subtitle: "Don't worry! Enter your email address and we'll send you a verification code to reset it.",
+      subtitle:
+        "Don't worry! Enter your email address and we'll send you a verification code to reset it.",
       email: 'Email',
       emailPlaceholder: 'Enter your email',
       sendOTPButton: 'Send OTP',
       verifyOTPTitle: 'Verify your email',
-      verifyOTPSubtitle: 'Enter the 6-digit verification code sent to your email',
+      verifyOTPSubtitle:
+        'Enter the 6-digit verification code sent to your email',
       otp: 'OTP',
       otpPlaceholder: 'Enter OTP',
       verifyOTPButton: 'Verify OTP',
@@ -390,6 +392,11 @@ export const translations = {
             fieldSubmittedAt: 'Submitted at',
             fieldQuestion: 'Question no.'
           }
+        },
+        actions: {
+          apply: 'Apply',
+          clear: 'Clear',
+          view: 'View'
         }
       }
     },
@@ -1325,7 +1332,8 @@ export const translations = {
 
     forgotPassword: {
       title: 'Quên mật khẩu?',
-      subtitle: "Đừng lo! Nhập email của bạn và chúng tôi sẽ gửi mã xác minh để đặt lại mật khẩu.",
+      subtitle:
+        'Đừng lo! Nhập email của bạn và chúng tôi sẽ gửi mã xác minh để đặt lại mật khẩu.',
       email: 'Email',
       emailPlaceholder: 'Nhập email của bạn',
       sendOTPButton: 'Gửi mã OTP',
@@ -1601,6 +1609,11 @@ export const translations = {
             fieldSubmittedAt: 'Nộp lúc',
             fieldQuestion: 'Câu hỏi số'
           }
+        },
+        actions: {
+          apply: 'Áp dụng',
+          clear: 'Xóa',
+          view: 'Xem'
         }
       }
     },
@@ -1991,7 +2004,7 @@ export const translations = {
           textInputPlaceholder:
             'Nhắn tin cho AI về kết quả làm bài hoặc hệ thống',
           newChatSessionButton: 'Tạo phiên trò chuyện mới',
-          shortTitle: 'Trò chuyện với AI',
+          shortTitle: 'Trò chuyện với AI'
         }
       },
       trashBin: {

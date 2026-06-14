@@ -66,8 +66,8 @@ export default function ResultsFilters({ assignments, onApply }: Props) {
             </div> */}
 
             <div className="flex gap-2">
-                <Button onClick={() => onApply(assignmentId, classId, search)}>Apply</Button>
-                <Button variant="outline" onClick={() => { setAssignmentId(null); setClassId(null); setSearch(''); onApply(null, null, ''); }}>Clear</Button>
+                <Button onClick={() => onApply(assignmentId, classId, search)}>{t.admin.resultManagement.actions.apply}</Button>
+                <Button variant="outline" onClick={() => { setAssignmentId(null); setClassId(null); setSearch(''); onApply(null, null, ''); }}>{t.admin.resultManagement.actions.clear}</Button>
             </div>
         </div>
     )
