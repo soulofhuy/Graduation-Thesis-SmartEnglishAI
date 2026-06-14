@@ -15,15 +15,8 @@ import { Card } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageToggle } from '@/components/language-toggle'
 import { useLanguage } from '@/components/language-provider'
-import { ArrowLeft, GraduationCap, Presentation } from 'lucide-react'
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form'
+import { ArrowLeft, GraduationCap, Presentation, Eye, EyeOff } from 'lucide-react'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import Image from 'next/image'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { getToastMessage } from '@/lib/toast/message'
@@ -33,6 +26,8 @@ export default function SignupPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [step, setStep] = useState<'role' | 'form'>('role')
 
     useEffect(() => {
@@ -189,13 +184,27 @@ export default function SignupPage() {
                                                         <FormItem>
                                                             <FormLabel className="text-[15px]">{t.signup.password}</FormLabel>
                                                             <FormControl>
-                                                                <Input
-                                                                    placeholder="••••••"
-                                                                    type="password"
-                                                                    {...field}
-                                                                    disabled={isLoading}
-                                                                    className="h-11 bg-muted/50 border-border focus-visible:ring-transparent"
-                                                                />
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        placeholder="••••••"
+                                                                        type={showPassword ? 'text' : 'password'}
+                                                                        {...field}
+                                                                        disabled={isLoading}
+                                                                        className="h-11 pr-10 bg-muted/50 border-border focus-visible:ring-transparent"
+                                                                    />
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setShowPassword(!showPassword)}
+                                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                                                    >
+                                                                        {showPassword ? (
+                                                                            <EyeOff className="h-4 w-4" />
+                                                                        ) : (
+                                                                            <Eye className="h-4 w-4" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
                                                             </FormControl>
                                                             <FormMessage />
                                                         </FormItem>
@@ -209,13 +218,27 @@ export default function SignupPage() {
                                                         <FormItem>
                                                             <FormLabel className="text-[15px]">{t.signup.confirmPassword}</FormLabel>
                                                             <FormControl>
-                                                                <Input
-                                                                    placeholder="••••••"
-                                                                    type="password"
-                                                                    {...field}
-                                                                    disabled={isLoading}
-                                                                    className="h-11 bg-muted/50 border-border focus-visible:ring-transparent"
-                                                                />
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        placeholder="••••••"
+                                                                        type={showConfirmPassword ? 'text' : 'password'}
+                                                                        {...field}
+                                                                        disabled={isLoading}
+                                                                        className="h-11 pr-10 bg-muted/50 border-border focus-visible:ring-transparent"
+                                                                    />
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                                                    >
+                                                                        {showConfirmPassword ? (
+                                                                            <EyeOff className="h-4 w-4" />
+                                                                        ) : (
+                                                                            <Eye className="h-4 w-4" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
                                                             </FormControl>
                                                             <FormMessage />
                                                         </FormItem>

@@ -197,8 +197,8 @@ export default function AdminResultPage() {
       {/* Admin keeps the same result-analysis workflow and exposes the AI panel on the same page. */}
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t.admin.assignmentManagement.title}</h1>
-          <p className="text-muted-foreground mt-1">{t.admin.assignmentManagement.description}</p>
+          <h1 className="text-3xl font-bold text-foreground">{t.admin.resultManagement.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.admin.resultManagement.description}</p>
         </div>
         <Button className="self-start" onClick={() => setIsChatOpen((prev) => !prev)}>
           {t.teacher.results.chatWithAI.shortTitle}

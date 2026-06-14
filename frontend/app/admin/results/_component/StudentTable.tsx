@@ -41,7 +41,9 @@ export default function StudentTable({ students, onView }: Props) {
                             </TableCell>
                             <TableCell className="text-center">
                                 <div className="flex justify-center gap-2">
-                                    <Button size="sm" onClick={() => onView(s.id)}>View</Button>
+                                    <Button size="sm" onClick={() => onView(s.id)}>
+                                        {t.admin.resultManagement.actions.view}
+                                    </Button>
                                 </div>
                             </TableCell>
                         </TableRow>
