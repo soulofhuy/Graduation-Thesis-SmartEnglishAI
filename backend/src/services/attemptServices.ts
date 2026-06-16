@@ -26,8 +26,8 @@ type ResultQuestionAnswerSnapshot = {
     isSelected: boolean;
     isCorrect: boolean;
   }[];
-  selectedChoiceId: string;
-  selectedChoiceContent: string;
+  selectedChoiceId: string | null;
+  selectedChoiceContent: string | null;
   correctChoiceId: string | null;
   correctChoiceContent: string | null;
   isCorrect: boolean;
@@ -190,75 +190,86 @@ class AttemptService {
 
   private static async buildResultQuestionAnswers(
     tx: Prisma.TransactionClient,
-    attemptId: string
+    attemptId: string,
+    assignmentId: string
   ) {
-    const submittedAnswers = await tx.answer.findMany({
-      where: {
-        attemptId
-      },
-      include: {
-        question: {
-          select: {
-            id: true,
-            questionContent: true,
-            correctChoiceId: true,
-            task: {
-              select: {
-                taskType: true,
-                taskContent: true
-              }
-            },
-            passage: {
-              select: {
-                passageContent: true
-              }
-            },
-            choices: {
-              select: {
-                id: true,
-                choiceContent: true
-              }
-            },
-            correctChoice: {
-              select: {
-                id: true,
-                choiceContent: true
-              }
+    const [submittedAnswers, allQuestions] = await Promise.all([
+      tx.answer.findMany({
+        where: {
+          attemptId
+        },
+        include: {
+          selectedChoice: {
+            select: {
+              id: true,
+              choiceContent: true
             }
           }
+        }
+      }),
+      tx.question.findMany({
+        where: {
+          task: {
+            assignmentId
+          }
         },
-        selectedChoice: {
-          select: {
-            id: true,
-            choiceContent: true
+        include: {
+          task: {
+            select: {
+              taskType: true,
+              taskContent: true
+            }
+          },
+          passage: {
+            select: {
+              passageContent: true
+            }
+          },
+          choices: {
+            select: {
+              id: true,
+              choiceContent: true
+            }
+          },
+          correctChoice: {
+            select: {
+              id: true,
+              choiceContent: true
+            }
           }
         }
-      }
-    });
+      })
+    ]);
 
-    return submittedAnswers.map<ResultQuestionAnswerSnapshot>(answer => ({
-      questionId: answer.questionId,
-      questionContent: answer.question.questionContent,
-      taskType: answer.question.task.taskType,
-      taskContent: answer.question.task.taskContent,
-      passageContent: answer.question.passage?.passageContent ?? null,
-      choiceOptions: answer.question.choices.map(choice => ({
-        choiceId: choice.id,
-        choiceContent: choice.choiceContent,
-        isSelected: choice.id === answer.selectedChoiceId,
+    const answerMap = new Map(submittedAnswers.map(ans => [ans.questionId, ans]));
+
+    return allQuestions.map<ResultQuestionAnswerSnapshot>(question => {
+      const answer = answerMap.get(question.id);
+
+      return {
+        questionId: question.id,
+        questionContent: question.questionContent,
+        taskType: question.task.taskType,
+        taskContent: question.task.taskContent,
+        passageContent: question.passage?.passageContent ?? null,
+        choiceOptions: question.choices.map(choice => ({
+          choiceId: choice.id,
+          choiceContent: choice.choiceContent,
+          isSelected: answer ? choice.id === answer.selectedChoiceId : false,
+          isCorrect:
+            question.correctChoiceId !== null &&
+            choice.id === question.correctChoiceId
+        })),
+        selectedChoiceId: answer ? answer.selectedChoiceId : null,
+        selectedChoiceContent: answer ? answer.selectedChoice.choiceContent : null,
+        correctChoiceId: question.correctChoiceId,
+        correctChoiceContent: question.correctChoice?.choiceContent ?? null,
         isCorrect:
-          answer.question.correctChoiceId !== null &&
-          choice.id === answer.question.correctChoiceId
-      })),
-      selectedChoiceId: answer.selectedChoiceId,
-      selectedChoiceContent: answer.selectedChoice.choiceContent,
-      correctChoiceId: answer.question.correctChoiceId,
-      correctChoiceContent:
-        answer.question.correctChoice?.choiceContent ?? null,
-      isCorrect:
-        answer.question.correctChoiceId !== null &&
-        answer.selectedChoiceId === answer.question.correctChoiceId
-    }));
+          question.correctChoiceId !== null &&
+          answer !== undefined &&
+          answer.selectedChoiceId === question.correctChoiceId
+      };
+    });
   }
 
   private static async ensureSingleAttemptPolicy(
@@ -532,7 +543,8 @@ class AttemptService {
 
       const questionAnswers = await this.buildResultQuestionAnswers(
         tx,
-        attempt.id
+        attempt.id,
+        normalizedAssignmentId
       );
       const correctCount = questionAnswers.filter(
         item => item.isCorrect
