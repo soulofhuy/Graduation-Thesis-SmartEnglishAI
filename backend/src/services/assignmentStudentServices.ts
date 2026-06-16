@@ -86,6 +86,15 @@ class AssignmentStudentService {
               tasks: true
             }
           },
+          tasks: {
+            select: {
+              _count: {
+                select: {
+                  questions: true
+                }
+              }
+            }
+          },
           attempts: {
             where: {
               studentId
@@ -155,10 +164,15 @@ class AssignmentStudentService {
         };
       }
 
-      const { attempts, ...assignmentWithoutAttempts } = assignment;
+      const { attempts, tasks, _count, ...assignmentWithoutAttempts } = assignment;
+      const questionsCount = tasks.reduce((sum, task) => sum + task._count.questions, 0);
 
       return {
         ...assignmentWithoutAttempts,
+        _count: {
+          ..._count,
+          questions: questionsCount
+        },
         attemptSummary
       };
     });
@@ -298,6 +312,15 @@ class AssignmentStudentService {
               tasks: true
             }
           },
+          tasks: {
+            select: {
+              _count: {
+                select: {
+                  questions: true
+                }
+              }
+            }
+          },
           attempts: {
             where: {
               studentId
@@ -367,10 +390,15 @@ class AssignmentStudentService {
         };
       }
 
-      const { attempts, ...assignmentWithoutAttempts } = assignment;
+      const { attempts, tasks, _count, ...assignmentWithoutAttempts } = assignment;
+      const questionsCount = tasks.reduce((sum, task) => sum + task._count.questions, 0);
 
       return {
         ...assignmentWithoutAttempts,
+        _count: {
+          ..._count,
+          questions: questionsCount
+        },
         attemptSummary
       };
     });

@@ -361,7 +361,7 @@ export default function StudentQuizPage() {
                         <TableCell className="whitespace-normal">
                           {assignment.class?.name}
                         </TableCell>
-                        <TableCell>{assignment._count?.tasks ?? 0} câu</TableCell>
+                        <TableCell>{assignment._count?.questions ?? 0}</TableCell>
                         <TableCell className="flex items-center justify-center">
                           {!assignment.isSingleAttempt ? (
                             <Check className="h-8 w-8 text-green-500" />

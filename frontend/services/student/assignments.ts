@@ -35,6 +35,7 @@ export type StudentAssignedAssignment = Assignment & {
   creator: Pick<User, 'id' | 'email' | 'role' | 'profile'>;
   _count: {
     tasks: number;
+    questions: number;
   };
   attemptSummary: StudentAssignmentAttemptSummary | null;
 };
