@@ -86,6 +86,15 @@ class AssignmentStudentService {
               tasks: true
             }
           },
+          tasks: {
+            select: {
+              _count: {
+                select: {
+                  questions: true
+                }
+              }
+            }
+          },
           attempts: {
             where: {
               studentId
@@ -155,10 +164,15 @@ class AssignmentStudentService {
         };
       }
 
-      const { attempts, ...assignmentWithoutAttempts } = assignment;
+      const { attempts, tasks, _count, ...assignmentWithoutAttempts } = assignment;
+      const questionsCount = tasks.reduce((sum, task) => sum + task._count.questions, 0);
 
       return {
         ...assignmentWithoutAttempts,
+        _count: {
+          ..._count,
+          questions: questionsCount
+        },
         attemptSummary
       };
     });
@@ -298,6 +312,15 @@ class AssignmentStudentService {
               tasks: true
             }
           },
+          tasks: {
+            select: {
+              _count: {
+                select: {
+                  questions: true
+                }
+              }
+            }
+          },
           attempts: {
             where: {
               studentId
@@ -367,10 +390,15 @@ class AssignmentStudentService {
         };
       }
 
-      const { attempts, ...assignmentWithoutAttempts } = assignment;
+      const { attempts, tasks, _count, ...assignmentWithoutAttempts } = assignment;
+      const questionsCount = tasks.reduce((sum, task) => sum + task._count.questions, 0);
 
       return {
         ...assignmentWithoutAttempts,
+        _count: {
+          ..._count,
+          questions: questionsCount
+        },
         attemptSummary
       };
     });
@@ -430,13 +458,68 @@ class AssignmentStudentService {
         }
       },
       select: {
-        id: true
+        id: true,
+        tasks: {
+          select: {
+            questions: {
+              select: {
+                id: true,
+                questionContent: true,
+                correctChoiceId: true,
+                task: {
+                  select: {
+                    id: true,
+                    taskContent: true,
+                    taskType: true
+                  }
+                },
+                choices: {
+                  select: {
+                    id: true,
+                    choiceContent: true
+                  }
+                }
+              }
+            },
+            passages: {
+              select: {
+                questions: {
+                  select: {
+                    id: true,
+                    questionContent: true,
+                    correctChoiceId: true,
+                    task: {
+                      select: {
+                        id: true,
+                        taskContent: true,
+                        taskType: true
+                      }
+                    },
+                    choices: {
+                      select: {
+                        id: true,
+                        choiceContent: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     });
 
     if (!assignment) {
       throw new Error('Assignment not found or not accessible');
     }
+
+    const allQuestions = assignment.tasks.flatMap(
+      task => {
+        const passageQuestions = task.passages?.flatMap(passage => passage.questions) || [];
+        return [...task.questions, ...passageQuestions];
+      }
+    );
 
     const attemptHistory = await prisma.attempt.findMany({
       where: {
@@ -530,9 +613,41 @@ class AssignmentStudentService {
       }
     });
 
+    const completedAttempts = attemptHistory.map(attempt => {
+      const answerMap = new Map(
+        attempt.answers.map(answer => [
+          answer.questionId,
+          answer
+        ])
+      );
+
+      const fullAnswers = allQuestions.map(question => {
+        const existingAnswer = answerMap.get(question.id);
+
+        if (existingAnswer) {
+          return existingAnswer;
+        }
+
+        return {
+          id: null,
+          questionId: question.id,
+          selectedChoiceId: null,
+
+          question,
+
+          selectedChoice: null
+        };
+      });
+
+      return {
+        ...attempt,
+        answers: fullAnswers
+      };
+    });
+
     return {
-      totalItems: attemptHistory.length,
-      data: attemptHistory
+      totalItems: completedAttempts.length,
+      data: completedAttempts
     };
   };
 }

@@ -344,8 +344,8 @@ export default function StudentHistoryPage() {
                             })}
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                              {t.common.submissionStatus.submitted}
+                            <Badge className={item.attemptSummary?.status === 'SUBMITTED' ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-red-100 text-red-700 hover:bg-red-100'}>
+                              {item.attemptSummary?.status === 'SUBMITTED' ? t.common.submissionStatus.submitted : t.common.submissionStatus.noResult}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">

@@ -2436,7 +2436,7 @@ export const translations = {
       submissionStatus: {
         submitted: 'Đã nộp',
         inProgress: 'Đang làm',
-        noResult: 'Chưa có'
+        noResult: 'Chưa làm'
       }
     }
   }

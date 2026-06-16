@@ -53,9 +53,9 @@ const getAIAnalysisResponse = async (prompt: string) => {
 export const aiResultAnalysisService = {
   sendAnalysisChat: async (payload: SendAnalysisChatPayload) => {
     try {
-      // const aiResponse = await getAIAnalysisResponse(payload.prompt);
-      const aiResponse =
-        'Đây là phản hồi giả định từ AI cho prompt: ' + payload.prompt;
+      const aiResponse = await getAIAnalysisResponse(payload.prompt);
+      // const aiResponse =
+      //   'Đây là phản hồi giả định từ AI cho prompt: ' + payload.prompt;
       const saveData = {
         ...payload,
         response: aiResponse

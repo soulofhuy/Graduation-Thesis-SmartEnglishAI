@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/stats-card'
@@ -60,6 +60,7 @@ export default function TeacherResultsPage() {
   const [resultsError, setResultsError] = useState<string | null>(null)
   const [results, setResults] = useState<StudentResultTable[]>([])
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const requestIdRef = useRef(0)
 
   // Load the teacher's classes first so the assignment filter can be chained from the selected class.
   useEffect(() => {
@@ -95,9 +96,13 @@ export default function TeacherResultsPage() {
         return
       }
 
+      setSelectedAssignment('')
+      setAssignments([])
+
       try {
         setIsLoadingAssignments(true)
         setSelectedAssignment('')
+        setAssignments([])
         const fetchedAssignments = await getAssignmentsByClassId(accessToken, selectedClass)
         setAssignments(fetchedAssignments)
         if (fetchedAssignments.length > 0) {
@@ -117,7 +122,13 @@ export default function TeacherResultsPage() {
   // The current class + assignment pair drives the stats, table, and AI chat context.
   useEffect(() => {
     const loadResults = async () => {
-      if (!selectedClass || !selectedAssignment || !accessToken) {
+      const currentRequestId = ++requestIdRef.current
+
+      const assignmentExists = assignments.some(
+        assignment => assignment.id === selectedAssignment
+      )
+
+      if (isLoadingClasses || isLoadingAssignments || !assignmentExists || !selectedAssignment || !selectedClass || !accessToken) {
         setResults([])
         return
       }
@@ -125,11 +136,21 @@ export default function TeacherResultsPage() {
       try {
         setIsLoadingResults(true)
         setResultsError(null)
+        console.log({
+          selectedClass,
+          selectedAssignment,
+          assignmentExists,
+          assignments: assignments.map(a => a.id)
+        })
         const progressData = await getClassProgressOnAssignments(
           accessToken,
           selectedClass,
           selectedAssignment
         )
+
+        if (currentRequestId !== requestIdRef.current) {
+          return
+        }
 
         setStatistic(progressData.assignmentStatistic)
         const transformedResults: StudentResultTable[] = progressData.students
@@ -150,6 +171,9 @@ export default function TeacherResultsPage() {
           })
         setResults(transformedResults)
       } catch (error) {
+        if (currentRequestId !== requestIdRef.current) {
+          return
+        }
         const message = error instanceof Error ? error.message : getToastMessage('loadFailed', language)
         setResultsError(message)
         setResults([])
@@ -160,7 +184,7 @@ export default function TeacherResultsPage() {
     }
 
     loadResults()
-  }, [selectedClass, selectedAssignment, accessToken])
+  }, [selectedClass, selectedAssignment, accessToken, isLoadingClasses, isLoadingAssignments, assignments])
 
   const stats = [
     {
