@@ -212,14 +212,14 @@ export default function TrashPage() {
                             <div className="flex flex-wrap gap-2 mt-2 justify-center">
                                 <Button
                                     onClick={() => setFilterType('class')}
-                                    className={`px-3 py-1 rounded-full border transition-colors ${filterType === 'class' ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                                    className={`px-3 py-1 rounded-full border transition-colors ${filterType === 'class' ? 'bg-primary text-white border-primary' : 'bg-background text-foreground'}`}
                                 >
                                     {t.teacher.trashBin.searchOrSortOrFilter.filter.class}
                                 </Button>
 
                                 <Button
                                     onClick={() => setFilterType('assignment')}
-                                    className={`px-3 py-1 rounded-full border transition-colors ${filterType === 'assignment' ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                                    className={`px-3 py-1 rounded-full border transition-colors ${filterType === 'assignment' ? 'bg-primary text-white border-primary' : 'bg-background text-foreground'}`}
                                 >
                                     {t.teacher.trashBin.searchOrSortOrFilter.filter.assignment}
                                 </Button>

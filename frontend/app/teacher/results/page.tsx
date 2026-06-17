@@ -256,7 +256,7 @@ export default function TeacherResultsPage() {
                     <button
                       key={cls.id}
                       onClick={() => setSelectedClass(cls.id)}
-                      className={`px-3 py-1 rounded-full border transition-colors ${selectedClass === cls.id ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                      className={`px-3 py-1 rounded-full border transition-colors ${selectedClass === cls.id ? 'bg-primary text-white border-primary' : 'bg-background text-foreground'}`}
                       aria-pressed={selectedClass === cls.id}
                     >
                       {cls.name}
@@ -281,7 +281,7 @@ export default function TeacherResultsPage() {
                     <button
                       key={assignment.id}
                       onClick={() => setSelectedAssignment(assignment.id)}
-                      className={`px-3 py-1 rounded-full border transition-colors ${selectedAssignment === assignment.id ? 'bg-primary text-white border-primary' : 'bg-white text-foreground'}`}
+                      className={`px-3 py-1 rounded-full border transition-colors ${selectedAssignment === assignment.id ? 'bg-primary text-white border-primary' : 'bg-background text-foreground'}`}
                       aria-pressed={selectedAssignment === assignment.id}
                     >
                       {assignment.title || 'Bài tập không tên'}
