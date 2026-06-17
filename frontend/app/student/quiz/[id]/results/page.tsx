@@ -247,7 +247,7 @@ export default function QuizResultsPage() {
                                                     <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                                                     <div className="flex-1">
                                                         {getAnswerDisplayContent(answer).passageContent ? (
-                                                            <div className="mb-3 rounded-lg border border-green-200 bg-white/70 p-3">
+                                                            <div className="mb-3 rounded-lg border border-green-200 dark:border-green-900 bg-white/70 dark:bg-slate-800/70 p-3">
                                                                 <FormattedContent
                                                                     html={getAnswerDisplayContent(answer).passageContent}
                                                                     className="text-sm leading-6 text-foreground"
@@ -281,7 +281,7 @@ export default function QuizResultsPage() {
                                                     <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                                                     <div className="flex-1">
                                                         {getAnswerDisplayContent(answer).passageContent ? (
-                                                            <div className="mb-3 rounded-lg border border-red-200 bg-white/80 p-3">
+                                                            <div className="mb-3 rounded-lg border border-red-200 dark:border-red-900 bg-white/80 dark:bg-slate-800/80 p-3">
                                                                 <FormattedContent
                                                                     html={getAnswerDisplayContent(answer).passageContent}
                                                                     className="text-sm leading-6 text-foreground"

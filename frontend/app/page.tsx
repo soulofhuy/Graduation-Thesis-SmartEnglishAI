@@ -106,7 +106,7 @@ export default function LandingPage() {
           />
           <div className="flex items-center gap-2">
             <Link href="/login">
-              <Button variant="ghost" className="transition-smooth hover:bg-primary/10">
+              <Button variant="ghost" className="transition-all duration-200 hover:bg-primary/20 hover:text-primary">
                 {t.nav.login}
               </Button>
             </Link>

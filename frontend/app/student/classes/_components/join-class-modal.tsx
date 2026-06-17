@@ -33,7 +33,7 @@ export function JoinClassModal({
             description={t.student.classes.buttonJoinClass.description}
             footer={
                 <div className="flex gap-3">
-                    <Button variant="secondary" onClick={() => onOpenChange(false)}>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>
                         {t.common.cancel}
                     </Button>
                     <Button onClick={onJoin} disabled={isJoining || !classCode.trim()}>
