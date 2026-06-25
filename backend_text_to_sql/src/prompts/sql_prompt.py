@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import List, Dict
+
 SQL_PROMPT_TEMPLATE = """
 You are an expert PostgreSQL SQL generator.
 You convert natural language into PostgreSQL SQL.
@@ -25,11 +27,13 @@ Rules:
 18. Never generate CREATE.
 19. Only generate SELECT statements.
 20. If question cannot be answered using schema return INVALID_REQUEST.
+21. Use conversation history to resolve references like "that student", "those records", "the same class", etc.
 
 Schema:
 {schema}
 
-Question:
+{history_block}
+Current question:
 {question}
 
 Output:
@@ -37,5 +41,21 @@ SQL only.
 """.strip()
 
 
-def build_sql_prompt(schema: str, question: str) -> str:
-    return SQL_PROMPT_TEMPLATE.format(schema=schema, question=question)
+def _build_history_block(conversation_history: List[Dict[str, str]]) -> str:
+    if not conversation_history:
+        return ""
+    lines = ["Conversation history (use this to understand follow-up questions):"]
+    for turn in conversation_history:
+        role = turn.get("role", "")
+        content = turn.get("content", "").strip()
+        if role == "user":
+            lines.append(f"User: {content}")
+        elif role == "assistant":
+            lines.append(f"Assistant: {content}")
+    lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def build_sql_prompt(schema: str, question: str, conversation_history: List[Dict[str, str]] | None = None) -> str:
+    history_block = _build_history_block(conversation_history or [])
+    return SQL_PROMPT_TEMPLATE.format(schema=schema, question=question, history_block=history_block)

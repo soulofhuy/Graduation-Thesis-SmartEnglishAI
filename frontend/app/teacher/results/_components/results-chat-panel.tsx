@@ -141,6 +141,12 @@ export function ResultsChatPanel({
 
         const promptText = inputValue
 
+        // Build conversation history from existing messages for context-aware SQL generation
+        const conversationHistory = chatMessages.map((msg) => ({
+            role: msg.role === 'teacher' ? 'user' as const : 'assistant' as const,
+            content: msg.message,
+        }))
+
         const userMessage: ChatMessage = {
             id: Date.now().toString(),
             role: 'teacher',
@@ -160,6 +166,7 @@ export function ResultsChatPanel({
                 userId: user.id,
                 chatSessionId,
                 prompt: inputValue,
+                conversationHistory,
             })
             if (aiResponse?.chatSessionId) {
                 setChatSessionId(aiResponse.chatSessionId)

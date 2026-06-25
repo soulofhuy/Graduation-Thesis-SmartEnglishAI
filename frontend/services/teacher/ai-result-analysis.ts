@@ -3,11 +3,17 @@ import {
   getTextToSqlApiBaseUrl
 } from '@/lib/api-base-url/get-api-base-url';
 
+type ConversationTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
 type SendAnalysisChatPayload = {
   accessToken: string;
   userId: string;
   chatSessionId?: string | null;
   prompt: string;
+  conversationHistory?: ConversationTurn[];
 };
 
 type AnalysisChatSession = {
@@ -30,14 +36,15 @@ type AnalysisChatSessionDetail = AnalysisChatSession & {
 };
 
 // chỗ này là API được gọi từ backend để có thể lấy data từ AI
-const getAIAnalysisResponse = async (prompt: string) => {
+const getAIAnalysisResponse = async (prompt: string, conversationHistory: ConversationTurn[] = []) => {
   const response = await fetch(`${getTextToSqlApiBaseUrl()}/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: prompt
+      message: prompt,
+      conversation_history: conversationHistory
     })
   });
 
@@ -47,13 +54,13 @@ const getAIAnalysisResponse = async (prompt: string) => {
   }
 
   const data = await response.json();
-  return data.response;
+  return data.analysis;
 };
 
 export const aiResultAnalysisService = {
   sendAnalysisChat: async (payload: SendAnalysisChatPayload) => {
     try {
-      const aiResponse = await getAIAnalysisResponse(payload.prompt);
+      const aiResponse = await getAIAnalysisResponse(payload.prompt, payload.conversationHistory ?? []);
       // const aiResponse =
       //   'Đây là phản hồi giả định từ AI cho prompt: ' + payload.prompt;
       const saveData = {

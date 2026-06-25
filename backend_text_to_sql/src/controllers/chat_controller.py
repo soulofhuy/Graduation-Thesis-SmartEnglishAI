@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 def handle_chat():
     payload = request.get_json(silent=True) or {}
     message = str(payload.get("message", "")).strip()
+    conversation_history = payload.get("conversation_history") or []
 
     if not message:
         return jsonify({
@@ -23,7 +24,7 @@ def handle_chat():
         }), 400
 
     try:
-        result = process_message(message)
+        result = process_message(message, conversation_history)
         if result.get("success"):
             return jsonify(result), 200
 
