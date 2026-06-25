@@ -101,7 +101,7 @@ export function ResultsChatPanel({
     useEffect(() => {
         // History is scoped by the authenticated user; the latest thread becomes the active one.
         const loadHistory = async () => {
-            if (!classId || !assignmentId || !accessToken) return
+            if (!accessToken) return
             try {
                 setIsLoading(true)
                 const history = await aiResultAnalysisService.getAnalysisChatHistory(accessToken)
@@ -129,7 +129,7 @@ export function ResultsChatPanel({
             }
         }
         loadHistory()
-    }, [classId, assignmentId, accessToken, user, language])
+    }, [accessToken, user, language])
 
     useEffect(() => {
         scrollToBottom()
