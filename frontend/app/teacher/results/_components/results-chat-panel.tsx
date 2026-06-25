@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { dateTimeFormat } from '@/lib/format'
+import { MarkdownContent } from '@/components/markdown-content'
 
 type ChatThread = {
     id: string
@@ -129,7 +130,7 @@ export function ResultsChatPanel({
             }
         }
         loadHistory()
-    }, [accessToken, user, language])
+    }, [accessToken, user?.id, language])
 
     useEffect(() => {
         scrollToBottom()
@@ -285,7 +286,13 @@ export function ResultsChatPanel({
                                                 <div className="text-xs font-semibold opacity-80">
                                                     {message.name}
                                                 </div>
-                                                <div className="mt-1 leading-relaxed">{message.message}</div>
+                                                <div className="mt-1 leading-relaxed">
+                                  {message.role === 'ai' ? (
+                                    <MarkdownContent content={message.message} className="prose-invert-none" />
+                                  ) : (
+                                    message.message
+                                  )}
+                                </div>
                                                 <div className="mt-2 text-[11px] opacity-70">{message.time}</div>
                                             </div>
                                         </div>
