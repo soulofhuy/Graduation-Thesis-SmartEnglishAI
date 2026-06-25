@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,6 +13,7 @@ import { answerColumns } from '@/lib/view-details-assignment-helpers/choice-cons
 import {
   startOrGetInProgressAttempt,
   submitAttempt,
+  saveDraftAttempt,
   type StudentAttempt
 } from '@/services/student/attempts'
 import {
@@ -57,15 +58,25 @@ export default function QuizTakePage() {
   const [attemptId, setAttemptId] = useState<string | null>(null)
   const [isLoadingAssignment, setIsLoadingAssignment] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
+  const isSavingDraftRef = useRef(false)
+  const AUTO_SAVE_INTERVAL_MS = 30_000
 
-  const mapAttemptAnswersToSelectedAnswers = (attempt: StudentAttempt) => {
-    const nextSelectedAnswers: Record<string, string> = {}
+  const mapAttemptAnswersToSelectedAnswers = (attempt: StudentAttempt): Record<string, string> => {
+    // Prefer Answer records (written on submit), fall back to draftAnswer (written by auto-save)
+    if (attempt.answers && attempt.answers.length > 0) {
+      const nextSelectedAnswers: Record<string, string> = {}
+      attempt.answers.forEach((answer) => {
+        nextSelectedAnswers[answer.questionId] = answer.selectedChoiceId
+      })
+      return nextSelectedAnswers
+    }
 
-    attempt.answers?.forEach((answer) => {
-      nextSelectedAnswers[answer.questionId] = answer.selectedChoiceId
-    })
+    if (attempt.draftAnswer && typeof attempt.draftAnswer === 'object') {
+      return attempt.draftAnswer as Record<string, string>
+    }
 
-    return nextSelectedAnswers
+    return {}
   }
 
   const questions = useMemo<Question[]>(() => {
@@ -188,6 +199,27 @@ export default function QuizTakePage() {
     void fetchQuizData()
   }, [accessToken, isHydrated, assignmentId])
 
+  // Auto-save draft every 30s while attempt is in progress
+  useEffect(() => {
+    if (!accessToken || !attemptId || isSubmitting) return
+
+    const save = async () => {
+      if (isSavingDraftRef.current || Object.keys(selectedAnswers).length === 0) return
+      isSavingDraftRef.current = true
+      try {
+        await saveDraftAttempt(accessToken, attemptId, selectedAnswers)
+        setLastSavedAt(new Date())
+      } catch {
+        // silent — auto-save failure shouldn't interrupt the student
+      } finally {
+        isSavingDraftRef.current = false
+      }
+    }
+
+    const interval = setInterval(save, AUTO_SAVE_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [accessToken, attemptId, selectedAnswers, isSubmitting])
+
   const handleSelectAnswerByQuestion = (questionId: string, optionId: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -299,8 +331,13 @@ export default function QuizTakePage() {
               </h2>
             </div>
 
-            {/* Button */}
-            <div className="flex justify-end lg:justify-center">
+            {/* Auto-save status + Submit */}
+            <div className="flex items-center justify-end lg:justify-center gap-3">
+              {lastSavedAt && (
+                <span className="text-xs text-muted-foreground">
+                  Đã lưu lúc {lastSavedAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
               <Button
                 onClick={() => setShowSubmitDialog(true)}
                 className="gap-2"

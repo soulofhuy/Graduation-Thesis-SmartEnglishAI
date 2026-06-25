@@ -18,4 +18,6 @@ router.get(
 
 router.post('/attempts/submit', verifyJWT, AttemptController.submitAttempt);
 
+router.patch('/attempts/:attemptId/draft', verifyJWT, AttemptController.saveDraft);
+
 export default router;

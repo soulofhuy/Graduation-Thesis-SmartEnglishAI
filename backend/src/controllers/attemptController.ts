@@ -79,6 +79,27 @@ class AttemptController {
     }
   };
 
+  static saveDraft = async (req: AuthenticatedRequest, res: Response) => {
+    const studentId = req.userId;
+    const { attemptId } = req.params;
+    const { draftAnswer } = req.body;
+
+    if (!studentId) {
+      return res.status(401).json(Responses.errorResponse(new Error('Unauthorized')));
+    }
+
+    if (!attemptId) {
+      return res.status(400).json(Responses.errorResponse(new Error('Attempt ID is required')));
+    }
+
+    try {
+      const attempt = await AttemptService.saveDraft(studentId, attemptId, draftAnswer);
+      return res.status(200).json(Responses.successResponse('Draft saved', attempt));
+    } catch (error) {
+      return res.status(400).json(Responses.errorResponse(error));
+    }
+  };
+
   static submitAttempt = async (req: AuthenticatedRequest, res: Response) => {
     const studentId = req.userId;
 
