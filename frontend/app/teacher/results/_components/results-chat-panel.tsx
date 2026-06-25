@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { getToastMessage } from '@/lib/toast/message'
 import { TOAST_COLORS } from '@/lib/toast/color'
 import { dateTimeFormat } from '@/lib/format'
+import { MarkdownContent } from '@/components/markdown-content'
 
 type ChatThread = {
     id: string
@@ -101,7 +102,7 @@ export function ResultsChatPanel({
     useEffect(() => {
         // History is scoped by the authenticated user; the latest thread becomes the active one.
         const loadHistory = async () => {
-            if (!classId || !assignmentId || !accessToken) return
+            if (!accessToken) return
             try {
                 setIsLoading(true)
                 const history = await aiResultAnalysisService.getAnalysisChatHistory(accessToken)
@@ -129,7 +130,7 @@ export function ResultsChatPanel({
             }
         }
         loadHistory()
-    }, [classId, assignmentId, accessToken, user, language])
+    }, [accessToken, user?.id, language])
 
     useEffect(() => {
         scrollToBottom()
@@ -140,6 +141,12 @@ export function ResultsChatPanel({
         if (!inputValue.trim() || !accessToken || !user) return
 
         const promptText = inputValue
+
+        // Build conversation history from existing messages for context-aware SQL generation
+        const conversationHistory = chatMessages.map((msg) => ({
+            role: msg.role === 'teacher' ? 'user' as const : 'assistant' as const,
+            content: msg.message,
+        }))
 
         const userMessage: ChatMessage = {
             id: Date.now().toString(),
@@ -160,6 +167,7 @@ export function ResultsChatPanel({
                 userId: user.id,
                 chatSessionId,
                 prompt: inputValue,
+                conversationHistory,
             })
             if (aiResponse?.chatSessionId) {
                 setChatSessionId(aiResponse.chatSessionId)
@@ -278,7 +286,13 @@ export function ResultsChatPanel({
                                                 <div className="text-xs font-semibold opacity-80">
                                                     {message.name}
                                                 </div>
-                                                <div className="mt-1 leading-relaxed">{message.message}</div>
+                                                <div className="mt-1 leading-relaxed">
+                                  {message.role === 'ai' ? (
+                                    <MarkdownContent content={message.message} className="prose-invert-none" />
+                                  ) : (
+                                    message.message
+                                  )}
+                                </div>
                                                 <div className="mt-2 text-[11px] opacity-70">{message.time}</div>
                                             </div>
                                         </div>

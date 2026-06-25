@@ -12,12 +12,12 @@ from src.utils.sql_validator import validate_sql
 logger = logging.getLogger(__name__)
 
 
-def process_message(message: str) -> Dict[str, Any]:
+def process_message(message: str, conversation_history: list | None = None) -> Dict[str, Any]:
     logger.info("Processing message")
     logger.debug("Message length: %d", len(message))
     schema = get_schema()
     logger.debug("Schema length: %d", len(schema))
-    sql = generate_sql(message, schema)
+    sql = generate_sql(message, schema, conversation_history)
     logger.info("Generated SQL")
     logger.debug("SQL: %s", sql)
 
@@ -45,7 +45,7 @@ def process_message(message: str) -> Dict[str, Any]:
             "error": result.get("error"),
         }
 
-    analysis = generate_analysis(message, sql, result)
+    analysis = generate_analysis(message, sql, result, conversation_history)
     logger.info("Generated analysis")
     logger.debug("Analysis length: %d", len(analysis))
     return {
