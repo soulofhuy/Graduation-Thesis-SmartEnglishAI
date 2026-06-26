@@ -51,7 +51,7 @@ export default function StudentHistoryDetailPage() {
     if (!isHydrated || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Đang tải chi tiết lịch sử bài làm...</p>
+                <p className="text-muted-foreground">{t.common.loadingHistory}</p>
             </div>
         )
     }
@@ -59,7 +59,7 @@ export default function StudentHistoryDetailPage() {
     if (!accessToken) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Vui lòng đăng nhập để xem chi tiết</p>
+                <p className="text-muted-foreground">{t.common.loginRequired}</p>
             </div>
         )
     }

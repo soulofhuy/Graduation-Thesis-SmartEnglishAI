@@ -39,7 +39,7 @@ export function PageSizeSelect({
                 disabled={disabled}
             >
                 <SelectTrigger className="h-10">
-                    <SelectValue placeholder="Chọn số lượng" />
+                    <SelectValue placeholder={t.common.pageSizeSelect} />
                 </SelectTrigger>
                 <SelectContent>
                     {options.map((size) => (

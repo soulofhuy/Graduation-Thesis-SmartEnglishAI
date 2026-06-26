@@ -295,7 +295,7 @@ export default function QuizTakePage() {
   if (!isHydrated || isLoadingAssignment) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Dang tai bai tap...</p>
+        <p className="text-muted-foreground">{t.common.loadingQuiz}</p>
       </div>
     )
   }
@@ -303,7 +303,7 @@ export default function QuizTakePage() {
   if (!accessToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Vui long dang nhap de lam bai tap</p>
+        <p className="text-muted-foreground">{t.common.loginRequired}</p>
       </div>
     )
   }
@@ -311,7 +311,7 @@ export default function QuizTakePage() {
   if (!assignment || totalQuestions === 0 || !currentQuestion) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Bai tap khong co cau hoi hoac da bi go bo</p>
+        <p className="text-muted-foreground">{t.common.notFound}</p>
       </div>
     )
   }
@@ -335,7 +335,7 @@ export default function QuizTakePage() {
             <div className="flex items-center justify-end lg:justify-center gap-3">
               {lastSavedAt && (
                 <span className="text-xs text-muted-foreground">
-                  Đã lưu lúc {lastSavedAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                  {t.common.autoSave.savedAt} {lastSavedAt.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
               <Button

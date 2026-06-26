@@ -1214,6 +1214,38 @@ export const translations = {
         submitted: 'Submitted',
         inProgress: 'In progress',
         noResult: 'No result'
+      },
+      loginRequired: 'Please log in to continue',
+      notFound: 'Not found',
+      sortBy: 'Sort by',
+      searchByNameEmailPhone: 'Search by name, email, phone number...',
+      noClass: 'No class available',
+      sortOptions: {
+        nameAZ: 'Name (A-Z)',
+        nameZA: 'Name (Z-A)',
+        emailAZ: 'Email (A-Z)',
+        emailZA: 'Email (Z-A)',
+        phoneAZ: 'Phone (A-Z)',
+        phoneZA: 'Phone (Z-A)',
+        joinedOldest: 'Joined date (Oldest)',
+        joinedNewest: 'Joined date (Newest)',
+        bannedStatusAsc: 'Banned status (Low to high)',
+        bannedStatusDesc: 'Banned status (High to low)',
+        bannedDateOldest: 'Banned date (Oldest)',
+        bannedDateNewest: 'Banned date (Newest)'
+      },
+      themeToggle: {
+        switchToLight: 'Switch to light mode',
+        switchToDark: 'Switch to dark mode',
+        toggle: 'Toggle light/dark mode'
+      },
+      pageSizeSelect: 'Choose page size',
+      questionLabel: 'Question',
+      backToList: 'Back to list',
+      loadingQuiz: 'Loading assignment...',
+      loadingHistory: 'Loading attempt history...',
+      autoSave: {
+        savedAt: 'Saved at'
       }
     }
   },
@@ -2437,6 +2469,38 @@ export const translations = {
         submitted: 'Đã nộp',
         inProgress: 'Đang làm',
         noResult: 'Chưa làm'
+      },
+      loginRequired: 'Vui lòng đăng nhập để tiếp tục',
+      notFound: 'Không tìm thấy',
+      sortBy: 'Sắp xếp theo',
+      searchByNameEmailPhone: 'Tìm kiếm theo tên, email, số điện thoại...',
+      noClass: 'Chưa có tên lớp',
+      sortOptions: {
+        nameAZ: 'Tên (A-Z)',
+        nameZA: 'Tên (Z-A)',
+        emailAZ: 'Email (A-Z)',
+        emailZA: 'Email (Z-A)',
+        phoneAZ: 'Số điện thoại (A-Z)',
+        phoneZA: 'Số điện thoại (Z-A)',
+        joinedOldest: 'Ngày tham gia (Cũ nhất)',
+        joinedNewest: 'Ngày tham gia (Mới nhất)',
+        bannedStatusAsc: 'Trạng thái khóa (Từ thấp đến cao)',
+        bannedStatusDesc: 'Trạng thái khóa (Từ cao đến thấp)',
+        bannedDateOldest: 'Ngày khóa (Cũ nhất)',
+        bannedDateNewest: 'Ngày khóa (Mới nhất)'
+      },
+      themeToggle: {
+        switchToLight: 'Chuyển sang chế độ sáng',
+        switchToDark: 'Chuyển sang chế độ tối',
+        toggle: 'Chuyển đổi chế độ sáng/tối'
+      },
+      pageSizeSelect: 'Chọn số lượng',
+      questionLabel: 'Câu hỏi',
+      backToList: 'Quay lại danh sách',
+      loadingQuiz: 'Đang tải bài tập...',
+      loadingHistory: 'Đang tải chi tiết lịch sử bài làm...',
+      autoSave: {
+        savedAt: 'Đã lưu lúc'
       }
     }
   }
