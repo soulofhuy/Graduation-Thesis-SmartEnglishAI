@@ -14,7 +14,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { accessToken } = useAuth()
+  const { accessToken, logout } = useAuth()
   const { t } = useLanguage()
   const [userName, setUserName] = useState('')
 
@@ -49,6 +49,7 @@ export default function AdminLayout({
       userRole="admin"
       userName={userName || 'Admin'}
       onLogout={() => {
+        logout()
         router.push('/login')
       }}
     >
