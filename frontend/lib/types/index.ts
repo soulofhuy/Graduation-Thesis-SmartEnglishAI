@@ -97,6 +97,7 @@ export interface Assignment {
   creator?: User | null;
   class?: Class | null;
   tasks?: Task[] | null;
+  hasAttempts?: boolean;
 }
 
 export interface Task {

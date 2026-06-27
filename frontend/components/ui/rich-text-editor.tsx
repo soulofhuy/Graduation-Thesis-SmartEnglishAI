@@ -10,6 +10,7 @@ type RichTextEditorProps = {
     placeholder: string
     minHeightClass?: string
     className?: string
+    disabled?: boolean
 }
 
 const getPlainText = (html: string) => html.replace(/<[^>]*>/g, '').trim()
@@ -19,7 +20,8 @@ export function RichTextEditor({
     onChange,
     placeholder,
     minHeightClass = 'min-h-24',
-    className
+    className,
+    disabled = false
 }: RichTextEditorProps) {
     const editorRef = useRef<HTMLDivElement | null>(null)
 
@@ -34,6 +36,7 @@ export function RichTextEditor({
     }, [value])
 
     const applyCommand = (command: string) => {
+        if (disabled) return
         editorRef.current?.focus()
         document.execCommand(command)
         onChange(editorRef.current?.innerHTML ?? '')
@@ -46,7 +49,8 @@ export function RichTextEditor({
             <div className="border-b px-2 py-1.5 flex flex-wrap gap-1">
                 <button
                     type="button"
-                    className="h-8 w-8 rounded border hover:bg-muted inline-flex items-center justify-center"
+                    disabled={disabled}
+                    className="h-8 w-8 rounded border hover:bg-muted disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => applyCommand('bold')}
                 >
@@ -54,7 +58,8 @@ export function RichTextEditor({
                 </button>
                 <button
                     type="button"
-                    className="h-8 w-8 rounded border hover:bg-muted inline-flex items-center justify-center"
+                    disabled={disabled}
+                    className="h-8 w-8 rounded border hover:bg-muted disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => applyCommand('italic')}
                 >
@@ -62,7 +67,8 @@ export function RichTextEditor({
                 </button>
                 <button
                     type="button"
-                    className="h-8 w-8 rounded border hover:bg-muted inline-flex items-center justify-center"
+                    disabled={disabled}
+                    className="h-8 w-8 rounded border hover:bg-muted disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => applyCommand('underline')}
                 >
@@ -78,18 +84,18 @@ export function RichTextEditor({
                 )}
                 <div
                     ref={editorRef}
-                    contentEditable
+                    contentEditable={!disabled}
                     suppressContentEditableWarning
                     className={cn(
-                        'px-3 py-2 outline-none min-w-0 w-full max-w-full whitespace-pre-wrap break-words',
+                        'px-3 py-2 outline-none min-w-0 w-full max-w-full whitespace-pre-wrap break-words disabled:opacity-80',
                         minHeightClass
                     )}
                     style={{
                         overflowWrap: 'anywhere',
                         wordBreak: 'break-word'
                     }}
-                    onInput={(e) => onChange((e.target as HTMLDivElement).innerHTML)}
-                    onBlur={(e) => onChange((e.target as HTMLDivElement).innerHTML)}
+                    onInput={(e) => !disabled && onChange((e.target as HTMLDivElement).innerHTML)}
+                    onBlur={(e) => !disabled && onChange((e.target as HTMLDivElement).innerHTML)}
                 />
             </div>
         </div>

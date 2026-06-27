@@ -160,6 +160,7 @@ export default function EditQuizPage() {
         canViewResult: true
     })
     const [tasks, setTasks] = useState<TaskDraft[]>([initialTask])
+    const [hasAttempts, setHasAttempts] = useState(false)
     const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask.id)
     const [selectedQuestionId, setSelectedQuestionId] = useState<string>(initialTask.questions[0].id)
 
@@ -220,6 +221,7 @@ export default function EditQuizPage() {
 
                 setFormData(mapAssignmentToFormData(assignment))
                 setTasks(mappedTasks)
+                setHasAttempts(Boolean(assignment.hasAttempts))
                 setSelectedTaskId(mappedTasks[0].id)
                 setSelectedQuestionId(mappedTasks[0].questions[0].id)
             } catch (error) {
@@ -374,6 +376,7 @@ export default function EditQuizPage() {
             const result = await updateAssignmentFullById(accessToken, assignmentId, payloadPreview)
 
             setFormData(mapAssignmentToFormData(result.assignment))
+            setHasAttempts(Boolean(result.assignment.hasAttempts))
             if ((result.assignment.tasks ?? []).length > 0) {
                 const nextTasks = (result.assignment.tasks ?? []).map((task) => mapTaskToDraft(task, getTaskTitleFromType))
                 setTasks(nextTasks)
@@ -642,6 +645,7 @@ export default function EditQuizPage() {
                             onToggleCorrectChoice={handleToggleCorrectChoice}
                             onDeleteChoice={handleDeleteChoice}
                             onChangeChoiceContent={handleChangeChoiceContent}
+                            hasAttempts={hasAttempts}
                         />
                     )}
 

@@ -257,7 +257,15 @@ class AssignmentController {
             updatedAssignment
           )
         );
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'ASSESSMENT_HAS_ATTEMPTS') {
+        return res.status(409).json({
+          status: false,
+          message: error.message,
+          data: null,
+          error: { code: 'ASSESSMENT_HAS_ATTEMPTS' }
+        });
+      }
       return res.status(400).json(Responses.errorResponse(error));
     }
   };
@@ -300,7 +308,15 @@ class AssignmentController {
             updatedAssignment
           )
         );
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'ASSESSMENT_HAS_ATTEMPTS') {
+        return res.status(409).json({
+          status: false,
+          message: error.message,
+          data: null,
+          error: { code: 'ASSESSMENT_HAS_ATTEMPTS' }
+        });
+      }
       return res.status(400).json(Responses.errorResponse(error));
     }
   };

@@ -301,6 +301,7 @@ export type UpdateAssignmentFullInput = {
   isSingleAttempt: boolean;
   canViewResult: boolean;
   tasks: CreateTaskInput[];
+  forceDeleteAttempts?: boolean;
 };
 
 export async function updateAssignmentFullById(

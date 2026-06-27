@@ -49,6 +49,7 @@ type UpdateAssignmentInput = {
 
 type UpdateFullAssignmentInput = UpdateAssignmentInput & {
   tasks?: CreateTaskInput[];
+  forceDeleteAttempts?: boolean;
 };
 
 class AssignmentService {
@@ -339,7 +340,7 @@ class AssignmentService {
       throw new Error('Assignment ID is required');
     }
 
-    return prisma.assignment.findUnique({
+    const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
         class: {
@@ -380,6 +381,19 @@ class AssignmentService {
         }
       }
     });
+
+    if (!assignment) {
+      return null;
+    }
+
+    const attemptCount = await prisma.attempt.count({
+      where: { assignmentId }
+    });
+
+    return {
+      ...assignment,
+      hasAttempts: attemptCount > 0
+    };
   };
 
   static getChatMessagesByAssignmentId = async (
@@ -537,6 +551,10 @@ class AssignmentService {
       throw new Error('Chat session not found');
     }
 
+    if (!session.assignment) {
+      throw new Error('Assignment associated with chat session not found');
+    }
+
     const assignmentId = session.assignment.id;
 
     // reuse permission checks: find teacher role and assignment info
@@ -579,7 +597,7 @@ class AssignmentService {
       }
     }
 
-    const prompts = await prisma.prompt.findMany({
+    const prompts = await prisma.aIPrompt.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -718,6 +736,63 @@ class AssignmentService {
     };
   };
 
+  private static areTasksIdentical(payloadTasks: any[], dbTasks: any[]): boolean {
+    if (payloadTasks.length !== dbTasks.length) return false;
+
+    for (let i = 0; i < payloadTasks.length; i++) {
+      const pTask = payloadTasks[i];
+      const dTask = dbTasks[i];
+
+      if ((pTask.taskContent || '').trim() !== (dTask.taskContent || '').trim()) return false;
+      if ((pTask.taskType ?? 'MULTIPLE_CHOICE') !== dTask.taskType) return false;
+
+      // Compare passages
+      const pPassages = pTask.passages ?? [];
+      const dPassages = dTask.passages ?? [];
+      if (pPassages.length !== dPassages.length) return false;
+      for (let j = 0; j < pPassages.length; j++) {
+        if ((pPassages[j].passageContent || '').trim() !== (dPassages[j].passageContent || '').trim()) return false;
+      }
+
+      // Compare questions
+      const pQuestions = pTask.questions ?? [];
+      const dQuestions = dTask.questions ?? [];
+      if (pQuestions.length !== dQuestions.length) return false;
+
+      for (let j = 0; j < pQuestions.length; j++) {
+        const pQ = pQuestions[j];
+        const dQ = dQuestions[j];
+
+        if ((pQ.questionContent || '').trim() !== (dQ.questionContent || '').trim()) return false;
+
+        // Compare passage link
+        if (pQ.passageIndex !== undefined && pQ.passageIndex !== null && pQ.passageIndex !== 'none') {
+          const passageIdx = Number(pQ.passageIndex);
+          const expectedPassageId = dPassages[passageIdx]?.id ?? null;
+          if (dQ.passageId !== expectedPassageId) return false;
+        } else {
+          if (dQ.passageId !== null && dQ.passageId !== undefined) return false;
+        }
+
+        // Compare choices
+        const pChoices = pQ.choices ?? [];
+        const dChoices = dQ.choices ?? [];
+        if (pChoices.length !== dChoices.length) return false;
+
+        for (let k = 0; k < pChoices.length; k++) {
+          const pC = pChoices[k];
+          const dC = dChoices[k];
+
+          if ((pC.choiceContent || '').trim() !== (dC.choiceContent || '').trim()) return false;
+          const isDCorrect = dQ.correctChoiceId === dC.id;
+          if (Boolean(pC.isCorrect) !== isDCorrect) return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   static updateAssignment = async (
     updaterId: string,
     assignmentId: string,
@@ -792,6 +867,65 @@ class AssignmentService {
       throw new Error(
         'Only assignment creator, class owner or admin can update assignment'
       );
+    }
+
+    if (
+      payload.tasks !== undefined &&
+      Array.isArray(payload.tasks) &&
+      payload.tasks.length > 0
+    ) {
+      const attemptCount = await prisma.attempt.count({
+        where: { assignmentId }
+      });
+
+      if (attemptCount > 0) {
+        const fullAssignment = await prisma.assignment.findUnique({
+          where: { id: assignmentId },
+          include: {
+            tasks: {
+              orderBy: {
+                createdAt: 'asc'
+              },
+              include: {
+                passages: {
+                  orderBy: {
+                    createdAt: 'asc'
+                  }
+                },
+                questions: {
+                  orderBy: {
+                    createdAt: 'asc'
+                  },
+                  include: {
+                    choices: {
+                      orderBy: {
+                        createdAt: 'asc'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        if (fullAssignment) {
+          const identical = AssignmentService.areTasksIdentical(
+            payload.tasks,
+            fullAssignment.tasks
+          );
+
+          if (identical) {
+            delete payload.tasks;
+          } else if (payload.forceDeleteAttempts !== true) {
+            const err: any = new Error(
+              'This assessment already has student attempts. Saving these changes will permanently delete all existing student attempts.'
+            );
+            err.code = 'ASSESSMENT_HAS_ATTEMPTS';
+            throw err;
+          }
+        }
+      }
     }
 
     if (payload.classId !== undefined) {
@@ -891,6 +1025,12 @@ class AssignmentService {
       payload.tasks.length > 0
     ) {
       const updatedAssignment = await prisma.$transaction(async tx => {
+        if (payload.forceDeleteAttempts === true) {
+          await tx.attempt.deleteMany({
+            where: { assignmentId }
+          });
+        }
+
         // Update basic assignment fields
         await tx.assignment.update({
           where: { id: assignmentId },
