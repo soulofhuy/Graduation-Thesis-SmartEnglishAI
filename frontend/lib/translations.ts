@@ -666,6 +666,12 @@ export const translations = {
             'AI is creating your assignment, please wait a moment...',
           chatMessageFieldPlaceholder: 'Type your message here to chat with AI'
         },
+        aiEditPanel: {
+          initialMessage: 'Hello! Describe what you want to change in the assignment. For example: "Add 2 questions about past tense" or "Change question 3 to reading comprehension format".',
+          generating: 'AI is processing and updating the assignment...',
+          placeholder: 'Describe the changes you want AI to make... (Enter to send)',
+          appliedSuccess: 'AI has updated the assignment'
+        },
         editAssignment: {
           title: 'Edit assignment',
           description: 'Update assignment information and configuration',
@@ -680,6 +686,15 @@ export const translations = {
           },
           tabChatWithAI: {
             title: 'AI conversation history'
+          },
+          tabAIEdit: {
+            title: 'Edit with AI'
+          },
+          confirmForceDelete: {
+            title: 'Confirm assignment edit',
+            description: 'This assignment has been attempted by students. If you continue, all existing attempt results will be permanently deleted and cannot be recovered. Are you sure you want to continue?',
+            cancel: 'Cancel',
+            confirm: 'Delete results and save'
           }
         },
         createQuestionsAndTasks: {
@@ -1214,6 +1229,38 @@ export const translations = {
         submitted: 'Submitted',
         inProgress: 'In progress',
         noResult: 'No result'
+      },
+      loginRequired: 'Please log in to continue',
+      notFound: 'Not found',
+      sortBy: 'Sort by',
+      searchByNameEmailPhone: 'Search by name, email, phone number...',
+      noClass: 'No class available',
+      sortOptions: {
+        nameAZ: 'Name (A-Z)',
+        nameZA: 'Name (Z-A)',
+        emailAZ: 'Email (A-Z)',
+        emailZA: 'Email (Z-A)',
+        phoneAZ: 'Phone (A-Z)',
+        phoneZA: 'Phone (Z-A)',
+        joinedOldest: 'Joined date (Oldest)',
+        joinedNewest: 'Joined date (Newest)',
+        bannedStatusAsc: 'Banned status (Low to high)',
+        bannedStatusDesc: 'Banned status (High to low)',
+        bannedDateOldest: 'Banned date (Oldest)',
+        bannedDateNewest: 'Banned date (Newest)'
+      },
+      themeToggle: {
+        switchToLight: 'Switch to light mode',
+        switchToDark: 'Switch to dark mode',
+        toggle: 'Toggle light/dark mode'
+      },
+      pageSizeSelect: 'Choose page size',
+      questionLabel: 'Question',
+      backToList: 'Back to list',
+      loadingQuiz: 'Loading assignment...',
+      loadingHistory: 'Loading attempt history...',
+      autoSave: {
+        savedAt: 'Saved at'
       }
     }
   },
@@ -1846,6 +1893,15 @@ export const translations = {
           },
           tabChatWithAI: {
             title: 'Lịch sử trò chuyện với AI'
+          },
+          tabAIEdit: {
+            title: 'Chỉnh sửa bằng AI'
+          },
+          confirmForceDelete: {
+            title: 'Xác nhận chỉnh sửa bài tập',
+            description: 'Bài tập này đã có học sinh làm bài. Nếu tiếp tục chỉnh sửa, tất cả kết quả làm bài cũ sẽ bị xóa vĩnh viễn và không thể khôi phục. Bạn có chắc chắn muốn tiếp tục không?',
+            cancel: 'Hủy',
+            confirm: 'Xóa kết quả và lưu'
           }
         },
         createAssignment: {
@@ -1902,6 +1958,12 @@ export const translations = {
           AILoadingMessage:
             'Đang kết nối với AI để tạo bài tập cho bạn, vui lòng chờ trong giây lát...',
           chatMessageFieldPlaceholder: 'Nhập thông tin về bài tập bạn muốn tạo'
+        },
+        aiEditPanel: {
+          initialMessage: 'Xin chào! Hãy mô tả bạn muốn thay đổi gì trong bài kiểm tra. Ví dụ: "Thêm 2 câu hỏi về past tense" hoặc "Đổi câu 3 thành dạng reading comprehension".',
+          generating: 'AI đang xử lý và cập nhật bài kiểm tra...',
+          placeholder: 'Mô tả thay đổi bạn muốn AI thực hiện... (Enter để gửi)',
+          appliedSuccess: 'AI đã cập nhật bài kiểm tra thành công'
         },
         createQuestionsAndTasks: {
           createTask: {
@@ -2437,6 +2499,38 @@ export const translations = {
         submitted: 'Đã nộp',
         inProgress: 'Đang làm',
         noResult: 'Chưa làm'
+      },
+      loginRequired: 'Vui lòng đăng nhập để tiếp tục',
+      notFound: 'Không tìm thấy',
+      sortBy: 'Sắp xếp theo',
+      searchByNameEmailPhone: 'Tìm kiếm theo tên, email, số điện thoại...',
+      noClass: 'Chưa có tên lớp',
+      sortOptions: {
+        nameAZ: 'Tên (A-Z)',
+        nameZA: 'Tên (Z-A)',
+        emailAZ: 'Email (A-Z)',
+        emailZA: 'Email (Z-A)',
+        phoneAZ: 'Số điện thoại (A-Z)',
+        phoneZA: 'Số điện thoại (Z-A)',
+        joinedOldest: 'Ngày tham gia (Cũ nhất)',
+        joinedNewest: 'Ngày tham gia (Mới nhất)',
+        bannedStatusAsc: 'Trạng thái khóa (Từ thấp đến cao)',
+        bannedStatusDesc: 'Trạng thái khóa (Từ cao đến thấp)',
+        bannedDateOldest: 'Ngày khóa (Cũ nhất)',
+        bannedDateNewest: 'Ngày khóa (Mới nhất)'
+      },
+      themeToggle: {
+        switchToLight: 'Chuyển sang chế độ sáng',
+        switchToDark: 'Chuyển sang chế độ tối',
+        toggle: 'Chuyển đổi chế độ sáng/tối'
+      },
+      pageSizeSelect: 'Chọn số lượng',
+      questionLabel: 'Câu hỏi',
+      backToList: 'Quay lại danh sách',
+      loadingQuiz: 'Đang tải bài tập...',
+      loadingHistory: 'Đang tải chi tiết lịch sử bài làm...',
+      autoSave: {
+        savedAt: 'Đã lưu lúc'
       }
     }
   }

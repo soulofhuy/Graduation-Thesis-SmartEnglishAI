@@ -121,6 +121,24 @@ export const submitAttempt = async (
   return payload.data;
 };
 
+export const saveDraftAttempt = async (
+  token: string,
+  attemptId: string,
+  selectedAnswers: Record<string, string>
+) => {
+  const response = await fetch(`${getApiBaseUrl()}/attempts/${attemptId}/draft`, {
+    method: 'PATCH',
+    headers: buildAuthHeaders(token),
+    body: JSON.stringify({ draftAnswer: selectedAnswers })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to save draft');
+  }
+
+  return response.json();
+};
+
 export const getLatestAttemptForStudent = async (
   token: string,
   assignmentId: string

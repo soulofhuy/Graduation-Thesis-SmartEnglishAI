@@ -27,18 +27,6 @@ import { TablePagination } from '@/components/pagination'
 
 type StudentSortValue = 'name-asc' | 'name-desc' | 'email-asc' | 'email-desc' | 'phone-asc' | 'phone-desc' | 'status-asc' | 'status-desc' | 'date-asc' | 'date-desc'
 
-const STUDENT_SORT_OPTIONS: Array<{ value: StudentSortValue; label: string }> = [
-    { value: 'name-asc', label: 'Tên (A-Z)' },
-    { value: 'name-desc', label: 'Tên (Z-A)' },
-    { value: 'email-asc', label: 'Email (A-Z)' },
-    { value: 'email-desc', label: 'Email (Z-A)' },
-    { value: 'phone-asc', label: 'Số điện thoại (A-Z)' },
-    { value: 'phone-desc', label: 'Số điện thoại (Z-A)' },
-    { value: 'status-asc', label: 'Trạng thái khóa (Từ thấp đến cao)' },
-    { value: 'status-desc', label: 'Trạng thái khóa (Từ cao đến thấp)' },
-    { value: 'date-asc', label: 'Ngày khóa (Cũ nhất)' },
-    { value: 'date-desc', label: 'Ngày khóa (Mới nhất)' },
-]
 
 interface BannedStudentsModalProps {
     isOpen: boolean
@@ -56,6 +44,18 @@ export function BannedStudentsModal({
     accessToken,
 }: BannedStudentsModalProps) {
     const { t, language } = useLanguage()
+    const STUDENT_SORT_OPTIONS: Array<{ value: StudentSortValue; label: string }> = [
+        { value: 'name-asc', label: t.common.sortOptions.nameAZ },
+        { value: 'name-desc', label: t.common.sortOptions.nameZA },
+        { value: 'email-asc', label: t.common.sortOptions.emailAZ },
+        { value: 'email-desc', label: t.common.sortOptions.emailZA },
+        { value: 'phone-asc', label: t.common.sortOptions.phoneAZ },
+        { value: 'phone-desc', label: t.common.sortOptions.phoneZA },
+        { value: 'status-asc', label: t.common.sortOptions.bannedStatusAsc },
+        { value: 'status-desc', label: t.common.sortOptions.bannedStatusDesc },
+        { value: 'date-asc', label: t.common.sortOptions.bannedDateOldest },
+        { value: 'date-desc', label: t.common.sortOptions.bannedDateNewest },
+    ]
     const [students, setStudents] = useState<ClassMember[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [isPaging, setIsPaging] = useState(false)
@@ -205,7 +205,7 @@ export function BannedStudentsModal({
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Tìm kiếm theo tên, email, số điện thoại..."
+                            placeholder={t.common.searchByNameEmailPhone}
                             value={searchInput}
                             onChange={(event) => {
                                 setSearchInput(event.target.value)
@@ -214,10 +214,10 @@ export function BannedStudentsModal({
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Sắp xếp theo:</span>
+                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">{t.common.sortBy}:</span>
                         <Select value={sortValue} onValueChange={(value) => setSortValue(value as StudentSortValue)}>
                             <SelectTrigger className="w-full sm:w-64">
-                                <SelectValue placeholder="Sắp xếp" />
+                                <SelectValue placeholder={t.common.sortBy} />
                             </SelectTrigger>
                             <SelectContent>
                                 {STUDENT_SORT_OPTIONS.map((option) => (

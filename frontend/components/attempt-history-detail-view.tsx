@@ -76,7 +76,7 @@ export function AttemptHistoryDetailView({
     emptyLabels,
 }: AttemptHistoryDetailViewProps) {
 
-    const { language } = useLanguage()
+    const { language, t } = useLanguage()
 
     return (
         <div className="p-4 md:p-8 space-y-6">
@@ -243,7 +243,7 @@ export function AttemptHistoryDetailView({
                                                                     className="font-medium text-foreground"
                                                                 />
                                                             ) : (
-                                                                <p className="font-medium text-foreground">Câu hỏi</p>
+                                                                <p className="font-medium text-foreground">{t.common.questionLabel}</p>
                                                             )}
                                                         </div>
                                                     </div>

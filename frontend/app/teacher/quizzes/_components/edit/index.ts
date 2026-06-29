@@ -6,3 +6,4 @@ export * from './quiz-preview-modal';
 export * from './quiz-preview-content';
 export * from './chat-session-view';
 export * from './chat-message-content';
+export * from './ai-edit-chat-panel';

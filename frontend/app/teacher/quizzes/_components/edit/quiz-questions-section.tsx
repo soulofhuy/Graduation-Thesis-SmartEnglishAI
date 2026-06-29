@@ -34,6 +34,7 @@ type QuizQuestionsSectionProps = {
     onToggleCorrectChoice: (choiceId: string) => void
     onDeleteChoice: (choiceId: string) => void
     onChangeChoiceContent: (choiceId: string, value: string) => void
+    hasAttempts?: boolean
 }
 
 export function QuizQuestionsSection({
@@ -59,8 +60,9 @@ export function QuizQuestionsSection({
     onToggleCorrectChoice,
     onDeleteChoice,
     onChangeChoiceContent,
+    hasAttempts = false,
 }: QuizQuestionsSectionProps) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const getTaskTypeLabel = (taskType: TaskType) => {
         const labels = t.teacher.assignments.createQuestionsAndTasks.createTask.fieldTaskTypeDropdownValue
@@ -95,6 +97,13 @@ export function QuizQuestionsSection({
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                    {hasAttempts && (
+                        <div className="rounded-md bg-yellow-50 p-3 text-xs text-yellow-800 border border-yellow-200">
+                            {language === 'vi' 
+                                ? 'Bài kiểm tra này đã có học sinh làm bài. Việc chỉnh sửa câu hỏi sẽ yêu cầu xóa toàn bộ lịch sử bài làm của học sinh.'
+                                : 'This assessment already has student attempts. Modifying question content will delete all student attempts.'}
+                        </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                         {tasks.map((task) => (
                             <button

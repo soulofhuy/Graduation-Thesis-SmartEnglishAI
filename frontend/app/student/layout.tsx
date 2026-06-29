@@ -14,7 +14,7 @@ export default function StudentLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { accessToken } = useAuth()
+  const { accessToken, logout } = useAuth()
   const { t } = useLanguage()
   const [userName, setUserName] = useState('')
 
@@ -50,6 +50,7 @@ export default function StudentLayout({
       userRole="student"
       userName={userName || 'User'}
       onLogout={() => {
+        logout()
         router.push('/login')
       }}
     >

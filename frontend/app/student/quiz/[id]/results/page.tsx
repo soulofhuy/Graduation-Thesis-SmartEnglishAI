@@ -119,7 +119,7 @@ export default function QuizResultsPage() {
     if (!isHydrated || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Đang tải kết quả bài làm...</p>
+                <p className="text-muted-foreground">{t.common.loadingQuiz}</p>
             </div>
         )
     }
@@ -127,7 +127,7 @@ export default function QuizResultsPage() {
     if (!accessToken) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Vui lòng đăng nhập để xem kết quả</p>
+                <p className="text-muted-foreground">{t.common.loginRequired}</p>
             </div>
         )
     }
@@ -135,7 +135,7 @@ export default function QuizResultsPage() {
     if (!assignmentId) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <p className="text-muted-foreground">Không tìm thấy bài kiểm tra</p>
+                <p className="text-muted-foreground">{t.common.notFound}</p>
             </div>
         )
     }
@@ -146,7 +146,7 @@ export default function QuizResultsPage() {
                 <Link href="/student/quiz">
                     <Button variant="outline" className="gap-2 mb-4">
                         <ArrowLeft className="w-4 h-4" />
-                        Quay lại danh sách bài tập
+                        {t.common.backToList}
                     </Button>
                 </Link>
 
@@ -312,10 +312,10 @@ export default function QuizResultsPage() {
 
                 <div className="flex gap-3 justify-center">
                     <Link href="/student/quiz">
-                        <Button variant="outline">Quay lại danh sách</Button>
+                        <Button variant="outline">{t.common.backToList}</Button>
                     </Link>
                     <Link href={`/student/quiz/${assignmentId}/take`}>
-                        <Button>Làm lại bài tập</Button>
+                        <Button>{t.student.assignments.takeAssignment.submitConfirmation.continueButton}</Button>
                     </Link>
                 </div>
             </div>

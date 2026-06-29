@@ -18,6 +18,7 @@ import UserManagementRouter from './src/routes/admin/userManagement/userManageme
 import GetAllClassesRouter from './src/routes/admin/classManagement/getAllClassesRoutes';
 import CreateNewClassesRouter from './src/routes/admin/classManagement/createNewClassesRoutes';
 import AIGenerateAssignmentRouter from './src/routes/ai/generate-assignment/aiGenerateAssignmentRoutes';
+import AIEditAssignmentRouter from './src/routes/ai/edit-assignment/aiEditAssignmentRoutes';
 import AIChatSessionRouter from './src/routes/ai/chat-session/aiChatSessionRoutes';
 import AIResultAnalysisRouter from './src/routes/ai/result-analysis/resultAnalysisRoutes';
 import GetAllAssignmentsRouter from './src/routes/admin/assignmentManagement/getAllAssignmentRoutes';
@@ -60,6 +61,7 @@ app.use('/api', DeleteAssignmentRouter);
 app.use('/api', GetListOfResultsRouter);
 app.use('/api', GetResultDetailsRouter);
 app.use('/api', AIGenerateAssignmentRouter);
+app.use('/api', AIEditAssignmentRouter);
 app.use('/api', AIChatSessionRouter);
 app.use('/api', AIResultAnalysisRouter);
 app.use('/api', AdminTrashBinRouter);

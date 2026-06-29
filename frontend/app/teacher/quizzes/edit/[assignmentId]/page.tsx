@@ -40,6 +40,7 @@ import {
     createQuestion,
     createTask,
     ChatSessionView,
+    AIEditChatPanel,
     type AssignmentFormData,
     type QuestionDraft,
     type TaskDraft
@@ -47,6 +48,16 @@ import {
 import type { Assignment, Choice, Class, Question, Task, TaskType } from '@/lib/types'
 import { useLanguage } from '@/components/language-provider'
 import { getTaskTypeLabel } from '@/lib/language-mappers/task-type-mapper'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 type ActiveTab = 'basic' | 'questions' | 'preview' | 'results' | 'aiMessages'
 
@@ -160,6 +171,8 @@ export default function EditQuizPage() {
         canViewResult: true
     })
     const [tasks, setTasks] = useState<TaskDraft[]>([initialTask])
+    const [hasAttempts, setHasAttempts] = useState(false)
+    const [showForceDeleteDialog, setShowForceDeleteDialog] = useState(false)
     const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask.id)
     const [selectedQuestionId, setSelectedQuestionId] = useState<string>(initialTask.questions[0].id)
 
@@ -220,6 +233,7 @@ export default function EditQuizPage() {
 
                 setFormData(mapAssignmentToFormData(assignment))
                 setTasks(mappedTasks)
+                setHasAttempts(Boolean(assignment.hasAttempts))
                 setSelectedTaskId(mappedTasks[0].id)
                 setSelectedQuestionId(mappedTasks[0].questions[0].id)
             } catch (error) {
@@ -332,6 +346,13 @@ export default function EditQuizPage() {
         }).success
     }, [formData.title, payloadPreview.tasks, language])
 
+    const handleAIApplyChanges = (newTasks: TaskDraft[], formUpdate?: Partial<AssignmentFormData>) => {
+        setTasks(newTasks)
+        if (newTasks[0]) setSelectedTaskId(newTasks[0].id)
+        if (newTasks[0]?.questions[0]) setSelectedQuestionId(newTasks[0].questions[0].id)
+        if (formUpdate) setFormData(prev => ({ ...prev, ...formUpdate }))
+    }
+
     const goToQuestionTab = () => {
         const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
         if (!basicValidation.success) {
@@ -340,6 +361,36 @@ export default function EditQuizPage() {
         }
 
         setActiveTab('questions')
+    }
+
+    const doUpdateAssignment = async (force = false) => {
+        if (!accessToken || !assignmentId) return
+
+        setIsSubmitting(true)
+        try {
+            const payload = force ? { ...payloadPreview, forceDeleteAttempts: true } : payloadPreview
+            const result = await updateAssignmentFullById(accessToken, assignmentId, payload)
+
+            setFormData(mapAssignmentToFormData(result.assignment))
+            setHasAttempts(Boolean(result.assignment.hasAttempts))
+            if ((result.assignment.tasks ?? []).length > 0) {
+                const nextTasks = (result.assignment.tasks ?? []).map((task) => mapTaskToDraft(task, getTaskTitleFromType))
+                setTasks(nextTasks)
+                setSelectedTaskId(nextTasks[0].id)
+                setSelectedQuestionId(nextTasks[0].questions[0].id)
+            }
+            toast.success(result.message || 'Cap nhat bai tap thanh cong')
+        } catch (error) {
+            const code = (error as any)?.code as string | undefined
+            if (code === 'ASSESSMENT_HAS_ATTEMPTS') {
+                setShowForceDeleteDialog(true)
+                return
+            }
+            const message = error instanceof Error ? error.message : 'Cap nhat bai tap that bai'
+            toast.error(message)
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const submitUpdateAssignment = async () => {
@@ -369,24 +420,7 @@ export default function EditQuizPage() {
             return
         }
 
-        setIsSubmitting(true)
-        try {
-            const result = await updateAssignmentFullById(accessToken, assignmentId, payloadPreview)
-
-            setFormData(mapAssignmentToFormData(result.assignment))
-            if ((result.assignment.tasks ?? []).length > 0) {
-                const nextTasks = (result.assignment.tasks ?? []).map((task) => mapTaskToDraft(task, getTaskTitleFromType))
-                setTasks(nextTasks)
-                setSelectedTaskId(nextTasks[0].id)
-                setSelectedQuestionId(nextTasks[0].questions[0].id)
-            }
-            toast.success(result.message || 'Cap nhat bai tap thanh cong')
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Cap nhat bai tap that bai'
-            toast.error(message)
-        } finally {
-            setIsSubmitting(false)
-        }
+        await doUpdateAssignment(false)
     }
 
     const topTabs = [
@@ -642,6 +676,7 @@ export default function EditQuizPage() {
                             onToggleCorrectChoice={handleToggleCorrectChoice}
                             onDeleteChoice={handleDeleteChoice}
                             onChangeChoiceContent={handleChangeChoiceContent}
+                            hasAttempts={hasAttempts}
                         />
                     )}
 
@@ -685,24 +720,29 @@ export default function EditQuizPage() {
                         </div>
                     )} */}
 
-                    {activeTab === 'aiMessages' && (
-                        <div className="space-y-4">
-                            {isChatMessagesLoading ? (
-                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    {t.common.loading}
-                                </div>
-                            ) : (chatMessagesData?.chatSessions ?? []).length === 0 ? (
-                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    {t.common.noData}
-                                </div>
-                            ) : (
+                    {activeTab === 'aiMessages' && accessToken && (
+                        <div className="space-y-6">
+                            <AIEditChatPanel
+                                accessToken={accessToken}
+                                assignmentId={assignmentId}
+                                currentPayload={payloadPreview}
+                                onApplyChanges={handleAIApplyChanges}
+                                initialSession={(chatMessagesData?.chatSessions ?? [])[0]}
+                                onSessionCreated={() => {
+                                    void getAssignmentChatMessagesById(accessToken, assignmentId, undefined, 3)
+                                        .then(setChatMessagesData)
+                                        .catch(() => {})
+                                }}
+                            />
+
+                            {!isChatMessagesLoading && (chatMessagesData?.chatSessions ?? []).length > 0 && (
                                 <div className="space-y-4">
                                     {(chatMessagesData?.chatSessions ?? []).map((session) => (
                                         <ChatSessionView
                                             key={session.id}
                                             session={session}
-                                            accessToken={accessToken as string}
-                                            assignmentId={assignmentId as string}
+                                            accessToken={accessToken}
+                                            assignmentId={assignmentId}
                                         />
                                     ))}
                                 </div>
@@ -717,6 +757,31 @@ export default function EditQuizPage() {
                 onClose={() => setIsPreviewOpen(false)}
                 payload={payloadPreview}
             />
+
+            <AlertDialog open={showForceDeleteDialog} onOpenChange={setShowForceDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t.teacher.assignments.editAssignment.confirmForceDelete.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t.teacher.assignments.editAssignment.confirmForceDelete.description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setShowForceDeleteDialog(false)}>
+                            {t.teacher.assignments.editAssignment.confirmForceDelete.cancel}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => {
+                                setShowForceDeleteDialog(false)
+                                void doUpdateAssignment(true)
+                            }}
+                        >
+                            {t.teacher.assignments.editAssignment.confirmForceDelete.confirm}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

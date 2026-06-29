@@ -615,6 +615,25 @@ class AttemptService {
       });
     });
   };
+  static saveDraft = async (
+    studentId: string,
+    attemptId: string,
+    draftAnswer: unknown
+  ) => {
+    const attempt = await prisma.attempt.findFirst({
+      where: { id: attemptId, studentId, status: 'IN_PROGRESS' }
+    });
+
+    if (!attempt) {
+      throw new Error('In-progress attempt not found');
+    }
+
+    return prisma.attempt.update({
+      where: { id: attemptId },
+      data: { draftAnswer: draftAnswer as any },
+      select: { id: true, draftAnswer: true }
+    });
+  };
 }
 
 export default AttemptService;
