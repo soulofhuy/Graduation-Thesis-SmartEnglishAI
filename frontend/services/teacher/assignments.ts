@@ -325,7 +325,10 @@ export async function updateAssignmentFullById(
 
   if (!response.ok || !payload.status) {
     const message = payload?.message || 'Update assignment failed';
-    throw new Error(message);
+    const errorCode = (payload as any)?.error?.code as string | undefined;
+    const err = new Error(message) as Error & { code?: string };
+    if (errorCode) err.code = errorCode;
+    throw err;
   }
 
   if (!payload.data) {

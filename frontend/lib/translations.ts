@@ -680,6 +680,12 @@ export const translations = {
           },
           tabChatWithAI: {
             title: 'AI conversation history'
+          },
+          confirmForceDelete: {
+            title: 'Confirm assignment edit',
+            description: 'This assignment has been attempted by students. If you continue, all existing attempt results will be permanently deleted and cannot be recovered. Are you sure you want to continue?',
+            cancel: 'Cancel',
+            confirm: 'Delete results and save'
           }
         },
         createQuestionsAndTasks: {
@@ -1878,6 +1884,12 @@ export const translations = {
           },
           tabChatWithAI: {
             title: 'Lịch sử trò chuyện với AI'
+          },
+          confirmForceDelete: {
+            title: 'Xác nhận chỉnh sửa bài tập',
+            description: 'Bài tập này đã có học sinh làm bài. Nếu tiếp tục chỉnh sửa, tất cả kết quả làm bài cũ sẽ bị xóa vĩnh viễn và không thể khôi phục. Bạn có chắc chắn muốn tiếp tục không?',
+            cancel: 'Hủy',
+            confirm: 'Xóa kết quả và lưu'
           }
         },
         createAssignment: {
