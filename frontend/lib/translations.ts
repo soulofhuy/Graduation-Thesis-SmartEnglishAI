@@ -666,6 +666,12 @@ export const translations = {
             'AI is creating your assignment, please wait a moment...',
           chatMessageFieldPlaceholder: 'Type your message here to chat with AI'
         },
+        aiEditPanel: {
+          initialMessage: 'Hello! Describe what you want to change in the assignment. For example: "Add 2 questions about past tense" or "Change question 3 to reading comprehension format".',
+          generating: 'AI is processing and updating the assignment...',
+          placeholder: 'Describe the changes you want AI to make... (Enter to send)',
+          appliedSuccess: 'AI has updated the assignment'
+        },
         editAssignment: {
           title: 'Edit assignment',
           description: 'Update assignment information and configuration',
@@ -680,6 +686,9 @@ export const translations = {
           },
           tabChatWithAI: {
             title: 'AI conversation history'
+          },
+          tabAIEdit: {
+            title: 'Edit with AI'
           },
           confirmForceDelete: {
             title: 'Confirm assignment edit',
@@ -1885,6 +1894,9 @@ export const translations = {
           tabChatWithAI: {
             title: 'Lịch sử trò chuyện với AI'
           },
+          tabAIEdit: {
+            title: 'Chỉnh sửa bằng AI'
+          },
           confirmForceDelete: {
             title: 'Xác nhận chỉnh sửa bài tập',
             description: 'Bài tập này đã có học sinh làm bài. Nếu tiếp tục chỉnh sửa, tất cả kết quả làm bài cũ sẽ bị xóa vĩnh viễn và không thể khôi phục. Bạn có chắc chắn muốn tiếp tục không?',
@@ -1946,6 +1958,12 @@ export const translations = {
           AILoadingMessage:
             'Đang kết nối với AI để tạo bài tập cho bạn, vui lòng chờ trong giây lát...',
           chatMessageFieldPlaceholder: 'Nhập thông tin về bài tập bạn muốn tạo'
+        },
+        aiEditPanel: {
+          initialMessage: 'Xin chào! Hãy mô tả bạn muốn thay đổi gì trong bài kiểm tra. Ví dụ: "Thêm 2 câu hỏi về past tense" hoặc "Đổi câu 3 thành dạng reading comprehension".',
+          generating: 'AI đang xử lý và cập nhật bài kiểm tra...',
+          placeholder: 'Mô tả thay đổi bạn muốn AI thực hiện... (Enter để gửi)',
+          appliedSuccess: 'AI đã cập nhật bài kiểm tra thành công'
         },
         createQuestionsAndTasks: {
           createTask: {

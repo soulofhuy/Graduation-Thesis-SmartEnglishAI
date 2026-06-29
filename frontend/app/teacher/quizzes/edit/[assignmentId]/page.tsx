@@ -40,6 +40,7 @@ import {
     createQuestion,
     createTask,
     ChatSessionView,
+    AIEditChatPanel,
     type AssignmentFormData,
     type QuestionDraft,
     type TaskDraft
@@ -344,6 +345,13 @@ export default function EditQuizPage() {
             tasks: payloadPreview.tasks,
         }).success
     }, [formData.title, payloadPreview.tasks, language])
+
+    const handleAIApplyChanges = (newTasks: TaskDraft[], formUpdate?: Partial<AssignmentFormData>) => {
+        setTasks(newTasks)
+        if (newTasks[0]) setSelectedTaskId(newTasks[0].id)
+        if (newTasks[0]?.questions[0]) setSelectedQuestionId(newTasks[0].questions[0].id)
+        if (formUpdate) setFormData(prev => ({ ...prev, ...formUpdate }))
+    }
 
     const goToQuestionTab = () => {
         const basicValidation = createAssignmentBasicInfoSchema(language).safeParse(formData)
@@ -712,24 +720,29 @@ export default function EditQuizPage() {
                         </div>
                     )} */}
 
-                    {activeTab === 'aiMessages' && (
-                        <div className="space-y-4">
-                            {isChatMessagesLoading ? (
-                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    {t.common.loading}
-                                </div>
-                            ) : (chatMessagesData?.chatSessions ?? []).length === 0 ? (
-                                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                                    {t.common.noData}
-                                </div>
-                            ) : (
+                    {activeTab === 'aiMessages' && accessToken && (
+                        <div className="space-y-6">
+                            <AIEditChatPanel
+                                accessToken={accessToken}
+                                assignmentId={assignmentId}
+                                currentPayload={payloadPreview}
+                                onApplyChanges={handleAIApplyChanges}
+                                initialSession={(chatMessagesData?.chatSessions ?? [])[0]}
+                                onSessionCreated={() => {
+                                    void getAssignmentChatMessagesById(accessToken, assignmentId, undefined, 3)
+                                        .then(setChatMessagesData)
+                                        .catch(() => {})
+                                }}
+                            />
+
+                            {!isChatMessagesLoading && (chatMessagesData?.chatSessions ?? []).length > 0 && (
                                 <div className="space-y-4">
                                     {(chatMessagesData?.chatSessions ?? []).map((session) => (
                                         <ChatSessionView
                                             key={session.id}
                                             session={session}
-                                            accessToken={accessToken as string}
-                                            assignmentId={assignmentId as string}
+                                            accessToken={accessToken}
+                                            assignmentId={assignmentId}
                                         />
                                     ))}
                                 </div>
