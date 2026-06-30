@@ -199,12 +199,8 @@ class AssignmentStudentService {
     return prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
-        class: {
-          select: {
-            id: true,
-            name: true,
-            teacherId: true
-          }
+        assignmentClasses: {
+          select: { class: { select: { id: true, name: true, teacherId: true } } }
         },
         tasks: {
           orderBy: {
@@ -462,13 +458,17 @@ class AssignmentStudentService {
       where: {
         id: assignmentId,
         isActive: true,
-        class: {
-          isActive: true,
-          classMembers: {
-            some: {
-              studentId,
-              isApproved: true,
-              isBanned: false
+        assignmentClasses: {
+          some: {
+            class: {
+              isActive: true,
+              classMembers: {
+                some: {
+                  studentId,
+                  isApproved: true,
+                  isBanned: false
+                }
+              }
             }
           }
         }

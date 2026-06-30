@@ -57,6 +57,7 @@ class ViewClassProgressOnAssignmentsController {
     res: Response
   ) => {
     const teacherId = req.userId;
+    const classId = req.params.classId || req.body.classId;
     const studentId = req.params.studentId || req.body.studentId;
     const assignmentId = req.params.assignmentId || req.body.assignmentId;
 
@@ -79,20 +80,6 @@ class ViewClassProgressOnAssignmentsController {
     }
 
     try {
-      // Resolve assignment -> class so we can reuse existing service which requires classId
-      const assignment = await prisma.assignment.findUnique({
-        where: { id: assignmentId.trim() },
-        select: { id: true, classId: true, isActive: true }
-      });
-
-      if (!assignment || !assignment.isActive) {
-        return res
-          .status(404)
-          .json(Responses.errorResponse(new Error('Assignment not found')));
-      }
-
-      const classId = assignment.classId;
-
       const detail =
         await ViewClassProgressOnAssignmentsService.getStudentAssignmentProgressDetail(
           teacherId,

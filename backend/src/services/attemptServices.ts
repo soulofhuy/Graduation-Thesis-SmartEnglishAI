@@ -89,13 +89,17 @@ class AttemptService {
         where: {
           id: assignmentId,
           isActive: true,
-          class: {
-            isActive: true,
-            classMembers: {
-              some: {
-                studentId,
-                isApproved: true,
-                isBanned: false
+          assignmentClasses: {
+            some: {
+              class: {
+                isActive: true,
+                classMembers: {
+                  some: {
+                    studentId,
+                    isApproved: true,
+                    isBanned: false
+                  }
+                }
               }
             }
           }
