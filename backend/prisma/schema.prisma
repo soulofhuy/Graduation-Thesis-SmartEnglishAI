@@ -90,6 +90,7 @@ model Class {
   isActive              Boolean           @default(true)
   deactivatedAt         DateTime?
   assignments           Assignment[]
+  assignmentClasses     AssignmentClass[]
 }
 
 model ClassMember {
@@ -120,7 +121,7 @@ model Assignment {
   title                 String
   description           String?
   createdBy             String
-  classId               String
+  classId               String?
   isPublic              Boolean           @default(false)
   dueDate               DateTime?
   isSingleAttempt       Boolean           @default(false)
@@ -131,13 +132,28 @@ model Assignment {
   deactivatedAt         DateTime?
 
   creator               User              @relation("AssignmentCreator", fields: [createdBy], references: [id], onDelete: Cascade)
-  class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  class                 Class?            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  assignmentClasses     AssignmentClass[]
   tasks                 Task[]
   attempts              Attempt[]
   aiChatSessions        ChatSession[]
 
   @@index([classId])
   @@index([createdBy])
+}
+
+model AssignmentClass {
+  id                    String            @id @default(uuid())
+  assignmentId          String
+  classId               String
+  createdAt             DateTime          @default(now())
+
+  assignment            Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  class                 Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, classId])
+  @@index([classId])
+  @@index([assignmentId])
 }
 
 model ChatSession {

@@ -128,7 +128,7 @@ function mapAssignmentToFormData(assignment: Assignment): AssignmentFormData {
     return {
         title: assignment.title ?? '',
         description: assignment.description ?? '',
-        classId: assignment.classId ?? '',
+        classIds: (assignment as any).classIds ?? (assignment.classId ? [assignment.classId] : []),
         dueDate:
             dueDate && !Number.isNaN(dueDate.getTime())
                 ? new Date(dueDate.getTime() - dueDate.getTimezoneOffset() * 60000)
@@ -164,7 +164,7 @@ export default function EditQuizPage() {
     const [formData, setFormData] = useState<AssignmentFormData>({
         title: '',
         description: '',
-        classId: '',
+        classIds: [],
         dueDate: '',
         isPublic: false,
         isSingleAttempt: true,

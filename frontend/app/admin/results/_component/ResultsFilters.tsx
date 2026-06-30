@@ -6,7 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLanguage } from '@/components/language-provider'
 
-type AssignmentOption = { id: string; title: string; className?: string; classId?: string }
+type AssignmentOption = {
+    id: string
+    title: string
+    className?: string
+    classId?: string
+    classes?: Array<{ id: string; name: string; classCode: string }>
+}
 
 type Props = {
     assignments: AssignmentOption[]
@@ -20,14 +26,18 @@ export default function ResultsFilters({ assignments, onApply }: Props) {
     const [search, setSearch] = useState('')
 
     const classesForAssignment = assignmentId
-        ? assignments
-            .filter((a) => a.id === assignmentId)
-            .map((a) => ({ id: a.classId ?? '', name: a.className ?? 'Chưa có tên lớp' }))
-            .filter((c) => Boolean(c.id))
+        ? (() => {
+            const found = assignments.find((a) => a.id === assignmentId)
+            if (!found) return []
+            // Prefer multi-class array, fall back to single classId
+            if (found.classes && found.classes.length > 0) return found.classes
+            if (found.classId) return [{ id: found.classId, name: found.className ?? 'Chưa có tên lớp', classCode: '' }]
+            return []
+          })()
         : []
 
     useEffect(() => {
-        if (!assignmentId) setClassId(null)
+        setClassId(null)
     }, [assignmentId])
 
     return (

@@ -143,8 +143,8 @@ class GetListOfResultsServices {
       prisma.assignment.findFirst({
         where: {
           id: normalizedAssignmentId,
-          classId: classData.id,
-          isActive: true
+          isActive: true,
+          assignmentClasses: { some: { classId: classData.id } }
         },
         select: {
           id: true,
@@ -189,8 +189,8 @@ class GetListOfResultsServices {
             },
             assignmentId: normalizedAssignmentId,
             assignment: {
-              classId: classData.id,
-              isActive: true
+              isActive: true,
+              assignmentClasses: { some: { classId: classData.id } }
             }
           },
           orderBy: {

@@ -43,13 +43,17 @@ class AssignmentStudentService {
 
     const where = {
       isActive: true,
-      class: {
-        isActive: true,
-        classMembers: {
-          some: {
-            studentId,
-            isApproved: true,
-            isBanned: false
+      assignmentClasses: {
+        some: {
+          class: {
+            isActive: true,
+            classMembers: {
+              some: {
+                studentId,
+                isApproved: true,
+                isBanned: false
+              }
+            }
           }
         }
       }
@@ -65,12 +69,16 @@ class AssignmentStudentService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          class: {
+          assignmentClasses: {
             select: {
-              id: true,
-              name: true,
-              classCode: true,
-              teacherId: true
+              class: {
+                select: {
+                  id: true,
+                  name: true,
+                  classCode: true,
+                  teacherId: true
+                }
+              }
             }
           },
           creator: {
@@ -191,12 +199,8 @@ class AssignmentStudentService {
     return prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
-        class: {
-          select: {
-            id: true,
-            name: true,
-            teacherId: true
-          }
+        assignmentClasses: {
+          select: { class: { select: { id: true, name: true, teacherId: true } } }
         },
         tasks: {
           orderBy: {
@@ -269,13 +273,17 @@ class AssignmentStudentService {
 
     const where = {
       isActive: true,
-      class: {
-        isActive: true,
-        classMembers: {
-          some: {
-            studentId,
-            isApproved: true,
-            isBanned: false
+      assignmentClasses: {
+        some: {
+          class: {
+            isActive: true,
+            classMembers: {
+              some: {
+                studentId,
+                isApproved: true,
+                isBanned: false
+              }
+            }
           }
         }
       }
@@ -291,12 +299,16 @@ class AssignmentStudentService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          class: {
+          assignmentClasses: {
             select: {
-              id: true,
-              name: true,
-              classCode: true,
-              teacherId: true
+              class: {
+                select: {
+                  id: true,
+                  name: true,
+                  classCode: true,
+                  teacherId: true
+                }
+              }
             }
           },
           creator: {
@@ -446,13 +458,17 @@ class AssignmentStudentService {
       where: {
         id: assignmentId,
         isActive: true,
-        class: {
-          isActive: true,
-          classMembers: {
-            some: {
-              studentId,
-              isApproved: true,
-              isBanned: false
+        assignmentClasses: {
+          some: {
+            class: {
+              isActive: true,
+              classMembers: {
+                some: {
+                  studentId,
+                  isApproved: true,
+                  isBanned: false
+                }
+              }
             }
           }
         }

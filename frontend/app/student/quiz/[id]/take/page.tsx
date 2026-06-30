@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Flag, ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { Flag, ChevronLeft, ChevronRight, Send, Clock, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth-provider'
 import { normalizeHtmlToText } from '@/lib/view-details-assignment-helpers/normalize-html-to-text'
@@ -59,6 +59,8 @@ export default function QuizTakePage() {
   const [isLoadingAssignment, setIsLoadingAssignment] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const hasAutoSubmittedRef = useRef(false)
   const isSavingDraftRef = useRef(false)
   const AUTO_SAVE_INTERVAL_MS = 30_000
 
@@ -220,6 +222,46 @@ export default function QuizTakePage() {
     return () => clearInterval(interval)
   }, [accessToken, attemptId, selectedAnswers, isSubmitting])
 
+  // Countdown timer — init when assignment loads, auto-submit when expired
+  useEffect(() => {
+    if (!assignment?.dueDate) return
+
+    const calcTimeLeft = () =>
+      Math.floor((new Date(assignment.dueDate!).getTime() - Date.now()) / 1000)
+
+    const initial = calcTimeLeft()
+    if (initial <= 0) {
+      setTimeLeft(0)
+      return
+    }
+
+    setTimeLeft(initial)
+
+    const tick = setInterval(() => {
+      const remaining = calcTimeLeft()
+      setTimeLeft(remaining)
+
+      if (remaining <= 0) {
+        clearInterval(tick)
+        if (!hasAutoSubmittedRef.current && !isSubmitting) {
+          hasAutoSubmittedRef.current = true
+          toast.warning(t.student.assignments.takeAssignment.timeUpAutoSubmit ?? 'Hết giờ! Bài đang được nộp tự động...')
+          void handleSubmitQuiz()
+        }
+      }
+    }, 1000)
+
+    return () => clearInterval(tick)
+  }, [assignment?.dueDate])
+
+  const formatTimeLeft = (seconds: number): string => {
+    if (seconds <= 0) return '00:00:00'
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    const s = seconds % 60
+    return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':')
+  }
+
   const handleSelectAnswerByQuestion = (questionId: string, optionId: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -331,15 +373,34 @@ export default function QuizTakePage() {
               </h2>
             </div>
 
-            {/* Auto-save status + Submit */}
-            <div className="flex items-center justify-end lg:justify-center gap-3">
+            {/* Countdown + Auto-save status + Submit */}
+            <div className="flex items-center justify-end lg:justify-center gap-3 flex-wrap">
+              {timeLeft !== null && (
+                <div className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-mono font-semibold ${
+                  timeLeft <= 0
+                    ? 'bg-destructive/10 text-destructive'
+                    : timeLeft <= 300
+                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 animate-pulse'
+                    : 'bg-muted text-foreground'
+                }`}>
+                  {timeLeft <= 0
+                    ? <AlertTriangle className="w-4 h-4" />
+                    : <Clock className="w-4 h-4" />
+                  }
+                  {timeLeft <= 0
+                    ? (t.student.assignments.takeAssignment.timeExpired ?? 'Hết giờ')
+                    : formatTimeLeft(timeLeft)
+                  }
+                </div>
+              )}
               {lastSavedAt && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground hidden sm:inline">
                   {t.common.autoSave.savedAt} {lastSavedAt.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
               <Button
                 onClick={() => setShowSubmitDialog(true)}
+                disabled={isSubmitting || timeLeft === 0}
                 className="gap-2"
               >
                 <Send className="w-4 h-4" />

@@ -22,7 +22,6 @@ class GetAllAssignmentServices {
             id: true,
             title: true,
             description: true,
-            classId: true,
             createdBy: true,
             isPublic: true,
             dueDate: true,
@@ -44,11 +43,9 @@ class GetAllAssignmentServices {
                 }
               }
             },
-            class: {
+            assignmentClasses: {
               select: {
-                id: true,
-                name: true,
-                classCode: true
+                class: { select: { id: true, name: true, classCode: true } }
               }
             },
             tasks: {
@@ -83,7 +80,8 @@ class GetAllAssignmentServices {
               lastName: a.creator.profile?.lastName || null
             }
           : null,
-        classInfo: a.class || null
+        classes: a.assignmentClasses.map((ac: any) => ac.class),
+        classInfo: a.assignmentClasses[0]?.class || null
       }));
 
       return {

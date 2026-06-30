@@ -25,7 +25,7 @@ export interface CreateTaskInput {
 export interface CreateAssignmentInput {
   title: string;
   description?: string;
-  classId: string;
+  classIds: string[];
   isPublic: boolean;
   dueDate?: string;
   isSingleAttempt: boolean;

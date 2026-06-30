@@ -56,12 +56,14 @@ class GetResultDetailsServices {
       },
       select: {
         id: true,
-        classId: true,
         title: true,
         description: true,
         dueDate: true,
         isSingleAttempt: true,
-        canViewResult: true
+        canViewResult: true,
+        assignmentClasses: {
+          select: { class: { select: { id: true, name: true, classCode: true, teacherId: true } } }
+        }
       }
     });
 
@@ -69,10 +71,13 @@ class GetResultDetailsServices {
       throw new Error('Assignment not found');
     }
 
+    // Use the first class for backwards-compat (admin detail view)
+    const primaryClassId = assignment.assignmentClasses[0]?.class?.id ?? '';
+
     const [classData, classMember] = await Promise.all([
-      prisma.class.findFirst({
+      primaryClassId ? prisma.class.findFirst({
         where: {
-          id: assignment.classId,
+          id: primaryClassId,
           isActive: true
         },
         select: {
@@ -81,10 +86,10 @@ class GetResultDetailsServices {
           classCode: true,
           teacherId: true
         }
-      }),
-      prisma.classMember.findFirst({
+      }) : Promise.resolve(null),
+      primaryClassId ? prisma.classMember.findFirst({
         where: {
-          classId: assignment.classId,
+          classId: primaryClassId,
           studentId: studentId.trim(),
           isApproved: true,
           isBanned: false,
@@ -105,7 +110,7 @@ class GetResultDetailsServices {
             }
           }
         }
-      })
+      }) : Promise.resolve(null)
     ]);
 
     if (!classData) {

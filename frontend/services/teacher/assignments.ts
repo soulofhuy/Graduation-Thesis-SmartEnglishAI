@@ -296,7 +296,7 @@ export type UpdateAssignmentFullInput = {
   title: string;
   description?: string;
   dueDate?: string | null;
-  classId: string;
+  classIds: string[];
   isPublic: boolean;
   isSingleAttempt: boolean;
   canViewResult: boolean;

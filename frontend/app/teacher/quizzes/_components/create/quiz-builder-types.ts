@@ -35,7 +35,7 @@ export interface TaskDraft {
 export interface AssignmentFormData {
   title: string;
   description: string;
-  classId: string;
+  classIds: string[];
   dueDate: string;
   isPublic: boolean;
   isSingleAttempt: boolean;
