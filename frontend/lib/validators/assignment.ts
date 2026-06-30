@@ -18,7 +18,7 @@ export const createAssignmentBasicInfoSchema = (language?: Language) => {
 
   return z.object({
     title: z.string().trim().min(1, messages.titleRequired),
-    classId: z.string().trim().min(1, messages.classIdRequired),
+    classIds: z.array(z.string().trim().min(1)).min(1, messages.classIdRequired),
     description: z.string().optional(),
     dueDate: z
       .string()
@@ -39,7 +39,7 @@ export const createAssignmentPayloadSchema = (language?: Language) => {
 
   const schema = z.object({
     title: z.string().trim().min(1, messages.titleRequired),
-    classId: z.string().trim().min(1, messages.classIdRequired),
+    classIds: z.array(z.string().trim().min(1)).min(1, messages.classIdRequired),
     description: z.string().optional(),
     dueDate: z
       .string()

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import type { AssignmentFormData } from './quiz-builder-types'
 import { useLanguage } from '@/components/language-provider'
@@ -53,23 +53,31 @@ export function QuizBasicInfoSection({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="classId">{t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClass}</Label>
-                            <Select
-                                value={formData.classId}
-                                onValueChange={(value) => setFormData((prev) => ({ ...prev, classId: value }))}
-                                disabled={isClassesLoading || classes.length === 0}
-                            >
-                                <SelectTrigger id="classId" className="h-11 w-full">
-                                    <SelectValue placeholder={isClassesLoading ? t.common.loading : t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClassPlaceholder} />
-                                </SelectTrigger>
-                                <SelectContent>
+                            <Label>{t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClass}</Label>
+                            {isClassesLoading ? (
+                                <p className="text-sm text-muted-foreground">{t.common.loading}</p>
+                            ) : classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">{t.teacher.assignments.createAssignment.tabAssignmentInfo.fieldClassPlaceholder}</p>
+                            ) : (
+                                <div className="flex flex-col gap-2 rounded-md border border-input bg-background px-3 py-2 max-h-40 overflow-y-auto">
                                     {classes.map((classItem) => (
-                                        <SelectItem key={classItem.id} value={classItem.id}>
-                                            {classItem.name}
-                                        </SelectItem>
+                                        <label key={classItem.id} className="flex items-center gap-2 cursor-pointer">
+                                            <Checkbox
+                                                checked={formData.classIds.includes(classItem.id)}
+                                                onCheckedChange={(checked) => {
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        classIds: checked
+                                                            ? [...prev.classIds, classItem.id]
+                                                            : prev.classIds.filter(id => id !== classItem.id)
+                                                    }))
+                                                }}
+                                            />
+                                            <span className="text-sm">{classItem.name}</span>
+                                        </label>
                                     ))}
-                                </SelectContent>
-                            </Select>
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid gap-2">

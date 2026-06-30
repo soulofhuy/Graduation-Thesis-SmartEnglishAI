@@ -44,7 +44,7 @@ export const buildCreateAssignmentPayload = (
 ): CreateAssignmentInput => ({
   title: safeTrim(formData.title),
   description: safeTrim(formData.description) || undefined,
-  classId: safeTrim(formData.classId),
+  classIds: formData.classIds,
   isPublic: formData.isPublic,
   dueDate: formData.dueDate
     ? new Date(formData.dueDate).toISOString()

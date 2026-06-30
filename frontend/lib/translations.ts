@@ -989,6 +989,8 @@ export const translations = {
         },
         takeAssignment: {
           submitButton: 'Submit',
+          timeUpAutoSubmit: 'Time is up! Your quiz is being auto-submitted...',
+          timeExpired: 'Time expired',
           answerList: {
             title: 'Your answer list',
             currentQuestion: 'Current question',
@@ -2258,6 +2260,8 @@ export const translations = {
         },
         takeAssignment: {
           submitButton: 'Nộp bài',
+          timeUpAutoSubmit: 'Hết giờ! Bài đang được nộp tự động...',
+          timeExpired: 'Hết giờ',
           answerList: {
             title: 'Danh sách câu trả lời',
             currentQuestion: 'Câu hỏi hiện tại',

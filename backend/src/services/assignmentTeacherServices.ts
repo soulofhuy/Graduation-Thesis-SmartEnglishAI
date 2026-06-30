@@ -28,7 +28,7 @@ type CreateTaskInput = {
 type CreateAssignmentInput = {
   title: string;
   description?: string;
-  classId: string;
+  classIds: string[];
   isPublic?: boolean;
   dueDate?: string;
   isSingleAttempt?: boolean;
@@ -39,7 +39,7 @@ type CreateAssignmentInput = {
 type UpdateAssignmentInput = {
   title?: string;
   description?: string;
-  classId?: string;
+  classIds?: string[];
   dueDate?: string | null;
   isPublic?: boolean;
   isSingleAttempt?: boolean;
@@ -58,8 +58,8 @@ class AssignmentService {
       throw new Error('Assignment title is required');
     }
 
-    if (!payload.classId?.trim()) {
-      throw new Error('Class ID is required');
+    if (!Array.isArray(payload.classIds) || payload.classIds.length === 0) {
+      throw new Error('At least one class is required');
     }
 
     if (!Array.isArray(payload.tasks) || payload.tasks.length === 0) {
@@ -163,7 +163,7 @@ class AssignmentService {
   ) => {
     this.validateCreatePayload(payload);
 
-    const [creator, classInfo] = await Promise.all([
+    const [creator, classes] = await Promise.all([
       prisma.user.findUnique({
         where: { id: creatorId },
         select: {
@@ -171,8 +171,8 @@ class AssignmentService {
           role: true
         }
       }),
-      prisma.class.findUnique({
-        where: { id: payload.classId },
+      prisma.class.findMany({
+        where: { id: { in: payload.classIds } },
         select: {
           id: true,
           teacherId: true,
@@ -185,21 +185,22 @@ class AssignmentService {
       throw new Error('Creator not found');
     }
 
-    if (!classInfo) {
-      throw new Error('Class not found');
-    }
-
-    if (!classInfo.isActive) {
-      throw new Error('Cannot create assignment for an inactive class');
-    }
-
-    if (creator.role === Role.STUDENT) {
-      throw new Error('Students are not allowed to create assignments');
+    if (classes.length !== payload.classIds.length) {
+      throw new Error('One or more classes not found');
     }
 
     const isAdmin = creator.role === Role.ADMIN;
-    if (!isAdmin && classInfo.teacherId !== creatorId) {
-      throw new Error('Only class owner or admin can create assignment');
+
+    for (const classInfo of classes) {
+      if (!classInfo.isActive) {
+        throw new Error('Cannot create assignment for an inactive class');
+      }
+      if (creator.role === Role.STUDENT) {
+        throw new Error('Students are not allowed to create assignments');
+      }
+      if (!isAdmin && classInfo.teacherId !== creatorId) {
+        throw new Error('Only class owner or admin can create assignment');
+      }
     }
 
     let parsedDueDate: Date | undefined;
@@ -213,7 +214,6 @@ class AssignmentService {
     const assignment = await prisma.$transaction(async tx => {
       const assignmentData: {
         title: string;
-        classId: string;
         createdBy: string;
         isPublic: boolean;
         isSingleAttempt: boolean;
@@ -222,7 +222,6 @@ class AssignmentService {
         dueDate?: Date;
       } = {
         title: payload.title.trim(),
-        classId: payload.classId,
         createdBy: creatorId,
         isPublic: payload.isPublic ?? false,
         isSingleAttempt: payload.isSingleAttempt ?? false,
@@ -239,6 +238,13 @@ class AssignmentService {
 
       const createdAssignment = await tx.assignment.create({
         data: assignmentData
+      });
+
+      await tx.assignmentClass.createMany({
+        data: payload.classIds.map(classId => ({
+          assignmentId: createdAssignment.id,
+          classId
+        }))
       });
 
       for (const task of payload.tasks) {
@@ -343,11 +349,11 @@ class AssignmentService {
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
-        class: {
+        assignmentClasses: {
           select: {
-            id: true,
-            name: true,
-            teacherId: true
+            class: {
+              select: { id: true, name: true, teacherId: true }
+            }
           }
         },
         tasks: {
@@ -392,6 +398,8 @@ class AssignmentService {
 
     return {
       ...assignment,
+      classes: assignment.assignmentClasses.map(ac => ac.class),
+      classIds: assignment.assignmentClasses.map(ac => ac.class.id),
       hasAttempts: attemptCount > 0
     };
   };
@@ -424,11 +432,11 @@ class AssignmentService {
         select: {
           id: true,
           createdBy: true,
-          class: {
+          assignmentClasses: {
             select: {
-              id: true,
-              teacherId: true,
-              isActive: true
+              class: {
+                select: { id: true, teacherId: true, isActive: true }
+              }
             }
           }
         }
@@ -447,12 +455,13 @@ class AssignmentService {
       throw new Error('Assignment not found');
     }
 
-    if (!assignment.class.isActive) {
+    const assignedClasses3 = assignment.assignmentClasses.map((ac: any) => ac.class);
+    if (assignedClasses3.length > 0 && !assignedClasses3.some((c: any) => c.isActive)) {
       throw new Error('Cannot view chat messages of an inactive class');
     }
 
     const isAdmin = teacher.role === Role.ADMIN;
-    const isClassTeacher = assignment.class.teacherId === teacherId;
+    const isClassTeacher = assignedClasses3.some((c: any) => c.teacherId === teacherId);
     const isCreator = assignment.createdBy === teacherId;
 
     if (!isAdmin && !isClassTeacher && !isCreator) {
@@ -568,7 +577,9 @@ class AssignmentService {
         select: {
           id: true,
           createdBy: true,
-          class: { select: { teacherId: true, isActive: true } }
+          assignmentClasses: {
+            select: { class: { select: { teacherId: true, isActive: true } } }
+          }
         }
       })
     ]);
@@ -576,11 +587,12 @@ class AssignmentService {
     if (!teacher) throw new Error('Teacher not found');
     if (!teacher.isActive) throw new Error('Teacher account is inactive');
     if (!assignment) throw new Error('Assignment not found');
-    if (!assignment.class.isActive)
+    const assignedClasses2 = assignment.assignmentClasses.map((ac: any) => ac.class);
+    if (assignedClasses2.length > 0 && !assignedClasses2.some((c: any) => c.isActive))
       throw new Error('Cannot view chat messages of an inactive class');
 
     const isAdmin = teacher.role === Role.ADMIN;
-    const isClassTeacher = assignment.class.teacherId === teacherId;
+    const isClassTeacher = assignedClasses2.some((c: any) => c.teacherId === teacherId);
     const isCreator = assignment.createdBy === teacherId;
 
     if (!isAdmin && !isClassTeacher && !isCreator) {
@@ -615,13 +627,16 @@ class AssignmentService {
 
     return prisma.assignment.findMany({
       where: {
-        classId,
-        isActive: true
+        isActive: true,
+        assignmentClasses: { some: { classId } }
       },
       orderBy: {
         createdAt: 'desc'
       },
       include: {
+        assignmentClasses: {
+          select: { class: { select: { id: true, name: true, teacherId: true } } }
+        },
         tasks: {
           include: {
             passages: {
@@ -699,12 +714,8 @@ class AssignmentService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          class: {
-            select: {
-              id: true,
-              name: true,
-              teacherId: true
-            }
+          assignmentClasses: {
+            select: { class: { select: { id: true, name: true, teacherId: true } } }
           },
           tasks: {
             include: {
@@ -828,11 +839,11 @@ class AssignmentService {
         select: {
           id: true,
           createdBy: true,
-          classId: true,
-          class: {
+          assignmentClasses: {
             select: {
-              teacherId: true,
-              isActive: true
+              class: {
+                select: { teacherId: true, isActive: true }
+              }
             }
           }
         }
@@ -851,7 +862,9 @@ class AssignmentService {
       throw new Error('Assignment not found');
     }
 
-    if (!existingAssignment.class.isActive) {
+    const assignedClasses = existingAssignment.assignmentClasses.map(ac => ac.class);
+    const allActive = assignedClasses.length === 0 || assignedClasses.every(c => c.isActive);
+    if (!allActive) {
       throw new Error('Cannot update assignment in an inactive class');
     }
 
@@ -860,7 +873,7 @@ class AssignmentService {
     }
 
     const isAdmin = updater.role === Role.ADMIN;
-    const isClassTeacher = existingAssignment.class.teacherId === updaterId;
+    const isClassTeacher = assignedClasses.some(c => c.teacherId === updaterId);
     const isCreator = existingAssignment.createdBy === updaterId;
 
     if (!isAdmin && !isClassTeacher && !isCreator) {
@@ -928,15 +941,13 @@ class AssignmentService {
       }
     }
 
-    if (payload.classId !== undefined) {
-      const normalizedClassId = payload.classId.trim();
-
-      if (!normalizedClassId) {
-        throw new Error('Class ID cannot be empty');
+    if (payload.classIds !== undefined) {
+      if (!Array.isArray(payload.classIds) || payload.classIds.length === 0) {
+        throw new Error('At least one class is required');
       }
 
-      const targetClass = await prisma.class.findUnique({
-        where: { id: normalizedClassId },
+      const targetClasses = await prisma.class.findMany({
+        where: { id: { in: payload.classIds } },
         select: {
           id: true,
           teacherId: true,
@@ -944,18 +955,17 @@ class AssignmentService {
         }
       });
 
-      if (!targetClass) {
-        throw new Error('Class not found');
+      if (targetClasses.length !== payload.classIds.length) {
+        throw new Error('One or more classes not found');
       }
 
-      if (!targetClass.isActive) {
-        throw new Error('Cannot update assignment to an inactive class');
-      }
-
-      if (!isAdmin && targetClass.teacherId !== updaterId) {
-        throw new Error(
-          'Only class owner or admin can move assignment to this class'
-        );
+      for (const cls of targetClasses) {
+        if (!cls.isActive) {
+          throw new Error('Cannot assign to an inactive class');
+        }
+        if (!isAdmin && cls.teacherId !== updaterId) {
+          throw new Error('Only class owner or admin can assign to this class');
+        }
       }
     }
 
@@ -985,7 +995,6 @@ class AssignmentService {
       description?: string | null;
       dueDate?: Date | null;
       isPublic?: boolean;
-      classId?: string;
       isSingleAttempt?: boolean;
       canViewResult?: boolean;
     } = {};
@@ -996,10 +1005,6 @@ class AssignmentService {
 
     if (payload.description !== undefined) {
       data.description = payload.description.trim() || null;
-    }
-
-    if (payload.classId !== undefined) {
-      data.classId = payload.classId.trim();
     }
 
     if (parsedDueDate !== undefined) {
@@ -1036,6 +1041,14 @@ class AssignmentService {
           where: { id: assignmentId },
           data
         });
+
+        // Replace class assignments if classIds provided
+        if (payload.classIds !== undefined) {
+          await tx.assignmentClass.deleteMany({ where: { assignmentId } });
+          await tx.assignmentClass.createMany({
+            data: payload.classIds.map(classId => ({ assignmentId, classId }))
+          });
+        }
 
         // Delete all existing tasks (cascade delete will handle questions, choices, passages)
         await tx.task.deleteMany({
@@ -1138,14 +1151,21 @@ class AssignmentService {
       return updatedAssignment;
     }
 
-    // If no tasks provided, just update basic fields
-    if (Object.keys(data).length === 0) {
+    // If no tasks provided, just update basic fields + classes
+    if (Object.keys(data).length === 0 && payload.classIds === undefined) {
       throw new Error('No valid fields provided to update');
     }
 
-    await prisma.assignment.update({
-      where: { id: assignmentId },
-      data
+    await prisma.$transaction(async tx => {
+      if (Object.keys(data).length > 0) {
+        await tx.assignment.update({ where: { id: assignmentId }, data });
+      }
+      if (payload.classIds !== undefined) {
+        await tx.assignmentClass.deleteMany({ where: { assignmentId } });
+        await tx.assignmentClass.createMany({
+          data: payload.classIds.map(classId => ({ assignmentId, classId }))
+        });
+      }
     });
 
     return this.getAssignmentById(assignmentId);
@@ -1187,20 +1207,14 @@ class AssignmentService {
       where: { id: assignmentId },
       select: {
         id: true,
-        class: {
-          select: {
-            isActive: true
-          }
+        assignmentClasses: {
+          select: { class: { select: { isActive: true } } }
         }
       }
     });
 
     if (!existingAssignment) {
       throw new Error('Assignment not found');
-    }
-
-    if (!existingAssignment.class.isActive) {
-      throw new Error('Cannot delete assignment from an inactive class');
     }
 
     await prisma.assignment.delete({

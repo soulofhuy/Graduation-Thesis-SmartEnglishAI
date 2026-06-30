@@ -59,7 +59,7 @@ export default function CreateQuizPage() {
     const [formData, setFormData] = useState<AssignmentFormData>({
         title: '',
         description: '',
-        classId: '',
+        classIds: [],
         dueDate: '',
         isPublic: false,
         isSingleAttempt: true,
@@ -128,10 +128,10 @@ export default function CreateQuizPage() {
 
                 setTeacherClasses(classOptions)
 
-                if (!formData.classId && classOptions[0]) {
+                if (formData.classIds.length === 0 && classOptions[0]) {
                     setFormData((prev) => ({
                         ...prev,
-                        classId: classOptions[0].id,
+                        classIds: [classOptions[0].id],
                     }))
                 }
             } catch (error) {
@@ -274,7 +274,7 @@ export default function CreateQuizPage() {
                 },
             ])
 
-            const combinedTopic = `Context:\nTitle: ${formData.title || '<no title>'}\nDescription: ${formData.description || '<no description>'}\nClassId: ${formData.classId || '<no class>'}\nDueDate: ${formData.dueDate || '<no dueDate>'}\nUser prompt: ${trimmedPrompt}`
+            const combinedTopic = `Context:\nTitle: ${formData.title || '<no title>'}\nDescription: ${formData.description || '<no description>'}\nClassIds: ${formData.classIds.join(', ') || '<no class>'}\nDueDate: ${formData.dueDate || '<no dueDate>'}\nUser prompt: ${trimmedPrompt}`
 
             // Persist prompt/response via chat-session API so sessions and prompts are saved
             const result = await sendAIChatMessage(accessToken, {
@@ -282,7 +282,7 @@ export default function CreateQuizPage() {
                 clientPrompt: trimmedPrompt,
                 assignmentTitle: formData.title || undefined,
                 assignmentDescription: formData.description || undefined,
-                classId: formData.classId || undefined,
+                classId: formData.classIds[0] || undefined,
                 dueDate: formData.dueDate || undefined,
                 isPublic: formData.isPublic,
                 isSingleAttempt: formData.isSingleAttempt,

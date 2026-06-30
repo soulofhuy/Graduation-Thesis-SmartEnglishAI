@@ -43,13 +43,17 @@ class AssignmentStudentService {
 
     const where = {
       isActive: true,
-      class: {
-        isActive: true,
-        classMembers: {
-          some: {
-            studentId,
-            isApproved: true,
-            isBanned: false
+      assignmentClasses: {
+        some: {
+          class: {
+            isActive: true,
+            classMembers: {
+              some: {
+                studentId,
+                isApproved: true,
+                isBanned: false
+              }
+            }
           }
         }
       }
@@ -65,12 +69,16 @@ class AssignmentStudentService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          class: {
+          assignmentClasses: {
             select: {
-              id: true,
-              name: true,
-              classCode: true,
-              teacherId: true
+              class: {
+                select: {
+                  id: true,
+                  name: true,
+                  classCode: true,
+                  teacherId: true
+                }
+              }
             }
           },
           creator: {
@@ -269,13 +277,17 @@ class AssignmentStudentService {
 
     const where = {
       isActive: true,
-      class: {
-        isActive: true,
-        classMembers: {
-          some: {
-            studentId,
-            isApproved: true,
-            isBanned: false
+      assignmentClasses: {
+        some: {
+          class: {
+            isActive: true,
+            classMembers: {
+              some: {
+                studentId,
+                isApproved: true,
+                isBanned: false
+              }
+            }
           }
         }
       }
@@ -291,12 +303,16 @@ class AssignmentStudentService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          class: {
+          assignmentClasses: {
             select: {
-              id: true,
-              name: true,
-              classCode: true,
-              teacherId: true
+              class: {
+                select: {
+                  id: true,
+                  name: true,
+                  classCode: true,
+                  teacherId: true
+                }
+              }
             }
           },
           creator: {
