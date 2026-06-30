@@ -94,12 +94,13 @@ export const getRecentAssignments = async (
     select: {
       id: true,
       title: true,
-      classId: true,
       createdAt: true,
       dueDate: true,
-      class: {
+      assignmentClasses: {
         select: {
-          name: true
+          class: {
+            select: { id: true, name: true }
+          }
         }
       },
       attempts: {
@@ -115,21 +116,23 @@ export const getRecentAssignments = async (
     take: limit
   });
 
-  // Get unique class IDs
-  const classIds = [...new Set(assignments.map((a: any) => a.classId))];
+  // Get unique class IDs across all assignments (multi-class support)
+  const classIds = [...new Set(
+    assignments.flatMap((a: any) => a.assignmentClasses.map((ac: any) => ac.class.id))
+  )];
 
   // Query total students in each class (approved and not banned)
-  const classStudentCounts = await prisma.classMember.groupBy({
-    by: ['classId'],
-    where: {
-      classId: {
-        in: classIds
-      },
-      isApproved: true,
-      isBanned: false
-    },
-    _count: true
-  });
+  const classStudentCounts = classIds.length
+    ? await prisma.classMember.groupBy({
+        by: ['classId'],
+        where: {
+          classId: { in: classIds },
+          isApproved: true,
+          isBanned: false
+        },
+        _count: true
+      })
+    : [];
 
   // Create a map for quick lookup
   const studentCountMap = new Map(
@@ -144,19 +147,21 @@ export const getRecentAssignments = async (
 
       const submittedCount = submittedAttempts.length;
 
-      // Count unique students who submitted
       const submittedStudentIds = new Set(
         submittedAttempts.map((attempt: any) => attempt.studentId)
       );
       const submittedStudentsCount = submittedStudentIds.size;
 
+      const primaryClass = assignment.assignmentClasses[0]?.class;
+      const primaryClassId = primaryClass?.id;
+
       return {
         id: assignment.id,
         title: assignment.title,
-        className: assignment.class.name || 'Unknown',
+        className: primaryClass?.name || 'Unknown',
         createdAt: assignment.createdAt,
         dueDate: assignment.dueDate,
-        totalStudentsInClass: studentCountMap.get(assignment.classId) || 0,
+        totalStudentsInClass: primaryClassId ? (studentCountMap.get(primaryClassId) || 0) : 0,
         submittedCount,
         submittedStudentsCount
       };
