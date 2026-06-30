@@ -38,6 +38,7 @@ interface TableAssignment {
   className: string
   classId: string
   classCode: string
+  classes: Array<{ id: string; name: string; classCode: string }>
   taskCount: number
   attemptCount: number
   isActive: boolean
@@ -59,6 +60,11 @@ const mapAssignmentToTableAssignment = (assignment: AdminAssignmentRow): TableAs
     className: assignment.classInfo?.name?.trim() ?? assignment.class?.name?.trim() ?? 'Chưa có tên lớp',
     classId: assignment.classInfo?.id ?? assignment.class?.id ?? '',
     classCode: assignment.classInfo?.classCode ?? assignment.class?.classCode ?? '-',
+    classes: (assignment.classes ?? (assignment.classInfo ? [assignment.classInfo] : [])).map(c => ({
+      id: c.id,
+      name: c.name?.trim() ?? 'Chưa có tên lớp',
+      classCode: c.classCode ?? '-'
+    })),
     taskCount: assignment.taskCount ?? (assignment.tasks?.length ?? 0),
     attemptCount: assignment.attemptCount ?? 0,
     isActive: Boolean(assignment.isActive),

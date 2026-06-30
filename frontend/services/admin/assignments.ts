@@ -25,6 +25,11 @@ export type AdminAssignmentRow = Assignment & {
     name: string | null;
     classCode: string;
   } | null;
+  classes?: Array<{
+    id: string;
+    name: string | null;
+    classCode: string;
+  }>;
 };
 
 export type GetAllAssignmentsResponse = {
